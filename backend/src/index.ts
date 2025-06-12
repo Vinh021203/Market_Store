@@ -1,27 +1,9 @@
-// import express from 'express';
-// import cors from 'cors';
-// import dotenv from 'dotenv';
-// import uploadRoute from './routes/uploadRoute';
-
-// dotenv.config();
-
-// const app = express();
-// const PORT = process.env.PORT || 5000;
-
-// app.use(cors());
-// app.use(express.json());
-
-// app.use('/api', uploadRoute);
-
-// app.listen(PORT, () => {
-//   console.log(`🚀 Server is running at http://localhost:${PORT}`);
-// });
-
 import express from "express";
 import cors from "cors";
 import dotenv from "dotenv";
 import uploadRoute from "./routes/uploadRoute";
-import sepayRoute from "./routes/sepayRoute"; // 🆕 Thêm SePay route
+import sepayRoute from "./routes/sepayRoute";
+import productRoute from "./routes/productRoute"; // 🆕 Thêm Product route
 
 dotenv.config();
 
@@ -31,13 +13,12 @@ const PORT = process.env.PORT || 5000;
 const allowedOrigins = [
   "http://localhost:3000",
   "http://localhost:8080",
-  "https://your-frontend.vercel.app", // ✨ sau này bạn deploy FE lên Vercel thì thay đúng domain
+  "https://your-frontend.vercel.app",
 ];
 
 app.use(
   cors({
     origin: (origin, callback) => {
-      // Nếu gọi từ Postman hoặc không có origin (null) → vẫn cho phép
       if (!origin || allowedOrigins.includes(origin)) {
         callback(null, true);
       } else {
@@ -51,8 +32,9 @@ app.use(
 app.use(express.json({ limit: "10mb" }));
 
 // Routes
-app.use("/api", uploadRoute); // Upload routes (Cloudinary)
-app.use("/api", sepayRoute); // 🆕 SePay webhook routes
+app.use("/api", uploadRoute); // Cloudinary upload
+app.use("/api", sepayRoute); // SePay webhook
+app.use("/api", productRoute); // 🆕 Product API
 
 // Health check endpoint
 app.get("/api/health", (req, res) => {
@@ -62,30 +44,15 @@ app.get("/api/health", (req, res) => {
     services: {
       cloudinary: "active",
       sepay_webhook: "active",
+      products_api: "active", // 🆕
     },
     timestamp: new Date().toISOString(),
   });
 });
 
-// Error handling middleware
-app.use(
-  (
-    err: any,
-    req: express.Request,
-    res: express.Response,
-    next: express.NextFunction
-  ) => {
-    console.error("Error:", err);
-    res.status(500).json({
-      success: false,
-      message: "Internal server error",
-      error: process.env.NODE_ENV === "development" ? err.message : undefined,
-    });
-  }
-);
-
 app.listen(PORT, () => {
   console.log(`🚀 Server is running at http://localhost:${PORT}`);
   console.log(`📁 Cloudinary upload: http://localhost:${PORT}/api/upload`);
   console.log(`💳 SePay webhook: http://localhost:${PORT}/api/webhook/sepay`);
+  console.log(`📦 Products API: http://localhost:${PORT}/api/products`); // 🆕
 });

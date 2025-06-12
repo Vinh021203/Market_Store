@@ -14,8 +14,6 @@ import {
   formatPrice,
   getDiscountPercentage,
 } from "@/lib/products";
-import { supabase } from "@/lib/supabase";
-import { addToCartDB } from "@/lib/cart";
 import {
   Star,
   ShoppingCart,
@@ -48,6 +46,17 @@ const ProductDetail: React.FC = () => {
     (async () => {
       const data = await getProductById(id);
       if (!data) return;
+
+      // ✅ Xử lý images như ProductDetail
+      if (typeof data.images === "string") {
+        data.images = (data.images as string)
+          .split(",")
+          .map((t: string) => t.trim())
+          .filter(Boolean);
+      }
+      if (!Array.isArray(data.images)) {
+        data.images = [];
+      }
       setProduct(data);
 
       const related = await getRelatedProducts(data);
@@ -55,22 +64,15 @@ const ProductDetail: React.FC = () => {
     })();
   }, [id]);
 
+  // Loading state
   if (!product) {
     return (
       <div className="container px-4 py-8 mx-auto">
         <Card className="py-12 text-center">
           <CardContent>
-            <X className="w-12 h-12 mx-auto mb-4 text-muted-foreground" />
-            <h2 className="mb-2 text-xl font-semibold">
-              Không tìm thấy sản phẩm
-            </h2>
-            <p className="mb-4 text-muted-foreground">
-              Sản phẩm bạn đang tìm không tồn tại hoặc đã bị xóa.
-            </p>
-            <Button onClick={() => navigate(-1)}>
-              <ArrowLeft className="w-4 h-4 mr-2" />
-              Quay lại
-            </Button>
+            <div className="w-12 h-12 mx-auto mb-4 bg-gray-200 rounded animate-pulse" />
+            <h2 className="mb-2 text-xl font-semibold">Đang tải...</h2>
+            <p className="text-muted-foreground">Vui lòng đợi trong giây lát</p>
           </CardContent>
         </Card>
       </div>
@@ -82,15 +84,22 @@ const ProductDetail: React.FC = () => {
     : 0;
 
   const handleAddToCart = async () => {
-  if (!product) return;
+    if (!product) return;
 
-  try {
-    await addToCart(product); // ✅ gọi đúng context
-  } catch (error) {
-    toast({ title: "Lỗi", description: "Không thể thêm sản phẩm" });
-  }
-};
-
+    try {
+      await addToCart(product);
+      toast({
+        title: "Đã thêm vào giỏ hàng",
+        description: "Sản phẩm đã được thêm vào giỏ hàng thành công.",
+      });
+    } catch (error) {
+      toast({
+        title: "Lỗi",
+        description: "Không thể thêm sản phẩm",
+        variant: "destructive",
+      });
+    }
+  };
 
   const handleShare = async () => {
     try {
@@ -119,6 +128,11 @@ const ProductDetail: React.FC = () => {
     });
   };
 
+  const handleImageError = (e: React.SyntheticEvent<HTMLImageElement>) => {
+    e.currentTarget.src =
+      "https://via.placeholder.com/400x300?text=Image+Not+Found";
+  };
+
   const features = [
     { label: "Mã nguồn sạch", included: true },
     { label: "Responsive design", included: true },
@@ -143,14 +157,19 @@ const ProductDetail: React.FC = () => {
       </div>
 
       <div className="grid gap-8 mb-12 lg:grid-cols-2">
-        {/* Product Images */}
+        {/* ✅ Product Images - Giống hệt ProductDetail */}
         <div className="space-y-4">
           <div className="relative overflow-hidden border rounded-lg">
             <img
-              src={product.images[selectedImage]}
+              src={
+                product.images?.[selectedImage] ||
+                "https://via.placeholder.com/400x300?text=No+Image"
+              }
               alt={product.title}
               className="object-cover w-full h-96"
+              onError={handleImageError}
             />
+
             {discountPercentage > 0 && (
               <Badge variant="destructive" className="absolute top-4 left-4">
                 -{discountPercentage}%
@@ -166,7 +185,8 @@ const ProductDetail: React.FC = () => {
             )}
           </div>
 
-          {product.images.length > 1 && (
+          {/* ✅ Thumbnail Gallery - Giống hệt ProductDetail */}
+          {product.images && product.images.length > 1 && (
             <div className="grid grid-cols-4 gap-2">
               {product.images.map((image, index) => (
                 <button
@@ -180,6 +200,7 @@ const ProductDetail: React.FC = () => {
                     src={image}
                     alt={`${product.title} ${index + 1}`}
                     className="object-cover w-full h-20"
+                    onError={handleImageError}
                   />
                 </button>
               ))}
@@ -329,7 +350,7 @@ const ProductDetail: React.FC = () => {
           <div className="space-y-2">
             <h3 className="font-semibold">Tags:</h3>
             <div className="flex flex-wrap gap-2">
-              {product.tags.map((tag) => (
+              {product.tags?.map((tag) => (
                 <Badge key={tag} variant="outline">
                   {tag}
                 </Badge>

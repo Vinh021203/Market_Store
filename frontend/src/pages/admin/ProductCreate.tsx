@@ -47,7 +47,8 @@ const productSchema = z.object({
   }),
   tags: z.string(),
   image: z.string().url("URL hình ảnh không hợp lệ"),
-  images: z.string(),
+  images: z.array(z.string()).min(1, "Phải có ít nhất 1 ảnh phụ"),
+  // images: z.string(),
   downloadUrl: z.string().optional(),
   previewUrl: z.string().optional(),
   isActive: z.boolean(),
@@ -91,7 +92,7 @@ const ProductCreate: React.FC = () => {
       tags: "",
       image:
         "https://images.unsplash.com/photo-1460925895917-afdab827c52f?w=600&h=400&fit=crop",
-      images: "",
+      images: [],
       downloadUrl: "",
       previewUrl: "",
       isActive: true,
@@ -119,7 +120,7 @@ const ProductCreate: React.FC = () => {
           setValue("category", product.category);
           setValue("tags", product.tags.join(", "));
           setValue("image", product.image);
-          setValue("images", product.images.join(", "));
+          setValue("images", product.images);
           setValue("downloadUrl", product.downloadUrl || "");
           setValue("previewUrl", product.previewUrl || "");
           setValue("isActive", product.isActive);
@@ -142,7 +143,7 @@ const ProductCreate: React.FC = () => {
     const transformed = {
       ...data,
       tags: data.tags.split(",").map((t) => t.trim()),
-      images: data.images.split(",").map((t) => t.trim()),
+      images: data.images,
       technologies: data.technologies
         ? data.technologies.split(",").map((t) => t.trim())
         : [],
@@ -369,7 +370,16 @@ const ProductCreate: React.FC = () => {
                     <Input
                       id="images"
                       placeholder="https://example.com/1.jpg, https://example.com/2.jpg"
-                      {...register("images")}
+                      value={watchedValues.images?.join(", ") || ""}
+                      onChange={(e) =>
+                        setValue(
+                          "images",
+                          e.target.value
+                            .split(",")
+                            .map((t) => t.trim())
+                            .filter(Boolean), // loại bỏ chuỗi rỗng
+                        )
+                      }
                     />
                     <Input
                       type="file"
@@ -394,7 +404,7 @@ const ProductCreate: React.FC = () => {
 
                     {watchedValues.images && (
                       <div className="grid grid-cols-2 gap-2 mt-2">
-                        {watchedValues.images.split(",").map((img, i) => (
+                        {watchedValues.images.map((img, i) => (
                           <img
                             key={i}
                             src={img.trim()}
