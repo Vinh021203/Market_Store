@@ -38,7 +38,7 @@ const updateOrderViaRest = async (orderId: string) => {
 const getOrderViaRest = async (orderId: string) => {
   try {
     const response = await fetch(
-      `${process.env.SUPABASE_URL}/rest/v1/orders?id=eq.${orderId}&select=id,status,payment_status`,
+      `${process.env.SUPABASE_URL}/rest/v1/orders?id=eq.${orderId}&select=id,status,payment_status,total_price`,
       {
         headers: {
           apikey: process.env.SUPABASE_ANON_KEY!,
@@ -126,7 +126,7 @@ router.post("/webhook/sepay", async (req: Request, res: Response) => {
       return res.status(200).json({ message: "Ignored outgoing transaction" });
     }
 
-    // ✅ Extract order ID với flexible regex - FIXED
+    // ✅ Extract order ID với flexible regex
     const orderMatch = content.match(/DH([a-f0-9-]{32,36})/i);
     if (!orderMatch) {
       console.log("No valid order ID found in content:", content);
@@ -135,7 +135,7 @@ router.post("/webhook/sepay", async (req: Request, res: Response) => {
 
     const rawOrderId = orderMatch[1];
 
-    // ✅ Clean và format lại UUID - ENHANCED
+    // ✅ Clean và format lại UUID
     let orderId: string;
     try {
       console.log(
@@ -216,6 +216,23 @@ router.post("/webhook/sepay", async (req: Request, res: Response) => {
         });
       }
 
+      // Verify amount matches order total
+      if (
+        existingOrder.total_price &&
+        existingOrder.total_price !== transferAmount
+      ) {
+        console.error(
+          `Amount mismatch: expected ${existingOrder.total_price}, got ${transferAmount}`
+        );
+        return res.status(400).json({
+          success: false,
+          message: "Amount mismatch",
+          orderId,
+          expected: existingOrder.total_price,
+          received: transferAmount,
+        });
+      }
+
       // Update order status
       const { data: orderData, error: orderError } = await retryOperation(() =>
         updateOrderViaRest(orderId)
@@ -292,46 +309,12 @@ router.get("/webhook/sepay/health", async (req: Request, res: Response) => {
         ),
         database_connection: dbConnectionOk,
       },
-      version: "3.2-fixed-uuid-length",
+      version: "4.0-production-ready",
     });
   } catch (error: any) {
     res.status(500).json({
       success: false,
       message: "Health check failed",
-      error: error.message,
-      timestamp: new Date().toISOString(),
-    });
-  }
-});
-
-// ✅ Test endpoint
-router.post("/webhook/sepay/test", async (req: Request, res: Response) => {
-  try {
-    const response = await fetch(
-      `${process.env.SUPABASE_URL}/rest/v1/orders?limit=3&order=created_at.desc&select=id,status,payment_status,created_at`,
-      {
-        headers: {
-          apikey: process.env.SUPABASE_ANON_KEY!,
-          Authorization: `Bearer ${process.env.SUPABASE_ANON_KEY}`,
-        },
-      }
-    );
-
-    const data = response.ok ? await response.json() : null;
-
-    res.json({
-      success: response.ok,
-      message: response.ok
-        ? "Database connection OK"
-        : "Database connection failed",
-      error: response.ok ? null : `HTTP ${response.status}`,
-      sample_data: data,
-      timestamp: new Date().toISOString(),
-    });
-  } catch (error: any) {
-    res.status(500).json({
-      success: false,
-      message: "Test failed",
       error: error.message,
       timestamp: new Date().toISOString(),
     });
