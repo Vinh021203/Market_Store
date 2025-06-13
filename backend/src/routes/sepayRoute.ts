@@ -15,10 +15,19 @@ const initSupabase = async () => {
         {
           global: {
             headers: {
-              "User-Agent": "webhook-client/1.0",
+              "User-Agent": "webhook-client",
               Accept: "application/json",
               "Content-Type": "application/json",
+              "Accept-Encoding": "gzip, deflate",
             },
+          },
+          auth: {
+            persistSession: false,
+            autoRefreshToken: false,
+            detectSessionInUrl: false,
+          },
+          db: {
+            schema: "public",
           },
         }
       );
@@ -45,6 +54,32 @@ const cleanOrderId = (rawOrderId: string): string => {
   }
 
   return cleaned;
+};
+
+// ✅ Helper function để retry database operations
+const retryDatabaseOperation = async (
+  operation: () => Promise<any>,
+  maxRetries = 3
+) => {
+  let lastError;
+
+  for (let i = 0; i < maxRetries; i++) {
+    try {
+      return await operation();
+    } catch (error: any) {
+      lastError = error;
+      console.warn(
+        `Database operation failed (attempt ${i + 1}/${maxRetries}):`,
+        error.message
+      );
+
+      if (i < maxRetries - 1) {
+        await new Promise((resolve) => setTimeout(resolve, 1000 * (i + 1)));
+      }
+    }
+  }
+
+  throw lastError;
 };
 
 router.post("/webhook/sepay", async (req: Request, res: Response) => {
@@ -110,12 +145,15 @@ router.post("/webhook/sepay", async (req: Request, res: Response) => {
     try {
       const client = await initSupabase();
 
-      // Check if order exists first
-      const { data: existingOrder, error: checkError } = await client
-        .from("orders")
-        .select("id, status, payment_status")
-        .eq("id", orderId)
-        .single();
+      // Check if order exists first với retry logic
+      const { data: existingOrder, error: checkError } =
+        await retryDatabaseOperation(() =>
+          client
+            .from("orders")
+            .select("id, status, payment_status")
+            .eq("id", orderId)
+            .single()
+        );
 
       if (checkError) {
         console.error("Order lookup error:", checkError);
@@ -138,17 +176,20 @@ router.post("/webhook/sepay", async (req: Request, res: Response) => {
         });
       }
 
-      // Update order status
-      const { data: orderData, error: orderError } = await client
-        .from("orders")
-        .update({
-          status: "completed",
-          payment_status: "paid",
-          updated_at: new Date().toISOString(),
-        })
-        .eq("id", orderId)
-        .select()
-        .single();
+      // Update order status với retry logic
+      const { data: orderData, error: orderError } =
+        await retryDatabaseOperation(() =>
+          client
+            .from("orders")
+            .update({
+              status: "completed",
+              payment_status: "paid",
+              updated_at: new Date().toISOString(),
+            })
+            .eq("id", orderId)
+            .select()
+            .single()
+        );
 
       if (orderError) {
         console.error("Order update error:", orderError);
@@ -167,16 +208,18 @@ router.post("/webhook/sepay", async (req: Request, res: Response) => {
 
       // ✅ Create payment record với better error handling
       try {
-        const { error: paymentError } = await client.from("payments").insert({
-          order_id: orderId,
-          amount: transferAmount,
-          gateway: gateway || "MBBank",
-          transaction_id: referenceCode,
-          sepay_transaction_id: id,
-          transaction_date: transactionDate,
-          status: "completed",
-          created_at: new Date().toISOString(),
-        });
+        const { error: paymentError } = await retryDatabaseOperation(() =>
+          client.from("payments").insert({
+            order_id: orderId,
+            amount: transferAmount,
+            gateway: gateway || "MBBank",
+            transaction_id: referenceCode,
+            sepay_transaction_id: id,
+            transaction_date: transactionDate,
+            status: "completed",
+            created_at: new Date().toISOString(),
+          })
+        );
 
         if (paymentError) {
           console.warn("Payment record creation failed:", paymentError);
@@ -310,7 +353,7 @@ router.post("/webhook/sepay/debug", (req: Request, res: Response) => {
       content,
       regex_match: !!orderMatch,
       extracted_id: orderMatch ? orderMatch[1] : null,
-      cleaned_id: null as string | null, // ✅ Explicit type
+      cleaned_id: null as string | null,
       valid: false,
       char_codes: content.split("").map((c: string, i: number) => ({
         char: c,
