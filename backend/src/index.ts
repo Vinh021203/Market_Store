@@ -1,4 +1,4 @@
-import express from "express";
+import express, { Request, Response, NextFunction } from "express";
 import cors from "cors";
 import dotenv from "dotenv";
 import helmet from "helmet";
@@ -6,6 +6,15 @@ import rateLimit from "express-rate-limit";
 import uploadRoute from "./routes/uploadRoute";
 import sepayRoute from "./routes/sepayRoute";
 import productRoute from "./routes/productRoute";
+
+// ✅ Extend Express Request interface
+declare global {
+  namespace Express {
+    interface Request {
+      rawBody?: Buffer;
+    }
+  }
+}
 
 dotenv.config();
 
@@ -56,7 +65,7 @@ app.use("/api/webhook/sepay", sepayLimiter);
 // 🌐 CORS Configuration với Environment-based Security
 const isDevelopment = process.env.NODE_ENV === "development";
 const allowedOrigins = [
-  "https://marketstore-two.vercel.app", // ✅ Production frontend (bỏ trailing slash)
+  "https://marketstore-two.vercel.app", // ✅ Production frontend
   ...(isDevelopment
     ? [
         "http://localhost:3000",
@@ -96,11 +105,12 @@ app.use(
   })
 );
 
+// ✅ Body Parser với proper TypeScript types
 app.use(
   express.json({
     limit: "10mb",
-    verify: (req: any, res, buf) => {
-      // ✅ Store raw body for webhook signature verification
+    verify: (req: Request, res: Response, buf: Buffer) => {
+      // Store raw body for webhook signature verification
       if (req.url?.includes("/webhook/sepay")) {
         req.rawBody = buf;
       }
@@ -116,7 +126,7 @@ app.use(
 );
 
 // 🔍 Request Logging Middleware
-app.use((req, res, next) => {
+app.use((req: Request, res: Response, next: NextFunction) => {
   const timestamp = new Date().toISOString();
   console.log(
     `${timestamp} - ${req.method} ${req.url} - Origin: ${
@@ -127,7 +137,7 @@ app.use((req, res, next) => {
 });
 
 // 🛡️ Security Headers
-app.use((req, res, next) => {
+app.use((req: Request, res: Response, next: NextFunction) => {
   res.setHeader("X-Content-Type-Options", "nosniff");
   res.setHeader("X-Frame-Options", "DENY");
   res.setHeader("X-XSS-Protection", "1; mode=block");
@@ -141,7 +151,7 @@ app.use("/api", sepayRoute);
 app.use("/api", productRoute);
 
 // 🏥 Health Check với Security Info
-app.get("/api/health", (req, res) => {
+app.get("/api/health", (req: Request, res: Response) => {
   res.json({
     success: true,
     message: "Backend server is running",
@@ -165,7 +175,7 @@ app.get("/api/health", (req, res) => {
 
 // 🔍 CORS Debug Endpoint (Development only)
 if (isDevelopment) {
-  app.get("/api/cors-debug", (req, res) => {
+  app.get("/api/cors-debug", (req: Request, res: Response) => {
     res.json({
       success: true,
       request_origin: req.headers.origin,
@@ -177,7 +187,7 @@ if (isDevelopment) {
 }
 
 // 🚫 404 Handler
-app.use("*", (req, res) => {
+app.use("*", (req: Request, res: Response) => {
   res.status(404).json({
     success: false,
     message: "Endpoint not found",
@@ -187,40 +197,33 @@ app.use("*", (req, res) => {
 });
 
 // 🚨 Error Handler
-app.use(
-  (
-    err: any,
-    req: express.Request,
-    res: express.Response,
-    next: express.NextFunction
-  ) => {
-    console.error("❌ Error:", err.message);
+app.use((err: any, req: Request, res: Response, next: NextFunction) => {
+  console.error("❌ Error:", err.message);
 
-    if (err.message.includes("CORS not allowed")) {
-      return res.status(403).json({
-        success: false,
-        message: "CORS Error: Origin not allowed",
-        origin: req.headers.origin,
-        allowed_origins: isDevelopment
-          ? allowedOrigins
-          : ["Contact admin for access"],
-      });
-    }
-
-    if (err.type === "entity.too.large") {
-      return res.status(413).json({
-        success: false,
-        message: "Request entity too large",
-      });
-    }
-
-    res.status(500).json({
+  if (err.message.includes("CORS not allowed")) {
+    return res.status(403).json({
       success: false,
-      message: "Internal server error",
-      error: isDevelopment ? err.message : "Something went wrong",
+      message: "CORS Error: Origin not allowed",
+      origin: req.headers.origin,
+      allowed_origins: isDevelopment
+        ? allowedOrigins
+        : ["Contact admin for access"],
     });
   }
-);
+
+  if (err.type === "entity.too.large") {
+    return res.status(413).json({
+      success: false,
+      message: "Request entity too large",
+    });
+  }
+
+  res.status(500).json({
+    success: false,
+    message: "Internal server error",
+    error: isDevelopment ? err.message : "Something went wrong",
+  });
+});
 
 // 🚀 Server Start
 app.listen(PORT, () => {
