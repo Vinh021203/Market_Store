@@ -126,8 +126,8 @@ router.post("/webhook/sepay", async (req: Request, res: Response) => {
       return res.status(200).json({ message: "Ignored outgoing transaction" });
     }
 
-    // ✅ Extract order ID với flexible regex - FIX CHÍNH
-    const orderMatch = content.match(/DH([a-f0-9]{30,40})/i);
+    // ✅ Extract order ID với flexible regex - FIXED
+    const orderMatch = content.match(/DH([a-f0-9-]{32,36})/i);
     if (!orderMatch) {
       console.log("No valid order ID found in content:", content);
       return res.status(200).json({ message: "No valid order ID found" });
@@ -135,20 +135,32 @@ router.post("/webhook/sepay", async (req: Request, res: Response) => {
 
     const rawOrderId = orderMatch[1];
 
-    // ✅ Clean và format lại UUID - FIX CHÍNH
+    // ✅ Clean và format lại UUID - ENHANCED
     let orderId: string;
     try {
+      console.log(
+        `🔍 Raw extracted: "${rawOrderId}" (${rawOrderId.length} chars)`
+      );
+
       // Remove all dashes first
       const cleanId = rawOrderId.replace(/-/g, "");
+      console.log(
+        `🧹 After removing dashes: "${cleanId}" (${cleanId.length} chars)`
+      );
 
-      // ✅ Take first 32 characters for UUID (fix cho 33 chars)
+      // Take first 32 characters for UUID
       const uuidString = cleanId.substring(0, 32);
+      console.log(`✂️ Trimmed to 32 chars: "${uuidString}"`);
 
-      // Validate length
+      // Validate length and hex characters
       if (uuidString.length !== 32) {
         throw new Error(
-          `Invalid UUID length after trim: ${uuidString.length}, expected 32`
+          `Invalid UUID length after processing: ${uuidString.length}, expected 32`
         );
+      }
+
+      if (!/^[a-f0-9]{32}$/i.test(uuidString)) {
+        throw new Error(`Invalid hex characters in UUID: ${uuidString}`);
       }
 
       // Re-format as UUID: 8-4-4-4-12
@@ -162,16 +174,17 @@ router.post("/webhook/sepay", async (req: Request, res: Response) => {
 
       console.log(`🎯 Processing payment for order: ${orderId}`);
       console.log(`📝 Original content: ${content}`);
-      console.log(
-        `🔄 Extracted raw: ${rawOrderId} (${rawOrderId.length} chars)`
-      );
-      console.log(`✂️ Trimmed to: ${uuidString} (${uuidString.length} chars)`);
-      console.log(`✅ Formatted UUID: ${orderId}`);
+      console.log(`✅ Final formatted UUID: ${orderId}`);
     } catch (cleanError: any) {
       console.error("Order ID validation failed:", cleanError.message);
       return res.status(400).json({
         error: "Invalid order ID format",
         details: cleanError.message,
+        debug: {
+          original_content: content,
+          extracted_raw: rawOrderId,
+          raw_length: rawOrderId.length,
+        },
       });
     }
 
