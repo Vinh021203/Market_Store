@@ -7,7 +7,7 @@ import uploadRoute from "./routes/uploadRoute";
 import sepayRoute from "./routes/sepayRoute";
 import productRoute from "./routes/productRoute";
 
-// ✅ Extend Express Request interface inline
+// ✅ Extend Express Request interface
 declare global {
   namespace Express {
     interface Request {
@@ -21,7 +21,7 @@ dotenv.config();
 const app = express();
 const PORT = process.env.PORT || 5000;
 
-// Security Middleware
+// 🛡️ Security Middleware
 app.use(
   helmet({
     contentSecurityPolicy: {
@@ -38,9 +38,9 @@ app.use(
   })
 );
 
-// Rate Limiting
+// 🚦 Rate Limiting
 const limiter = rateLimit({
-  windowMs: 15 * 60 * 1000,
+  windowMs: 15 * 60 * 1000, // 15 minutes
   max: 100,
   message: {
     success: false,
@@ -52,11 +52,11 @@ const limiter = rateLimit({
 
 app.use("/api", limiter);
 
-// CORS Configuration
+// 🌐 CORS Configuration
 const isDevelopment = process.env.NODE_ENV === "development";
 const allowedOrigins = [
   "https://marketstore-two.vercel.app",
-  ...(isDevelopment ? ["http://localhost:3000"] : []),
+  ...(isDevelopment ? ["http://localhost:3000", "http://localhost:8080"] : []),
 ];
 
 app.use(
@@ -65,6 +65,7 @@ app.use(
       origin: string | undefined,
       callback: (err: Error | null, allow?: boolean) => void
     ) => {
+      // Allow requests without origin (mobile apps, Postman, server-to-server)
       if (!origin) {
         return callback(null, true);
       }
@@ -73,19 +74,29 @@ app.use(
         callback(null, true);
       } else {
         console.error(`🚫 CORS blocked origin: ${origin}`);
+        console.log(`✅ Allowed origins:`, allowedOrigins);
         callback(new Error(`CORS not allowed from origin: ${origin}`));
       }
     },
     credentials: true,
     methods: ["GET", "POST", "PUT", "DELETE", "PATCH", "OPTIONS"],
+    allowedHeaders: [
+      "Content-Type",
+      "Authorization",
+      "X-Requested-With",
+      "Accept",
+      "Origin",
+    ],
+    maxAge: 86400, // 24 hours preflight cache
   })
 );
 
-// Body Parser
+// 📝 Body Parser
 app.use(
   express.json({
     limit: "10mb",
     verify: (req: Request, res: Response, buf: Buffer) => {
+      // Store raw body for webhook signature verification
       if (req.url?.includes("/webhook/sepay")) {
         req.rawBody = buf;
       }
@@ -95,29 +106,89 @@ app.use(
 
 app.use(express.urlencoded({ extended: true, limit: "10mb" }));
 
-// Routes
+// 🔍 Request Logging
+app.use((req: Request, res: Response, next: NextFunction) => {
+  const timestamp = new Date().toISOString();
+  console.log(
+    `${timestamp} - ${req.method} ${req.url} - Origin: ${
+      req.headers.origin || "No origin"
+    }`
+  );
+  next();
+});
+
+// 📍 Routes
 app.use("/api", uploadRoute);
 app.use("/api", sepayRoute);
 app.use("/api", productRoute);
 
-// Health check
+// 🏥 Health Check
 app.get("/api/health", (req: Request, res: Response) => {
   res.json({
     success: true,
     message: "Backend server is running",
+    environment: process.env.NODE_ENV || "development",
+    services: {
+      cloudinary: "active",
+      sepay_webhook: "active",
+      products_api: "active",
+      supabase: "active",
+    },
     timestamp: new Date().toISOString(),
+    uptime: process.uptime(),
   });
 });
 
-// Error Handler
+// 🚫 404 Handler
+app.use("*", (req: Request, res: Response) => {
+  res.status(404).json({
+    success: false,
+    message: "Endpoint not found",
+    path: req.originalUrl,
+    method: req.method,
+  });
+});
+
+// 🚨 Error Handler
 app.use((err: any, req: Request, res: Response, next: NextFunction) => {
-  console.error("Error:", err.message);
+  console.error("❌ Error:", err.message);
+
+  if (err.message.includes("CORS not allowed")) {
+    return res.status(403).json({
+      success: false,
+      message: "CORS Error: Origin not allowed",
+      origin: req.headers.origin,
+      allowed_origins: isDevelopment
+        ? allowedOrigins
+        : ["Contact admin for access"],
+    });
+  }
+
   res.status(500).json({
     success: false,
     message: "Internal server error",
+    error: isDevelopment ? err.message : "Something went wrong",
   });
 });
 
+// 🚀 Server Start
 app.listen(PORT, () => {
-  console.log(`🚀 Server running on port ${PORT}`);
+  console.log(`🚀 Server is running at http://localhost:${PORT}`);
+  console.log(`🌍 Environment: ${process.env.NODE_ENV || "development"}`);
+  console.log(`🛡️ Security: Helmet + CORS + Rate Limiting enabled`);
+  console.log(`📁 Cloudinary upload: http://localhost:${PORT}/api/upload`);
+  console.log(`💳 SePay webhook: http://localhost:${PORT}/api/webhook/sepay`);
+  console.log(`📦 Products API: http://localhost:${PORT}/api/products`);
+  console.log(`🌐 Allowed origins:`, allowedOrigins);
+});
+
+// 🔄 Graceful Shutdown
+process.on("SIGTERM", () => {
+  console.log("🛑 SIGTERM received, shutting down gracefully");
+  process.exit(0);
+});
+
+process.on("SIGINT", () => {
+  console.log("🛑 SIGINT received, shutting down gracefully");
+  process.exit(0);
 });
