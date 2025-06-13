@@ -1,18 +1,62 @@
 import express from "express";
-import { createClient } from "@supabase/supabase-js";
 
 const router = express.Router();
 
-// Supabase client
-const supabase = createClient(
-  process.env.SUPABASE_URL!,
-  process.env.SUPABASE_ANON_KEY!
-);
+// ✅ Kiểm tra environment variables trước khi khởi tạo
+const supabaseUrl = process.env.SUPABASE_URL;
+const supabaseKey = process.env.SUPABASE_ANON_KEY;
+
+console.log("🔍 Environment check:");
+console.log("SUPABASE_URL:", supabaseUrl ? "Set" : "Missing");
+console.log("SUPABASE_ANON_KEY:", supabaseKey ? "Set" : "Missing");
+
+if (!supabaseUrl || !supabaseKey) {
+  console.error("❌ Missing Supabase environment variables");
+  throw new Error("Supabase environment variables are required");
+}
+
+// ✅ Dynamic import với error handling
+let supabase: any;
+
+const initSupabase = async () => {
+  if (!supabase) {
+    try {
+      const { createClient } = await import("@supabase/supabase-js");
+      supabase = createClient(supabaseUrl, supabaseKey);
+      console.log("✅ Supabase client initialized successfully");
+    } catch (error) {
+      console.error("❌ Failed to initialize Supabase:", error);
+      throw error;
+    }
+  }
+  return supabase;
+};
+
+// Health check endpoint
+router.get("/health", async (req, res) => {
+  try {
+    const client = await initSupabase();
+    res.json({
+      success: true,
+      message: "Product API is healthy",
+      supabase: "connected",
+      timestamp: new Date().toISOString(),
+    });
+  } catch (error) {
+    res.status(500).json({
+      success: false,
+      message: "Health check failed",
+      error: (error as Error).message,
+    });
+  }
+});
 
 // Get all products
 router.get("/products", async (req, res) => {
   try {
-    const { data, error } = await supabase
+    const client = await initSupabase();
+
+    const { data, error } = await client
       .from("products")
       .select("*")
       .eq("is_active", true)
@@ -38,8 +82,9 @@ router.get("/products", async (req, res) => {
 router.get("/products/:id", async (req, res) => {
   try {
     const { id } = req.params;
+    const client = await initSupabase();
 
-    const { data, error } = await supabase
+    const { data, error } = await client
       .from("products")
       .select("*")
       .eq("id", id)
