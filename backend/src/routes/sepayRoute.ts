@@ -2,7 +2,7 @@ import express, { Request, Response } from "express";
 
 const router = express.Router();
 
-// ✅ REST API helpers (giữ nguyên)
+// ✅ REST API helpers
 const updateOrderViaRest = async (orderId: string) => {
   try {
     const response = await fetch(
@@ -65,7 +65,7 @@ const getOrderViaRest = async (orderId: string) => {
   }
 };
 
-// ✅ Retry helper (giữ nguyên)
+// ✅ Retry helper
 const retryOperation = async (
   operation: () => Promise<any>,
   maxRetries = 3
@@ -126,8 +126,8 @@ router.post("/webhook/sepay", async (req: Request, res: Response) => {
       return res.status(200).json({ message: "Ignored outgoing transaction" });
     }
 
-    // ✅ Extract order ID với flexible regex
-    const orderMatch = content.match(/DH([a-f0-9-]{32,36})/i);
+    // ✅ Extract order ID với flexible regex - FIX CHÍNH
+    const orderMatch = content.match(/DH([a-f0-9]{30,40})/i);
     if (!orderMatch) {
       console.log("No valid order ID found in content:", content);
       return res.status(200).json({ message: "No valid order ID found" });
@@ -135,26 +135,37 @@ router.post("/webhook/sepay", async (req: Request, res: Response) => {
 
     const rawOrderId = orderMatch[1];
 
-    // ✅ Clean và format lại UUID
+    // ✅ Clean và format lại UUID - FIX CHÍNH
     let orderId: string;
     try {
       // Remove all dashes first
       const cleanId = rawOrderId.replace(/-/g, "");
 
-      // Validate length (UUID without dashes = 32 chars)
-      if (cleanId.length !== 32) {
-        throw new Error(`Invalid UUID length: ${cleanId.length}, expected 32`);
+      // ✅ Take first 32 characters for UUID (fix cho 33 chars)
+      const uuidString = cleanId.substring(0, 32);
+
+      // Validate length
+      if (uuidString.length !== 32) {
+        throw new Error(
+          `Invalid UUID length after trim: ${uuidString.length}, expected 32`
+        );
       }
 
       // Re-format as UUID: 8-4-4-4-12
-      orderId = `${cleanId.slice(0, 8)}-${cleanId.slice(8, 12)}-${cleanId.slice(
-        12,
-        16
-      )}-${cleanId.slice(16, 20)}-${cleanId.slice(20, 32)}`;
+      orderId = `${uuidString.slice(0, 8)}-${uuidString.slice(
+        8,
+        12
+      )}-${uuidString.slice(12, 16)}-${uuidString.slice(
+        16,
+        20
+      )}-${uuidString.slice(20, 32)}`;
 
       console.log(`🎯 Processing payment for order: ${orderId}`);
       console.log(`📝 Original content: ${content}`);
-      console.log(`🔄 Extracted raw: ${rawOrderId}`);
+      console.log(
+        `🔄 Extracted raw: ${rawOrderId} (${rawOrderId.length} chars)`
+      );
+      console.log(`✂️ Trimmed to: ${uuidString} (${uuidString.length} chars)`);
       console.log(`✅ Formatted UUID: ${orderId}`);
     } catch (cleanError: any) {
       console.error("Order ID validation failed:", cleanError.message);
@@ -242,7 +253,7 @@ router.post("/webhook/sepay", async (req: Request, res: Response) => {
   }
 });
 
-// ✅ Health check endpoint (giữ nguyên)
+// ✅ Health check endpoint
 router.get("/webhook/sepay/health", async (req: Request, res: Response) => {
   try {
     const response = await fetch(
@@ -268,12 +279,46 @@ router.get("/webhook/sepay/health", async (req: Request, res: Response) => {
         ),
         database_connection: dbConnectionOk,
       },
-      version: "3.1-flexible-regex",
+      version: "3.2-fixed-uuid-length",
     });
   } catch (error: any) {
     res.status(500).json({
       success: false,
       message: "Health check failed",
+      error: error.message,
+      timestamp: new Date().toISOString(),
+    });
+  }
+});
+
+// ✅ Test endpoint
+router.post("/webhook/sepay/test", async (req: Request, res: Response) => {
+  try {
+    const response = await fetch(
+      `${process.env.SUPABASE_URL}/rest/v1/orders?limit=3&order=created_at.desc&select=id,status,payment_status,created_at`,
+      {
+        headers: {
+          apikey: process.env.SUPABASE_ANON_KEY!,
+          Authorization: `Bearer ${process.env.SUPABASE_ANON_KEY}`,
+        },
+      }
+    );
+
+    const data = response.ok ? await response.json() : null;
+
+    res.json({
+      success: response.ok,
+      message: response.ok
+        ? "Database connection OK"
+        : "Database connection failed",
+      error: response.ok ? null : `HTTP ${response.status}`,
+      sample_data: data,
+      timestamp: new Date().toISOString(),
+    });
+  } catch (error: any) {
+    res.status(500).json({
+      success: false,
+      message: "Test failed",
       error: error.message,
       timestamp: new Date().toISOString(),
     });
