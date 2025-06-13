@@ -2,7 +2,7 @@ import express, { Request, Response } from "express";
 
 const router = express.Router();
 
-// ✅ REST API helper để thay thế Supabase client (tránh ByteString error)
+// ✅ REST API helpers (giữ nguyên)
 const updateOrderViaRest = async (orderId: string) => {
   try {
     const response = await fetch(
@@ -65,48 +65,7 @@ const getOrderViaRest = async (orderId: string) => {
   }
 };
 
-const createPaymentRecordViaRest = async (paymentData: any) => {
-  try {
-    const response = await fetch(
-      `${process.env.SUPABASE_URL}/rest/v1/payments`,
-      {
-        method: "POST",
-        headers: {
-          apikey: process.env.SUPABASE_ANON_KEY!,
-          Authorization: `Bearer ${process.env.SUPABASE_ANON_KEY}`,
-          "Content-Type": "application/json",
-          Prefer: "return=representation",
-        },
-        body: JSON.stringify(paymentData),
-      }
-    );
-
-    if (!response.ok) {
-      const errorText = await response.text();
-      throw new Error(`HTTP ${response.status}: ${errorText}`);
-    }
-
-    const data = await response.json();
-    return { data, error: null };
-  } catch (error: any) {
-    return { data: null, error: { message: error.message } };
-  }
-};
-
-// ✅ Helper function để clean và validate order ID
-const cleanOrderId = (rawOrderId: string): string => {
-  const cleaned = rawOrderId.replace(/[^\w-]/g, "");
-  const uuidRegex =
-    /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
-
-  if (!uuidRegex.test(cleaned)) {
-    throw new Error(`Invalid UUID format: ${rawOrderId} -> ${cleaned}`);
-  }
-
-  return cleaned;
-};
-
-// ✅ Retry helper
+// ✅ Retry helper (giữ nguyên)
 const retryOperation = async (
   operation: () => Promise<any>,
   maxRetries = 3
@@ -167,10 +126,8 @@ router.post("/webhook/sepay", async (req: Request, res: Response) => {
       return res.status(200).json({ message: "Ignored outgoing transaction" });
     }
 
-    // ✅ Extract order ID from content
-    const orderMatch = content.match(
-      /DH([a-f0-9]{8}-[a-f0-9]{4}-[a-f0-9]{4}-[a-f0-9]{4}-[a-f0-9]{12})/i
-    );
+    // ✅ Extract order ID với flexible regex
+    const orderMatch = content.match(/DH([a-f0-9-]{32,36})/i);
     if (!orderMatch) {
       console.log("No valid order ID found in content:", content);
       return res.status(200).json({ message: "No valid order ID found" });
@@ -178,11 +135,27 @@ router.post("/webhook/sepay", async (req: Request, res: Response) => {
 
     const rawOrderId = orderMatch[1];
 
-    // ✅ Clean và validate order ID
+    // ✅ Clean và format lại UUID
     let orderId: string;
     try {
-      orderId = cleanOrderId(rawOrderId);
+      // Remove all dashes first
+      const cleanId = rawOrderId.replace(/-/g, "");
+
+      // Validate length (UUID without dashes = 32 chars)
+      if (cleanId.length !== 32) {
+        throw new Error(`Invalid UUID length: ${cleanId.length}, expected 32`);
+      }
+
+      // Re-format as UUID: 8-4-4-4-12
+      orderId = `${cleanId.slice(0, 8)}-${cleanId.slice(8, 12)}-${cleanId.slice(
+        12,
+        16
+      )}-${cleanId.slice(16, 20)}-${cleanId.slice(20, 32)}`;
+
       console.log(`🎯 Processing payment for order: ${orderId}`);
+      console.log(`📝 Original content: ${content}`);
+      console.log(`🔄 Extracted raw: ${rawOrderId}`);
+      console.log(`✅ Formatted UUID: ${orderId}`);
     } catch (cleanError: any) {
       console.error("Order ID validation failed:", cleanError.message);
       return res.status(400).json({
@@ -191,7 +164,7 @@ router.post("/webhook/sepay", async (req: Request, res: Response) => {
       });
     }
 
-    // ✅ Process order using REST API (tránh ByteString error)
+    // ✅ Process order using REST API
     try {
       // Check if order exists
       const { data: existingOrder, error: checkError } = await retryOperation(
@@ -209,7 +182,7 @@ router.post("/webhook/sepay", async (req: Request, res: Response) => {
       }
 
       // Check if already paid
-      if (existingOrder.payment_status === "paid") {
+      if (existingOrder.payment_status === "completed") {
         console.log(`⚠️ Order ${orderId} already paid, skipping update`);
         return res.status(200).json({
           success: true,
@@ -238,32 +211,6 @@ router.post("/webhook/sepay", async (req: Request, res: Response) => {
         sepayId: id,
         date: transactionDate,
       });
-
-      // ✅ Create payment record
-      try {
-        const paymentData = {
-          order_id: orderId,
-          amount: transferAmount,
-          gateway: gateway || "MBBank",
-          transaction_id: referenceCode,
-          sepay_transaction_id: id,
-          transaction_date: transactionDate,
-          status: "completed",
-          created_at: new Date().toISOString(),
-        };
-
-        const { error: paymentError } = await retryOperation(() =>
-          createPaymentRecordViaRest(paymentData)
-        );
-
-        if (paymentError) {
-          console.warn("Payment record creation failed:", paymentError);
-        } else {
-          console.log("✅ Payment record created successfully");
-        }
-      } catch (paymentInsertError) {
-        console.warn("Payment record insert error:", paymentInsertError);
-      }
 
       console.log(`✅ Order ${orderId} updated successfully`);
 
@@ -295,10 +242,9 @@ router.post("/webhook/sepay", async (req: Request, res: Response) => {
   }
 });
 
-// ✅ Health check endpoint (không dùng Supabase client)
+// ✅ Health check endpoint (giữ nguyên)
 router.get("/webhook/sepay/health", async (req: Request, res: Response) => {
   try {
-    // Test database connection via REST API
     const response = await fetch(
       `${process.env.SUPABASE_URL}/rest/v1/orders?limit=1`,
       {
@@ -322,104 +268,12 @@ router.get("/webhook/sepay/health", async (req: Request, res: Response) => {
         ),
         database_connection: dbConnectionOk,
       },
-      version: "3.0-rest-api",
+      version: "3.1-flexible-regex",
     });
   } catch (error: any) {
     res.status(500).json({
       success: false,
       message: "Health check failed",
-      error: error.message,
-      timestamp: new Date().toISOString(),
-    });
-  }
-});
-
-// ✅ Test endpoint
-router.post("/webhook/sepay/test", async (req: Request, res: Response) => {
-  try {
-    // Test database connection
-    const response = await fetch(
-      `${process.env.SUPABASE_URL}/rest/v1/orders?limit=3&order=created_at.desc&select=id,status,payment_status,created_at`,
-      {
-        headers: {
-          apikey: process.env.SUPABASE_ANON_KEY!,
-          Authorization: `Bearer ${process.env.SUPABASE_ANON_KEY}`,
-        },
-      }
-    );
-
-    const data = response.ok ? await response.json() : null;
-    const testOrderId = "123e4567-e89b-12d3-a456-426614174000";
-
-    res.json({
-      success: response.ok,
-      message: response.ok
-        ? "Database connection OK"
-        : "Database connection failed",
-      error: response.ok ? null : `HTTP ${response.status}`,
-      sample_data: data,
-      order_id_test: {
-        input: testOrderId,
-        output: cleanOrderId(testOrderId),
-        valid: true,
-      },
-      timestamp: new Date().toISOString(),
-    });
-  } catch (error: any) {
-    res.status(500).json({
-      success: false,
-      message: "Test failed",
-      error: error.message,
-      timestamp: new Date().toISOString(),
-    });
-  }
-});
-
-// ✅ Debug endpoint
-router.post("/webhook/sepay/debug", (req: Request, res: Response) => {
-  try {
-    const { content } = req.body;
-
-    if (!content) {
-      return res.status(400).json({ error: "Content is required" });
-    }
-
-    const orderMatch = content.match(
-      /DH([a-f0-9]{8}-[a-f0-9]{4}-[a-f0-9]{4}-[a-f0-9]{4}-[a-f0-9]{12})/i
-    );
-
-    const result = {
-      content,
-      regex_match: !!orderMatch,
-      extracted_id: orderMatch ? orderMatch[1] : null,
-      cleaned_id: null as string | null,
-      valid: false,
-      char_codes: content.split("").map((c: string, i: number) => ({
-        char: c,
-        code: c.charCodeAt(0),
-        index: i,
-        problematic: c.charCodeAt(0) > 255,
-      })),
-    };
-
-    if (orderMatch) {
-      try {
-        result.cleaned_id = cleanOrderId(orderMatch[1]);
-        result.valid = true;
-      } catch (error: any) {
-        result.cleaned_id = null;
-        result.valid = false;
-      }
-    }
-
-    res.json({
-      success: true,
-      debug_info: result,
-      timestamp: new Date().toISOString(),
-    });
-  } catch (error: any) {
-    res.status(500).json({
-      success: false,
       error: error.message,
       timestamp: new Date().toISOString(),
     });
