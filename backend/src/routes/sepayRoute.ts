@@ -17,7 +17,7 @@ const updateOrderViaRest = async (orderId: string) => {
         },
         body: JSON.stringify({
           status: "completed",
-          payment_status: "paid",
+          payment_status: "completed",
           updated_at: new Date().toISOString(),
         }),
       }
