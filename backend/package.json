@@ -23,7 +23,6 @@
     "express-rate-limit": "^7.5.0",
     "helmet": "^8.1.0",
     "multer": "^1.4.4",
-    "multer-storage-cloudinary": "^4.0.0",
     "node-fetch": "^3.3.2"
   },
   "devDependencies": {
@@ -46,6 +45,6 @@
     "sepay",
     "marketplace"
   ],
-  "author": "Your Name",
+  "author": "Vinh021203",
   "license": "MIT"
 }

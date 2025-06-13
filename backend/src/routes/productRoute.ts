@@ -1,8 +1,7 @@
-import express from "express";
+import express, { Request, Response } from "express";
 
 const router = express.Router();
 
-// ✅ Kiểm tra environment variables trước khi khởi tạo
 const supabaseUrl = process.env.SUPABASE_URL;
 const supabaseKey = process.env.SUPABASE_ANON_KEY;
 
@@ -15,7 +14,6 @@ if (!supabaseUrl || !supabaseKey) {
   throw new Error("Supabase environment variables are required");
 }
 
-// ✅ Dynamic import với error handling
 let supabase: any;
 
 const initSupabase = async () => {
@@ -32,8 +30,7 @@ const initSupabase = async () => {
   return supabase;
 };
 
-// Health check endpoint
-router.get("/health", async (req, res) => {
+router.get("/health", async (req: Request, res: Response) => {
   try {
     const client = await initSupabase();
     res.json({
@@ -51,8 +48,7 @@ router.get("/health", async (req, res) => {
   }
 });
 
-// Get all products
-router.get("/products", async (req, res) => {
+router.get("/products", async (req: Request, res: Response) => {
   try {
     const client = await initSupabase();
 
@@ -78,8 +74,7 @@ router.get("/products", async (req, res) => {
   }
 });
 
-// Get product by ID
-router.get("/products/:id", async (req, res) => {
+router.get("/products/:id", async (req: Request, res: Response) => {
   try {
     const { id } = req.params;
     const client = await initSupabase();

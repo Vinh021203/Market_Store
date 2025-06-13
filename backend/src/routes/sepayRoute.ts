@@ -1,12 +1,11 @@
-import express from "express";
+import express, { Request, Response } from "express";
+
 const router = express.Router();
 
-// SePay Webhook endpoint
-router.post("/webhook/sepay", async (req, res) => {
+router.post("/webhook/sepay", async (req: Request, res: Response) => {
   try {
     console.log("SePay webhook received:", req.body);
 
-    // Validate API key từ SePay
     const apiKey = req.headers.authorization?.replace("Apikey ", "");
     if (apiKey !== process.env.SEPAY_API_KEY) {
       console.error("Invalid API key:", apiKey);
@@ -14,22 +13,20 @@ router.post("/webhook/sepay", async (req, res) => {
     }
 
     const {
-      id, // ID giao dịch SePay
-      gateway, // "MBBank"
-      transactionDate, // Thời gian giao dịch
-      accountNumber, // "0971386588"
-      content, // Nội dung chuyển khoản
-      transferType, // "in" (tiền vào)
-      transferAmount, // Số tiền
-      referenceCode, // Mã tham chiếu
+      id,
+      gateway,
+      transactionDate,
+      accountNumber,
+      content,
+      transferType,
+      transferAmount,
+      referenceCode,
     } = req.body;
 
-    // Chỉ xử lý giao dịch tiền vào
     if (transferType !== "in") {
       return res.status(200).json({ message: "Ignored outgoing transaction" });
     }
 
-    // Extract order ID từ content (DH + order.id)
     const orderMatch = content.match(/DH([a-f0-9-]+)/i);
     if (!orderMatch) {
       console.log("No order ID found in content:", content);
@@ -37,8 +34,6 @@ router.post("/webhook/sepay", async (req, res) => {
     }
 
     const orderId = orderMatch[1];
-
-    // 🎯 GỌI API FRONTEND để cập nhật order
     const frontendApiUrl =
       process.env.FRONTEND_API_URL || "http://localhost:3000";
 
@@ -49,7 +44,7 @@ router.post("/webhook/sepay", async (req, res) => {
           method: "POST",
           headers: {
             "Content-Type": "application/json",
-            Authorization: `Bearer ${process.env.INTERNAL_API_KEY}`, // Bảo mật
+            Authorization: `Bearer ${process.env.INTERNAL_API_KEY}`,
           },
           body: JSON.stringify({
             orderId,
@@ -88,8 +83,7 @@ router.post("/webhook/sepay", async (req, res) => {
   }
 });
 
-// Health check cho SePay webhook
-router.get("/webhook/sepay/health", (req, res) => {
+router.get("/webhook/sepay/health", (req: Request, res: Response) => {
   res.json({
     success: true,
     message: "SePay webhook endpoint is healthy",
