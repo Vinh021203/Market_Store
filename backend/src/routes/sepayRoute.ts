@@ -2,50 +2,100 @@ import express, { Request, Response } from "express";
 
 const router = express.Router();
 
-// ✅ Initialize Supabase client với error handling
-let supabase: any;
+// ✅ REST API helper để thay thế Supabase client (tránh ByteString error)
+const updateOrderViaRest = async (orderId: string) => {
+  try {
+    const response = await fetch(
+      `${process.env.SUPABASE_URL}/rest/v1/orders?id=eq.${orderId}`,
+      {
+        method: "PATCH",
+        headers: {
+          apikey: process.env.SUPABASE_ANON_KEY!,
+          Authorization: `Bearer ${process.env.SUPABASE_ANON_KEY}`,
+          "Content-Type": "application/json",
+          Prefer: "return=representation",
+        },
+        body: JSON.stringify({
+          status: "completed",
+          payment_status: "paid",
+          updated_at: new Date().toISOString(),
+        }),
+      }
+    );
 
-const initSupabase = async () => {
-  if (!supabase) {
-    try {
-      const { createClient } = await import("@supabase/supabase-js");
-      supabase = createClient(
-        process.env.SUPABASE_URL!,
-        process.env.SUPABASE_ANON_KEY!,
-        {
-          global: {
-            headers: {
-              "User-Agent": "webhook-client",
-              Accept: "application/json",
-              "Content-Type": "application/json",
-              "Accept-Encoding": "gzip, deflate",
-            },
-          },
-          auth: {
-            persistSession: false,
-            autoRefreshToken: false,
-            detectSessionInUrl: false,
-          },
-          db: {
-            schema: "public",
-          },
-        }
-      );
-      console.log("✅ Supabase client initialized for webhook");
-    } catch (error) {
-      console.error("❌ Failed to initialize Supabase:", error);
-      throw error;
+    if (!response.ok) {
+      const errorText = await response.text();
+      throw new Error(`HTTP ${response.status}: ${errorText}`);
     }
+
+    const data = await response.json();
+    return { data, error: null };
+  } catch (error: any) {
+    return { data: null, error: { message: error.message } };
   }
-  return supabase;
+};
+
+const getOrderViaRest = async (orderId: string) => {
+  try {
+    const response = await fetch(
+      `${process.env.SUPABASE_URL}/rest/v1/orders?id=eq.${orderId}&select=id,status,payment_status`,
+      {
+        headers: {
+          apikey: process.env.SUPABASE_ANON_KEY!,
+          Authorization: `Bearer ${process.env.SUPABASE_ANON_KEY}`,
+          "Content-Type": "application/json",
+        },
+      }
+    );
+
+    if (!response.ok) {
+      const errorText = await response.text();
+      throw new Error(`HTTP ${response.status}: ${errorText}`);
+    }
+
+    const data = await response.json();
+
+    if (data.length === 0) {
+      return { data: null, error: { message: "Order not found" } };
+    }
+
+    return { data: data[0], error: null };
+  } catch (error: any) {
+    return { data: null, error: { message: error.message } };
+  }
+};
+
+const createPaymentRecordViaRest = async (paymentData: any) => {
+  try {
+    const response = await fetch(
+      `${process.env.SUPABASE_URL}/rest/v1/payments`,
+      {
+        method: "POST",
+        headers: {
+          apikey: process.env.SUPABASE_ANON_KEY!,
+          Authorization: `Bearer ${process.env.SUPABASE_ANON_KEY}`,
+          "Content-Type": "application/json",
+          Prefer: "return=representation",
+        },
+        body: JSON.stringify(paymentData),
+      }
+    );
+
+    if (!response.ok) {
+      const errorText = await response.text();
+      throw new Error(`HTTP ${response.status}: ${errorText}`);
+    }
+
+    const data = await response.json();
+    return { data, error: null };
+  } catch (error: any) {
+    return { data: null, error: { message: error.message } };
+  }
 };
 
 // ✅ Helper function để clean và validate order ID
 const cleanOrderId = (rawOrderId: string): string => {
-  // Remove any non-ASCII characters và chỉ giữ UUID format
   const cleaned = rawOrderId.replace(/[^\w-]/g, "");
-
-  // Validate UUID format (8-4-4-4-12)
   const uuidRegex =
     /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
 
@@ -56,8 +106,8 @@ const cleanOrderId = (rawOrderId: string): string => {
   return cleaned;
 };
 
-// ✅ Helper function để retry database operations
-const retryDatabaseOperation = async (
+// ✅ Retry helper
+const retryOperation = async (
   operation: () => Promise<any>,
   maxRetries = 3
 ) => {
@@ -69,7 +119,7 @@ const retryDatabaseOperation = async (
     } catch (error: any) {
       lastError = error;
       console.warn(
-        `Database operation failed (attempt ${i + 1}/${maxRetries}):`,
+        `Operation failed (attempt ${i + 1}/${maxRetries}):`,
         error.message
       );
 
@@ -117,7 +167,7 @@ router.post("/webhook/sepay", async (req: Request, res: Response) => {
       return res.status(200).json({ message: "Ignored outgoing transaction" });
     }
 
-    // ✅ Extract order ID from content với better regex
+    // ✅ Extract order ID from content
     const orderMatch = content.match(
       /DH([a-f0-9]{8}-[a-f0-9]{4}-[a-f0-9]{4}-[a-f0-9]{4}-[a-f0-9]{12})/i
     );
@@ -141,19 +191,12 @@ router.post("/webhook/sepay", async (req: Request, res: Response) => {
       });
     }
 
-    // ✅ Update order directly in Supabase
+    // ✅ Process order using REST API (tránh ByteString error)
     try {
-      const client = await initSupabase();
-
-      // Check if order exists first với retry logic
-      const { data: existingOrder, error: checkError } =
-        await retryDatabaseOperation(() =>
-          client
-            .from("orders")
-            .select("id, status, payment_status")
-            .eq("id", orderId)
-            .single()
-        );
+      // Check if order exists
+      const { data: existingOrder, error: checkError } = await retryOperation(
+        () => getOrderViaRest(orderId)
+      );
 
       if (checkError) {
         console.error("Order lookup error:", checkError);
@@ -176,20 +219,10 @@ router.post("/webhook/sepay", async (req: Request, res: Response) => {
         });
       }
 
-      // Update order status với retry logic
-      const { data: orderData, error: orderError } =
-        await retryDatabaseOperation(() =>
-          client
-            .from("orders")
-            .update({
-              status: "completed",
-              payment_status: "paid",
-              updated_at: new Date().toISOString(),
-            })
-            .eq("id", orderId)
-            .select()
-            .single()
-        );
+      // Update order status
+      const { data: orderData, error: orderError } = await retryOperation(() =>
+        updateOrderViaRest(orderId)
+      );
 
       if (orderError) {
         console.error("Order update error:", orderError);
@@ -206,30 +239,30 @@ router.post("/webhook/sepay", async (req: Request, res: Response) => {
         date: transactionDate,
       });
 
-      // ✅ Create payment record với better error handling
+      // ✅ Create payment record
       try {
-        const { error: paymentError } = await retryDatabaseOperation(() =>
-          client.from("payments").insert({
-            order_id: orderId,
-            amount: transferAmount,
-            gateway: gateway || "MBBank",
-            transaction_id: referenceCode,
-            sepay_transaction_id: id,
-            transaction_date: transactionDate,
-            status: "completed",
-            created_at: new Date().toISOString(),
-          })
+        const paymentData = {
+          order_id: orderId,
+          amount: transferAmount,
+          gateway: gateway || "MBBank",
+          transaction_id: referenceCode,
+          sepay_transaction_id: id,
+          transaction_date: transactionDate,
+          status: "completed",
+          created_at: new Date().toISOString(),
+        };
+
+        const { error: paymentError } = await retryOperation(() =>
+          createPaymentRecordViaRest(paymentData)
         );
 
         if (paymentError) {
           console.warn("Payment record creation failed:", paymentError);
-          // Don't fail the webhook for this
         } else {
           console.log("✅ Payment record created successfully");
         }
       } catch (paymentInsertError) {
         console.warn("Payment record insert error:", paymentInsertError);
-        // Continue processing
       }
 
       console.log(`✅ Order ${orderId} updated successfully`);
@@ -262,16 +295,21 @@ router.post("/webhook/sepay", async (req: Request, res: Response) => {
   }
 });
 
-// ✅ Enhanced health check endpoint
+// ✅ Health check endpoint (không dùng Supabase client)
 router.get("/webhook/sepay/health", async (req: Request, res: Response) => {
   try {
-    const client = await initSupabase();
+    // Test database connection via REST API
+    const response = await fetch(
+      `${process.env.SUPABASE_URL}/rest/v1/orders?limit=1`,
+      {
+        headers: {
+          apikey: process.env.SUPABASE_ANON_KEY!,
+          Authorization: `Bearer ${process.env.SUPABASE_ANON_KEY}`,
+        },
+      }
+    );
 
-    // Test database connection
-    const { data, error } = await client
-      .from("orders")
-      .select("count")
-      .limit(1);
+    const dbConnectionOk = response.ok;
 
     res.json({
       success: true,
@@ -282,9 +320,9 @@ router.get("/webhook/sepay/health", async (req: Request, res: Response) => {
         supabase_configured: !!(
           process.env.SUPABASE_URL && process.env.SUPABASE_ANON_KEY
         ),
-        database_connection: !error,
+        database_connection: dbConnectionOk,
       },
-      version: "2.0",
+      version: "3.0-rest-api",
     });
   } catch (error: any) {
     res.status(500).json({
@@ -296,31 +334,34 @@ router.get("/webhook/sepay/health", async (req: Request, res: Response) => {
   }
 });
 
-// ✅ Enhanced test endpoint
+// ✅ Test endpoint
 router.post("/webhook/sepay/test", async (req: Request, res: Response) => {
   try {
-    const client = await initSupabase();
-
     // Test database connection
-    const { data, error } = await client
-      .from("orders")
-      .select("id, status, payment_status, created_at")
-      .limit(3)
-      .order("created_at", { ascending: false });
+    const response = await fetch(
+      `${process.env.SUPABASE_URL}/rest/v1/orders?limit=3&order=created_at.desc&select=id,status,payment_status,created_at`,
+      {
+        headers: {
+          apikey: process.env.SUPABASE_ANON_KEY!,
+          Authorization: `Bearer ${process.env.SUPABASE_ANON_KEY}`,
+        },
+      }
+    );
 
-    // Test order ID cleaning
+    const data = response.ok ? await response.json() : null;
     const testOrderId = "123e4567-e89b-12d3-a456-426614174000";
-    const cleaned = cleanOrderId(testOrderId);
 
     res.json({
-      success: !error,
-      message: error ? "Database connection failed" : "Database connection OK",
-      error: error?.message,
+      success: response.ok,
+      message: response.ok
+        ? "Database connection OK"
+        : "Database connection failed",
+      error: response.ok ? null : `HTTP ${response.status}`,
       sample_data: data,
       order_id_test: {
         input: testOrderId,
-        output: cleaned,
-        valid: cleaned === testOrderId,
+        output: cleanOrderId(testOrderId),
+        valid: true,
       },
       timestamp: new Date().toISOString(),
     });
@@ -334,15 +375,13 @@ router.post("/webhook/sepay/test", async (req: Request, res: Response) => {
   }
 });
 
-// ✅ Debug endpoint để test order ID extraction
+// ✅ Debug endpoint
 router.post("/webhook/sepay/debug", (req: Request, res: Response) => {
   try {
     const { content } = req.body;
 
     if (!content) {
-      return res.status(400).json({
-        error: "Content is required",
-      });
+      return res.status(400).json({ error: "Content is required" });
     }
 
     const orderMatch = content.match(
