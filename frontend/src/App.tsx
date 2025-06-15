@@ -24,6 +24,7 @@ import Checkout from "./pages/Checkout";
 import About from "./pages/About";
 import Contact from "./pages/Contact";
 import Profile from "./pages/Profile";
+import Pricing from "./pages/Pricing";
 import SearchResults from "./pages/SearchResults";
 
 // Auth pages
@@ -176,6 +177,16 @@ const App = () => (
                       <ConditionalLayout>
                         <PageTransition>
                           <Contact />
+                        </PageTransition>
+                      </ConditionalLayout>
+                    }
+                  />
+                  <Route
+                    path="/pricing"
+                    element={
+                      <ConditionalLayout>
+                        <PageTransition>
+                          <Pricing />
                         </PageTransition>
                       </ConditionalLayout>
                     }
