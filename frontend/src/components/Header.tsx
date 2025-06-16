@@ -71,6 +71,7 @@ import {
   BarChart3,
   FileText,
   UserCog,
+  ArrowRight,
 } from "lucide-react";
 import { useAuth } from "@/contexts/AuthContext";
 import { useCart } from "@/contexts/CartContext";
@@ -345,9 +346,22 @@ const Header: React.FC = () => {
                   <div className="w-[800px] p-6">
                     <div className="grid grid-cols-3 gap-6">
                       <div className="col-span-2">
-                        <h3 className="mb-4 text-lg font-semibold text-transparent bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text">
-                          Template Categories
-                        </h3>
+                        {/* ✅ Header với "Xem tất cả" link */}
+                        <div className="flex items-center justify-between mb-4">
+                          <h3 className="text-lg font-semibold text-transparent bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text">
+                            Template Categories
+                          </h3>
+                          <NavigationMenuLink asChild>
+                            <Link
+                              to="/templates"
+                              className="flex items-center space-x-2 text-sm font-medium transition-colors group text-primary hover:text-primary/80"
+                            >
+                              <span>Xem tất cả</span>
+                              <ArrowRight className="w-3 h-3 transition-transform group-hover:translate-x-1" />
+                            </Link>
+                          </NavigationMenuLink>
+                        </div>
+
                         <div className="grid grid-cols-2 gap-3">
                           {templateCategories.map((category, index) => (
                             <NavigationMenuLink key={index} asChild>
@@ -387,6 +401,20 @@ const Header: React.FC = () => {
                               </Link>
                             </NavigationMenuLink>
                           ))}
+                        </div>
+
+                        {/* ✅ Footer với "Browse All Templates" button */}
+                        <div className="pt-4 mt-6 border-t">
+                          <NavigationMenuLink asChild>
+                            <Link
+                              to="/templates"
+                              className="flex items-center justify-center w-full p-3 text-sm font-medium text-white transition-all duration-300 rounded-lg group bg-gradient-to-r from-blue-500 to-purple-600 hover:from-blue-600 hover:to-purple-700 hover:shadow-lg"
+                            >
+                              <Package className="w-4 h-4 mr-2" />
+                              <span>Duyệt tất cả Templates</span>
+                              <ArrowRight className="w-4 h-4 ml-2 transition-transform group-hover:translate-x-1" />
+                            </Link>
+                          </NavigationMenuLink>
                         </div>
                       </div>
 
@@ -459,7 +487,7 @@ const Header: React.FC = () => {
                 </NavigationMenuContent>
               </NavigationMenuItem>
 
-              {/* E-books Dropdown */}
+              {/* E-books Dropdown - Enhanced Version */}
               <NavigationMenuItem>
                 <NavigationMenuTrigger className="group">
                   <BookOpen className="w-4 h-4 mr-2" />
@@ -472,24 +500,38 @@ const Header: React.FC = () => {
                   </Badge>
                 </NavigationMenuTrigger>
                 <NavigationMenuContent>
-                  <div className="w-[600px] p-6">
-                    <div className="grid grid-cols-2 gap-6">
-                      <div>
-                        <h3 className="mb-4 text-lg font-semibold text-transparent bg-gradient-to-r from-green-600 to-blue-600 bg-clip-text">
-                          E-book Categories
-                        </h3>
-                        <div className="space-y-3">
+                  <div className="w-[700px] p-6">
+                    <div className="grid grid-cols-5 gap-6">
+                      {/* Left Column - Categories (3 columns) */}
+                      <div className="col-span-3">
+                        <div className="flex items-center justify-between mb-4">
+                          <h3 className="text-lg font-semibold text-transparent bg-gradient-to-r from-green-600 to-blue-600 bg-clip-text">
+                            E-book Categories
+                          </h3>
+                          <NavigationMenuLink asChild>
+                            <Link
+                              to="/ebooks"
+                              className="flex items-center space-x-2 text-sm font-medium transition-colors group text-primary hover:text-primary/80"
+                            >
+                              <span>Xem tất cả</span>
+                              <ArrowRight className="w-3 h-3 transition-transform group-hover:translate-x-1" />
+                            </Link>
+                          </NavigationMenuLink>
+                        </div>
+
+                        {/* Categories Grid - 2 columns */}
+                        <div className="grid grid-cols-2 gap-3">
                           {ebookCategories.map((category, index) => (
                             <NavigationMenuLink key={index} asChild>
                               <Link
                                 to={category.href}
-                                className="block p-3 transition-all duration-300 rounded-lg group hover:bg-muted"
+                                className="block p-3 transition-all duration-300 rounded-lg group hover:bg-muted hover:shadow-md"
                               >
                                 <div className="flex items-center space-x-3">
                                   <div
-                                    className={`w-8 h-8 rounded-lg bg-gradient-to-r ${category.color} flex items-center justify-center group-hover:scale-110 transition-transform duration-300`}
+                                    className={`w-10 h-10 rounded-lg bg-gradient-to-r ${category.color} flex items-center justify-center group-hover:scale-110 transition-transform duration-300`}
                                   >
-                                    <category.icon className="w-4 h-4 text-white" />
+                                    <category.icon className="w-5 h-5 text-white" />
                                   </div>
                                   <div className="flex-1">
                                     <div className="flex items-center space-x-2">
@@ -502,12 +544,15 @@ const Header: React.FC = () => {
                                           className="text-xs text-yellow-800 bg-yellow-100"
                                         >
                                           <Star className="w-3 h-3 mr-1" />
-                                          Popular
+                                          Hot
                                         </Badge>
                                       )}
                                     </div>
+                                    <div className="mt-1 text-xs text-muted-foreground">
+                                      {category.description}
+                                    </div>
                                     <div className="text-xs text-muted-foreground">
-                                      {category.description} • {category.count}
+                                      {category.count} e-books
                                     </div>
                                   </div>
                                 </div>
@@ -515,46 +560,125 @@ const Header: React.FC = () => {
                             </NavigationMenuLink>
                           ))}
                         </div>
+
+                        {/* Footer CTA */}
+                        <div className="pt-4 mt-6 border-t">
+                          <NavigationMenuLink asChild>
+                            <Link
+                              to="/ebooks"
+                              className="flex items-center justify-center w-full p-3 text-sm font-medium text-white transition-all duration-300 rounded-lg group bg-gradient-to-r from-green-500 to-blue-600 hover:from-green-600 hover:to-blue-700 hover:shadow-lg"
+                            >
+                              <BookOpen className="w-4 h-4 mr-2" />
+                              <span>Duyệt tất cả E-books</span>
+                              <ArrowRight className="w-4 h-4 ml-2 transition-transform group-hover:translate-x-1" />
+                            </Link>
+                          </NavigationMenuLink>
+                        </div>
                       </div>
 
-                      <div className="space-y-4">
+                      {/* Right Column - Featured Content (2 columns) */}
+                      <div className="col-span-2 space-y-4">
                         <h4 className="text-sm font-semibold tracking-wide uppercase text-muted-foreground">
                           Featured Content
                         </h4>
-                        <div className="space-y-3">
-                          <div className="p-4 border rounded-lg bg-gradient-to-r from-blue-50 to-purple-50 dark:from-blue-900/20 dark:to-purple-900/20">
-                            <div className="flex items-center mb-2 space-x-2">
-                              <Crown className="w-4 h-4 text-yellow-500" />
-                              <span className="text-sm font-medium">
-                                Premium E-books
-                              </span>
-                            </div>
-                            <p className="mb-3 text-xs text-muted-foreground">
-                              Exclusive content from industry experts
-                            </p>
-                            <Button size="sm" className="w-full">
-                              Explore Premium
-                            </Button>
-                          </div>
 
-                          <div className="p-4 border rounded-lg bg-gradient-to-r from-green-50 to-emerald-50 dark:from-green-900/20 dark:to-emerald-900/20">
-                            <div className="flex items-center mb-2 space-x-2">
-                              <Download className="w-4 h-4 text-green-500" />
-                              <span className="text-sm font-medium">
-                                Free Downloads
-                              </span>
-                            </div>
-                            <p className="mb-3 text-xs text-muted-foreground">
-                              High-quality free resources for developers
-                            </p>
-                            <Button
-                              size="sm"
-                              variant="outline"
-                              className="w-full"
-                            >
-                              Browse Free
-                            </Button>
+                        {/* Premium E-books */}
+                        <div className="p-4 border border-blue-200 rounded-lg bg-gradient-to-br from-blue-50 to-purple-50 dark:from-blue-900/20 dark:to-purple-900/20">
+                          <div className="flex items-center mb-3 space-x-2">
+                            <Crown className="w-5 h-5 text-yellow-500" />
+                            <span className="text-sm font-medium">
+                              Premium E-books
+                            </span>
+                            <Badge className="text-xs text-yellow-800 bg-yellow-100">
+                              Exclusive
+                            </Badge>
                           </div>
+                          <p className="mb-3 text-xs leading-relaxed text-muted-foreground">
+                            Exclusive content from industry experts with
+                            advanced techniques and insider knowledge.
+                          </p>
+                          <Button
+                            size="sm"
+                            className="w-full bg-gradient-to-r from-blue-500 to-purple-600 hover:from-blue-600 hover:to-purple-700"
+                          >
+                            <Star className="w-3 h-3 mr-1" />
+                            Explore Premium
+                          </Button>
+                        </div>
+
+                        {/* Free Downloads */}
+                        <div className="p-4 border border-green-200 rounded-lg bg-gradient-to-br from-green-50 to-emerald-50 dark:from-green-900/20 dark:to-emerald-900/20">
+                          <div className="flex items-center mb-3 space-x-2">
+                            <Download className="w-5 h-5 text-green-500" />
+                            <span className="text-sm font-medium">
+                              Free Downloads
+                            </span>
+                            <Badge className="text-xs text-green-800 bg-green-100">
+                              Free
+                            </Badge>
+                          </div>
+                          <p className="mb-3 text-xs leading-relaxed text-muted-foreground">
+                            High-quality free resources perfect for developers
+                            starting their journey.
+                          </p>
+                          <Button
+                            size="sm"
+                            variant="outline"
+                            className="w-full hover:bg-green-50 hover:border-green-300"
+                          >
+                            <Heart className="w-3 h-3 mr-1" />
+                            Browse Free
+                          </Button>
+                        </div>
+
+                        {/* New Releases */}
+                        <div className="p-4 border border-orange-200 rounded-lg bg-gradient-to-br from-orange-50 to-red-50 dark:from-orange-900/20 dark:to-red-900/20">
+                          <div className="flex items-center mb-3 space-x-2">
+                            <Sparkles className="w-5 h-5 text-orange-500" />
+                            <span className="text-sm font-medium">
+                              New Releases
+                            </span>
+                            <Badge className="text-xs text-orange-800 bg-orange-100">
+                              Latest
+                            </Badge>
+                          </div>
+                          <p className="mb-3 text-xs leading-relaxed text-muted-foreground">
+                            Fresh content covering the latest trends and
+                            technologies in development.
+                          </p>
+                          <Button
+                            size="sm"
+                            variant="outline"
+                            className="w-full hover:bg-orange-50 hover:border-orange-300"
+                          >
+                            <Clock className="w-3 h-3 mr-1" />
+                            View Latest
+                          </Button>
+                        </div>
+
+                        {/* Bestsellers */}
+                        <div className="p-4 border border-purple-200 rounded-lg bg-gradient-to-br from-purple-50 to-pink-50 dark:from-purple-900/20 dark:to-pink-900/20">
+                          <div className="flex items-center mb-3 space-x-2">
+                            <Award className="w-5 h-5 text-purple-500" />
+                            <span className="text-sm font-medium">
+                              Bestsellers
+                            </span>
+                            <Badge className="text-xs text-purple-800 bg-purple-100">
+                              Popular
+                            </Badge>
+                          </div>
+                          <p className="mb-3 text-xs leading-relaxed text-muted-foreground">
+                            Most popular e-books loved by thousands of
+                            developers worldwide.
+                          </p>
+                          <Button
+                            size="sm"
+                            variant="outline"
+                            className="w-full hover:bg-purple-50 hover:border-purple-300"
+                          >
+                            <TrendingUp className="w-3 h-3 mr-1" />
+                            Top Picks
+                          </Button>
                         </div>
                       </div>
                     </div>
