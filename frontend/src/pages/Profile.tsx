@@ -92,14 +92,27 @@ const Profile: React.FC = () => {
           })),
         }));
 
-        // Lấy dữ liệu downloads
-        const { data: downloadsData, error: downloadsError } = await supabase
-          .from("downloads")
-          .select("*")
-          .eq("user_id", user.id);
+        // ✅ Lấy IDs của orders đã completed
+        const completedOrderIds = ordersData
+          .filter((order) => order.status === "completed")
+          .map((order) => order.id);
 
-        if (downloadsError || !downloadsData)
-          throw new Error("Lỗi khi lấy dữ liệu tải xuống");
+        // ✅ Chỉ lấy downloads từ completed orders
+        let downloadsData = [];
+        if (completedOrderIds.length > 0) {
+          const { data, error: downloadsError } = await supabase
+            .from("downloads")
+            .select("*")
+            .eq("user_id", user.id)
+            .in("order_id", completedOrderIds);
+
+          if (downloadsError) {
+            console.error("Downloads error:", downloadsError);
+            // Không throw error, chỉ set empty array
+          } else if (data) {
+            downloadsData = data;
+          }
+        }
 
         setUserStats({
           totalOrders,

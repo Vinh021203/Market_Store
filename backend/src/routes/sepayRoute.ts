@@ -5,7 +5,6 @@ const router = express.Router();
 // ✅ Function update order status
 const updateOrderToPaid = async (orderId: string) => {
   try {
-    // ✅ Sử dụng direct SQL để tránh ByteString error
     const response = await fetch(
       `${process.env.SUPABASE_URL}/rest/v1/orders?id=eq.${orderId}`,
       {
@@ -16,15 +15,19 @@ const updateOrderToPaid = async (orderId: string) => {
           "Content-Type": "application/json",
         },
         body: JSON.stringify({
-          status: "paid", // ✅ CHUYỂN SANG PAID
-          payment_status: "paid", // ✅ PAYMENT STATUS PAID
+          status: "completed", // ✅ FIX: paid → completed
+          payment_status: "completed", // ✅ FIX: paid → completed
           updated_at: new Date().toISOString(),
         }),
       }
     );
 
     if (response.ok) {
-      console.log(`✅ Order ${orderId} updated to PAID successfully`);
+      console.log(`✅ Order ${orderId} updated to COMPLETED successfully`);
+
+      // ✅ THÊM: Tự động tạo downloads
+      await createDownloadsForOrder(orderId);
+
       return true;
     } else {
       console.error(
@@ -36,6 +39,80 @@ const updateOrderToPaid = async (orderId: string) => {
   } catch (error) {
     console.error(`❌ Database update error for ${orderId}:`, error);
     return false;
+  }
+};
+
+// ✅ THÊM: Function tạo downloads tự động
+const createDownloadsForOrder = async (orderId: string) => {
+  try {
+    console.log(`🔄 Creating downloads for order: ${orderId}`);
+
+    // Lấy thông tin order và items
+    const orderResponse = await fetch(
+      `${process.env.SUPABASE_URL}/rest/v1/orders?id=eq.${orderId}&select=*,order_items(product_id,products(title,category,download_url,file_size))`,
+      {
+        headers: {
+          apikey: process.env.SUPABASE_ANON_KEY!,
+          Authorization: `Bearer ${process.env.SUPABASE_ANON_KEY}`,
+        },
+      }
+    );
+
+    if (!orderResponse.ok) {
+      throw new Error("Failed to fetch order details");
+    }
+
+    const orders = await orderResponse.json();
+    if (!orders || orders.length === 0) {
+      throw new Error("Order not found");
+    }
+
+    const order = orders[0];
+
+    // Tạo downloads cho từng product trong order
+    const downloadPromises = order.order_items.map(async (item: any) => {
+      const product = item.products;
+      if (!product) return null;
+
+      const downloadData = {
+        user_id: order.user_id,
+        product_id: item.product_id,
+        order_id: orderId, // ✅ Link với order
+        name: product.title,
+        type: product.category,
+        download_url: product.download_url,
+        file_size: product.file_size || "Unknown",
+        download_date: new Date().toISOString(),
+      };
+
+      const downloadResponse = await fetch(
+        `${process.env.SUPABASE_URL}/rest/v1/downloads`,
+        {
+          method: "POST",
+          headers: {
+            apikey: process.env.SUPABASE_ANON_KEY!,
+            Authorization: `Bearer ${process.env.SUPABASE_ANON_KEY}`,
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify(downloadData),
+        }
+      );
+
+      if (downloadResponse.ok) {
+        console.log(`✅ Download created for product: ${product.title}`);
+        return true;
+      } else {
+        console.error(
+          `❌ Failed to create download for product: ${product.title}`
+        );
+        return false;
+      }
+    });
+
+    await Promise.all(downloadPromises);
+    console.log(`✅ All downloads created for order: ${orderId}`);
+  } catch (error) {
+    console.error(`❌ Error creating downloads for order ${orderId}:`, error);
   }
 };
 
