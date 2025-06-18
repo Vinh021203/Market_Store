@@ -374,7 +374,7 @@ const updateOrderToPaid = async (orderId: string) => {
         },
         body: JSON.stringify({
           status: "completed", // ✅ FIX: paid → completed
-          payment_status: "completed", // ✅ FIX: paid → completed
+          // payment_status: "completed", // ✅ FIX: paid → completed
           updated_at: new Date().toISOString(),
         }),
       }
