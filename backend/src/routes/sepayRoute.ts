@@ -2,20 +2,22 @@ import express, { Request, Response } from "express";
 
 const router = express.Router();
 
-// ✅ Function update order status với enhanced logging
+// ✅ Function update order status với SERVICE_ROLE_KEY
 const updateOrderToPaid = async (orderId: string) => {
   try {
     console.log(`🔄 Attempting to update order: ${orderId}`);
 
+    // ✅ HEADERS ĐÚNG - Dùng SERVICE_ROLE_KEY
+    const headers = {
+      apikey: process.env.SUPABASE_ANON_KEY!,
+      Authorization: `Bearer ${process.env.SUPABASE_SERVICE_ROLE_KEY}`, // ✅ FIX
+      "Content-Type": "application/json",
+    };
+
     // ✅ Kiểm tra order có tồn tại không trước
     const checkResponse = await fetch(
       `${process.env.SUPABASE_URL}/rest/v1/orders?id=eq.${orderId}&select=id,status,payment_status,user_id`,
-      {
-        headers: {
-          apikey: process.env.SUPABASE_ANON_KEY!,
-          Authorization: `Bearer ${process.env.SUPABASE_ANON_KEY}`,
-        },
-      }
+      { headers } // ✅ Dùng headers đã fix
     );
 
     const existingOrders = await checkResponse.json();
@@ -26,17 +28,16 @@ const updateOrderToPaid = async (orderId: string) => {
       return false;
     }
 
+    // ✅ UPDATE VỚI SERVICE_ROLE_KEY
     const response = await fetch(
       `${process.env.SUPABASE_URL}/rest/v1/orders?id=eq.${orderId}`,
       {
         method: "PATCH",
-        headers: {
-          apikey: process.env.SUPABASE_ANON_KEY!,
-          Authorization: `Bearer ${process.env.SUPABASE_ANON_KEY}`,
-          "Content-Type": "application/json",
-        },
+        headers, // ✅ Dùng headers đã fix
         body: JSON.stringify({
-          status: "completed", // ✅ Chỉ update status để tránh trigger
+          status: "completed",
+          payment_status: "completed", // ✅ Update cả 2 fields
+          payment_confirmed_at: new Date().toISOString(),
           updated_at: new Date().toISOString(),
         }),
       }
@@ -51,12 +52,7 @@ const updateOrderToPaid = async (orderId: string) => {
       // ✅ Verify update worked
       const verifyResponse = await fetch(
         `${process.env.SUPABASE_URL}/rest/v1/orders?id=eq.${orderId}&select=status,payment_status`,
-        {
-          headers: {
-            apikey: process.env.SUPABASE_ANON_KEY!,
-            Authorization: `Bearer ${process.env.SUPABASE_ANON_KEY}`,
-          },
-        }
+        { headers } // ✅ Dùng headers đã fix
       );
 
       const verifyData = await verifyResponse.json();
@@ -76,20 +72,22 @@ const updateOrderToPaid = async (orderId: string) => {
   }
 };
 
-// ✅ Function tạo downloads tự động
+// ✅ Function tạo downloads tự động với SERVICE_ROLE_KEY
 const createDownloadsForOrder = async (orderId: string) => {
   try {
     console.log(`🔄 Creating downloads for order: ${orderId}`);
 
+    // ✅ HEADERS ĐÚNG - Dùng SERVICE_ROLE_KEY
+    const headers = {
+      apikey: process.env.SUPABASE_ANON_KEY!,
+      Authorization: `Bearer ${process.env.SUPABASE_SERVICE_ROLE_KEY}`, // ✅ FIX
+      "Content-Type": "application/json",
+    };
+
     // Lấy thông tin order và items
     const orderResponse = await fetch(
       `${process.env.SUPABASE_URL}/rest/v1/orders?id=eq.${orderId}&select=*,order_items(product_id,products(title,category,download_url,file_size))`,
-      {
-        headers: {
-          apikey: process.env.SUPABASE_ANON_KEY!,
-          Authorization: `Bearer ${process.env.SUPABASE_ANON_KEY}`,
-        },
-      }
+      { headers } // ✅ Dùng headers đã fix
     );
 
     if (!orderResponse.ok) {
@@ -124,7 +122,7 @@ const createDownloadsForOrder = async (orderId: string) => {
       const downloadData = {
         user_id: order.user_id,
         product_id: item.product_id,
-        order_id: orderId, // ✅ Link với order
+        order_id: orderId,
         name: product.title,
         type: product.category,
         download_url: product.download_url,
@@ -141,11 +139,7 @@ const createDownloadsForOrder = async (orderId: string) => {
         `${process.env.SUPABASE_URL}/rest/v1/downloads`,
         {
           method: "POST",
-          headers: {
-            apikey: process.env.SUPABASE_ANON_KEY!,
-            Authorization: `Bearer ${process.env.SUPABASE_ANON_KEY}`,
-            "Content-Type": "application/json",
-          },
+          headers, // ✅ Dùng headers đã fix
           body: JSON.stringify(downloadData),
         }
       );
@@ -224,7 +218,7 @@ router.post("/webhook/sepay", async (req: Request, res: Response) => {
 
         const rawOrderId = orderMatch[1];
 
-        // ✅ FIXED UUID PROCESSING - DỨT ĐIỂM
+        // ✅ FIXED UUID PROCESSING
         let orderId: string;
         try {
           console.log(
@@ -281,7 +275,7 @@ router.post("/webhook/sepay", async (req: Request, res: Response) => {
             transactionId: referenceCode,
             sepayId: id,
             date: transactionDate,
-            status: "COMPLETED", // ✅ CONFIRMED COMPLETED
+            status: "COMPLETED",
           });
 
           console.log(
@@ -318,9 +312,10 @@ router.get("/webhook/sepay/health", async (req: Request, res: Response) => {
         supabase_configured: !!(
           process.env.SUPABASE_URL && process.env.SUPABASE_ANON_KEY
         ),
+        service_role_configured: !!process.env.SUPABASE_SERVICE_ROLE_KEY, // ✅ Check service role
         database_connection: "active",
       },
-      version: "8.0-final-uuid-fix",
+      version: "9.0-service-role-fixed",
     });
   } catch (error: any) {
     res.status(500).json({
@@ -347,6 +342,11 @@ router.post("/webhook/sepay/test", async (req: Request, res: Response) => {
           ? "Order updated to COMPLETED"
           : "Failed to update order",
         orderId,
+        environment: {
+          service_role_key: !!process.env.SUPABASE_SERVICE_ROLE_KEY,
+          anon_key: !!process.env.SUPABASE_ANON_KEY,
+          supabase_url: !!process.env.SUPABASE_URL,
+        },
       });
     }
 
@@ -354,7 +354,7 @@ router.post("/webhook/sepay/test", async (req: Request, res: Response) => {
       return res.status(400).json({ error: "Content or orderId required" });
     }
 
-    // Test order ID extraction với enhanced logic
+    // Test order ID extraction
     const orderMatch = content.match(/DH([a-f0-9-]+)/i);
     if (!orderMatch) {
       return res.json({
