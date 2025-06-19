@@ -93,8 +93,12 @@ const Profile: React.FC = () => {
         }));
 
         // ✅ Lấy IDs của orders đã completed
+        // ✅ Fix - include processing
         const completedOrderIds = ordersData
-          .filter((order) => order.status === "completed")
+          .filter(
+            (order) =>
+              order.status === "completed" || order.status === "processing",
+          )
           .map((order) => order.id);
 
         // ✅ Chỉ lấy downloads từ completed orders

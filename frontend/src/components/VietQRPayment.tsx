@@ -61,10 +61,12 @@ const VietQRPayment: React.FC<VietQRPaymentProps> = ({
         if (!error && orderData) {
           console.log("📊 Current order status:", orderData);
 
-          // ✅ Chỉ webhook mới có thể update thành 'completed'
+          // ✅ Fix - accept cả processing
           if (
-            orderData.status === "completed" &&
-            orderData.payment_status === "completed"
+            (orderData.status === "completed" ||
+              orderData.status === "processing") &&
+            (orderData.payment_status === "completed" ||
+              orderData.payment_status === "processing")
           ) {
             console.log("🎉 Payment confirmed by SePay webhook!");
             setPaymentStatus("success");
