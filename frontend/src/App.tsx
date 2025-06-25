@@ -1,3 +1,4 @@
+import React, { Suspense } from "react"; // ✅ Import Suspense
 import { Toaster } from "@/components/ui/toaster";
 import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
@@ -19,42 +20,47 @@ import PageTransition from "@/components/PageTransition";
 import GlobalLoading from "@/components/GlobalLoading";
 import { isAdmin } from "@/lib/auth";
 
-// Pages
-import Index from "./pages/Index";
-import Templates from "./pages/Templates";
-import Ebooks from "./pages/Ebooks";
-import Blog from "./pages/Blog";
-import BlogPost from "./pages/BlogPost";
-import ProductDetail from "./pages/ProductDetail";
-import Cart from "./pages/Cart";
-import Checkout from "./pages/Checkout";
-import About from "./pages/About";
-import Contact from "./pages/Contact";
-import Profile from "./pages/Profile";
-import Pricing from "./pages/Pricing";
-import SearchResults from "./pages/SearchResults";
+// ✅ Lazy Load Pages
+// Thay vì import trực tiếp, chúng ta dùng React.lazy
+const Index = React.lazy(() => import("./pages/Index"));
+const Templates = React.lazy(() => import("./pages/Templates"));
+const Ebooks = React.lazy(() => import("./pages/Ebooks"));
+const Blog = React.lazy(() => import("./pages/Blog"));
+const BlogPost = React.lazy(() => import("./pages/BlogPost"));
+const ProductDetail = React.lazy(() => import("./pages/ProductDetail"));
+const Cart = React.lazy(() => import("./pages/Cart"));
+const Checkout = React.lazy(() => import("./pages/Checkout"));
+const About = React.lazy(() => import("./pages/About"));
+const Contact = React.lazy(() => import("./pages/Contact"));
+const Profile = React.lazy(() => import("./pages/Profile"));
+const Pricing = React.lazy(() => import("./pages/Pricing"));
+const SearchResults = React.lazy(() => import("./pages/SearchResults"));
 
 // Auth pages
-import Login from "./pages/auth/Login";
-import Register from "./pages/auth/Register";
+const Login = React.lazy(() => import("./pages/auth/Login"));
+const Register = React.lazy(() => import("./pages/auth/Register"));
 
 // Admin pages
-import AdminDashboard from "./pages/admin/Dashboard";
-import ProductManagement from "./pages/admin/ProductManagement";
-import ProductCreate from "./pages/admin/ProductCreate";
-import OrderManagement from "./pages/admin/OrderManagement";
-import UserManagement from "./pages/admin/UserManagement";
-import BlogManagement from "./pages/admin/BlogManagement";
-import BlogCreate from "./pages/admin/BlogCreate";
-import BlogCategories from "./pages/admin/BlogCategories";
-import Analytics from "./pages/admin/Analytics";
-import Reports from "./pages/admin/Reports";
-import Settings from "./pages/admin/Settings";
-import NotFound from "./pages/NotFound";
+const AdminDashboard = React.lazy(() => import("./pages/admin/Dashboard"));
+const ProductManagement = React.lazy(
+  () => import("./pages/admin/ProductManagement"),
+);
+const ProductCreate = React.lazy(() => import("./pages/admin/ProductCreate"));
+const OrderManagement = React.lazy(
+  () => import("./pages/admin/OrderManagement"),
+);
+const UserManagement = React.lazy(() => import("./pages/admin/UserManagement"));
+const BlogManagement = React.lazy(() => import("./pages/admin/BlogManagement"));
+const BlogCreate = React.lazy(() => import("./pages/admin/BlogCreate"));
+const BlogCategories = React.lazy(() => import("./pages/admin/BlogCategories"));
+const Analytics = React.lazy(() => import("./pages/admin/Analytics"));
+const Reports = React.lazy(() => import("./pages/admin/Reports"));
+const Settings = React.lazy(() => import("./pages/admin/Settings"));
+const NotFound = React.lazy(() => import("./pages/NotFound"));
 
 const queryClient = new QueryClient();
 
-// ✅ Protected Route Component
+// ✅ Protected Route Component (không đổi)
 interface ProtectedRouteProps {
   children: React.ReactNode;
   requireAdmin?: boolean;
@@ -67,17 +73,14 @@ const ProtectedRoute: React.FC<ProtectedRouteProps> = ({
   const { user, isLoading } = useAuth();
   const location = useLocation();
 
-  // ✅ Hiển thị loading khi đang check auth
   if (isLoading) {
     return <GlobalLoading />;
   }
 
-  // ✅ Redirect về login nếu chưa đăng nhập
   if (!user) {
     return <Navigate to="/auth/login" state={{ from: location }} replace />;
   }
 
-  // ✅ Check admin permission nếu cần
   if (requireAdmin && !isAdmin(user)) {
     return <Navigate to="/" replace />;
   }
@@ -85,16 +88,14 @@ const ProtectedRoute: React.FC<ProtectedRouteProps> = ({
   return <>{children}</>;
 };
 
-// ✅ Public Route Component (cho auth pages)
+// ✅ Public Route Component (không đổi)
 const PublicRoute: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const { user, isLoading } = useAuth();
 
-  // ✅ Hiển thị loading khi đang check auth
   if (isLoading) {
     return <GlobalLoading />;
   }
 
-  // ✅ Redirect về home nếu đã đăng nhập
   if (user) {
     return <Navigate to="/" replace />;
   }
@@ -102,32 +103,25 @@ const PublicRoute: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   return <>{children}</>;
 };
 
-// ✅ Component để wrap routes với conditional layout
+// ✅ Component để wrap routes với conditional layout (không đổi)
 const ConditionalLayout: React.FC<{ children: React.ReactNode }> = ({
   children,
 }) => {
   const location = useLocation();
-
-  // Danh sách routes không cần header/footer
   const excludedRoutes = ["/auth/login", "/auth/register"];
-
-  // Kiểm tra xem có phải route bị loại trừ không
   const shouldHideLayout = excludedRoutes.includes(location.pathname);
 
   if (shouldHideLayout) {
-    // Render trực tiếp children mà không có Layout
     return <>{children}</>;
   }
 
-  // Render với Layout bình thường
   return <Layout>{children}</Layout>;
 };
 
-// ✅ App Routes Component (để sử dụng useAuth hook)
+// ✅ App Routes Component (sử dụng Suspense cho từng Route element)
 const AppRoutes = () => {
   const { isLoading } = useAuth();
 
-  // ✅ Hiển thị loading toàn app khi đang check auth lần đầu
   if (isLoading) {
     return <GlobalLoading />;
   }
@@ -139,9 +133,13 @@ const AppRoutes = () => {
         path="/"
         element={
           <ConditionalLayout>
-            <PageTransition>
-              <Index />
-            </PageTransition>
+            <Suspense fallback={<GlobalLoading />}>
+              {" "}
+              {/* ✅ Thêm Suspense */}
+              <PageTransition>
+                <Index />
+              </PageTransition>
+            </Suspense>
           </ConditionalLayout>
         }
       />
@@ -149,9 +147,11 @@ const AppRoutes = () => {
         path="/templates"
         element={
           <ConditionalLayout>
-            <PageTransition>
-              <Templates />
-            </PageTransition>
+            <Suspense fallback={<GlobalLoading />}>
+              <PageTransition>
+                <Templates />
+              </PageTransition>
+            </Suspense>
           </ConditionalLayout>
         }
       />
@@ -159,9 +159,11 @@ const AppRoutes = () => {
         path="/ebooks"
         element={
           <ConditionalLayout>
-            <PageTransition>
-              <Ebooks />
-            </PageTransition>
+            <Suspense fallback={<GlobalLoading />}>
+              <PageTransition>
+                <Ebooks />
+              </PageTransition>
+            </Suspense>
           </ConditionalLayout>
         }
       />
@@ -169,9 +171,11 @@ const AppRoutes = () => {
         path="/blog"
         element={
           <ConditionalLayout>
-            <PageTransition>
-              <Blog />
-            </PageTransition>
+            <Suspense fallback={<GlobalLoading />}>
+              <PageTransition>
+                <Blog />
+              </PageTransition>
+            </Suspense>
           </ConditionalLayout>
         }
       />
@@ -179,9 +183,11 @@ const AppRoutes = () => {
         path="/blog/:slug"
         element={
           <ConditionalLayout>
-            <PageTransition>
-              <BlogPost />
-            </PageTransition>
+            <Suspense fallback={<GlobalLoading />}>
+              <PageTransition>
+                <BlogPost />
+              </PageTransition>
+            </Suspense>
           </ConditionalLayout>
         }
       />
@@ -189,9 +195,11 @@ const AppRoutes = () => {
         path="/product/:id"
         element={
           <ConditionalLayout>
-            <PageTransition>
-              <ProductDetail />
-            </PageTransition>
+            <Suspense fallback={<GlobalLoading />}>
+              <PageTransition>
+                <ProductDetail />
+              </PageTransition>
+            </Suspense>
           </ConditionalLayout>
         }
       />
@@ -199,9 +207,11 @@ const AppRoutes = () => {
         path="/cart"
         element={
           <ConditionalLayout>
-            <PageTransition>
-              <Cart />
-            </PageTransition>
+            <Suspense fallback={<GlobalLoading />}>
+              <PageTransition>
+                <Cart />
+              </PageTransition>
+            </Suspense>
           </ConditionalLayout>
         }
       />
@@ -209,9 +219,11 @@ const AppRoutes = () => {
         path="/about"
         element={
           <ConditionalLayout>
-            <PageTransition>
-              <About />
-            </PageTransition>
+            <Suspense fallback={<GlobalLoading />}>
+              <PageTransition>
+                <About />
+              </PageTransition>
+            </Suspense>
           </ConditionalLayout>
         }
       />
@@ -219,9 +231,11 @@ const AppRoutes = () => {
         path="/contact"
         element={
           <ConditionalLayout>
-            <PageTransition>
-              <Contact />
-            </PageTransition>
+            <Suspense fallback={<GlobalLoading />}>
+              <PageTransition>
+                <Contact />
+              </PageTransition>
+            </Suspense>
           </ConditionalLayout>
         }
       />
@@ -229,9 +243,11 @@ const AppRoutes = () => {
         path="/pricing"
         element={
           <ConditionalLayout>
-            <PageTransition>
-              <Pricing />
-            </PageTransition>
+            <Suspense fallback={<GlobalLoading />}>
+              <PageTransition>
+                <Pricing />
+              </PageTransition>
+            </Suspense>
           </ConditionalLayout>
         }
       />
@@ -239,9 +255,11 @@ const AppRoutes = () => {
         path="/search"
         element={
           <ConditionalLayout>
-            <PageTransition>
-              <SearchResults />
-            </PageTransition>
+            <Suspense fallback={<GlobalLoading />}>
+              <PageTransition>
+                <SearchResults />
+              </PageTransition>
+            </Suspense>
           </ConditionalLayout>
         }
       />
@@ -252,9 +270,11 @@ const AppRoutes = () => {
         element={
           <ProtectedRoute>
             <ConditionalLayout>
-              <PageTransition>
-                <Profile />
-              </PageTransition>
+              <Suspense fallback={<GlobalLoading />}>
+                <PageTransition>
+                  <Profile />
+                </PageTransition>
+              </Suspense>
             </ConditionalLayout>
           </ProtectedRoute>
         }
@@ -264,9 +284,11 @@ const AppRoutes = () => {
         element={
           <ProtectedRoute>
             <ConditionalLayout>
-              <PageTransition>
-                <Checkout />
-              </PageTransition>
+              <Suspense fallback={<GlobalLoading />}>
+                <PageTransition>
+                  <Checkout />
+                </PageTransition>
+              </Suspense>
             </ConditionalLayout>
           </ProtectedRoute>
         }
@@ -278,9 +300,11 @@ const AppRoutes = () => {
         element={
           <PublicRoute>
             <ConditionalLayout>
-              <PageTransition>
-                <Login />
-              </PageTransition>
+              <Suspense fallback={<GlobalLoading />}>
+                <PageTransition>
+                  <Login />
+                </PageTransition>
+              </Suspense>
             </ConditionalLayout>
           </PublicRoute>
         }
@@ -290,9 +314,11 @@ const AppRoutes = () => {
         element={
           <PublicRoute>
             <ConditionalLayout>
-              <PageTransition>
-                <Register />
-              </PageTransition>
+              <Suspense fallback={<GlobalLoading />}>
+                <PageTransition>
+                  <Register />
+                </PageTransition>
+              </Suspense>
             </ConditionalLayout>
           </PublicRoute>
         }
@@ -303,112 +329,140 @@ const AppRoutes = () => {
         path="/admin"
         element={
           <ProtectedRoute requireAdmin>
-            <AdminLayout />
+            <Suspense fallback={<GlobalLoading />}>
+              <AdminLayout />
+            </Suspense>
           </ProtectedRoute>
         }
       >
         <Route
           index
           element={
-            <PageTransition>
-              <AdminDashboard />
-            </PageTransition>
+            <Suspense fallback={<GlobalLoading />}>
+              <PageTransition>
+                <AdminDashboard />
+              </PageTransition>
+            </Suspense>
           }
         />
         <Route
           path="products"
           element={
-            <PageTransition>
-              <ProductManagement />
-            </PageTransition>
+            <Suspense fallback={<GlobalLoading />}>
+              <PageTransition>
+                <ProductManagement />
+              </PageTransition>
+            </Suspense>
           }
         />
         <Route
           path="products/create"
           element={
-            <PageTransition>
-              <ProductCreate />
-            </PageTransition>
+            <Suspense fallback={<GlobalLoading />}>
+              <PageTransition>
+                <ProductCreate />
+              </PageTransition>
+            </Suspense>
           }
         />
         <Route
           path="products/edit/:id"
           element={
-            <PageTransition>
-              <ProductCreate />
-            </PageTransition>
+            <Suspense fallback={<GlobalLoading />}>
+              <PageTransition>
+                <ProductCreate />
+              </PageTransition>
+            </Suspense>
           }
         />
         <Route
           path="orders"
           element={
-            <PageTransition>
-              <OrderManagement />
-            </PageTransition>
+            <Suspense fallback={<GlobalLoading />}>
+              <PageTransition>
+                <OrderManagement />
+              </PageTransition>
+            </Suspense>
           }
         />
         <Route
           path="blog"
           element={
-            <PageTransition>
-              <BlogManagement />
-            </PageTransition>
+            <Suspense fallback={<GlobalLoading />}>
+              <PageTransition>
+                <BlogManagement />
+              </PageTransition>
+            </Suspense>
           }
         />
         <Route
           path="blog/create"
           element={
-            <PageTransition>
-              <BlogCreate />
-            </PageTransition>
+            <Suspense fallback={<GlobalLoading />}>
+              <PageTransition>
+                <BlogCreate />
+              </PageTransition>
+            </Suspense>
           }
         />
         <Route
           path="blog/edit/:id"
           element={
-            <PageTransition>
-              <BlogCreate />
-            </PageTransition>
+            <Suspense fallback={<GlobalLoading />}>
+              <PageTransition>
+                <BlogCreate />
+              </PageTransition>
+            </Suspense>
           }
         />
         <Route
           path="blog/categories"
           element={
-            <PageTransition>
-              <BlogCategories />
-            </PageTransition>
+            <Suspense fallback={<GlobalLoading />}>
+              <PageTransition>
+                <BlogCategories />
+              </PageTransition>
+            </Suspense>
           }
         />
         <Route
           path="users"
           element={
-            <PageTransition>
-              <UserManagement />
-            </PageTransition>
+            <Suspense fallback={<GlobalLoading />}>
+              <PageTransition>
+                <UserManagement />
+              </PageTransition>
+            </Suspense>
           }
         />
         <Route
           path="analytics"
           element={
-            <PageTransition>
-              <Analytics />
-            </PageTransition>
+            <Suspense fallback={<GlobalLoading />}>
+              <PageTransition>
+                <Analytics />
+              </PageTransition>
+            </Suspense>
           }
         />
         <Route
           path="reports"
           element={
-            <PageTransition>
-              <Reports />
-            </PageTransition>
+            <Suspense fallback={<GlobalLoading />}>
+              <PageTransition>
+                <Reports />
+              </PageTransition>
+            </Suspense>
           }
         />
         <Route
           path="settings"
           element={
-            <PageTransition>
-              <Settings />
-            </PageTransition>
+            <Suspense fallback={<GlobalLoading />}>
+              <PageTransition>
+                <Settings />
+              </PageTransition>
+            </Suspense>
           }
         />
       </Route>
@@ -418,9 +472,11 @@ const AppRoutes = () => {
         path="*"
         element={
           <ConditionalLayout>
-            <PageTransition>
-              <NotFound />
-            </PageTransition>
+            <Suspense fallback={<GlobalLoading />}>
+              <PageTransition>
+                <NotFound />
+              </PageTransition>
+            </Suspense>
           </ConditionalLayout>
         }
       />
@@ -428,7 +484,7 @@ const AppRoutes = () => {
   );
 };
 
-// ✅ Main App Component
+// ✅ Main App Component (không đổi)
 const App = () => (
   <QueryClientProvider client={queryClient}>
     <ThemeProvider defaultTheme="system" storageKey="vite-ui-theme">
