@@ -1,42 +1,53 @@
 import express, { Request, Response } from "express";
+import { createClient } from "@supabase/supabase-js"; // Import Supabase Client SDK
 
 const router = express.Router();
 
-// ✅ Khai báo biến service_role key ở đây để dễ dàng sử dụng
-// Đảm bảo rằng process.env.SUPABASE_SERVICE_ROLE_KEY đã được cấu hình trên Render
-const SUPABASE_SERVICE_KEY = process.env.SUPABASE_SERVICE_ROLE_KEY;
+// Khai báo và khởi tạo Supabase Client một lần với service_role key
+const supabaseUrl = process.env.SUPABASE_URL;
+const supabaseServiceKey = process.env.SUPABASE_SERVICE_ROLE_KEY;
 
-if (!SUPABASE_SERVICE_KEY) {
-  console.error("🚨 Lỗi: SUPABASE_SERVICE_ROLE_KEY không được định nghĩa!");
-  // Có thể cân nhắc thoát ứng dụng hoặc vô hiệu hóa webhook nếu key quan trọng này bị thiếu.
+if (!supabaseUrl || !supabaseServiceKey) {
+  console.error(
+    "🚨 Lỗi: SUPABASE_URL hoặc SUPABASE_SERVICE_ROLE_KEY không được cấu hình trong backend!"
+  );
   // process.exit(1);
 }
 
-// ✅ Function update order status với enhanced logging
-const updateOrderToPaid = async (orderId: string) => {
-  try {
-    console.log(`🔄 Attempting to update order: ${orderId}`);
+const supabaseAdmin = createClient(supabaseUrl!, supabaseServiceKey!, {
+  auth: {
+    persistSession: false,
+  },
+});
 
-    // Dùng SERVICE_ROLE_KEY cho tất cả các thao tác trong hàm này để bỏ qua RLS
-    if (!SUPABASE_SERVICE_KEY) {
-      console.error(
-        "❌ SUPABASE_SERVICE_ROLE_KEY không có sẵn. Không thể cập nhật đơn hàng."
-      );
+// ✅ CẬP NHẬT: Hàm updateOrderToPaid nhận vào status và paymentStatus từ webhook
+const updateOrderToPaid = async (
+  orderId: string,
+  newStatus: "completed" | "failed" | "pending" | "processing" | "refunded", // Các trạng thái có thể có
+  newPaymentStatus:
+    | "completed"
+    | "failed"
+    | "pending"
+    | "processing"
+    | "refunded",
+  sepayTransactionId: string, // ID giao dịch từ SePay
+  transactionDate: string // Thời gian giao dịch từ SePay
+) => {
+  try {
+    console.log(
+      `🔄 Attempting to update order: ${orderId} to status: ${newStatus}, payment_status: ${newPaymentStatus}`
+    );
+
+    const { data: existingOrders, error: fetchError } = await supabaseAdmin
+      .from("orders")
+      .select("id,status,payment_status,user_id")
+      .eq("id", orderId);
+
+    if (fetchError) {
+      console.error(`❌ Lỗi khi tìm đơn hàng ${orderId}:`, fetchError.message);
       return false;
     }
 
-    // ✅ Kiểm tra order có tồn tại không trước
-    const checkResponse = await fetch(
-      `${process.env.SUPABASE_URL}/rest/v1/orders?id=eq.${orderId}&select=id,status,payment_status,user_id`,
-      {
-        headers: {
-          apikey: SUPABASE_SERVICE_KEY, // SỬ DỤNG SERVICE_KEY
-          Authorization: `Bearer ${SUPABASE_SERVICE_KEY}`, // SỬ DỤNG SERVICE_KEY
-        },
-      }
-    );
-
-    const existingOrders = await checkResponse.json();
     console.log(`🔍 Found orders:`, existingOrders);
 
     if (!existingOrders || existingOrders.length === 0) {
@@ -44,108 +55,97 @@ const updateOrderToPaid = async (orderId: string) => {
       return false;
     }
 
-    // ✅ THAY ĐỔI QUAN TRỌNG: Cập nhật cả status và payment_status
-    // VÀ THÊM HEADER X-Client-Info ĐỂ VƯỢT QUA TRIGGER PAYMENT_UPDATE_PROTECTION
-    const response = await fetch(
-      `${process.env.SUPABASE_URL}/rest/v1/orders?id=eq.${orderId}`,
-      {
-        method: "PATCH",
-        headers: {
-          apikey: SUPABASE_SERVICE_KEY, // SỬ DỤNG SERVICE_KEY
-          Authorization: `Bearer ${SUPABASE_SERVICE_KEY}`, // SỬ DỤNG SERVICE_KEY
-          "Content-Type": "application/json",
-          "X-Client-Info": "application-name=sepay_webhook", // ✅ QUAN TRỌNG: Header này để trigger nhận diện
-        },
-        body: JSON.stringify({
-          status: "completed", // Cập nhật trạng thái đơn hàng chung
-          payment_status: "completed", // Cập nhật trạng thái thanh toán
-          payment_confirmed_at: new Date().toISOString(), // Ghi lại thời gian xác nhận
-          updated_at: new Date().toISOString(),
-        }),
-      }
-    );
+    const { data: updatedOrder, error: updateError } = await supabaseAdmin
+      .from("orders")
+      .update({
+        status: newStatus, // Sử dụng status từ webhook
+        payment_status: newPaymentStatus, // Sử dụng payment_status từ webhook
+        payment_confirmed_at: new Date(transactionDate).toISOString(), // Dùng transactionDate từ webhook
+        transaction_id: sepayTransactionId, // Lưu ID giao dịch của SePay vào bảng orders
+        updated_at: new Date().toISOString(),
+      })
+      .eq("id", orderId)
+      .select();
 
-    const responseText = await response.text();
-    console.log(`📝 Database response:`, responseText);
-
-    if (response.ok) {
-      console.log(`✅ Order ${orderId} updated to COMPLETED successfully`);
-
-      // ✅ Verify update worked (dùng SERVICE_KEY)
-      const verifyResponse = await fetch(
-        `${process.env.SUPABASE_URL}/rest/v1/orders?id=eq.${orderId}&select=status,payment_status`,
-        {
-          headers: {
-            apikey: SUPABASE_SERVICE_KEY, // SỬ DỤNG SERVICE_KEY
-            Authorization: `Bearer ${SUPABASE_SERVICE_KEY}`, // SỬ DỤNG SERVICE_KEY
-          },
-        }
+    if (updateError) {
+      console.error(
+        `❌ Failed to update order ${orderId}:`,
+        updateError.message
       );
-
-      const verifyData = await verifyResponse.json();
-      console.log(`🔍 Verification result:`, verifyData);
-
-      // ✅ Tự động tạo downloads (đảm bảo hàm này cũng dùng SERVICE_KEY)
-      await createDownloadsForOrder(orderId);
-
-      return true;
-    } else {
-      console.error(`❌ Failed to update order ${orderId}:`, responseText);
+      console.error(`Supabase update error details:`, updateError);
       return false;
     }
-  } catch (error) {
-    console.error(`❌ Database update error for ${orderId}:`, error);
+
+    console.log(`📝 Database response (updated order):`, updatedOrder);
+    console.log(
+      `✅ Order ${orderId} updated to ${newStatus}/${newPaymentStatus} successfully`
+    );
+
+    // ✅ Tự động tạo downloads CHỈ KHI thanh toán thành công
+    if (newPaymentStatus === "completed") {
+      await createDownloadsForOrder(orderId);
+    } else {
+      console.log(
+        `⚠️ Downloads not created for order ${orderId} as payment status is not completed.`
+      );
+    }
+
+    return true;
+  } catch (error: any) {
+    console.error(`❌ Database update error for ${orderId}:`, error.message);
     return false;
   }
 };
 
-// ✅ Function tạo downloads tự động
+// Hàm createDownloadsForOrder không thay đổi về logic, nhưng đảm bảo sử dụng supabaseAdmin
 const createDownloadsForOrder = async (orderId: string) => {
   try {
     console.log(`🔄 Creating downloads for order: ${orderId}`);
 
-    // Dùng SERVICE_ROLE_KEY cho tất cả các thao tác trong hàm này
-    if (!SUPABASE_SERVICE_KEY) {
+    const { data: orders, error: fetchOrderError } = await supabaseAdmin
+      .from("orders")
+      .select(
+        `
+        id,
+        user_id,
+        order_items (
+          product_id,
+          products (
+            title,
+            category,
+            download_url,
+            file_size
+          )
+        )
+      `
+      )
+      .eq("id", orderId);
+
+    if (fetchOrderError) {
       console.error(
-        "❌ SUPABASE_SERVICE_ROLE_KEY không có sẵn. Không thể tạo downloads."
+        `❌ Lỗi khi tìm order và items cho downloads ${orderId}:`,
+        fetchOrderError.message
       );
       return;
     }
 
-    // Lấy thông tin order và items (dùng SERVICE_KEY để đảm bảo quyền)
-    const orderResponse = await fetch(
-      `${process.env.SUPABASE_URL}/rest/v1/orders?id=eq.${orderId}&select=*,order_items(product_id,products(title,category,download_url,file_size))`,
-      {
-        headers: {
-          apikey: SUPABASE_SERVICE_KEY, // SỬ DỤNG SERVICE_KEY
-          Authorization: `Bearer ${SUPABASE_SERVICE_KEY}`, // SỬ DỤNG SERVICE_KEY
-        },
-      }
-    );
-
-    if (!orderResponse.ok) {
-      const errorText = await orderResponse.text();
-      throw new Error(`Failed to fetch order details: ${errorText}`);
-    }
-
-    const orders = await orderResponse.json();
     if (!orders || orders.length === 0) {
-      throw new Error("Order not found");
+      console.log(`⚠️ Order not found for downloads: ${orderId}`);
+      return;
     }
 
     const order = orders[0];
-    console.log(`📦 Order details:`, {
+    console.log(`📦 Order details for downloads:`, {
       orderId: order.id,
       userId: order.user_id,
       itemsCount: order.order_items?.length || 0,
     });
 
     if (!order.order_items || order.order_items.length === 0) {
-      console.log(`⚠️ No items found in order ${orderId}`);
+      console.log(`⚠️ No items found in order ${orderId} for downloads`);
       return;
     }
 
-    // Tạo downloads cho từng product trong order
     const downloadPromises = order.order_items.map(async (item: any) => {
       const product = item.products;
       if (!product) {
@@ -156,7 +156,7 @@ const createDownloadsForOrder = async (orderId: string) => {
       const downloadData = {
         user_id: order.user_id,
         product_id: item.product_id,
-        order_id: orderId, // ✅ Link với order
+        order_id: orderId,
         name: product.title,
         type: product.category,
         download_url: product.download_url,
@@ -169,36 +169,51 @@ const createDownloadsForOrder = async (orderId: string) => {
         user: order.user_id,
       });
 
-      const downloadResponse = await fetch(
-        `${process.env.SUPABASE_URL}/rest/v1/downloads`,
-        {
-          method: "POST",
-          headers: {
-            apikey: SUPABASE_SERVICE_KEY, // SỬ DỤNG SERVICE_KEY
-            Authorization: `Bearer ${SUPABASE_SERVICE_KEY}`, // SỬ DỤNG SERVICE_KEY
-            "Content-Type": "application/json",
-          },
-          body: JSON.stringify(downloadData),
-        }
-      );
+      const { data: downloadResult, error: downloadError } = await supabaseAdmin
+        .from("downloads")
+        .insert(downloadData);
 
-      if (downloadResponse.ok) {
-        console.log(`✅ Download created for product: ${product.title}`);
-        return true;
-      } else {
-        const errorText = await downloadResponse.text();
+      if (downloadError) {
         console.error(
           `❌ Failed to create download for product: ${product.title}`,
-          errorText
+          downloadError.message
         );
         return false;
+      } else {
+        console.log(`✅ Download created for product: ${product.title}`);
+        return true;
       }
     });
 
     await Promise.all(downloadPromises);
     console.log(`✅ All downloads created for order: ${orderId}`);
-  } catch (error) {
-    console.error(`❌ Error creating downloads for order ${orderId}:`, error);
+  } catch (error: any) {
+    console.error(
+      `❌ Error creating downloads for order ${orderId}:`,
+      error.message
+    );
+  }
+};
+
+// Hàm logPaymentTransaction không thay đổi nhiều
+const logPaymentTransaction = async (transactionData: any) => {
+  try {
+    const { data, error } = await supabaseAdmin
+      .from("payment_transactions")
+      .insert(transactionData);
+
+    if (error) {
+      console.error(`❌ Failed to log payment transaction:`, error.message);
+      return false;
+    } else {
+      console.log(
+        `✅ Payment transaction logged successfully for order ${transactionData.order_id}`
+      );
+      return true;
+    }
+  } catch (error: any) {
+    console.error(`❌ Error logging payment transaction:`, error.message);
+    return false;
   }
 };
 
@@ -207,17 +222,14 @@ router.post("/webhook/sepay", async (req: Request, res: Response) => {
     console.log("🔔 SePay webhook received at:", new Date().toISOString());
     console.log("📝 Request body:", JSON.stringify(req.body, null, 2));
 
-    // ✅ RESPONSE NGAY LẬP TỨC
     res.status(200).json({
       success: true,
       message: "Payment processed successfully",
       timestamp: new Date().toISOString(),
     });
 
-    // ✅ XỬ LÝ ASYNC VỚI DATABASE UPDATE
     setImmediate(async () => {
       try {
-        // Verify API key của SePay (không phải Supabase)
         const sepayApiKey = req.headers.authorization?.replace("Apikey ", "");
         if (sepayApiKey !== process.env.SEPAY_API_KEY) {
           console.error("❌ Invalid SePay API key:", sepayApiKey);
@@ -235,19 +247,16 @@ router.post("/webhook/sepay", async (req: Request, res: Response) => {
           referenceCode,
         } = req.body;
 
-        // Validate required fields
         if (!content || !transferAmount || !id) {
           console.error("❌ Missing required fields from SePay webhook");
           return;
         }
 
-        // Only process incoming transactions
         if (transferType !== "in") {
           console.log("⚠️ Ignored outgoing transaction");
           return;
         }
 
-        // ✅ ENHANCED ORDER ID EXTRACTION
         const orderMatch = content.match(/DH([a-f0-9-]+)/i);
         if (!orderMatch) {
           console.log("❌ No valid order ID found in content:", content);
@@ -255,35 +264,17 @@ router.post("/webhook/sepay", async (req: Request, res: Response) => {
         }
 
         const rawOrderId = orderMatch[1];
-
-        // ✅ FIXED UUID PROCESSING - DỨT ĐIỂM
         let orderId: string;
         try {
           console.log(
             `🔍 Raw extracted: "${rawOrderId}" (${rawOrderId.length} chars)`
           );
-
-          // ✅ Nếu đã có format UUID chuẩn (36 chars với dashes)
           if (rawOrderId.includes("-") && rawOrderId.length === 36) {
             orderId = rawOrderId;
             console.log(`✅ Using existing UUID format: ${orderId}`);
           } else {
-            // ✅ Remove dashes và format lại
             const cleanId = rawOrderId.replace(/-/g, "");
-            console.log(
-              `🧹 After removing dashes: "${cleanId}" (${cleanId.length} chars)`
-            );
-
-            // ✅ Chỉ lấy 32 chars đầu (bỏ phần thừa nếu có)
             const uuidString = cleanId.substring(0, 32);
-            console.log(`✂️ Trimmed to 32 chars: "${uuidString}"`);
-
-            // ✅ Validate hex characters
-            if (!/^[a-f0-9]{32}$/i.test(uuidString)) {
-              throw new Error(`Invalid hex characters in UUID: ${uuidString}`);
-            }
-
-            // ✅ Format thành UUID chuẩn: 8-4-4-4-12
             orderId = `${uuidString.slice(0, 8)}-${uuidString.slice(
               8,
               12
@@ -293,7 +284,6 @@ router.post("/webhook/sepay", async (req: Request, res: Response) => {
             )}-${uuidString.slice(20, 32)}`;
             console.log(`✅ Formatted UUID: ${orderId}`);
           }
-
           console.log(`🎯 Processing payment for order: ${orderId}`);
           console.log(`📝 Original content: ${content}`);
           console.log(`✅ Final order ID: ${orderId}`);
@@ -302,53 +292,47 @@ router.post("/webhook/sepay", async (req: Request, res: Response) => {
           return;
         }
 
-        // ✅ GHI LẠI GIAO DỊCH VÀO PAYMENT_TRANSACTIONS TRƯỚC
+        // ✅ Cập nhật transactionData để log đầy đủ hơn
         const transactionData = {
           order_id: orderId,
           payment_method: gateway,
-          transaction_id: id, // SePay's unique transaction ID
+          transaction_id: id,
           amount: transferAmount,
           currency: "VND", // Hoặc dựa vào cấu hình nếu có
-          status: "completed", // Trạng thái giao dịch SePay
-          gateway_response: req.body, // Lưu toàn bộ response từ SePay
+          status: "completed", // Trạng thái giao dịch từ SePay webhook
+          gateway_response: req.body,
           processed_at: new Date().toISOString(),
+          gateway: gateway, // Lưu tên cổng thanh toán
+          // Bổ sung các trường khác nếu có thể từ webhook SePay mà bạn muốn lưu
+          // reference_code: referenceCode,
+          // account_number: accountNumber,
         };
 
-        const transactionResponse = await fetch(
-          `${process.env.SUPABASE_URL}/rest/v1/payment_transactions`,
-          {
-            method: "POST",
-            headers: {
-              apikey: SUPABASE_SERVICE_KEY!, // SỬ DỤNG SERVICE_KEY
-              Authorization: `Bearer ${SUPABASE_SERVICE_KEY!}`, // SỬ DỤNG SERVICE_KEY
-              "Content-Type": "application/json",
-            },
-            body: JSON.stringify(transactionData),
-          }
-        );
-
-        if (!transactionResponse.ok) {
-          const errorText = await transactionResponse.text();
-          console.error(`❌ Failed to log payment transaction: ${errorText}`);
-          // Vẫn tiếp tục xử lý update order, nhưng có thể cần thông báo/cảnh báo
-        } else {
-          console.log(
-            `✅ Payment transaction logged successfully for order ${orderId}`
+        const transactionLogged = await logPaymentTransaction(transactionData);
+        if (!transactionLogged) {
+          console.error(
+            "⚠️ Failed to log transaction, but proceeding with order update."
           );
         }
 
-        // ✅ UPDATE DATABASE TO COMPLETED
-        const updateSuccess = await updateOrderToPaid(orderId);
+        // ✅ CẬP NHẬT: Gọi updateOrderToPaid với các trạng thái từ webhook
+        const updateSuccess = await updateOrderToPaid(
+          orderId,
+          "completed", // Giả định SePay webhook chỉ gửi khi thành công
+          "completed", // Giả định SePay webhook chỉ gửi khi thành công
+          id, // Transaction ID của SePay
+          transactionDate // Thời gian giao dịch của SePay
+        );
 
         if (updateSuccess) {
           console.log(`💰 Payment processed successfully:`, {
             orderId,
-            amount: transferAmount,
-            gateway,
-            transactionId: referenceCode,
+            amount: transactionData.amount, // Sử dụng số tiền từ transactionData
+            gateway: transactionData.gateway,
+            transactionId: transactionData.transaction_id,
             sepayId: id,
-            date: transactionDate,
-            status: "completed", // ✅ CONFIRMED COMPLETED
+            date: transactionData.processed_at,
+            status: "COMPLETED",
           });
 
           console.log(
@@ -366,7 +350,6 @@ router.post("/webhook/sepay", async (req: Request, res: Response) => {
   } catch (error: any) {
     console.error("❌ SePay webhook error:", error);
     res.status(200).json({
-      // Vẫn trả về 200 OK để SePay không retry liên tục
       success: true,
       message: "Webhook received",
       note: "Error handled gracefully",
@@ -384,12 +367,12 @@ router.get("/webhook/sepay/health", async (req: Request, res: Response) => {
       environment: {
         sepay_configured: !!process.env.SEPAY_API_KEY,
         supabase_configured: !!(
-          process.env.SUPABASE_URL &&
-          (process.env.SUPABASE_ANON_KEY || SUPABASE_SERVICE_KEY)
+          supabaseUrl &&
+          (process.env.SUPABASE_ANON_KEY || supabaseServiceKey)
         ),
-        database_connection: "active", // Giả định kết nối hoạt động
+        database_connection: "active",
       },
-      version: "8.1-service-key-fix", // Cập nhật version để dễ theo dõi
+      version: "8.3-final-sdk-implementation", // Cập nhật version
     });
   } catch (error: any) {
     res.status(500).json({
@@ -407,9 +390,15 @@ router.post("/webhook/sepay/test", async (req: Request, res: Response) => {
     const { content, orderId } = req.body;
 
     if (orderId) {
-      // Test database update directly
       console.log(`🧪 Testing direct order update: ${orderId}`);
-      const updateSuccess = await updateOrderToPaid(orderId);
+      // ✅ CẬP NHẬT: Gọi updateOrderToPaid với các giá trị giả định cho test
+      const updateSuccess = await updateOrderToPaid(
+        orderId,
+        "completed",
+        "completed",
+        `TEST_SEPAY_ID_${Date.now()}`, // ID giao dịch giả
+        new Date().toISOString() // Thời gian giao dịch giả
+      );
       return res.json({
         success: updateSuccess,
         message: updateSuccess
@@ -423,7 +412,6 @@ router.post("/webhook/sepay/test", async (req: Request, res: Response) => {
       return res.status(400).json({ error: "Content or orderId required" });
     }
 
-    // Test order ID extraction với enhanced logic
     const orderMatch = content.match(/DH([a-f0-9-]+)/i);
     if (!orderMatch) {
       return res.json({
@@ -434,21 +422,32 @@ router.post("/webhook/sepay/test", async (req: Request, res: Response) => {
     }
 
     const rawOrderId = orderMatch[1];
-
-    // ✅ Enhanced UUID processing
     let extractedOrderId: string;
-    if (rawOrderId.includes("-") && rawOrderId.length === 36) {
-      extractedOrderId = rawOrderId;
-    } else {
-      const cleanId = rawOrderId.replace(/-/g, "");
-      const uuidString = cleanId.substring(0, 32);
-      extractedOrderId = `${uuidString.slice(0, 8)}-${uuidString.slice(
-        8,
-        12
-      )}-${uuidString.slice(12, 16)}-${uuidString.slice(
-        16,
-        20
-      )}-${uuidString.slice(20, 32)}`;
+    try {
+      console.log(
+        `🔍 Raw extracted: "${rawOrderId}" (${rawOrderId.length} chars)`
+      );
+      if (rawOrderId.includes("-") && rawOrderId.length === 36) {
+        extractedOrderId = rawOrderId;
+        console.log(`✅ Using existing UUID format: ${extractedOrderId}`);
+      } else {
+        const cleanId = rawOrderId.replace(/-/g, "");
+        const uuidString = cleanId.substring(0, 32);
+        extractedOrderId = `${uuidString.slice(0, 8)}-${uuidString.slice(
+          8,
+          12
+        )}-${uuidString.slice(12, 16)}-${uuidString.slice(
+          16,
+          20
+        )}-${uuidString.slice(20, 32)}`;
+        console.log(`✅ Formatted UUID: ${extractedOrderId}`);
+      }
+      console.log(`🎯 Processing payment for order: ${extractedOrderId}`);
+      console.log(`📝 Original content: ${content}`);
+      console.log(`✅ Final order ID: ${extractedOrderId}`);
+    } catch (cleanError: any) {
+      console.error("❌ Order ID processing failed:", cleanError.message);
+      return;
     }
 
     res.json({
