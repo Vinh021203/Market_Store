@@ -20,13 +20,17 @@ if (!supabaseUrl || !supabaseServiceKey) {
 //   },
 // });
 
-const supabaseAdmin = createClient(supabaseUrl!, supabaseServiceKey!, {
-  global: {
-    headers: {
-      "X-Client-Info": "application-name=sepay_webhook", // 🟢 Quan trọng!
+const supabaseAdmin = createClient(
+  process.env.SUPABASE_URL!,
+  process.env.SUPABASE_SERVICE_ROLE_KEY!,
+  {
+    global: {
+      headers: {
+        application_name: "sepay_webhook", // ✅ CHUẨN NHẤT
+      },
     },
-  },
-});
+  }
+);
 
 // ✅ CẬP NHẬT: Hàm updateOrderToPaid nhận vào status và paymentStatus từ webhook
 const updateOrderToPaid = async (
