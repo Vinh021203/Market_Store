@@ -4,7 +4,7 @@ import { Link } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import ProductCard from "@/components/ProductCard"; // Đảm bảo component này đã được tối ưu SEO bên trong nếu nó render sản phẩm riêng lẻ
+import ProductCard from "@/components/ProductCard";
 import { getFeaturedProducts } from "@/lib/products";
 import { Product } from "@/types";
 import {

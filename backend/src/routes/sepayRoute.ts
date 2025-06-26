@@ -2,18 +2,36 @@ import express, { Request, Response } from "express";
 
 const router = express.Router();
 
+// ✅ Khai báo biến service_role key ở đây để dễ dàng sử dụng
+// Đảm bảo rằng process.env.SUPABASE_SERVICE_ROLE_KEY đã được cấu hình trên Render
+const SUPABASE_SERVICE_KEY = process.env.SUPABASE_SERVICE_ROLE_KEY;
+
+if (!SUPABASE_SERVICE_KEY) {
+  console.error("🚨 Lỗi: SUPABASE_SERVICE_ROLE_KEY không được định nghĩa!");
+  // Có thể cân nhắc thoát ứng dụng hoặc vô hiệu hóa webhook nếu key quan trọng này bị thiếu.
+  // process.exit(1);
+}
+
 // ✅ Function update order status với enhanced logging
 const updateOrderToPaid = async (orderId: string) => {
   try {
     console.log(`🔄 Attempting to update order: ${orderId}`);
+
+    // Dùng SERVICE_ROLE_KEY cho tất cả các thao tác trong hàm này để bỏ qua RLS
+    if (!SUPABASE_SERVICE_KEY) {
+      console.error(
+        "❌ SUPABASE_SERVICE_ROLE_KEY không có sẵn. Không thể cập nhật đơn hàng."
+      );
+      return false;
+    }
 
     // ✅ Kiểm tra order có tồn tại không trước
     const checkResponse = await fetch(
       `${process.env.SUPABASE_URL}/rest/v1/orders?id=eq.${orderId}&select=id,status,payment_status,user_id`,
       {
         headers: {
-          apikey: process.env.SUPABASE_ANON_KEY!,
-          Authorization: `Bearer ${process.env.SUPABASE_ANON_KEY}`,
+          apikey: SUPABASE_SERVICE_KEY, // SỬ DỤNG SERVICE_KEY
+          Authorization: `Bearer ${SUPABASE_SERVICE_KEY}`, // SỬ DỤNG SERVICE_KEY
         },
       }
     );
@@ -26,17 +44,22 @@ const updateOrderToPaid = async (orderId: string) => {
       return false;
     }
 
+    // ✅ THAY ĐỔI QUAN TRỌNG: Cập nhật cả status và payment_status
+    // VÀ THÊM HEADER X-Client-Info ĐỂ VƯỢT QUA TRIGGER PAYMENT_UPDATE_PROTECTION
     const response = await fetch(
       `${process.env.SUPABASE_URL}/rest/v1/orders?id=eq.${orderId}`,
       {
         method: "PATCH",
         headers: {
-          apikey: process.env.SUPABASE_ANON_KEY!,
-          Authorization: `Bearer ${process.env.SUPABASE_ANON_KEY}`,
+          apikey: SUPABASE_SERVICE_KEY, // SỬ DỤNG SERVICE_KEY
+          Authorization: `Bearer ${SUPABASE_SERVICE_KEY}`, // SỬ DỤNG SERVICE_KEY
           "Content-Type": "application/json",
+          "X-Client-Info": "application-name=sepay_webhook", // ✅ QUAN TRỌNG: Header này để trigger nhận diện
         },
         body: JSON.stringify({
-          status: "completed", // ✅ Chỉ update status để tránh trigger
+          status: "completed", // Cập nhật trạng thái đơn hàng chung
+          payment_status: "completed", // Cập nhật trạng thái thanh toán
+          payment_confirmed_at: new Date().toISOString(), // Ghi lại thời gian xác nhận
           updated_at: new Date().toISOString(),
         }),
       }
@@ -48,13 +71,13 @@ const updateOrderToPaid = async (orderId: string) => {
     if (response.ok) {
       console.log(`✅ Order ${orderId} updated to COMPLETED successfully`);
 
-      // ✅ Verify update worked
+      // ✅ Verify update worked (dùng SERVICE_KEY)
       const verifyResponse = await fetch(
         `${process.env.SUPABASE_URL}/rest/v1/orders?id=eq.${orderId}&select=status,payment_status`,
         {
           headers: {
-            apikey: process.env.SUPABASE_ANON_KEY!,
-            Authorization: `Bearer ${process.env.SUPABASE_ANON_KEY}`,
+            apikey: SUPABASE_SERVICE_KEY, // SỬ DỤNG SERVICE_KEY
+            Authorization: `Bearer ${SUPABASE_SERVICE_KEY}`, // SỬ DỤNG SERVICE_KEY
           },
         }
       );
@@ -62,7 +85,7 @@ const updateOrderToPaid = async (orderId: string) => {
       const verifyData = await verifyResponse.json();
       console.log(`🔍 Verification result:`, verifyData);
 
-      // ✅ Tự động tạo downloads
+      // ✅ Tự động tạo downloads (đảm bảo hàm này cũng dùng SERVICE_KEY)
       await createDownloadsForOrder(orderId);
 
       return true;
@@ -81,19 +104,28 @@ const createDownloadsForOrder = async (orderId: string) => {
   try {
     console.log(`🔄 Creating downloads for order: ${orderId}`);
 
-    // Lấy thông tin order và items
+    // Dùng SERVICE_ROLE_KEY cho tất cả các thao tác trong hàm này
+    if (!SUPABASE_SERVICE_KEY) {
+      console.error(
+        "❌ SUPABASE_SERVICE_ROLE_KEY không có sẵn. Không thể tạo downloads."
+      );
+      return;
+    }
+
+    // Lấy thông tin order và items (dùng SERVICE_KEY để đảm bảo quyền)
     const orderResponse = await fetch(
       `${process.env.SUPABASE_URL}/rest/v1/orders?id=eq.${orderId}&select=*,order_items(product_id,products(title,category,download_url,file_size))`,
       {
         headers: {
-          apikey: process.env.SUPABASE_ANON_KEY!,
-          Authorization: `Bearer ${process.env.SUPABASE_ANON_KEY}`,
+          apikey: SUPABASE_SERVICE_KEY, // SỬ DỤNG SERVICE_KEY
+          Authorization: `Bearer ${SUPABASE_SERVICE_KEY}`, // SỬ DỤNG SERVICE_KEY
         },
       }
     );
 
     if (!orderResponse.ok) {
-      throw new Error("Failed to fetch order details");
+      const errorText = await orderResponse.text();
+      throw new Error(`Failed to fetch order details: ${errorText}`);
     }
 
     const orders = await orderResponse.json();
@@ -142,8 +174,8 @@ const createDownloadsForOrder = async (orderId: string) => {
         {
           method: "POST",
           headers: {
-            apikey: process.env.SUPABASE_ANON_KEY!,
-            Authorization: `Bearer ${process.env.SUPABASE_ANON_KEY}`,
+            apikey: SUPABASE_SERVICE_KEY, // SỬ DỤNG SERVICE_KEY
+            Authorization: `Bearer ${SUPABASE_SERVICE_KEY}`, // SỬ DỤNG SERVICE_KEY
             "Content-Type": "application/json",
           },
           body: JSON.stringify(downloadData),
@@ -185,15 +217,15 @@ router.post("/webhook/sepay", async (req: Request, res: Response) => {
     // ✅ XỬ LÝ ASYNC VỚI DATABASE UPDATE
     setImmediate(async () => {
       try {
-        // Verify API key
-        const apiKey = req.headers.authorization?.replace("Apikey ", "");
-        if (apiKey !== process.env.SEPAY_API_KEY) {
-          console.error("❌ Invalid API key:", apiKey);
+        // Verify API key của SePay (không phải Supabase)
+        const sepayApiKey = req.headers.authorization?.replace("Apikey ", "");
+        if (sepayApiKey !== process.env.SEPAY_API_KEY) {
+          console.error("❌ Invalid SePay API key:", sepayApiKey);
           return;
         }
 
         const {
-          id,
+          id, // SePay transaction ID
           gateway,
           transactionDate,
           accountNumber,
@@ -205,7 +237,7 @@ router.post("/webhook/sepay", async (req: Request, res: Response) => {
 
         // Validate required fields
         if (!content || !transferAmount || !id) {
-          console.error("❌ Missing required fields");
+          console.error("❌ Missing required fields from SePay webhook");
           return;
         }
 
@@ -270,6 +302,41 @@ router.post("/webhook/sepay", async (req: Request, res: Response) => {
           return;
         }
 
+        // ✅ GHI LẠI GIAO DỊCH VÀO PAYMENT_TRANSACTIONS TRƯỚC
+        const transactionData = {
+          order_id: orderId,
+          payment_method: gateway,
+          transaction_id: id, // SePay's unique transaction ID
+          amount: transferAmount,
+          currency: "VND", // Hoặc dựa vào cấu hình nếu có
+          status: "completed", // Trạng thái giao dịch SePay
+          gateway_response: req.body, // Lưu toàn bộ response từ SePay
+          processed_at: new Date().toISOString(),
+        };
+
+        const transactionResponse = await fetch(
+          `${process.env.SUPABASE_URL}/rest/v1/payment_transactions`,
+          {
+            method: "POST",
+            headers: {
+              apikey: SUPABASE_SERVICE_KEY!, // SỬ DỤNG SERVICE_KEY
+              Authorization: `Bearer ${SUPABASE_SERVICE_KEY!}`, // SỬ DỤNG SERVICE_KEY
+              "Content-Type": "application/json",
+            },
+            body: JSON.stringify(transactionData),
+          }
+        );
+
+        if (!transactionResponse.ok) {
+          const errorText = await transactionResponse.text();
+          console.error(`❌ Failed to log payment transaction: ${errorText}`);
+          // Vẫn tiếp tục xử lý update order, nhưng có thể cần thông báo/cảnh báo
+        } else {
+          console.log(
+            `✅ Payment transaction logged successfully for order ${orderId}`
+          );
+        }
+
         // ✅ UPDATE DATABASE TO COMPLETED
         const updateSuccess = await updateOrderToPaid(orderId);
 
@@ -299,6 +366,7 @@ router.post("/webhook/sepay", async (req: Request, res: Response) => {
   } catch (error: any) {
     console.error("❌ SePay webhook error:", error);
     res.status(200).json({
+      // Vẫn trả về 200 OK để SePay không retry liên tục
       success: true,
       message: "Webhook received",
       note: "Error handled gracefully",
@@ -316,11 +384,12 @@ router.get("/webhook/sepay/health", async (req: Request, res: Response) => {
       environment: {
         sepay_configured: !!process.env.SEPAY_API_KEY,
         supabase_configured: !!(
-          process.env.SUPABASE_URL && process.env.SUPABASE_ANON_KEY
+          process.env.SUPABASE_URL &&
+          (process.env.SUPABASE_ANON_KEY || SUPABASE_SERVICE_KEY)
         ),
-        database_connection: "active",
+        database_connection: "active", // Giả định kết nối hoạt động
       },
-      version: "8.0-final-uuid-fix",
+      version: "8.1-service-key-fix", // Cập nhật version để dễ theo dõi
     });
   } catch (error: any) {
     res.status(500).json({
