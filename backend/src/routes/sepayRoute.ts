@@ -14,9 +14,17 @@ if (!supabaseUrl || !supabaseServiceKey) {
   // process.exit(1);
 }
 
+// const supabaseAdmin = createClient(supabaseUrl!, supabaseServiceKey!, {
+//   auth: {
+//     persistSession: false,
+//   },
+// });
+
 const supabaseAdmin = createClient(supabaseUrl!, supabaseServiceKey!, {
-  auth: {
-    persistSession: false,
+  global: {
+    headers: {
+      "X-Client-Info": "application-name=sepay_webhook", // 🟢 Quan trọng!
+    },
   },
 });
 
