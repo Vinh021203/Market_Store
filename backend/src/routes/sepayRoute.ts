@@ -348,7 +348,7 @@ router.post("/webhook/sepay", async (req: Request, res: Response) => {
             transactionId: referenceCode,
             sepayId: id,
             date: transactionDate,
-            status: "COMPLETED", // ✅ CONFIRMED COMPLETED
+            status: "completed", // ✅ CONFIRMED COMPLETED
           });
 
           console.log(
