@@ -230,11 +230,11 @@ router.post("/webhook/sepay", async (req: Request, res: Response) => {
 
     setImmediate(async () => {
       try {
-        const sepayApiKey = req.headers.authorization?.replace("Apikey ", "");
-        if (sepayApiKey !== process.env.SEPAY_API_KEY) {
-          console.error("❌ Invalid SePay API key:", sepayApiKey);
-          return;
-        }
+        // const sepayApiKey = req.headers.authorization?.replace("Apikey ", "");
+        // if (sepayApiKey !== process.env.SEPAY_API_KEY) {
+        //   console.error("❌ Invalid SePay API key:", sepayApiKey);
+        //   return;
+        // }
 
         const {
           id, // SePay transaction ID
