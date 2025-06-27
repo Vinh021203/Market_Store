@@ -4,9 +4,9 @@ import { Link } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import ProductCard from "@/components/ProductCard";
-import { getFeaturedProducts } from "@/lib/products";
-import { Product } from "@/types";
+import ProductCard from "@/components/ProductCard"; // Component ProductCard sẽ nhận dữ liệu Product
+import { getFeaturedProducts } from "@/lib/products"; // Import hàm API từ lib/products
+import { Product } from "@/types"; // Import type Product
 import {
   ArrowRight,
   Star,
@@ -34,18 +34,27 @@ import {
   Eye,
   ShoppingCart,
 } from "lucide-react";
-import { Helmet } from "react-helmet-async"; // ✅ Import Helmet
+import { Helmet } from "react-helmet-async";
 
 const Index: React.FC = () => {
   const [featuredProducts, setFeaturedProducts] = useState<Product[]>([]);
   const [currentTestimonial, setCurrentTestimonial] = useState(0);
   const [isVisible, setIsVisible] = useState<Record<string, boolean>>({});
+  const [isLoadingProducts, setIsLoadingProducts] = useState(true); // Thêm state loading
 
   useEffect(() => {
     const fetchData = async () => {
-      // ✅ Đảm bảo getFeaturedProducts trả về dữ liệu thực
-      const data = await getFeaturedProducts();
-      setFeaturedProducts(data);
+      setIsLoadingProducts(true); // Bắt đầu load
+      try {
+        // ✅ Gọi hàm API để lấy dữ liệu sản phẩm nổi bật từ Supabase
+        const data = await getFeaturedProducts();
+        setFeaturedProducts(data);
+      } catch (error) {
+        console.error("Lỗi khi tải sản phẩm nổi bật:", error);
+        // Xử lý lỗi (ví dụ: hiển thị thông báo lỗi cho người dùng)
+      } finally {
+        setIsLoadingProducts(false); // Kết thúc load
+      }
     };
     fetchData();
 
@@ -69,7 +78,6 @@ const Index: React.FC = () => {
       { threshold: 0.1 },
     );
 
-    // Observe all sections
     const sections = document.querySelectorAll("[data-animate]");
     sections.forEach((section) => observer.observe(section));
 
@@ -79,7 +87,7 @@ const Index: React.FC = () => {
     };
   }, []);
 
-  // ✅ Fixed stats array with all required properties
+  // ✅ Fixed stats array with all required properties (giữ nguyên hoặc cập nhật từ database sau)
   const stats = [
     {
       label: "Templates",
@@ -111,7 +119,7 @@ const Index: React.FC = () => {
     },
   ];
 
-  // ✅ Fixed features array with all required properties
+  // ✅ Fixed features array with all required properties (giữ nguyên)
   const features = [
     {
       icon: Zap,
@@ -139,7 +147,7 @@ const Index: React.FC = () => {
     },
   ];
 
-  // ✅ Fixed categories array with all required properties
+  // ✅ Fixed categories array with all required properties (giữ nguyên hoặc cập nhật từ database sau)
   const categories = [
     {
       title: "Templates Website",
@@ -161,7 +169,7 @@ const Index: React.FC = () => {
     },
   ];
 
-  // ✅ Fixed testimonials array with all required properties
+  // ✅ Fixed testimonials array with all required properties (giữ nguyên hoặc cập nhật từ database sau)
   const testimonials = [
     {
       name: "Nguyễn Minh Tuấn",
@@ -206,7 +214,7 @@ const Index: React.FC = () => {
       date: "3 ngày trước",
       verified: true,
       projectType: "React E-book",
-      flag: "🇻🇳",
+      flag: "🇻�",
     },
     {
       name: "Marcus Johnson",
@@ -255,82 +263,6 @@ const Index: React.FC = () => {
     },
   ];
 
-  // ✅ Sample featured products data (sử dụng biến này để render)
-  const sampleProducts = [
-    {
-      id: "1",
-      title: "Modern E-commerce Template",
-      description:
-        "Template React/Next.js hoàn chỉnh cho website thương mại điện tử với tích hợp thanh toán",
-      price: 299000,
-      originalPrice: 499000,
-      image:
-        "https://images.unsplash.com/photo-1556742049-0cfed4f6a45d?w=400&h=300&fit=crop",
-      category: "template",
-      tags: ["React", "Next.js", "TypeScript", "Tailwind"],
-      rating: 4.9,
-      reviews: 127,
-      downloads: 1250,
-      author: "Market Store",
-      featured: true,
-      discount: 40,
-    },
-    {
-      id: "2",
-      title: "Advanced React Patterns",
-      description:
-        "E-book chuyên sâu về các pattern nâng cao trong React, từ cơ bản đến expert level",
-      price: 199000,
-      originalPrice: 299000,
-      image:
-        "https://images.unsplash.com/photo-1544716278-ca5e3f4abd8c?w=400&h=300&fit=crop",
-      category: "ebook",
-      tags: ["React", "JavaScript", "Patterns", "Best Practices"],
-      rating: 4.8,
-      reviews: 89,
-      downloads: 890,
-      author: "Nguyễn Văn A",
-      featured: true,
-      discount: 33,
-    },
-    {
-      id: "3",
-      title: "Admin Dashboard Pro",
-      description:
-        "Template admin dashboard responsive với dark mode, charts và data tables",
-      price: 399000,
-      originalPrice: 599000,
-      image:
-        "https://images.unsplash.com/photo-1551288049-bebda4e38f71?w=400&h=300&fit=crop",
-      category: "template",
-      tags: ["Vue.js", "Dashboard", "Charts", "Dark Mode"],
-      rating: 4.7,
-      reviews: 156,
-      downloads: 2100,
-      author: "Design Studio",
-      featured: true,
-      discount: 33,
-    },
-    {
-      id: "4",
-      title: "Mobile App Development Guide",
-      description:
-        "Hướng dẫn toàn diện phát triển ứng dụng mobile với React Native và Flutter",
-      price: 249000,
-      originalPrice: 349000,
-      image:
-        "https://images.unsplash.com/photo-1512941937669-90a1b58e7e9c?w=400&h=300&fit=crop",
-      category: "ebook",
-      tags: ["React Native", "Flutter", "Mobile", "iOS", "Android"],
-      rating: 4.9,
-      reviews: 203,
-      downloads: 1560,
-      author: "Tech Expert",
-      featured: true,
-      discount: 29,
-    },
-  ];
-
   return (
     <>
       <Helmet>
@@ -358,12 +290,10 @@ const Index: React.FC = () => {
           property="og:url"
           content="https://marketstore-two.vercel.app/"
         />{" "}
-        {/* ✅ Thay đổi URL chính xác */}
         <meta
           property="og:image"
           content="https://marketstore-two.vercel.app/social-share-image.jpg"
         />{" "}
-        {/* ✅ Đảm bảo bạn có file ảnh này trong thư mục public/ */}
         {/* Twitter Card Meta Tags */}
         <meta name="twitter:card" content="summary_large_image" />
         <meta
@@ -441,11 +371,8 @@ const Index: React.FC = () => {
                 <span className="inline-block hover:animate-bounce">
                   Template
                 </span>{" "}
-                &
-                <span className="inline-block hover:animate-pulse">
-                  {" "}
-                  E-book
-                </span>
+                &{" "}
+                <span className="inline-block hover:animate-pulse">E-book</span>
                 <br />
                 <span className="inline-block hover:animate-wiggle bg-gradient-to-r from-purple-600 to-pink-600 bg-clip-text">
                   Market
@@ -549,132 +476,33 @@ const Index: React.FC = () => {
             </div>
 
             <div className="grid gap-8 md:grid-cols-2 lg:grid-cols-4">
-              {sampleProducts.map((product, index) => (
-                <Card
-                  key={product.id}
-                  className={`group overflow-hidden transition-all duration-500 hover:shadow-2xl hover:-translate-y-3 border-0 bg-gradient-to-br from-white to-gray-50 dark:from-slate-800 dark:to-slate-900 ${
-                    isVisible["featured-products"]
-                      ? "animate-in slide-in-from-bottom"
-                      : "opacity-0"
-                  }`}
-                  style={{ animationDelay: `${index * 150}ms` }}
-                >
-                  <div className="relative overflow-hidden">
-                    <img
-                      src={product.image}
-                      alt={product.title}
-                      className="object-cover w-full h-48 transition-transform duration-500 group-hover:scale-110"
-                    />
-                    <div className="absolute inset-0 transition-opacity duration-300 opacity-0 bg-gradient-to-t from-black/50 to-transparent group-hover:opacity-100"></div>
-
-                    {/* Discount Badge */}
-                    {product.discount && (
-                      <div className="absolute top-3 left-3">
-                        <Badge className="font-bold text-white bg-red-500">
-                          -{product.discount}%
-                        </Badge>
-                      </div>
-                    )}
-
-                    {/* Category Badge */}
-                    <div className="absolute top-3 right-3">
-                      <Badge
-                        variant="secondary"
-                        className="bg-white/90 backdrop-blur"
-                      >
-                        {product.category === "template"
-                          ? "Template"
-                          : "E-book"}
-                      </Badge>
-                    </div>
-
-                    {/* Hover Actions */}
-                    <div className="absolute inset-0 flex items-center justify-center transition-opacity duration-300 opacity-0 group-hover:opacity-100">
-                      <div className="flex space-x-2">
-                        <Button
-                          size="sm"
-                          variant="secondary"
-                          className="bg-white/90 backdrop-blur"
-                        >
-                          <Eye className="w-4 h-4 mr-1" />
-                          Xem
-                        </Button>
-                        <Button
-                          size="sm"
-                          className="bg-blue-600 hover:bg-blue-700"
-                        >
-                          <ShoppingCart className="w-4 h-4 mr-1" />
-                          Mua
-                        </Button>
-                      </div>
-                    </div>
-                  </div>
-
-                  <CardContent className="p-6 space-y-4">
-                    <div>
-                      <h3 className="mb-2 text-lg font-semibold transition-colors group-hover:text-blue-600 line-clamp-2">
-                        {product.title}
-                      </h3>
-                      <p className="text-sm text-muted-foreground line-clamp-2">
-                        {product.description}
-                      </p>
-                    </div>
-
-                    {/* Tags */}
-                    <div className="flex flex-wrap gap-1">
-                      {product.tags.slice(0, 3).map((tag, tagIndex) => (
-                        <Badge
-                          key={tagIndex}
-                          variant="outline"
-                          className="text-xs"
-                        >
-                          {tag}
-                        </Badge>
-                      ))}
-                      {product.tags.length > 3 && (
-                        <Badge variant="outline" className="text-xs">
-                          +{product.tags.length - 3}
-                        </Badge>
-                      )}
-                    </div>
-
-                    {/* Rating & Stats */}
-                    <div className="flex items-center justify-between text-sm text-muted-foreground">
-                      <div className="flex items-center space-x-1">
-                        <Star className="w-4 h-4 text-yellow-400 fill-yellow-400" />
-                        <span className="font-medium">{product.rating}</span>
-                        <span>({product.reviews})</span>
-                      </div>
-                      <div className="flex items-center space-x-1">
-                        <Download className="w-4 h-4" />
-                        <span>{product.downloads}</span>
-                      </div>
-                    </div>
-
-                    {/* Price */}
-                    <div className="flex items-center justify-between">
-                      <div className="space-y-1">
-                        <div className="flex items-center space-x-2">
-                          <span className="text-lg font-bold text-green-600">
-                            {product.price.toLocaleString("vi-VN")}đ
-                          </span>
-                          {product.originalPrice && (
-                            <span className="text-sm line-through text-muted-foreground">
-                              {product.originalPrice.toLocaleString("vi-VN")}đ
-                            </span>
-                          )}
-                        </div>
-                        <div className="text-xs text-muted-foreground">
-                          bởi {product.author}
-                        </div>
-                      </div>
-                      <Button size="sm" variant="outline" className="group/btn">
-                        <Heart className="w-4 h-4 transition-colors group-hover/btn:text-red-500" />
-                      </Button>
-                    </div>
-                  </CardContent>
-                </Card>
-              ))}
+              {isLoadingProducts ? ( // Hiển thị loading nếu đang tải
+                <div className="py-10 text-center lg:col-span-4">
+                  <div className="w-12 h-12 mx-auto border-b-2 rounded-full animate-spin border-primary"></div>
+                  <p className="mt-4 text-muted-foreground">
+                    Đang tải sản phẩm nổi bật...
+                  </p>
+                </div>
+              ) : featuredProducts.length > 0 ? ( // Chỉ render nếu có sản phẩm
+                featuredProducts.map((product, index) => (
+                  <ProductCard // Sử dụng ProductCard component bạn đã có
+                    key={product.id}
+                    product={product}
+                    animationDelay={`${index * 150}ms`}
+                    isVisible={isVisible["featured-products"]}
+                  />
+                ))
+              ) : (
+                // Hiển thị khi không có sản phẩm
+                <div className="py-10 text-center lg:col-span-4">
+                  <p className="text-muted-foreground">
+                    Không tìm thấy sản phẩm nổi bật nào.
+                  </p>
+                  <Button asChild className="mt-4">
+                    <Link to="/products">Xem tất cả sản phẩm</Link>
+                  </Button>
+                </div>
+              )}
             </div>
 
             {/* View All Button */}
@@ -908,16 +736,6 @@ const Index: React.FC = () => {
                         <span>{testimonials[currentTestimonial].date}</span>
                       </div>
                     </div>
-                  </div>
-
-                  <div className="text-center">
-                    <Badge
-                      variant="outline"
-                      className="text-blue-800 bg-blue-100"
-                    >
-                      <Package className="w-3 h-3 mr-1" />
-                      {testimonials[currentTestimonial].projectType}
-                    </Badge>
                   </div>
                 </CardContent>
               </Card>

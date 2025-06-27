@@ -672,7 +672,7 @@ const Templates: React.FC = () => {
                 exit={{ opacity: 0 }}
                 className={
                   viewMode === "grid"
-                    ? "grid grid-cols-1 gap-6 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4"
+                    ? "grid grid-cols-1 gap-6 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 items-stretch" // Add items-stretch
                     : "space-y-6"
                 }
               >
@@ -700,6 +700,9 @@ const Templates: React.FC = () => {
                         });
                       }}
                       viewMode={viewMode}
+                      // isVisible prop is handled by the outer motion.div,
+                      // ProductCard doesn't need its own isVisible prop unless it has internal scroll animations
+                      // For consistent height, the outer motion.div needs to take care of it
                     />
                   </motion.div>
                 ))}

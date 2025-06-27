@@ -29,7 +29,13 @@ import {
   Github,
   Linkedin,
   MessageCircle,
+  LayoutTemplate,
+  Notebook,
+  Contact,
+  Store,
+  BookLock,
 } from "lucide-react";
+import { FcAbout } from "react-icons/fc";
 
 const Footer: React.FC = () => {
   const [email, setEmail] = useState("");
@@ -85,12 +91,12 @@ const Footer: React.FC = () => {
   ];
 
   const quickLinks = [
-    { to: "/templates", label: "Templates", icon: "🎨" },
-    { to: "/ebooks", label: "E-books", icon: "📚" },
-    { to: "/about", label: "Giới thiệu", icon: "ℹ️" },
-    { to: "/contact", label: "Liên hệ", icon: "📞" },
-    { to: "/blog", label: "Blog", icon: "✍️" },
-    { to: "/careers", label: "Tuyển dụng", icon: "💼" },
+    { to: "/templates", label: "Templates", icon: LayoutTemplate },
+    { to: "/ebooks", label: "E-books", icon: Notebook },
+    { to: "/about", label: "Giới thiệu", icon: Store },
+    { to: "/contact", label: "Liên hệ", icon: Contact },
+    { to: "/blog", label: "Blog", icon: BookLock },
+    { to: "/careers", label: "Tuyển dụng", icon: Users },
   ];
 
   const supportLinks = [
@@ -236,8 +242,8 @@ const Footer: React.FC = () => {
                     to={link.to}
                     className="flex items-center space-x-2 text-sm transition-all duration-300 text-muted-foreground hover:text-primary hover:translate-x-1 group"
                   >
-                    <span className="text-base group-hover:animate-bounce">
-                      {link.icon}
+                    <span className="p-1 text-sm group-hover:animate-bounce text-primary">
+                      <link.icon className="w-4 h-4" />
                     </span>
                     <span>{link.label}</span>
                   </Link>

@@ -1,6 +1,7 @@
 import { Product, FilterOptions } from "@/types";
 import { supabase } from "@/lib/supabase";
 import { toDbProduct } from "@/utils/productMapper";
+
 // 🔁 Convert snake_case → camelCase
 function mapProduct(data: any): Product {
   return {
@@ -108,17 +109,37 @@ export async function getProductById(id: string): Promise<Product | null> {
   return mapProduct(data);
 }
 
-export async function getFeaturedProducts(): Promise<Product[]> {
+// ✅ CẬP NHẬT: getFeaturedProducts để lấy ngẫu nhiên 4 sản phẩm
+export async function getFeaturedProducts(
+  limit: number = 4,
+): Promise<Product[]> {
   const { data, error } = await supabase
     .from("products")
     .select("*")
     .eq("is_featured", true)
     .eq("is_active", true)
-    .order("created_at", { ascending: false });
+    .order("created_at", { ascending: false }); // Vẫn sắp xếp để có trật tự ban đầu nếu muốn
 
-  if (error || !data) return [];
+  if (error || !data) {
+    console.error("Lỗi khi lấy sản phẩm nổi bật từ Supabase:", error);
+    return [];
+  }
 
-  return data.map(mapProduct);
+  // Chuyển đổi sang camelCase
+  let featuredProducts = data.map(mapProduct);
+
+  // ✅ LOGIC LẤY NGẪU NHIÊN 4 SẢN PHẨM
+  // Shuffle the array using Fisher-Yates algorithm
+  for (let i = featuredProducts.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [featuredProducts[i], featuredProducts[j]] = [
+      featuredProducts[j],
+      featuredProducts[i],
+    ];
+  }
+
+  // Return the first 'limit' number of shuffled products
+  return featuredProducts.slice(0, limit);
 }
 
 export async function getRelatedProducts(

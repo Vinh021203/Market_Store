@@ -13,6 +13,7 @@ import {
 import { AuthProvider, useAuth } from "@/contexts/AuthContext";
 import { CartProvider } from "@/contexts/CartContext";
 import { ThemeProvider } from "@/contexts/ThemeContext";
+import { WishlistProvider } from "@/hooks/useWishlist";
 import { LoadingProvider } from "@/contexts/LoadingContext";
 import Layout from "@/components/Layout";
 import AdminLayout from "@/components/admin/AdminLayout";
@@ -35,6 +36,8 @@ const Contact = React.lazy(() => import("./pages/Contact"));
 const Profile = React.lazy(() => import("./pages/Profile"));
 const Pricing = React.lazy(() => import("./pages/Pricing"));
 const SearchResults = React.lazy(() => import("./pages/SearchResults"));
+const Careers = React.lazy(() => import("./pages/Careers"));
+const Whishlist = React.lazy(() => import("./pages/Wishlist"));
 
 // Auth pages
 const Login = React.lazy(() => import("./pages/auth/Login"));
@@ -234,6 +237,30 @@ const AppRoutes = () => {
             <Suspense fallback={<GlobalLoading />}>
               <PageTransition>
                 <Contact />
+              </PageTransition>
+            </Suspense>
+          </ConditionalLayout>
+        }
+      />
+      <Route
+        path="/careers"
+        element={
+          <ConditionalLayout>
+            <Suspense fallback={<GlobalLoading />}>
+              <PageTransition>
+                <Careers />
+              </PageTransition>
+            </Suspense>
+          </ConditionalLayout>
+        }
+      />
+      <Route
+        path="/wishlist"
+        element={
+          <ConditionalLayout>
+            <Suspense fallback={<GlobalLoading />}>
+              <PageTransition>
+                <Whishlist />
               </PageTransition>
             </Suspense>
           </ConditionalLayout>
@@ -492,11 +519,13 @@ const App = () => (
         <AuthProvider>
           <CartProvider>
             <LoadingProvider>
-              <Toaster />
-              <Sonner />
-              <BrowserRouter>
-                <AppRoutes />
-              </BrowserRouter>
+              <WishlistProvider>
+                <Toaster />
+                <Sonner />
+                <BrowserRouter>
+                  <AppRoutes />
+                </BrowserRouter>
+              </WishlistProvider>
             </LoadingProvider>
           </CartProvider>
         </AuthProvider>
