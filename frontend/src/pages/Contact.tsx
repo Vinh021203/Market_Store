@@ -9,6 +9,7 @@ import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Badge } from "@/components/ui/badge";
 import { motion, AnimatePresence } from "framer-motion";
+import { createContact } from "@/lib/contacts";
 import {
   MapPin,
   Phone,
@@ -50,7 +51,14 @@ const contactSchema = z.object({
   phone: z.string().optional(),
   company: z.string().optional(),
   subject: z.string().min(5, "Tiêu đề phải có ít nhất 5 ký tự"),
-  category: z.string().min(1, "Vui lòng chọn danh mục"),
+  category: z.enum([
+    "support",
+    "sales",
+    "partnership",
+    "feedback",
+    "media",
+    "other",
+  ]),
   message: z.string().min(10, "Tin nhắn phải có ít nhất 10 ký tự"),
 });
 
@@ -97,19 +105,46 @@ const Contact: React.FC = () => {
     setIsSubmitting(true);
 
     // Simulate form submission
-    await new Promise((resolve) => setTimeout(resolve, 2000));
+    // await new Promise((resolve) => setTimeout(resolve, 2000));
+    try {
+      if (!data.name || !data.email || !data.subject || !data.message) {
+        throw new Error("Vui lòng điền đầy đủ thông tin bắt buộc");
+      }
 
-    setIsSubmitting(false);
-    setIsSubmitted(true);
-    reset();
+      const contact = await createContact({
+        name: data.name.trim(),
+        email: data.email.trim().toLowerCase(),
+        phone: data.phone?.trim(),
+        company: data.company?.trim(),
+        subject: data.subject.trim(),
+        category: data.category,
+        message: data.message.trim(),
+      });
 
-    toast({
-      title: "Tin nhắn đã được gửi!",
-      description: "Chúng tôi sẽ phản hồi bạn trong vòng 24 giờ.",
-    });
+      toast({
+        title: "✅ Tin nhắn đã được gửi!",
+        description:
+          "Email thông báo đã được gửi. Chúng tôi sẽ phản hồi trong 24h.",
+      });
 
-    // Reset form after 5 seconds
-    setTimeout(() => setIsSubmitted(false), 5000);
+      // Auto reset success state
+      setTimeout(() => setIsSubmitted(false), 5000);
+    } catch (error) {
+      console.error("Contact form submission error:", error);
+
+      const errorMessage =
+        error instanceof Error
+          ? error.message
+          : "Có lỗi xảy ra khi gửi tin nhắn. Vui lòng thử lại sau.";
+
+      toast({
+        title: "❌ Có lỗi xảy ra!",
+        description: errorMessage,
+        variant: "destructive",
+      });
+    } finally {
+      setIsSubmitting(false);
+    }
   };
 
   // Thêm function xử lý Google Maps
@@ -578,7 +613,7 @@ const Contact: React.FC = () => {
                               </Label>
                               <Input
                                 id="phone"
-                                placeholder="+84 123 456 789"
+                                placeholder="+84 971 386 588"
                                 {...register("phone")}
                                 className="transition-all duration-300 focus:ring-2 focus:ring-primary/20"
                               />
@@ -867,9 +902,9 @@ const Contact: React.FC = () => {
                       className="justify-start w-full"
                       asChild
                     >
-                      <a href="mailto:support@templatemarket.com">
+                      <a href="mailto:veutong961@gmail.com">
                         <Mail className="w-4 h-4 mr-2" />
-                        Email: support@templatemarket.com
+                        Email: veutong961@gmail.com
                       </a>
                     </Button>
                     <Button variant="outline" className="justify-start w-full">

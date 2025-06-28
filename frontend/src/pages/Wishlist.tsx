@@ -1,22 +1,37 @@
 import React, { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
-import { useWishlist } from "@/hooks/useWishlist"; // Import hook wishlist
-import { useCart } from "@/contexts/CartContext"; // Import useCart
+import { useWishlist } from "@/hooks/useWishlist";
+import { useCart } from "@/contexts/CartContext";
 import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import ProductCard from "@/components/ProductCard"; // Import ProductCard
+import { Card, CardContent } from "@/components/ui/card";
+import ProductCard from "@/components/ProductCard";
 import { Heart, Package, XCircle } from "lucide-react";
 import { motion } from "framer-motion";
-import { toast } from "@/hooks/use-toast";
 import { Helmet } from "react-helmet-async";
 
 const Wishlist: React.FC = () => {
-  const { wishlist, removeFromWishlist, clearWishlist } = useWishlist();
-  const { addToCart } = useCart(); // Lấy addToCart từ CartContext
+  const { wishlist, removeFromWishlist, clearWishlist, getTotalWishlistItems } =
+    useWishlist();
+  const { addToCart } = useCart();
   const [isVisible, setIsVisible] = useState<Record<string, boolean>>({});
+  const [renderKey, setRenderKey] = useState(0);
+
+  // ✅ Safe wishlist count với fallback
+  const wishlistCount = getTotalWishlistItems() || 0;
+
+  // Listen to wishlist updates
+  useEffect(() => {
+    const handleWishlistUpdate = () => {
+      setRenderKey((prev) => prev + 1);
+    };
+
+    window.addEventListener("wishlistUpdated", handleWishlistUpdate);
+    return () => {
+      window.removeEventListener("wishlistUpdated", handleWishlistUpdate);
+    };
+  }, []);
 
   useEffect(() => {
-    // Intersection Observer for scroll animations
     const observer = new IntersectionObserver(
       (entries) => {
         entries.forEach((entry) => {
@@ -38,19 +53,18 @@ const Wishlist: React.FC = () => {
   }, []);
 
   const handleRemoveFromWishlist = (productId: string, productName: string) => {
-    // removeFromWishlist đã có toast bên trong hook
     removeFromWishlist(productId);
   };
 
   const handleClearWishlist = () => {
-    // clearWishlist đã có toast bên trong hook
     clearWishlist();
   };
 
   return (
     <>
       <Helmet>
-        <title>Sản phẩm yêu thích - Template Market</title>
+        {/* ✅ Fix: Đảm bảo title luôn là string */}
+        <title>{`Sản phẩm yêu thích (${wishlistCount}) - Template Market`}</title>
         <meta
           name="description"
           content="Xem các sản phẩm yêu thích của bạn tại Template Market."
@@ -78,6 +92,7 @@ const Wishlist: React.FC = () => {
             className="mb-8 space-y-6"
             id="wishlist-header"
             data-animate
+            key={`header-${renderKey}`}
           >
             <div className="flex items-center space-x-4">
               <motion.div
@@ -87,8 +102,9 @@ const Wishlist: React.FC = () => {
                 <Heart className="w-6 h-6 text-white" />
               </motion.div>
               <div>
+                {/* ✅ Fix: Đảm bảo hiển thị số đúng */}
                 <h1 className="text-4xl font-bold text-transparent bg-gradient-to-r from-pink-600 via-red-600 to-orange-600 bg-clip-text">
-                  Sản phẩm yêu thích
+                  Sản phẩm yêu thích ({wishlistCount})
                 </h1>
                 <p className="text-lg text-muted-foreground">
                   Lưu trữ những sản phẩm bạn muốn mua sau này.
@@ -103,6 +119,7 @@ const Wishlist: React.FC = () => {
             transition={{ delay: 0.2 }}
             id="wishlist-content"
             data-animate
+            key={`content-${renderKey}`}
           >
             {wishlist.length === 0 ? (
               <Card className="py-16 text-center border-0 shadow-xl bg-gradient-to-br from-white to-gray-50 dark:from-slate-800 dark:to-slate-900">
@@ -140,7 +157,7 @@ const Wishlist: React.FC = () => {
                   <p className="text-muted-foreground">
                     Bạn có{" "}
                     <span className="font-semibold text-primary">
-                      {wishlist.length}
+                      {wishlistCount}
                     </span>{" "}
                     sản phẩm trong danh sách yêu thích.
                   </p>
@@ -157,7 +174,7 @@ const Wishlist: React.FC = () => {
                 <div className="grid items-stretch grid-cols-1 gap-6 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
                   {wishlist.map((product, index) => (
                     <motion.div
-                      key={product.id}
+                      key={`${product.id}-${renderKey}`}
                       initial={{ opacity: 0, y: 20 }}
                       animate={{ opacity: 1, y: 0 }}
                       transition={{ delay: index * 0.05 }}
@@ -172,9 +189,7 @@ const Wishlist: React.FC = () => {
                         product={product}
                         showAddToCart={true}
                         onAddToCart={() => {
-                          addToCart(product); // Sử dụng addToCart từ CartContext
-                          // Tùy chọn: xóa khỏi wishlist sau khi thêm vào giỏ nếu muốn
-                          // removeFromWishlist(product.id);
+                          addToCart(product);
                         }}
                         onRemoveFromWishlist={() =>
                           handleRemoveFromWishlist(product.id, product.title)

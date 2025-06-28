@@ -4,6 +4,7 @@ import {
   createContext,
   useContext,
   ReactNode,
+  useCallback,
 } from "react";
 import { Product } from "@/types";
 import { toast } from "@/hooks/use-toast";
@@ -25,6 +26,12 @@ function getStoredWishlist(): Product[] {
 function setStoredWishlist(wishlist: Product[]) {
   try {
     localStorage.setItem(WISHLIST_STORAGE_KEY, JSON.stringify(wishlist));
+    // ✅ Dispatch custom event để notify các components khác
+    window.dispatchEvent(
+      new CustomEvent("wishlistUpdated", {
+        detail: { wishlist, count: wishlist.length },
+      }),
+    );
   } catch (error) {
     console.error("❌ Lỗi khi lưu wishlist vào localStorage:", error);
   }
@@ -38,10 +45,13 @@ interface WishlistContextType {
   isInWishlist: (productId: string) => boolean;
   clearWishlist: () => void;
   getTotalWishlistItems: () => number;
+  refreshWishlist: () => void;
 }
 
 // Tạo context
-const WishlistContext = createContext<WishlistContextType | undefined>(undefined);
+const WishlistContext = createContext<WishlistContextType | undefined>(
+  undefined,
+);
 
 // Custom hook
 export const useWishlist = () => {
@@ -60,16 +70,40 @@ interface WishlistProviderProps {
 // Provider component
 export const WishlistProvider = ({ children }: WishlistProviderProps) => {
   const [wishlist, setWishlist] = useState<Product[]>([]);
+  const [forceUpdate, setForceUpdate] = useState(0);
 
+  // ✅ Load initial data
   useEffect(() => {
-    setWishlist(getStoredWishlist());
+    const stored = getStoredWishlist();
+    setWishlist(stored);
   }, []);
 
+  // ✅ Listen to custom wishlist events
   useEffect(() => {
-    setStoredWishlist(wishlist);
+    const handleWishlistUpdate = () => {
+      setForceUpdate((prev) => prev + 1);
+    };
+
+    window.addEventListener("wishlistUpdated", handleWishlistUpdate);
+    return () => {
+      window.removeEventListener("wishlistUpdated", handleWishlistUpdate);
+    };
+  }, []);
+
+  // ✅ Save to localStorage whenever wishlist changes
+  useEffect(() => {
+    if (wishlist.length >= 0) {
+      setStoredWishlist(wishlist);
+    }
   }, [wishlist]);
 
-  const addToWishlist = (product: Product) => {
+  const refreshWishlist = useCallback(() => {
+    const stored = getStoredWishlist();
+    setWishlist(stored);
+    setForceUpdate((prev) => prev + 1);
+  }, []);
+
+  const addToWishlist = useCallback((product: Product) => {
     setWishlist((prev) => {
       if (prev.some((item) => item.id === product.id)) {
         toast({
@@ -79,32 +113,49 @@ export const WishlistProvider = ({ children }: WishlistProviderProps) => {
         });
         return prev;
       }
-      toast({ title: "❤️ Đã thêm vào yêu thích", description: product.title });
-      return [...prev, product];
-    });
-  };
 
-  const removeFromWishlist = (productId: string) => {
+      const newWishlist = [...prev, product];
+      toast({
+        title: "❤️ Đã thêm vào yêu thích",
+        description: product.title,
+      });
+
+      setForceUpdate((prev) => prev + 1);
+      return newWishlist;
+    });
+  }, []);
+
+  const removeFromWishlist = useCallback((productId: string) => {
     setWishlist((prev) => {
       const newWishlist = prev.filter((item) => item.id !== productId);
       const removed = prev.find((item) => item.id === productId);
+
       toast({
         title: "💔 Đã xóa khỏi yêu thích",
         description: removed?.title || "Sản phẩm",
       });
+
+      setForceUpdate((prev) => prev + 1);
       return newWishlist;
     });
-  };
+  }, []);
 
-  const isInWishlist = (productId: string) =>
-    wishlist.some((item) => item.id === productId);
+  const isInWishlist = useCallback(
+    (productId: string) => {
+      return wishlist.some((item) => item.id === productId);
+    },
+    [wishlist, forceUpdate],
+  );
 
-  const clearWishlist = () => {
+  const clearWishlist = useCallback(() => {
     setWishlist([]);
     toast({ title: "🗑️ Đã xóa toàn bộ danh sách yêu thích." });
-  };
+    setForceUpdate((prev) => prev + 1);
+  }, []);
 
-  const getTotalWishlistItems = () => wishlist.length;
+  const getTotalWishlistItems = useCallback(() => {
+    return wishlist.length;
+  }, [wishlist.length, forceUpdate]);
 
   const value: WishlistContextType = {
     wishlist,
@@ -113,6 +164,7 @@ export const WishlistProvider = ({ children }: WishlistProviderProps) => {
     isInWishlist,
     clearWishlist,
     getTotalWishlistItems,
+    refreshWishlist,
   };
 
   return (

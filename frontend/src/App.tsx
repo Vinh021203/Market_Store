@@ -1,4 +1,4 @@
-import React, { Suspense } from "react"; // ✅ Import Suspense
+import React, { Suspense } from "react";
 import { Toaster } from "@/components/ui/toaster";
 import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
@@ -21,8 +21,7 @@ import PageTransition from "@/components/PageTransition";
 import GlobalLoading from "@/components/GlobalLoading";
 import { isAdmin } from "@/lib/auth";
 
-// ✅ Lazy Load Pages
-// Thay vì import trực tiếp, chúng ta dùng React.lazy
+// ✅ Lazy Load Pages - Public
 const Index = React.lazy(() => import("./pages/Index"));
 const Templates = React.lazy(() => import("./pages/Templates"));
 const Ebooks = React.lazy(() => import("./pages/Ebooks"));
@@ -33,17 +32,23 @@ const Cart = React.lazy(() => import("./pages/Cart"));
 const Checkout = React.lazy(() => import("./pages/Checkout"));
 const About = React.lazy(() => import("./pages/About"));
 const Contact = React.lazy(() => import("./pages/Contact"));
-const Profile = React.lazy(() => import("./pages/Profile"));
 const Pricing = React.lazy(() => import("./pages/Pricing"));
 const SearchResults = React.lazy(() => import("./pages/SearchResults"));
 const Careers = React.lazy(() => import("./pages/Careers"));
-const Whishlist = React.lazy(() => import("./pages/Wishlist"));
+const Wishlist = React.lazy(() => import("./pages/Wishlist"));
 
-// Auth pages
+// ✅ User Pages - Protected
+const Profile = React.lazy(() => import("./pages/Profile"));
+const MyOrders = React.lazy(() => import("./pages/MyOrders"));
+const Downloads = React.lazy(() => import("./pages/Downloads"));
+const UserSettings = React.lazy(() => import("./pages/Settings")); // ✅ Rename để tránh conflict
+
+// ✅ Auth pages
 const Login = React.lazy(() => import("./pages/auth/Login"));
 const Register = React.lazy(() => import("./pages/auth/Register"));
+const EmailConfirmed = React.lazy(() => import("./pages/auth/EmailConfirmed"));
 
-// Admin pages
+// ✅ Admin pages
 const AdminDashboard = React.lazy(() => import("./pages/admin/Dashboard"));
 const ProductManagement = React.lazy(
   () => import("./pages/admin/ProductManagement"),
@@ -58,12 +63,12 @@ const BlogCreate = React.lazy(() => import("./pages/admin/BlogCreate"));
 const BlogCategories = React.lazy(() => import("./pages/admin/BlogCategories"));
 const Analytics = React.lazy(() => import("./pages/admin/Analytics"));
 const Reports = React.lazy(() => import("./pages/admin/Reports"));
-const Settings = React.lazy(() => import("./pages/admin/Settings"));
+const AdminSettings = React.lazy(() => import("./pages/admin/Settings")); // ✅ Rename để tránh conflict
 const NotFound = React.lazy(() => import("./pages/NotFound"));
 
 const queryClient = new QueryClient();
 
-// ✅ Protected Route Component (không đổi)
+// Protected Route Component
 interface ProtectedRouteProps {
   children: React.ReactNode;
   requireAdmin?: boolean;
@@ -91,7 +96,7 @@ const ProtectedRoute: React.FC<ProtectedRouteProps> = ({
   return <>{children}</>;
 };
 
-// ✅ Public Route Component (không đổi)
+// Public Route Component
 const PublicRoute: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const { user, isLoading } = useAuth();
 
@@ -106,7 +111,7 @@ const PublicRoute: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   return <>{children}</>;
 };
 
-// ✅ Component để wrap routes với conditional layout (không đổi)
+// Component để wrap routes với conditional layout
 const ConditionalLayout: React.FC<{ children: React.ReactNode }> = ({
   children,
 }) => {
@@ -121,7 +126,7 @@ const ConditionalLayout: React.FC<{ children: React.ReactNode }> = ({
   return <Layout>{children}</Layout>;
 };
 
-// ✅ App Routes Component (sử dụng Suspense cho từng Route element)
+// ✅ App Routes Component
 const AppRoutes = () => {
   const { isLoading } = useAuth();
 
@@ -131,14 +136,12 @@ const AppRoutes = () => {
 
   return (
     <Routes>
-      {/* Public Routes with Conditional Layout */}
+      {/* Public Routes */}
       <Route
         path="/"
         element={
           <ConditionalLayout>
             <Suspense fallback={<GlobalLoading />}>
-              {" "}
-              {/* ✅ Thêm Suspense */}
               <PageTransition>
                 <Index />
               </PageTransition>
@@ -260,7 +263,7 @@ const AppRoutes = () => {
           <ConditionalLayout>
             <Suspense fallback={<GlobalLoading />}>
               <PageTransition>
-                <Whishlist />
+                <Wishlist />
               </PageTransition>
             </Suspense>
           </ConditionalLayout>
@@ -291,7 +294,7 @@ const AppRoutes = () => {
         }
       />
 
-      {/* ✅ Protected Routes */}
+      {/* ✅ Protected User Routes */}
       <Route
         path="/profile"
         element={
@@ -300,6 +303,48 @@ const AppRoutes = () => {
               <Suspense fallback={<GlobalLoading />}>
                 <PageTransition>
                   <Profile />
+                </PageTransition>
+              </Suspense>
+            </ConditionalLayout>
+          </ProtectedRoute>
+        }
+      />
+      <Route
+        path="/my-orders"
+        element={
+          <ProtectedRoute>
+            <ConditionalLayout>
+              <Suspense fallback={<GlobalLoading />}>
+                <PageTransition>
+                  <MyOrders />
+                </PageTransition>
+              </Suspense>
+            </ConditionalLayout>
+          </ProtectedRoute>
+        }
+      />
+      <Route
+        path="/downloads"
+        element={
+          <ProtectedRoute>
+            <ConditionalLayout>
+              <Suspense fallback={<GlobalLoading />}>
+                <PageTransition>
+                  <Downloads />
+                </PageTransition>
+              </Suspense>
+            </ConditionalLayout>
+          </ProtectedRoute>
+        }
+      />
+      <Route
+        path="/settings"
+        element={
+          <ProtectedRoute>
+            <ConditionalLayout>
+              <Suspense fallback={<GlobalLoading />}>
+                <PageTransition>
+                  <UserSettings /> {/* ✅ Sử dụng UserSettings */}
                 </PageTransition>
               </Suspense>
             </ConditionalLayout>
@@ -321,7 +366,7 @@ const AppRoutes = () => {
         }
       />
 
-      {/* ✅ Auth Routes - Chỉ hiển thị khi chưa đăng nhập */}
+      {/* ✅ Auth Routes */}
       <Route
         path="/auth/login"
         element={
@@ -350,7 +395,16 @@ const AppRoutes = () => {
           </PublicRoute>
         }
       />
-
+      <Route
+        path="/auth/email-confirmed"
+        element={
+          <Suspense fallback={<GlobalLoading />}>
+            <PageTransition>
+              <EmailConfirmed />
+            </PageTransition>
+          </Suspense>
+        }
+      />
       {/* ✅ Admin Routes with Protection */}
       <Route
         path="/admin"
@@ -487,7 +541,7 @@ const AppRoutes = () => {
           element={
             <Suspense fallback={<GlobalLoading />}>
               <PageTransition>
-                <Settings />
+                <AdminSettings /> {/* ✅ Sử dụng AdminSettings */}
               </PageTransition>
             </Suspense>
           }
@@ -511,23 +565,23 @@ const AppRoutes = () => {
   );
 };
 
-// ✅ Main App Component (không đổi)
+// Main App Component
 const App = () => (
   <QueryClientProvider client={queryClient}>
     <ThemeProvider defaultTheme="system" storageKey="vite-ui-theme">
       <TooltipProvider>
         <AuthProvider>
-          <CartProvider>
-            <LoadingProvider>
-              <WishlistProvider>
+          <WishlistProvider>
+            <CartProvider>
+              <LoadingProvider>
                 <Toaster />
                 <Sonner />
                 <BrowserRouter>
                   <AppRoutes />
                 </BrowserRouter>
-              </WishlistProvider>
-            </LoadingProvider>
-          </CartProvider>
+              </LoadingProvider>
+            </CartProvider>
+          </WishlistProvider>
         </AuthProvider>
       </TooltipProvider>
     </ThemeProvider>

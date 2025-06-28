@@ -62,6 +62,53 @@ const Register: React.FC = () => {
     resolver: zodResolver(registerSchema),
   });
 
+  // const onSubmit = async (data: RegisterData) => {
+  //   if (!navigator.onLine) {
+  //     setError("Không có kết nối internet. Vui lòng kiểm tra lại.");
+  //     return;
+  //   }
+
+  //   setError("");
+  //   setIsSubmitting(true);
+  //   setLoadingStage("Đang tạo tài khoản...");
+
+  //   const timeoutId = setTimeout(() => {
+  //     setIsSubmitting(false);
+  //     setLoadingStage("");
+  //     setError("Đăng ký quá lâu. Vui lòng thử lại.");
+  //   }, 15000);
+
+  //   try {
+  //     setLoadingStage("Đang xác thực thông tin...");
+  //     const success = await registerUser(data);
+
+  //     clearTimeout(timeoutId);
+
+  //     if (success) {
+  //       setLoadingStage("Đăng ký thành công!");
+  //       toast({
+  //         title: "Đăng ký thành công",
+  //         description: "Chào mừng bạn đến với Template Market!",
+  //       });
+
+  //       setTimeout(() => {
+  //         navigate("/");
+  //       }, 500);
+  //     } else {
+  //       setError("Email đã được sử dụng. Vui lòng chọn email khác.");
+  //     }
+  //   } catch (error) {
+  //     clearTimeout(timeoutId);
+  //     console.error("Register error:", error);
+  //     setError("Có lỗi xảy ra khi đăng ký. Vui lòng thử lại.");
+  //   } finally {
+  //     setTimeout(() => {
+  //       setIsSubmitting(false);
+  //       setLoadingStage("");
+  //     }, 1000);
+  //   }
+  // };
+  // pages/auth/Register.tsx - Enhanced onSubmit
   const onSubmit = async (data: RegisterData) => {
     if (!navigator.onLine) {
       setError("Không có kết nối internet. Vui lòng kiểm tra lại.");
@@ -72,35 +119,41 @@ const Register: React.FC = () => {
     setIsSubmitting(true);
     setLoadingStage("Đang tạo tài khoản...");
 
-    const timeoutId = setTimeout(() => {
-      setIsSubmitting(false);
-      setLoadingStage("");
-      setError("Đăng ký quá lâu. Vui lòng thử lại.");
-    }, 15000);
-
     try {
       setLoadingStage("Đang xác thực thông tin...");
       const success = await registerUser(data);
 
-      clearTimeout(timeoutId);
-
       if (success) {
         setLoadingStage("Đăng ký thành công!");
+
+        // ✅ Updated success message cho email confirmation
         toast({
-          title: "Đăng ký thành công",
-          description: "Chào mừng bạn đến với Template Market!",
+          title: "Kiểm tra email của bạn",
+          description:
+            "Chúng tôi đã gửi link xác thực đến email của bạn. Vui lòng click vào link để kích hoạt tài khoản.",
+          duration: 10000, // 10 giây để user đọc kỹ
         });
 
+        // ✅ Redirect về login thay vì home
         setTimeout(() => {
-          navigate("/");
-        }, 500);
-      } else {
-        setError("Email đã được sử dụng. Vui lòng chọn email khác.");
+          navigate("/auth/login?message=check-email");
+        }, 2000);
       }
-    } catch (error) {
-      clearTimeout(timeoutId);
+    } catch (error: any) {
       console.error("Register error:", error);
-      setError("Có lỗi xảy ra khi đăng ký. Vui lòng thử lại.");
+
+      // ✅ Enhanced error handling
+      if (error.message?.includes("Email này đã được đăng ký")) {
+        setError(
+          "Email này đã được sử dụng. Vui lòng chọn email khác hoặc đăng nhập.",
+        );
+      } else if (error.message?.includes("Password")) {
+        setError("Mật khẩu không đủ mạnh. Vui lòng chọn mật khẩu khác.");
+      } else {
+        setError(
+          error.message || "Có lỗi xảy ra khi đăng ký. Vui lòng thử lại.",
+        );
+      }
     } finally {
       setTimeout(() => {
         setIsSubmitting(false);

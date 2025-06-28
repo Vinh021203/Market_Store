@@ -76,6 +76,7 @@ import {
 import { useAuth } from "@/contexts/AuthContext";
 import { useCart } from "@/contexts/CartContext";
 import { useTheme } from "@/contexts/ThemeContext";
+import { useWishlist } from "@/hooks/useWishlist";
 import { isAdmin, getInitials } from "@/lib/auth";
 import { motion, AnimatePresence } from "framer-motion";
 
@@ -91,6 +92,7 @@ const Header: React.FC = () => {
   const { user, logout } = useAuth();
   const { items, getTotalItems } = useCart();
   const { theme, setTheme } = useTheme();
+  const { wishlist, getTotalWishlistItems } = useWishlist();
 
   // Scroll effect
   useEffect(() => {
@@ -284,6 +286,7 @@ const Header: React.FC = () => {
     }
   };
 
+  const totalWishlistItems = getTotalWishlistItems() || 0;
   const totalItems = getTotalItems();
 
   return (
@@ -825,11 +828,46 @@ const Header: React.FC = () => {
 
             {/* Wishlist */}
             {user && (
-              <Button variant="ghost" size="sm" asChild className="p-0 w-9 h-9">
-                <Link to="/wishlist">
-                  <Heart className="w-4 h-4" />
-                </Link>
-              </Button>
+              <motion.div
+                whileHover={{ scale: 1.05 }}
+                whileTap={{ scale: 0.95 }}
+              >
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  asChild
+                  className="relative p-0 w-9 h-9"
+                >
+                  <Link to="/wishlist">
+                    <Heart className="w-4 h-4" />
+                    <AnimatePresence>
+                      {totalWishlistItems > 0 && (
+                        <motion.div
+                          initial={{ scale: 0, opacity: 0 }}
+                          animate={{ scale: 1, opacity: 1 }}
+                          exit={{ scale: 0, opacity: 0 }}
+                          className="absolute -top-1 -right-1"
+                        >
+                          <Badge className="flex items-center justify-center w-5 h-5 p-0 text-xs bg-primary hover:bg-primary/90">
+                            <motion.span
+                              key={totalWishlistItems}
+                              initial={{ scale: 1.5 }}
+                              animate={{ scale: 1 }}
+                              transition={{
+                                type: "spring",
+                                stiffness: 500,
+                                damping: 30,
+                              }}
+                            >
+                              {totalWishlistItems}
+                            </motion.span>
+                          </Badge>
+                        </motion.div>
+                      )}
+                    </AnimatePresence>
+                  </Link>
+                </Button>
+              </motion.div>
             )}
 
             {/* ✅ Enhanced Cart với animation */}
@@ -925,7 +963,7 @@ const Header: React.FC = () => {
                   </DropdownMenuItem>
 
                   <DropdownMenuItem asChild>
-                    <Link to="/orders" className="cursor-pointer">
+                    <Link to="/my-orders" className="cursor-pointer">
                       <Package className="w-4 h-4 mr-2" />
                       <span>Đơn hàng của tôi</span>
                     </Link>

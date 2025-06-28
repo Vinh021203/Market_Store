@@ -1,876 +1,783 @@
 import React, { useState, useEffect } from "react";
-import { Navigate } from "react-router-dom";
+import { Navigate, Link } from "react-router-dom";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Badge } from "@/components/ui/badge";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Switch } from "@/components/ui/switch";
+import { Progress } from "@/components/ui/progress";
+import { Separator } from "@/components/ui/separator";
 import { useAuth } from "@/contexts/AuthContext";
 import { getInitials } from "@/lib/auth";
 import { formatPrice } from "@/lib/products";
 import { supabase } from "@/lib/supabase";
-import { uploadFileToCloudinary } from "@/lib/uploadFileToCloudinary";
 import {
   User,
-  Download,
-  ShoppingBag,
-  Settings,
-  Calendar,
-  Mail,
   CreditCard,
+  Calendar,
+  ShoppingBag,
+  Download,
+  Settings,
+  Trophy,
+  Star,
+  TrendingUp,
+  Gift,
+  Crown,
+  Heart,
   FileText,
-  Lock,
+  Activity,
+  Award,
+  Target,
+  Zap,
+  BarChart3,
+  Clock,
+  CheckCircle,
+  ArrowRight,
+  Edit,
   Camera,
-  Upload,
-  X,
+  Mail,
+  Phone,
+  MapPin,
+  Globe,
   Loader2,
-  Eye,
-  EyeOff,
 } from "lucide-react";
+import { motion } from "framer-motion";
 import { toast } from "@/components/ui/use-toast";
-import { Order, Download as DownloadType } from "@/types";
 
 interface UserStats {
   totalOrders: number;
   totalSpent: number;
   totalDownloads: number;
-  memberSince: string;
+  completedOrders: number;
+  favoriteCategory: string;
+  membershipLevel: string;
+  loyaltyPoints: number;
+  achievementCount: number;
+  lastLoginDate: string;
+  accountAge: number;
+}
+
+interface Achievement {
+  id: string;
+  title: string;
+  description: string;
+  icon: React.ElementType;
+  unlocked: boolean;
+  progress: number;
+  maxProgress: number;
+  color: string;
+}
+
+interface RecentActivity {
+  id: string;
+  type: "order" | "download" | "review" | "login";
+  title: string;
+  description: string;
+  date: string;
+  icon: React.ElementType;
+  color: string;
 }
 
 const Profile: React.FC = () => {
-  const { user, updateProfile } = useAuth();
-  const [editName, setEditName] = useState(user?.name || "");
-  const [editAvatar, setEditAvatar] = useState(user?.avatar || "");
-  const [password, setPassword] = useState("");
-  const [confirmPassword, setConfirmPassword] = useState("");
-  const [showPassword, setShowPassword] = useState(false);
-  const [showConfirmPassword, setShowConfirmPassword] = useState(false);
-  const [emailNotifications, setEmailNotifications] = useState(true);
-  const [orderNotifications, setOrderNotifications] = useState(true);
-  const [isLoading, setIsLoading] = useState(false);
+  const { user } = useAuth();
   const [userStats, setUserStats] = useState<UserStats | null>(null);
-  const [recentOrders, setRecentOrders] = useState<Order[]>([]);
-  const [downloads, setDownloads] = useState<DownloadType[]>([]);
-  const [error, setError] = useState<string | null>(null);
-
-  // Avatar upload states
-  const [isUploadingAvatar, setIsUploadingAvatar] = useState(false);
-  const [uploadedAvatarUrl, setUploadedAvatarUrl] = useState<string | null>(
-    null,
-  );
-  const [uploadProgress, setUploadProgress] = useState(0);
+  const [achievements, setAchievements] = useState<Achievement[]>([]);
+  const [recentActivity, setRecentActivity] = useState<RecentActivity[]>([]);
+  const [isLoading, setIsLoading] = useState(true);
+  const [activeTab, setActiveTab] = useState<
+    "overview" | "stats" | "achievements" | "activity"
+  >("overview");
 
   useEffect(() => {
-    const fetchUserData = async () => {
-      if (!user) return;
-      setIsLoading(true);
-
-      try {
-        // Lấy danh sách đơn hàng + sản phẩm trong từng đơn hàng
-        const { data: ordersData, error: ordersError } = await supabase
-          .from("orders")
-          .select("*, order_items(*, products(*))")
-          .eq("user_id", user.id)
-          .order("created_at", { ascending: false });
-
-        if (ordersError || !ordersData) throw new Error("Lỗi khi lấy đơn hàng");
-
-        const totalOrders = ordersData.length;
-        const totalSpent = ordersData.reduce(
-          (sum, order) => sum + (order.total_price || 0),
-          0,
-        );
-
-        const mappedOrders = ordersData.map((order) => ({
-          ...order,
-          items: (order.order_items ?? []).map((item) => ({
-            ...item,
-            product: item.products ?? null,
-          })),
-        }));
-
-        // ✅ Lấy IDs của orders đã completed
-        // ✅ Fix - include processing
-        const completedOrderIds = ordersData
-          .filter(
-            (order) =>
-              order.status === "completed" || order.status === "processing",
-          )
-          .map((order) => order.id);
-
-        // ✅ Chỉ lấy downloads từ completed orders
-        let downloadsData = [];
-        if (completedOrderIds.length > 0) {
-          const { data, error: downloadsError } = await supabase
-            .from("downloads")
-            .select("*")
-            .eq("user_id", user.id)
-            .in("order_id", completedOrderIds);
-
-          if (downloadsError) {
-            console.error("Downloads error:", downloadsError);
-            // Không throw error, chỉ set empty array
-          } else if (data) {
-            downloadsData = data;
-          }
-        }
-
-        setUserStats({
-          totalOrders,
-          totalSpent,
-          totalDownloads: downloadsData.length,
-          memberSince: user.createdAt,
-        });
-
-        setRecentOrders(mappedOrders);
-        setDownloads(downloadsData);
-      } catch (err) {
-        setError("Không thể tải dữ liệu. Vui lòng thử lại.");
-        toast({ variant: "destructive", description: "Không thể tải dữ liệu" });
-      } finally {
-        setIsLoading(false);
-      }
-    };
-
-    fetchUserData();
+    if (user) {
+      fetchUserData();
+    }
   }, [user]);
 
-  // Avatar upload handler
-  const handleAvatarUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0];
-    if (!file) return;
-
-    // Validate file
-    const validTypes = ["image/jpeg", "image/png", "image/gif", "image/webp"];
-    if (!validTypes.includes(file.type)) {
-      toast({
-        variant: "destructive",
-        description: "Vui lòng chọn file ảnh hợp lệ (JPEG, PNG, GIF, WEBP)",
-      });
-      return;
-    }
-
-    if (file.size > 5 * 1024 * 1024) {
-      toast({
-        variant: "destructive",
-        description: "Kích thước ảnh phải nhỏ hơn 5MB",
-      });
-      return;
-    }
-
-    setIsUploadingAvatar(true);
-    setUploadProgress(0);
-
+  const fetchUserData = async () => {
+    setIsLoading(true);
     try {
-      // Simulate progress
-      const progressInterval = setInterval(() => {
-        setUploadProgress((prev) => {
-          if (prev >= 90) {
-            clearInterval(progressInterval);
-            return 90;
-          }
-          return prev + 10;
-        });
-      }, 200);
+      // Fetch user statistics
+      const { data: ordersData } = await supabase
+        .from("orders")
+        .select("*, order_items(*, products(*))")
+        .eq("user_id", user?.id);
 
-      const result = await uploadFileToCloudinary(file);
+      const { data: downloadsData } = await supabase
+        .from("downloads")
+        .select("*")
+        .eq("user_id", user?.id);
 
-      clearInterval(progressInterval);
-      setUploadProgress(100);
+      // Calculate stats
+      const totalOrders = ordersData?.length || 0;
+      const totalSpent =
+        ordersData?.reduce((sum, order) => sum + (order.total_price || 0), 0) ||
+        0;
+      const totalDownloads = downloadsData?.length || 0;
+      const completedOrders =
+        ordersData?.filter((order) => order.status === "completed").length || 0;
 
-      setUploadedAvatarUrl(result.url);
-      setEditAvatar(result.url);
+      // Calculate membership level
+      let membershipLevel = "Bronze";
+      let loyaltyPoints = Math.floor(totalSpent / 1000) * 10;
 
-      toast({
-        description: `Avatar đã được tải lên thành công (${result.size}, ${result.format})`,
+      if (totalSpent >= 50000000) membershipLevel = "Diamond";
+      else if (totalSpent >= 20000000) membershipLevel = "Platinum";
+      else if (totalSpent >= 10000000) membershipLevel = "Gold";
+      else if (totalSpent >= 5000000) membershipLevel = "Silver";
+
+      const accountAge = Math.floor(
+        (Date.now() - new Date(user?.createdAt || 0).getTime()) /
+          (1000 * 60 * 60 * 24),
+      );
+
+      setUserStats({
+        totalOrders,
+        totalSpent,
+        totalDownloads,
+        completedOrders,
+        favoriteCategory: "Template",
+        membershipLevel,
+        loyaltyPoints,
+        achievementCount: 8,
+        lastLoginDate: new Date().toISOString(),
+        accountAge,
       });
+
+      // Generate achievements
+      setAchievements([
+        {
+          id: "first_purchase",
+          title: "Khách hàng mới",
+          description: "Hoàn thành đơn hàng đầu tiên",
+          icon: ShoppingBag,
+          unlocked: totalOrders > 0,
+          progress: Math.min(totalOrders, 1),
+          maxProgress: 1,
+          color: "text-blue-500",
+        },
+        {
+          id: "big_spender",
+          title: "Người mua sắm VIP",
+          description: "Chi tiêu trên 10 triệu VNĐ",
+          icon: Crown,
+          unlocked: totalSpent >= 10000000,
+          progress: Math.min(totalSpent, 10000000),
+          maxProgress: 10000000,
+          color: "text-yellow-500",
+        },
+        {
+          id: "download_master",
+          title: "Chuyên gia tải xuống",
+          description: "Tải xuống 50+ files",
+          icon: Download,
+          unlocked: totalDownloads >= 50,
+          progress: Math.min(totalDownloads, 50),
+          maxProgress: 50,
+          color: "text-green-500",
+        },
+        {
+          id: "loyal_customer",
+          title: "Khách hàng thân thiết",
+          description: "Thành viên trên 365 ngày",
+          icon: Heart,
+          unlocked: accountAge >= 365,
+          progress: Math.min(accountAge, 365),
+          maxProgress: 365,
+          color: "text-red-500",
+        },
+        {
+          id: "template_collector",
+          title: "Nhà sưu tập Template",
+          description: "Sở hữu 20+ templates",
+          icon: FileText,
+          unlocked: totalOrders >= 20,
+          progress: Math.min(totalOrders, 20),
+          maxProgress: 20,
+          color: "text-purple-500",
+        },
+        {
+          id: "perfect_customer",
+          title: "Khách hàng hoàn hảo",
+          description: "100% đơn hàng thành công",
+          icon: CheckCircle,
+          unlocked: totalOrders > 0 && completedOrders === totalOrders,
+          progress: totalOrders > 0 ? (completedOrders / totalOrders) * 100 : 0,
+          maxProgress: 100,
+          color: "text-emerald-500",
+        },
+      ]);
+
+      // Generate recent activity
+      setRecentActivity([
+        {
+          id: "1",
+          type: "login",
+          title: "Đăng nhập thành công",
+          description: "Truy cập từ Chrome trên Windows",
+          date: new Date().toISOString(),
+          icon: Activity,
+          color: "text-blue-500",
+        },
+        {
+          id: "2",
+          type: "order",
+          title: "Đơn hàng mới",
+          description: "Mua template website e-commerce",
+          date: new Date(Date.now() - 86400000).toISOString(),
+          icon: ShoppingBag,
+          color: "text-green-500",
+        },
+        {
+          id: "3",
+          type: "download",
+          title: "Tải xuống file",
+          description: "Template React Dashboard",
+          date: new Date(Date.now() - 172800000).toISOString(),
+          icon: Download,
+          color: "text-purple-500",
+        },
+      ]);
     } catch (error) {
-      console.error("Upload error:", error);
+      console.error("Error fetching user data:", error);
       toast({
         variant: "destructive",
-        description: "Có lỗi xảy ra khi tải ảnh lên",
+        description: "Không thể tải dữ liệu người dùng",
       });
     } finally {
-      setIsUploadingAvatar(false);
-      setUploadProgress(0);
+      setIsLoading(false);
     }
-  };
-
-  const handleRemoveUploadedAvatar = () => {
-    setUploadedAvatarUrl(null);
-    setEditAvatar(user?.avatar || "");
   };
 
   if (!user) {
     return <Navigate to="/auth/login" replace />;
   }
 
-  const handleUpdateProfile = async () => {
-    setIsLoading(true);
-    try {
-      const success = await updateProfile({
-        name: editName,
-        avatar: uploadedAvatarUrl || editAvatar,
-      });
-
-      if (success) {
-        setUploadedAvatarUrl(null);
-        toast({ description: "Cập nhật hồ sơ thành công" });
-      } else {
-        throw new Error("Update failed");
-      }
-    } catch (err) {
-      setError("Cập nhật hồ sơ thất bại");
-      toast({ variant: "destructive", description: "Cập nhật hồ sơ thất bại" });
-    } finally {
-      setIsLoading(false);
+  const getMembershipColor = (level: string) => {
+    switch (level) {
+      case "Diamond":
+        return "from-cyan-500 to-blue-600";
+      case "Platinum":
+        return "from-gray-400 to-gray-600";
+      case "Gold":
+        return "from-yellow-400 to-yellow-600";
+      case "Silver":
+        return "from-gray-300 to-gray-400";
+      default:
+        return "from-orange-400 to-orange-600";
     }
   };
 
-  const handleChangePassword = async () => {
-    if (password !== confirmPassword) {
-      toast({ variant: "destructive", description: "Mật khẩu không khớp" });
-      return;
-    }
-    if (password.length < 8) {
-      toast({
-        variant: "destructive",
-        description: "Mật khẩu phải có ít nhất 8 ký tự",
-      });
-      return;
-    }
-
-    setIsLoading(true);
-    try {
-      const { error } = await supabase.auth.updateUser({ password });
-      if (error) throw new Error("Password change failed");
-      toast({ description: "Đổi mật khẩu thành công" });
-      setPassword("");
-      setConfirmPassword("");
-    } catch (err) {
-      setError("Đổi mật khẩu thất bại");
-      toast({ variant: "destructive", description: "Đổi mật khẩu thất bại" });
-    } finally {
-      setIsLoading(false);
+  const getMembershipIcon = (level: string) => {
+    switch (level) {
+      case "Diamond":
+        return "💎";
+      case "Platinum":
+        return "⭐";
+      case "Gold":
+        return "🏆";
+      case "Silver":
+        return "🥈";
+      default:
+        return "🥉";
     }
   };
 
-  const handleUpdateNotifications = async () => {
-    setIsLoading(true);
-    try {
-      const { error } = await supabase
-        .from("profiles")
-        .update({
-          email_notifications: emailNotifications,
-          order_notifications: orderNotifications,
-        })
-        .eq("id", user.id);
-      if (error) throw new Error("Failed to update notifications");
-      toast({ description: "Cập nhật thông báo thành công" });
-    } catch (err) {
-      setError("Cập nhật thông báo thất bại");
-      toast({
-        variant: "destructive",
-        description: "Cập nhật thông báo thất bại",
-      });
-    } finally {
-      setIsLoading(false);
-    }
-  };
-
-  const handleDownload = async (downloadId: string) => {
-    try {
-      const { data, error } = await supabase
-        .from("downloads")
-        .select("download_url")
-        .eq("id", downloadId)
-        .single();
-
-      if (error || !data?.download_url) throw new Error("Không tìm thấy file");
-
-      const url = data.download_url;
-      const link = document.createElement("a");
-      link.href = url;
-      link.target = "_blank";
-      link.rel = "noopener";
-      link.download = url.split("/").pop() || "download";
-      document.body.appendChild(link);
-      link.click();
-      document.body.removeChild(link);
-
-      toast({ description: "Bắt đầu tải file..." });
-    } catch (err) {
-      toast({
-        variant: "destructive",
-        description: "Tải file thất bại",
-      });
-    }
-  };
+  if (isLoading) {
+    return (
+      <div className="container px-4 py-8 mx-auto">
+        <div className="flex items-center justify-center min-h-[400px]">
+          <Loader2 className="w-8 h-8 animate-spin" />
+          <span className="ml-3 text-lg">Đang tải hồ sơ...</span>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="container px-4 py-8 mx-auto">
-      {error && (
-        <div className="p-4 mb-4 text-sm text-red-700 bg-red-100 rounded">
-          {error}
-        </div>
-      )}
+      <div className="max-w-6xl mx-auto space-y-8">
+        {/* Header Section */}
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          className="relative overflow-hidden bg-gradient-to-r from-purple-600 via-blue-600 to-cyan-600 rounded-3xl"
+        >
+          <div className="absolute inset-0 bg-black/20" />
+          <div className="relative p-8 text-white">
+            <div className="flex flex-col items-center gap-6 md:flex-row">
+              <div className="relative">
+                <Avatar className="w-32 h-32 border-4 shadow-2xl border-white/20">
+                  <AvatarImage src={user.avatar} />
+                  <AvatarFallback className="text-3xl bg-white/10">
+                    {getInitials(user.name)}
+                  </AvatarFallback>
+                </Avatar>
+                <Button
+                  size="sm"
+                  className="absolute bottom-0 right-0 w-8 h-8 p-0 bg-white/20 hover:bg-white/30"
+                >
+                  <Camera className="w-4 h-4" />
+                </Button>
+              </div>
 
-      <div className="grid gap-8 lg:grid-cols-4">
-        <div className="lg:col-span-1">
-          <Card>
-            <CardContent className="pt-6">
-              <div className="space-y-4 text-center">
-                <div className="relative w-20 h-20 mx-auto">
-                  <Avatar className="w-20 h-20">
-                    <AvatarImage
-                      src={uploadedAvatarUrl || editAvatar || user.avatar}
-                    />
-                    <AvatarFallback className="text-lg">
-                      {getInitials(user.name)}
-                    </AvatarFallback>
-                  </Avatar>
-
-                  {uploadedAvatarUrl && (
-                    <div className="absolute flex items-center justify-center w-6 h-6 bg-green-500 rounded-full -top-1 -right-1">
-                      <Camera className="w-3 h-3 text-white" />
-                    </div>
-                  )}
-                </div>
-
-                <div>
-                  <h3 className="text-lg font-semibold">{user.name}</h3>
-                  <p className="text-sm text-muted-foreground">{user.email}</p>
+              <div className="flex-1 text-center md:text-left">
+                <div className="flex items-center justify-center gap-3 mb-2 md:justify-start">
+                  <h1 className="text-4xl font-bold">{user.name}</h1>
                   <Badge
-                    variant={user.role === "admin" ? "default" : "secondary"}
-                    className="mt-2"
+                    className={`bg-gradient-to-r ${getMembershipColor(userStats?.membershipLevel || "Bronze")} text-white border-0`}
                   >
-                    {user.role === "admin" ? "Quản trị viên" : "Khách hàng"}
+                    {getMembershipIcon(userStats?.membershipLevel || "Bronze")}{" "}
+                    {userStats?.membershipLevel}
                   </Badge>
                 </div>
 
-                <div className="grid grid-cols-2 gap-4 text-center">
-                  <div>
-                    <div className="text-lg font-bold">
-                      {userStats?.totalOrders || 0}
-                    </div>
-                    <div className="text-xs text-muted-foreground">
-                      Đơn hàng
-                    </div>
+                <div className="flex flex-col gap-2 mb-4 text-white/80 md:flex-row md:items-center md:gap-6">
+                  <div className="flex items-center gap-2">
+                    <Mail className="w-4 h-4" />
+                    {user.email}
                   </div>
-                  <div>
-                    <div className="text-lg font-bold">
-                      {userStats?.totalDownloads || 0}
-                    </div>
-                    <div className="text-xs text-muted-foreground">
-                      Downloads
-                    </div>
+                  <div className="flex items-center gap-2">
+                    <Calendar className="w-4 h-4" />
+                    Thành viên từ{" "}
+                    {new Date(user.createdAt).toLocaleDateString("vi-VN")}
+                  </div>
+                  <div className="flex items-center gap-2">
+                    <Activity className="w-4 h-4" />
+                    Hoạt động {userStats?.accountAge || 0} ngày
                   </div>
                 </div>
-              </div>
-            </CardContent>
-          </Card>
 
-          <Card className="mt-6">
-            <CardHeader>
-              <CardTitle className="text-lg">Thống kê</CardTitle>
-            </CardHeader>
-            <CardContent className="space-y-4">
-              <div className="flex items-center justify-between">
-                <div className="flex items-center space-x-2">
-                  <CreditCard className="w-4 h-4 text-muted-foreground" />
-                  <span className="text-sm">Tổng chi tiêu</span>
+                <div className="flex flex-wrap gap-4">
+                  <div className="flex items-center gap-2 px-4 py-2 rounded-full bg-white/10">
+                    <Trophy className="w-4 h-4" />
+                    <span className="font-medium">
+                      {userStats?.loyaltyPoints || 0} điểm
+                    </span>
+                  </div>
+                  <div className="flex items-center gap-2 px-4 py-2 rounded-full bg-white/10">
+                    <Award className="w-4 h-4" />
+                    <span className="font-medium">
+                      {achievements.filter((a) => a.unlocked).length} thành tích
+                    </span>
+                  </div>
                 </div>
-                <span className="font-medium">
-                  {formatPrice(userStats?.totalSpent || 0)}
-                </span>
               </div>
-              <div className="flex items-center justify-between">
-                <div className="flex items-center space-x-2">
-                  <Calendar className="w-4 h-4 text-muted-foreground" />
-                  <span className="text-sm">Thành viên từ</span>
-                </div>
-                <span className="font-medium">
-                  {userStats?.memberSince
-                    ? new Date(userStats.memberSince).toLocaleDateString(
-                        "vi-VN",
-                      )
-                    : "-"}
-                </span>
+
+              <div className="flex gap-3">
+                <Button variant="secondary" size="sm" asChild>
+                  <Link to="/settings">
+                    <Settings className="w-4 h-4 mr-2" />
+                    Cài đặt
+                  </Link>
+                </Button>
+                <Button variant="secondary" size="sm" asChild>
+                  <Link to="/profile/edit">
+                    <Edit className="w-4 h-4 mr-2" />
+                    Chỉnh sửa
+                  </Link>
+                </Button>
               </div>
-            </CardContent>
-          </Card>
+            </div>
+          </div>
+        </motion.div>
+
+        {/* Navigation Tabs */}
+        <div className="flex gap-2 p-1 bg-gray-100 rounded-lg dark:bg-gray-800">
+          {[
+            { id: "overview", label: "Tổng quan", icon: BarChart3 },
+            { id: "stats", label: "Thống kê", icon: TrendingUp },
+            { id: "achievements", label: "Thành tích", icon: Trophy },
+            { id: "activity", label: "Hoạt động", icon: Activity },
+          ].map((tab) => (
+            <Button
+              key={tab.id}
+              variant={activeTab === tab.id ? "default" : "ghost"}
+              size="sm"
+              onClick={() => setActiveTab(tab.id as any)}
+              className="flex-1"
+            >
+              <tab.icon className="w-4 h-4 mr-2" />
+              {tab.label}
+            </Button>
+          ))}
         </div>
 
-        <div className="lg:col-span-3">
-          <Tabs defaultValue="orders" className="space-y-6">
-            <TabsList className="grid w-full grid-cols-3">
-              <TabsTrigger
-                value="orders"
-                className="flex items-center space-x-2"
-              >
-                <ShoppingBag className="w-4 h-4" />
-                <span>Đơn hàng</span>
-              </TabsTrigger>
-              <TabsTrigger
-                value="downloads"
-                className="flex items-center space-x-2"
-              >
-                <Download className="w-4 h-4" />
-                <span>Downloads</span>
-              </TabsTrigger>
-              <TabsTrigger
-                value="settings"
-                className="flex items-center space-x-2"
-              >
-                <Settings className="w-4 h-4" />
-                <span>Cài đặt</span>
-              </TabsTrigger>
-            </TabsList>
-
-            {/* Orders Tab */}
-            <TabsContent value="orders">
-              <Card>
-                <CardHeader>
-                  <CardTitle>Lịch sử đơn hàng</CardTitle>
-                </CardHeader>
-                <CardContent>
-                  {isLoading ? (
-                    <div className="flex items-center justify-center py-8">
-                      <Loader2 className="w-6 h-6 animate-spin" />
-                      <span className="ml-2">Đang tải...</span>
-                    </div>
-                  ) : (
-                    <div className="space-y-4">
-                      {recentOrders.map((order) => (
-                        <div key={order.id} className="p-4 border rounded-lg">
-                          <div className="flex items-start justify-between mb-3">
-                            <div>
-                              <h4 className="font-medium">
-                                Đơn hàng #{order.id.slice(0, 8)}
-                              </h4>
-                              <p className="text-sm text-muted-foreground">
-                                {new Date(order.created_at).toLocaleDateString(
-                                  "vi-VN",
-                                )}
-                              </p>
-                            </div>
-                            <div className="text-right">
-                              <div className="font-medium">
-                                {formatPrice(order.total_price)}
-                              </div>
-                              <Badge
-                                variant={
-                                  order.status === "completed"
-                                    ? "default"
-                                    : "secondary"
-                                }
-                              >
-                                {order.status === "completed"
-                                  ? "Hoàn thành"
-                                  : "Đang xử lý"}
-                              </Badge>
-                            </div>
-                          </div>
-                          <div className="space-y-1">
-                            {order.items.map((item, index) => (
-                              <div
-                                key={index}
-                                className="flex items-center space-x-2 text-sm"
-                              >
-                                {item.product ? (
-                                  <>
-                                    {item.product.category === "template" ? (
-                                      <FileText className="w-4 h-4 text-blue-500" />
-                                    ) : (
-                                      <Download className="w-4 h-4 text-green-500" />
-                                    )}
-                                    <span>{item.product.title}</span>
-                                    <Badge
-                                      variant="outline"
-                                      className="text-xs"
-                                    >
-                                      {item.product.category === "template"
-                                        ? "Template"
-                                        : "E-book"}
-                                    </Badge>
-                                  </>
-                                ) : (
-                                  <span className="italic text-muted-foreground">
-                                    Sản phẩm đã bị xóa
-                                  </span>
-                                )}
-                              </div>
-                            ))}
-                          </div>
-                        </div>
-                      ))}
-                    </div>
-                  )}
-                </CardContent>
-              </Card>
-            </TabsContent>
-
-            {/* Downloads Tab */}
-            <TabsContent value="downloads">
-              <Card>
-                <CardHeader>
-                  <CardTitle>Downloads của tôi</CardTitle>
-                </CardHeader>
-                <CardContent>
-                  {isLoading ? (
-                    <div className="flex items-center justify-center py-8">
-                      <Loader2 className="w-6 h-6 animate-spin" />
-                      <span className="ml-2">Đang tải...</span>
-                    </div>
-                  ) : (
-                    <div className="space-y-4">
-                      {downloads?.map((download) => (
-                        <div
-                          key={download.id}
-                          className="p-4 border rounded-lg"
-                        >
-                          <div className="flex items-center justify-between">
-                            <div className="flex items-center space-x-3">
-                              {download.type === "template" ? (
-                                <FileText className="w-8 h-8 text-blue-500" />
-                              ) : (
-                                <Download className="w-8 h-8 text-green-500" />
-                              )}
-                              <div>
-                                <h4 className="font-medium">{download.name}</h4>
-                                <div className="flex items-center space-x-2 text-sm text-muted-foreground">
-                                  <span>
-                                    Tải ngày{" "}
-                                    {new Date(
-                                      download.downloadDate,
-                                    ).toLocaleDateString("vi-VN")}
-                                  </span>
-                                  <span>•</span>
-                                  <span>{download.fileSize || "Unknown"}</span>
-                                </div>
-                              </div>
-                            </div>
-                            <Button
-                              size="sm"
-                              variant="outline"
-                              onClick={() => handleDownload(download.id)}
-                              disabled={isLoading}
-                            >
-                              <Download className="w-4 h-4 mr-2" />
-                              Tải lại
-                            </Button>
-                          </div>
-                        </div>
-                      ))}
-                    </div>
-                  )}
-                </CardContent>
-              </Card>
-            </TabsContent>
-
-            {/* Settings Tab */}
-            <TabsContent value="settings">
-              <div className="space-y-6">
-                {/* Avatar Upload Card */}
-                <Card>
-                  <CardHeader>
-                    <CardTitle className="flex items-center gap-2">
-                      <Camera className="w-5 h-5" />
-                      Ảnh đại diện
-                    </CardTitle>
-                  </CardHeader>
-                  <CardContent className="space-y-4">
-                    <div className="flex items-center gap-6">
-                      <Avatar className="w-24 h-24">
-                        <AvatarImage
-                          src={uploadedAvatarUrl || editAvatar || user.avatar}
-                        />
-                        <AvatarFallback className="text-xl">
-                          {getInitials(user.name)}
-                        </AvatarFallback>
-                      </Avatar>
-
-                      <div className="flex-1 space-y-3">
-                        <div>
-                          <Label
-                            htmlFor="avatar-upload"
-                            className="text-sm font-medium"
-                          >
-                            Tải ảnh mới
-                          </Label>
-                          <Input
-                            id="avatar-upload"
-                            type="file"
-                            accept="image/*"
-                            onChange={handleAvatarUpload}
-                            disabled={isUploadingAvatar || isLoading}
-                            className="mt-1"
-                          />
-                        </div>
-
-                        {isUploadingAvatar && (
-                          <div className="space-y-2">
-                            <div className="flex items-center gap-2 text-sm text-muted-foreground">
-                              <Loader2 className="w-4 h-4 animate-spin" />
-                              <span>Đang tải lên... {uploadProgress}%</span>
-                            </div>
-                            <div className="w-full h-2 bg-gray-200 rounded-full">
-                              <div
-                                className="h-2 transition-all duration-300 bg-blue-600 rounded-full"
-                                style={{ width: `${uploadProgress}%` }}
-                              ></div>
-                            </div>
-                          </div>
-                        )}
-
-                        {uploadedAvatarUrl && (
-                          <div className="flex items-center justify-between p-3 border border-green-200 rounded bg-green-50">
-                            <div className="flex items-center gap-2">
-                              <div className="w-2 h-2 bg-green-500 rounded-full"></div>
-                              <span className="text-sm text-green-800">
-                                ✓ Ảnh mới đã được tải lên
-                              </span>
-                            </div>
-                            <Button
-                              variant="ghost"
-                              size="sm"
-                              onClick={handleRemoveUploadedAvatar}
-                            >
-                              <X className="w-4 h-4" />
-                            </Button>
-                          </div>
-                        )}
-                      </div>
-                    </div>
-
-                    {/* Drag & Drop Area */}
-                    <div
-                      className="p-6 text-center transition-colors border-2 border-dashed rounded-lg cursor-pointer border-muted hover:border-primary/50"
-                      onClick={() =>
-                        document.getElementById("avatar-upload")?.click()
-                      }
-                      onDragOver={(e) => {
-                        e.preventDefault();
-                        e.currentTarget.classList.add("border-primary");
-                      }}
-                      onDragLeave={(e) => {
-                        e.preventDefault();
-                        e.currentTarget.classList.remove("border-primary");
-                      }}
-                      onDrop={async (e) => {
-                        e.preventDefault();
-                        e.currentTarget.classList.remove("border-primary");
-
-                        const files = Array.from(e.dataTransfer.files);
-                        const file = files[0];
-
-                        if (!file || !file.type.startsWith("image/")) {
-                          toast({
-                            variant: "destructive",
-                            description: "Vui lòng chọn file ảnh hợp lệ",
-                          });
-                          return;
-                        }
-
-                        const input = document.getElementById(
-                          "avatar-upload",
-                        ) as HTMLInputElement;
-                        if (input) {
-                          const dt = new DataTransfer();
-                          dt.items.add(file);
-                          input.files = dt.files;
-                          handleAvatarUpload({ target: input } as any);
-                        }
-                      }}
-                    >
-                      <Upload className="w-8 h-8 mx-auto mb-2 text-muted-foreground" />
-                      <p className="mb-1 text-sm text-muted-foreground">
-                        Kéo thả hoặc click để tải ảnh lên
+        {/* Content based on active tab */}
+        <motion.div
+          key={activeTab}
+          initial={{ opacity: 0, x: 20 }}
+          animate={{ opacity: 1, x: 0 }}
+          transition={{ duration: 0.3 }}
+        >
+          {activeTab === "overview" && (
+            <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-4">
+              {/* Quick Stats Cards */}
+              <Card className="overflow-hidden">
+                <CardContent className="p-6">
+                  <div className="flex items-center justify-between">
+                    <div>
+                      <p className="text-sm font-medium text-muted-foreground">
+                        Tổng đơn hàng
                       </p>
-                      <p className="text-xs text-muted-foreground">
-                        PNG, JPG, WEBP tối đa 5MB
+                      <p className="text-3xl font-bold">
+                        {userStats?.totalOrders || 0}
                       </p>
                     </div>
-                  </CardContent>
-                </Card>
-
-                {/* Personal Info Card */}
-                <Card>
-                  <CardHeader>
-                    <CardTitle>Thông tin cá nhân</CardTitle>
-                  </CardHeader>
-                  <CardContent className="space-y-4">
-                    <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
-                      <div>
-                        <Label htmlFor="name" className="text-sm font-medium">
-                          Họ và tên
-                        </Label>
-                        <Input
-                          id="name"
-                          className="mt-1"
-                          value={editName}
-                          onChange={(e) => setEditName(e.target.value)}
-                          disabled={isLoading}
-                        />
-                      </div>
-                      <div>
-                        <Label
-                          htmlFor="avatar-url"
-                          className="text-sm font-medium"
-                        >
-                          Avatar URL (tùy chọn)
-                        </Label>
-                        <Input
-                          id="avatar-url"
-                          className="mt-1"
-                          value={editAvatar}
-                          onChange={(e) => setEditAvatar(e.target.value)}
-                          placeholder="https://example.com/avatar.jpg"
-                          disabled={isLoading}
-                        />
-                      </div>
+                    <div className="p-3 bg-blue-100 rounded-full dark:bg-blue-900">
+                      <ShoppingBag className="w-6 h-6 text-blue-600 dark:text-blue-400" />
                     </div>
-                    <Button
-                      onClick={handleUpdateProfile}
-                      disabled={isLoading || isUploadingAvatar}
-                    >
-                      {isLoading ? (
-                        <>
-                          <Loader2 className="w-4 h-4 mr-2 animate-spin" />
-                          Đang cập nhật...
-                        </>
-                      ) : (
-                        "Cập nhật thông tin"
+                  </div>
+                  <div className="mt-4">
+                    <div className="flex items-center gap-2 text-sm">
+                      <TrendingUp className="w-4 h-4 text-green-500" />
+                      <span className="text-green-500">+12%</span>
+                      <span className="text-muted-foreground">
+                        so với tháng trước
+                      </span>
+                    </div>
+                  </div>
+                </CardContent>
+              </Card>
+
+              <Card className="overflow-hidden">
+                <CardContent className="p-6">
+                  <div className="flex items-center justify-between">
+                    <div>
+                      <p className="text-sm font-medium text-muted-foreground">
+                        Tổng chi tiêu
+                      </p>
+                      <p className="text-3xl font-bold">
+                        {formatPrice(userStats?.totalSpent || 0)}
+                      </p>
+                    </div>
+                    <div className="p-3 bg-green-100 rounded-full dark:bg-green-900">
+                      <CreditCard className="w-6 h-6 text-green-600 dark:text-green-400" />
+                    </div>
+                  </div>
+                  <div className="mt-4">
+                    <div className="flex items-center gap-2 text-sm">
+                      <Target className="w-4 h-4 text-blue-500" />
+                      <span className="text-muted-foreground">
+                        Mục tiêu: 50M VNĐ
+                      </span>
+                    </div>
+                    <Progress
+                      value={Math.min(
+                        ((userStats?.totalSpent || 0) / 50000000) * 100,
+                        100,
                       )}
-                    </Button>
-                  </CardContent>
-                </Card>
+                      className="mt-2"
+                    />
+                  </div>
+                </CardContent>
+              </Card>
 
-                {/* Security Card */}
-                <Card>
-                  <CardHeader>
-                    <CardTitle>Bảo mật</CardTitle>
-                  </CardHeader>
-                  <CardContent className="space-y-4">
-                    <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
-                      <div>
-                        <Label
-                          htmlFor="password"
-                          className="text-sm font-medium"
-                        >
-                          Mật khẩu mới
-                        </Label>
-                        <div className="relative mt-1">
-                          <Input
-                            id="password"
-                            type={showPassword ? "text" : "password"}
-                            value={password}
-                            onChange={(e) => setPassword(e.target.value)}
-                            disabled={isLoading}
-                          />
-                          <Button
-                            type="button"
-                            variant="ghost"
-                            size="sm"
-                            className="absolute top-0 right-0 h-full px-3 py-2 hover:bg-transparent"
-                            onClick={() => setShowPassword(!showPassword)}
-                          >
-                            {showPassword ? (
-                              <EyeOff className="w-4 h-4" />
-                            ) : (
-                              <Eye className="w-4 h-4" />
-                            )}
-                          </Button>
-                        </div>
+              <Card className="overflow-hidden">
+                <CardContent className="p-6">
+                  <div className="flex items-center justify-between">
+                    <div>
+                      <p className="text-sm font-medium text-muted-foreground">
+                        Downloads
+                      </p>
+                      <p className="text-3xl font-bold">
+                        {userStats?.totalDownloads || 0}
+                      </p>
+                    </div>
+                    <div className="p-3 bg-purple-100 rounded-full dark:bg-purple-900">
+                      <Download className="w-6 h-6 text-purple-600 dark:text-purple-400" />
+                    </div>
+                  </div>
+                  <div className="mt-4">
+                    <div className="flex items-center gap-2 text-sm">
+                      <Zap className="w-4 h-4 text-yellow-500" />
+                      <span className="text-muted-foreground">
+                        Trung bình 5 files/tháng
+                      </span>
+                    </div>
+                  </div>
+                </CardContent>
+              </Card>
+
+              <Card className="overflow-hidden">
+                <CardContent className="p-6">
+                  <div className="flex items-center justify-between">
+                    <div>
+                      <p className="text-sm font-medium text-muted-foreground">
+                        Điểm thưởng
+                      </p>
+                      <p className="text-3xl font-bold">
+                        {userStats?.loyaltyPoints || 0}
+                      </p>
+                    </div>
+                    <div className="p-3 bg-yellow-100 rounded-full dark:bg-yellow-900">
+                      <Gift className="w-6 h-6 text-yellow-600 dark:text-yellow-400" />
+                    </div>
+                  </div>
+                  <div className="mt-4">
+                    <Button size="sm" variant="outline" className="w-full">
+                      <Gift className="w-4 h-4 mr-2" />
+                      Đổi quà
+                    </Button>
+                  </div>
+                </CardContent>
+              </Card>
+            </div>
+          )}
+
+          {activeTab === "stats" && (
+            <div className="grid gap-6 md:grid-cols-2">
+              <Card>
+                <CardHeader>
+                  <CardTitle className="flex items-center gap-2">
+                    <BarChart3 className="w-5 h-5" />
+                    Thống kê chi tiết
+                  </CardTitle>
+                </CardHeader>
+                <CardContent className="space-y-4">
+                  <div className="flex items-center justify-between">
+                    <span className="text-sm font-medium">
+                      Đơn hàng hoàn thành
+                    </span>
+                    <span className="font-bold">
+                      {userStats?.completedOrders || 0}/
+                      {userStats?.totalOrders || 0}
+                    </span>
+                  </div>
+                  <Progress
+                    value={
+                      userStats?.totalOrders
+                        ? (userStats.completedOrders / userStats.totalOrders) *
+                          100
+                        : 0
+                    }
+                  />
+
+                  <Separator />
+
+                  <div className="space-y-3">
+                    <div className="flex items-center justify-between">
+                      <span className="text-sm">Danh mục yêu thích</span>
+                      <Badge variant="secondary">
+                        {userStats?.favoriteCategory}
+                      </Badge>
+                    </div>
+                    <div className="flex items-center justify-between">
+                      <span className="text-sm">Tỷ lệ thành công</span>
+                      <span className="font-medium">
+                        {userStats?.totalOrders
+                          ? Math.round(
+                              (userStats.completedOrders /
+                                userStats.totalOrders) *
+                                100,
+                            )
+                          : 0}
+                        %
+                      </span>
+                    </div>
+                    <div className="flex items-center justify-between">
+                      <span className="text-sm">Chi tiêu trung bình</span>
+                      <span className="font-medium">
+                        {formatPrice(
+                          userStats?.totalOrders
+                            ? userStats.totalSpent / userStats.totalOrders
+                            : 0,
+                        )}
+                      </span>
+                    </div>
+                  </div>
+                </CardContent>
+              </Card>
+
+              <Card>
+                <CardHeader>
+                  <CardTitle className="flex items-center gap-2">
+                    <Crown className="w-5 h-5" />
+                    Cấp độ thành viên
+                  </CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <div className="space-y-4 text-center">
+                    <div className="text-6xl">
+                      {getMembershipIcon(
+                        userStats?.membershipLevel || "Bronze",
+                      )}
+                    </div>
+                    <div>
+                      <h3 className="text-2xl font-bold">
+                        {userStats?.membershipLevel}
+                      </h3>
+                      <p className="text-muted-foreground">
+                        Thành viên {userStats?.membershipLevel}
+                      </p>
+                    </div>
+
+                    <div className="space-y-2">
+                      <div className="flex justify-between text-sm">
+                        <span>Tiến độ lên hạng</span>
+                        <span>75%</span>
                       </div>
-                      <div>
-                        <Label
-                          htmlFor="confirmPassword"
-                          className="text-sm font-medium"
-                        >
-                          Xác nhận mật khẩu
-                        </Label>
-                        <div className="relative mt-1">
-                          <Input
-                            id="confirmPassword"
-                            type={showConfirmPassword ? "text" : "password"}
-                            value={confirmPassword}
-                            onChange={(e) => setConfirmPassword(e.target.value)}
-                            disabled={isLoading}
-                          />
-                          <Button
-                            type="button"
-                            variant="ghost"
-                            size="sm"
-                            className="absolute top-0 right-0 h-full px-3 py-2 hover:bg-transparent"
-                            onClick={() =>
-                              setShowConfirmPassword(!showConfirmPassword)
+                      <Progress value={75} />
+                      <p className="text-xs text-muted-foreground">
+                        Chi tiêu thêm {formatPrice(5000000)} để lên hạng Gold
+                      </p>
+                    </div>
+
+                    <Button className="w-full" variant="outline">
+                      <TrendingUp className="w-4 h-4 mr-2" />
+                      Xem quyền lợi
+                    </Button>
+                  </div>
+                </CardContent>
+              </Card>
+            </div>
+          )}
+
+          {activeTab === "achievements" && (
+            <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
+              {achievements.map((achievement) => (
+                <Card
+                  key={achievement.id}
+                  className={`overflow-hidden ${achievement.unlocked ? "border-green-200 bg-green-50 dark:bg-green-950" : "opacity-60"}`}
+                >
+                  <CardContent className="p-6">
+                    <div className="flex items-start gap-4">
+                      <div
+                        className={`p-3 rounded-full ${achievement.unlocked ? "bg-green-100 dark:bg-green-900" : "bg-gray-100 dark:bg-gray-800"}`}
+                      >
+                        <achievement.icon
+                          className={`w-6 h-6 ${achievement.unlocked ? achievement.color : "text-gray-400"}`}
+                        />
+                      </div>
+                      <div className="flex-1">
+                        <div className="flex items-center gap-2 mb-2">
+                          <h3 className="font-semibold">{achievement.title}</h3>
+                          {achievement.unlocked && (
+                            <CheckCircle className="w-4 h-4 text-green-500" />
+                          )}
+                        </div>
+                        <p className="mb-3 text-sm text-muted-foreground">
+                          {achievement.description}
+                        </p>
+                        <div className="space-y-1">
+                          <div className="flex justify-between text-xs">
+                            <span>Tiến độ</span>
+                            <span>
+                              {achievement.progress}/{achievement.maxProgress}
+                            </span>
+                          </div>
+                          <Progress
+                            value={
+                              (achievement.progress / achievement.maxProgress) *
+                              100
                             }
-                          >
-                            {showConfirmPassword ? (
-                              <EyeOff className="w-4 h-4" />
-                            ) : (
-                              <Eye className="w-4 h-4" />
-                            )}
-                          </Button>
+                            className="h-2"
+                          />
                         </div>
                       </div>
                     </div>
-                    <Button onClick={handleChangePassword} disabled={isLoading}>
-                      <Lock className="w-4 h-4 mr-2" />
-                      Đổi mật khẩu
-                    </Button>
                   </CardContent>
                 </Card>
+              ))}
+            </div>
+          )}
 
-                {/* Notifications Card */}
-                <Card>
-                  <CardHeader>
-                    <CardTitle>Thông báo</CardTitle>
-                  </CardHeader>
-                  <CardContent className="space-y-4">
-                    <div className="flex items-center justify-between">
-                      <div>
-                        <h4 className="font-medium">Email marketing</h4>
-                        <p className="text-sm text-muted-foreground">
-                          Nhận thông tin về sản phẩm mới và khuyến mãi
-                        </p>
-                      </div>
-                      <Switch
-                        checked={emailNotifications}
-                        onCheckedChange={setEmailNotifications}
-                        disabled={isLoading}
-                      />
-                    </div>
-                    <div className="flex items-center justify-between">
-                      <div>
-                        <h4 className="font-medium">Thông báo đơn hàng</h4>
-                        <p className="text-sm text-muted-foreground">
-                          Nhận thông báo về trạng thái đơn hàng
-                        </p>
-                      </div>
-                      <Switch
-                        checked={orderNotifications}
-                        onCheckedChange={setOrderNotifications}
-                        disabled={isLoading}
-                      />
-                    </div>
-                    <Button
-                      onClick={handleUpdateNotifications}
-                      disabled={isLoading}
+          {activeTab === "activity" && (
+            <Card>
+              <CardHeader>
+                <CardTitle className="flex items-center gap-2">
+                  <Activity className="w-5 h-5" />
+                  Hoạt động gần đây
+                </CardTitle>
+              </CardHeader>
+              <CardContent>
+                <div className="space-y-4">
+                  {recentActivity.map((activity) => (
+                    <div
+                      key={activity.id}
+                      className="flex items-start gap-4 p-4 border rounded-lg"
                     >
-                      <Mail className="w-4 h-4 mr-2" />
-                      Cập nhật thông báo
-                    </Button>
-                  </CardContent>
-                </Card>
-              </div>
-            </TabsContent>
-          </Tabs>
-        </div>
+                      <div
+                        className={`p-2 rounded-full bg-gray-100 dark:bg-gray-800`}
+                      >
+                        <activity.icon
+                          className={`w-4 h-4 ${activity.color}`}
+                        />
+                      </div>
+                      <div className="flex-1">
+                        <h4 className="font-medium">{activity.title}</h4>
+                        <p className="text-sm text-muted-foreground">
+                          {activity.description}
+                        </p>
+                        <div className="flex items-center gap-2 mt-2 text-xs text-muted-foreground">
+                          <Clock className="w-3 h-3" />
+                          {new Date(activity.date).toLocaleString("vi-VN")}
+                        </div>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </CardContent>
+            </Card>
+          )}
+        </motion.div>
+
+        {/* Quick Actions */}
+        <Card>
+          <CardHeader>
+            <CardTitle>Hành động nhanh</CardTitle>
+          </CardHeader>
+          <CardContent>
+            <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
+              <Button variant="outline" className="h-auto p-4" asChild>
+                <Link to="/my-orders">
+                  <div className="text-center">
+                    <ShoppingBag className="w-8 h-8 mx-auto mb-2 text-blue-500" />
+                    <div className="font-medium">Đơn hàng</div>
+                    <div className="text-sm text-muted-foreground">
+                      Quản lý đơn hàng
+                    </div>
+                  </div>
+                </Link>
+              </Button>
+
+              <Button variant="outline" className="h-auto p-4" asChild>
+                <Link to="/downloads">
+                  <div className="text-center">
+                    <Download className="w-8 h-8 mx-auto mb-2 text-green-500" />
+                    <div className="font-medium">Downloads</div>
+                    <div className="text-sm text-muted-foreground">
+                      Tải xuống files
+                    </div>
+                  </div>
+                </Link>
+              </Button>
+
+              <Button variant="outline" className="h-auto p-4" asChild>
+                <Link to="/settings">
+                  <div className="text-center">
+                    <Settings className="w-8 h-8 mx-auto mb-2 text-purple-500" />
+                    <div className="font-medium">Cài đặt</div>
+                    <div className="text-sm text-muted-foreground">
+                      Tùy chỉnh tài khoản
+                    </div>
+                  </div>
+                </Link>
+              </Button>
+
+              <Button variant="outline" className="h-auto p-4" asChild>
+                <Link to="/templates">
+                  <div className="text-center">
+                    <FileText className="w-8 h-8 mx-auto mb-2 text-orange-500" />
+                    <div className="font-medium">Mua sắm</div>
+                    <div className="text-sm text-muted-foreground">
+                      Khám phá sản phẩm
+                    </div>
+                  </div>
+                </Link>
+              </Button>
+            </div>
+          </CardContent>
+        </Card>
       </div>
     </div>
   );

@@ -81,6 +81,17 @@ export interface Download {
   downloadDate: string;
   fileSize?: string;
   downloadUrl: string;
+  download_date: string; // ✅ snake_case như database
+  file_size?: string;
+}
+
+export interface DownloadUI extends Download {
+  // Computed properties for easier frontend access
+  downloadDate: string; // camelCase alias
+  fileSize?: string; // camelCase alias
+  downloadUrl: string; // camelCase alias
+  userId: string; // camelCase alias
+  productId?: string; // camelCase alias
 }
 
 export interface AuthContextType {
