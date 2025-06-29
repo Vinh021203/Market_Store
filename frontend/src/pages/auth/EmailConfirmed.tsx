@@ -1,4 +1,3 @@
-// pages/auth/EmailConfirmed.tsx
 import React, { useEffect, useState } from "react";
 import { useNavigate, useSearchParams } from "react-router-dom";
 import { supabase } from "@/lib/supabase";

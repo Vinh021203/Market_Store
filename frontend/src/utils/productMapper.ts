@@ -1,4 +1,3 @@
-// utils/productMapper.ts
 import { Product } from "@/types";
 
 export function toDbProduct(product: Partial<Product>) {

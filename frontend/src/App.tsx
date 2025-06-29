@@ -17,6 +17,7 @@ import { WishlistProvider } from "@/hooks/useWishlist";
 import { LoadingProvider } from "@/contexts/LoadingContext";
 import Layout from "@/components/Layout";
 import AdminLayout from "@/components/admin/AdminLayout";
+import AdminChatPanel from "@/pages/admin/AdminChatPanel";
 import PageTransition from "@/components/PageTransition";
 import GlobalLoading from "@/components/GlobalLoading";
 import { isAdmin } from "@/lib/auth";
@@ -467,6 +468,16 @@ const AppRoutes = () => {
           }
         />
         <Route
+          path="chat"
+          element={
+            <Suspense fallback={<GlobalLoading />}>
+              <PageTransition>
+                <AdminChatPanel />
+              </PageTransition>
+            </Suspense>
+          }
+        />
+        <Route
           path="blog"
           element={
             <Suspense fallback={<GlobalLoading />}>
@@ -541,7 +552,7 @@ const AppRoutes = () => {
           element={
             <Suspense fallback={<GlobalLoading />}>
               <PageTransition>
-                <AdminSettings /> {/* ✅ Sử dụng AdminSettings */}
+                <AdminSettings />
               </PageTransition>
             </Suspense>
           }
@@ -576,7 +587,12 @@ const App = () => (
               <LoadingProvider>
                 <Toaster />
                 <Sonner />
-                <BrowserRouter>
+                <BrowserRouter
+                  future={{
+                    v7_startTransition: true,
+                    v7_relativeSplatPath: true,
+                  }}
+                >
                   <AppRoutes />
                 </BrowserRouter>
               </LoadingProvider>

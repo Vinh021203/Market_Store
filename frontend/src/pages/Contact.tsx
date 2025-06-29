@@ -892,9 +892,9 @@ const Contact: React.FC = () => {
                       className="justify-start w-full"
                       asChild
                     >
-                      <a href="tel:+84123456789">
+                      <a href="tel:+84971386588">
                         <Phone className="w-4 h-4 mr-2" />
-                        Gọi ngay: +84 123 456 789
+                        Gọi ngay: +84 971.386.588
                       </a>
                     </Button>
                     <Button
@@ -1205,9 +1205,9 @@ const Contact: React.FC = () => {
                 asChild
                 className="transition-all duration-300 group hover:scale-105 hover:shadow-2xl"
               >
-                <a href="tel:+84123456789">
+                <a href="tel:+84971386588">
                   <Phone className="w-5 h-5 mr-2 group-hover:animate-bounce" />
-                  Gọi ngay: +84 123 456 789
+                  Gọi ngay: +84 971 386 588
                 </a>
               </Button>
               <Button

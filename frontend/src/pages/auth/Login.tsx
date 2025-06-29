@@ -1,3 +1,4 @@
+// pages/auth/Login.tsx - Modern design tương tự Register
 import React, { useState } from "react";
 import { Link, useNavigate, useLocation } from "react-router-dom";
 import { useForm } from "react-hook-form";
@@ -26,8 +27,14 @@ import {
   Shield,
   Sparkles,
   CheckCircle,
+  Star,
+  Trophy,
+  Zap,
+  LayoutGrid,
+  Users,
+  Code,
+  Palette,
   ArrowLeft,
-  Home,
 } from "lucide-react";
 import { toast } from "@/hooks/use-toast";
 import { motion } from "framer-motion";
@@ -103,97 +110,252 @@ const Login: React.FC = () => {
     }
   };
 
+  // ✅ Animation variants
+  const textRevealVariants = {
+    hidden: { opacity: 0, y: 30 },
+    visible: {
+      opacity: 1,
+      y: 0,
+      transition: {
+        type: "spring" as const,
+        damping: 10,
+        stiffness: 100,
+        staggerChildren: 0.1,
+      },
+    },
+  };
+
+  const itemSlideInVariants = {
+    hidden: { opacity: 0, x: -30 },
+    visible: { opacity: 1, x: 0, transition: { duration: 0.5 } },
+  };
+
   return (
     <div className="flex min-h-screen">
-      {/* Back to Home Button - Fixed Position */}
+      {/* ✅ Back to Home Button - Fixed Position */}
       <div className="fixed z-50 top-6 left-6">
         <Button
           variant="outline"
           size="sm"
           onClick={() => navigate("/")}
-          className="border-gray-200 shadow-lg bg-white/90 backdrop-blur-sm hover:bg-white"
+          className="text-white shadow-lg border-white/20 bg-white/10 backdrop-blur-sm hover:bg-white/20"
         >
           <ArrowLeft className="w-4 h-4 mr-2" />
           Về trang chủ
         </Button>
       </div>
 
-      {/* Left Side - Branding */}
-      <div className="relative hidden overflow-hidden lg:flex lg:w-1/2 bg-gradient-to-br from-blue-600 via-purple-600 to-indigo-700">
-        <div className="absolute inset-0 bg-black/20"></div>
-        <div className="relative z-10 flex flex-col justify-center px-12 text-white">
+      {/* ✅ Left Side - Enhanced Branding (Tương tự Register) */}
+      <div className="relative hidden w-1/2 overflow-hidden bg-slate-900 lg:flex">
+        {/* ✅ Enhanced Background */}
+        <motion.div
+          className="absolute inset-0 z-0"
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          transition={{ duration: 1.5 }}
+          style={{
+            background: `
+              radial-gradient(at 20% 50%, hsla(240, 70%, 40%, 0.8) 0px, transparent 50%),
+              radial-gradient(at 80% 30%, hsla(250, 70%, 45%, 0.7) 0px, transparent 50%),
+              radial-gradient(at 50% 90%, hsla(260, 70%, 50%, 0.6) 0px, transparent 50%)
+            `,
+            backgroundSize: "200% 200%",
+            animation: "gradientShift 30s ease infinite",
+          }}
+        />
+
+        {/* ✅ Floating Shapes */}
+        <motion.div
+          className="absolute w-40 h-40 rounded-full bg-indigo-400/10 blur-xl"
+          style={{ top: "10%", left: "15%" }}
+          animate={{
+            y: ["0%", "10%", "0%"],
+            x: ["0%", "5%", "0%"],
+            rotate: [0, 5, 0, -5, 0],
+            scale: [1, 1.02, 1],
+            opacity: [0.3, 0.4, 0.3],
+          }}
+          transition={{
+            duration: 15,
+            repeat: Infinity,
+            repeatType: "reverse" as const,
+            ease: "easeInOut" as const,
+          }}
+        />
+        <motion.div
+          className="absolute rounded-full h-60 w-60 bg-purple-400/10 blur-xl"
+          style={{ bottom: "5%", right: "20%" }}
+          animate={{
+            y: ["0%", "-10%", "0%"],
+            x: ["0%", "-5%", "0%"],
+            rotate: [0, -5, 0, 5, 0],
+            scale: [1, 1.03, 1],
+            opacity: [0.3, 0.5, 0.3],
+          }}
+          transition={{
+            duration: 18,
+            repeat: Infinity,
+            repeatType: "reverse" as const,
+            ease: "easeInOut" as const,
+          }}
+        />
+        <motion.div
+          className="absolute w-32 h-32 rounded-xl bg-blue-400/10 blur-xl"
+          style={{ top: "40%", right: "10%" }}
+          animate={{
+            y: ["0%", "15%", "0%"],
+            x: ["0%", "8%", "0%"],
+            rotate: [0, 10, 0, -10, 0],
+            scale: [1, 1.05, 1],
+            opacity: [0.3, 0.6, 0.3],
+          }}
+          transition={{
+            duration: 12,
+            repeat: Infinity,
+            repeatType: "reverse" as const,
+            ease: "easeInOut" as const,
+          }}
+        />
+
+        {/* ✅ Main Content - Căn đều và to hơn */}
+        <motion.div
+          className="relative z-10 flex flex-col justify-center px-20 text-white"
+          variants={textRevealVariants}
+          initial="hidden"
+          animate="visible"
+        >
+          {/* ✅ Logo - To hơn */}
           <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.8 }}
+            variants={itemSlideInVariants}
+            className="flex items-center mb-12"
           >
-            <div className="flex items-center mb-8">
-              <Sparkles className="w-8 h-8 mr-3" />
-              <h1 className="text-3xl font-bold">Template Market</h1>
-            </div>
-
-            <h2 className="mb-6 text-4xl font-bold leading-tight">
-              Chào mừng trở lại!
-            </h2>
-
-            <p className="mb-8 text-xl text-blue-100">
-              Khám phá hàng nghìn template và e-book chất lượng cao
-            </p>
-
-            <div className="space-y-4">
-              <div className="flex items-center">
-                <CheckCircle className="w-5 h-5 mr-3 text-green-400" />
-                <span>Templates chuyên nghiệp</span>
-              </div>
-              <div className="flex items-center">
-                <CheckCircle className="w-5 h-5 mr-3 text-green-400" />
-                <span>E-books độc quyền</span>
-              </div>
-              <div className="flex items-center">
-                <CheckCircle className="w-5 h-5 mr-3 text-green-400" />
-                <span>Hỗ trợ 24/7</span>
-              </div>
-            </div>
-
-            {/* Home Link in Branding Section */}
-            <div className="mt-8">
-              <Button
-                variant="outline"
-                onClick={() => navigate("/")}
-                className="text-white border-white/30 hover:bg-white/10 hover:border-white/50"
-              >
-                <Home className="w-4 h-4 mr-2" />
-                Khám phá ngay
-              </Button>
+            <LayoutGrid className="mr-5 text-indigo-300 h-14 w-14" />
+            <div>
+              <h1 className="text-5xl font-extrabold tracking-tight">
+                Template Market
+              </h1>
+              <p className="mt-2 text-lg text-indigo-200">
+                Welcome back to creativity
+              </p>
             </div>
           </motion.div>
-        </div>
 
-        {/* Decorative elements */}
-        <div className="absolute w-32 h-32 rounded-full top-20 right-20 bg-white/10 blur-xl"></div>
-        <div className="absolute w-24 h-24 rounded-full bottom-20 left-20 bg-purple-300/20 blur-lg"></div>
+          {/* ✅ Main Heading - To hơn và căn đều */}
+          <motion.h2
+            variants={itemSlideInVariants}
+            className="mb-8 text-6xl font-bold leading-tight"
+          >
+            Chào mừng
+            <span className="block text-transparent bg-gradient-to-r from-indigo-400 to-purple-400 bg-clip-text">
+              Trở lại!
+            </span>
+          </motion.h2>
+
+          <motion.p
+            variants={itemSlideInVariants}
+            className="mb-12 text-2xl leading-relaxed text-indigo-100 opacity-90"
+          >
+            Tiếp tục hành trình sáng tạo với hàng nghìn template và e-book chất
+            lượng cao
+          </motion.p>
+
+          {/* ✅ Features - To hơn và spacing đều */}
+          <motion.div
+            variants={textRevealVariants}
+            initial="hidden"
+            animate="visible"
+            className="mb-12 space-y-6 text-xl"
+          >
+            <motion.div
+              variants={itemSlideInVariants}
+              className="flex items-center"
+            >
+              <CheckCircle className="w-8 h-8 mr-6 text-green-400" />
+              <span>Truy cập ngay vào thư viện templates cao cấp</span>
+            </motion.div>
+            <motion.div
+              variants={itemSlideInVariants}
+              className="flex items-center"
+            >
+              <Star className="w-8 h-8 mr-6 text-yellow-400" />
+              <span>Download không giới hạn tất cả sản phẩm</span>
+            </motion.div>
+            <motion.div
+              variants={itemSlideInVariants}
+              className="flex items-center"
+            >
+              <Shield className="w-8 h-8 mr-6 text-blue-400" />
+              <span>Tài khoản được bảo mật tuyệt đối</span>
+            </motion.div>
+            <motion.div
+              variants={itemSlideInVariants}
+              className="flex items-center"
+            >
+              <Users className="w-8 h-8 mr-6 text-purple-400" />
+              <span>Tham gia cộng đồng 50,000+ designer</span>
+            </motion.div>
+          </motion.div>
+
+          {/* ✅ Welcome Back Message - Enhanced */}
+          <motion.div
+            className="p-8 border rounded-2xl bg-gradient-to-r from-indigo-500/20 to-purple-500/20 backdrop-blur-sm border-indigo-400/30"
+            initial={{ opacity: 0, scale: 0.9 }}
+            animate={{ opacity: 1, scale: 1 }}
+            transition={{ delay: 0.8 }}
+            whileHover={{ scale: 1.02 }}
+          >
+            <div className="flex items-center mb-4">
+              <Trophy className="w-10 h-10 mr-4 text-yellow-400" />
+              <p className="text-2xl font-bold text-indigo-300">
+                🎉 Chào mừng bạn trở lại!
+              </p>
+            </div>
+            <p className="text-lg text-indigo-200">
+              Hãy tiếp tục khám phá những template mới nhất và tạo ra những tác
+              phẩm tuyệt vời
+            </p>
+          </motion.div>
+        </motion.div>
       </div>
 
-      {/* Right Side - Login Form */}
-      <div className="flex items-center justify-center flex-1 px-4 sm:px-6 lg:px-8 bg-gray-50">
+      {/* ✅ Right Side - Enhanced Login Form */}
+      <div className="flex items-center justify-center flex-1 px-4 py-12 bg-slate-950 sm:px-6 lg:w-1/2 lg:px-8">
         <motion.div
-          initial={{ opacity: 0, x: 20 }}
+          initial={{ opacity: 0, x: 50 }}
           animate={{ opacity: 1, x: 0 }}
-          transition={{ duration: 0.6 }}
-          className="w-full max-w-md"
+          transition={{ duration: 0.7, delay: 0.2 }}
+          className="w-full max-w-lg"
         >
-          <Card className="border-0 shadow-2xl">
-            <CardHeader className="pb-8 space-y-1">
+          <Card className="p-8 border border-indigo-800 shadow-2xl rounded-xl bg-slate-900 sm:p-10">
+            <CardHeader className="mb-6 text-center">
               <div className="flex items-center justify-center mb-4">
-                <div className="flex items-center justify-center w-12 h-12 bg-gradient-to-r from-blue-500 to-purple-600 rounded-xl">
-                  <Shield className="w-6 h-6 text-white" />
-                </div>
+                <motion.div
+                  className="flex items-center justify-center w-16 h-16 rounded-full shadow-lg bg-gradient-to-r from-indigo-600 to-purple-700"
+                  initial={{ scale: 0 }}
+                  animate={{ scale: 1 }}
+                  transition={{ type: "spring", stiffness: 260, damping: 20 }}
+                >
+                  <motion.div
+                    animate={{
+                      rotate: [0, 360],
+                      scale: [1, 1.1, 1],
+                      opacity: [1, 0.8, 1],
+                    }}
+                    transition={{
+                      duration: 8,
+                      ease: "linear",
+                      repeat: Infinity,
+                    }}
+                  >
+                    <Shield className="w-8 h-8 text-white" />
+                  </motion.div>
+                </motion.div>
               </div>
-              <CardTitle className="text-2xl font-bold text-center text-gray-900">
-                Đăng nhập tài khoản
+              <CardTitle className="text-3xl font-bold text-white">
+                Chào mừng trở lại!
               </CardTitle>
-              <CardDescription className="text-center text-gray-600">
-                Nhập thông tin để truy cập vào tài khoản của bạn
+              <CardDescription className="mt-2 text-base text-gray-400">
+                Đăng nhập để tiếp tục hành trình sáng tạo của bạn.
               </CardDescription>
             </CardHeader>
 
@@ -204,58 +366,71 @@ const Login: React.FC = () => {
                     initial={{ opacity: 0, y: -10 }}
                     animate={{ opacity: 1, y: 0 }}
                   >
-                    <Alert variant="destructive">
+                    <Alert
+                      variant="destructive"
+                      className="text-red-300 border-red-700 bg-red-900/30"
+                    >
                       <AlertDescription>{error}</AlertDescription>
                     </Alert>
                   </motion.div>
                 )}
 
+                {/* ✅ Email Field */}
                 <div className="space-y-2">
                   <Label
                     htmlFor="email"
-                    className="text-sm font-medium text-gray-700"
+                    className="text-sm font-medium text-gray-300"
                   >
                     Địa chỉ email
                   </Label>
                   <div className="relative">
-                    <Mail className="absolute w-4 h-4 text-gray-400 transform -translate-y-1/2 left-3 top-1/2" />
+                    <Mail className="absolute w-4 h-4 text-gray-400 -translate-y-1/2 left-3 top-1/2" />
                     <Input
                       id="email"
                       type="email"
                       placeholder="example@email.com"
                       {...register("email")}
-                      className={`pl-10 h-12 ${errors.email ? "border-red-500" : "border-gray-300"} focus:border-blue-500 focus:ring-blue-500`}
+                      className={`h-11 pl-10 text-white ${
+                        errors.email
+                          ? "border-red-500 ring-red-500"
+                          : "border-slate-700 focus:ring-indigo-500"
+                      } bg-slate-800 focus:border-indigo-500 focus:ring-1 focus:ring-offset-0`}
                       disabled={isSubmitting}
                     />
                   </div>
                   {errors.email && (
-                    <p className="text-sm text-red-500">
+                    <p className="text-sm text-red-400">
                       {errors.email.message}
                     </p>
                   )}
                 </div>
 
+                {/* ✅ Password Field */}
                 <div className="space-y-2">
                   <Label
                     htmlFor="password"
-                    className="text-sm font-medium text-gray-700"
+                    className="text-sm font-medium text-gray-300"
                   >
                     Mật khẩu
                   </Label>
                   <div className="relative">
-                    <Lock className="absolute w-4 h-4 text-gray-400 transform -translate-y-1/2 left-3 top-1/2" />
+                    <Lock className="absolute w-4 h-4 text-gray-400 -translate-y-1/2 left-3 top-1/2" />
                     <Input
                       id="password"
                       type={showPassword ? "text" : "password"}
                       placeholder="Nhập mật khẩu"
                       {...register("password")}
-                      className={`pl-10 pr-12 h-12 ${errors.password ? "border-red-500" : "border-gray-300"} focus:border-blue-500 focus:ring-blue-500`}
+                      className={`h-11 pl-10 pr-12 text-white ${
+                        errors.password
+                          ? "border-red-500 ring-red-500"
+                          : "border-slate-700 focus:ring-indigo-500"
+                      } bg-slate-800 focus:border-indigo-500 focus:ring-1 focus:ring-offset-0`}
                       disabled={isSubmitting}
                     />
                     <button
                       type="button"
                       onClick={() => setShowPassword(!showPassword)}
-                      className="absolute text-gray-400 transform -translate-y-1/2 right-3 top-1/2 hover:text-gray-600"
+                      className="absolute text-gray-400 -translate-y-1/2 right-3 top-1/2 hover:text-gray-300"
                       disabled={isSubmitting}
                     >
                       {showPassword ? (
@@ -266,23 +441,24 @@ const Login: React.FC = () => {
                     </button>
                   </div>
                   {errors.password && (
-                    <p className="text-sm text-red-500">
+                    <p className="text-sm text-red-400">
                       {errors.password.message}
                     </p>
                   )}
                 </div>
 
+                {/* ✅ Remember & Forgot */}
                 <div className="flex items-center justify-between">
                   <div className="flex items-center">
                     <input
                       id="remember-me"
                       name="remember-me"
                       type="checkbox"
-                      className="w-4 h-4 text-blue-600 border-gray-300 rounded focus:ring-blue-500"
+                      className="w-4 h-4 text-indigo-500 border-gray-600 rounded bg-slate-800 focus:ring-indigo-500"
                     />
                     <label
                       htmlFor="remember-me"
-                      className="block ml-2 text-sm text-gray-700"
+                      className="block ml-2 text-sm text-gray-400"
                     >
                       Ghi nhớ đăng nhập
                     </label>
@@ -290,15 +466,16 @@ const Login: React.FC = () => {
 
                   <Link
                     to="/auth/forgot-password"
-                    className="text-sm font-medium text-blue-600 hover:text-blue-500"
+                    className="text-sm font-medium text-indigo-500 hover:text-indigo-400"
                   >
                     Quên mật khẩu?
                   </Link>
                 </div>
 
+                {/* ✅ Submit Button */}
                 <Button
                   type="submit"
-                  className="w-full h-12 bg-gradient-to-r from-blue-500 to-purple-600 hover:from-blue-600 hover:to-purple-700 text-white font-medium rounded-lg transition-all duration-200 transform hover:scale-[1.02]"
+                  className="group h-12 w-full rounded-lg bg-gradient-to-r from-indigo-600 to-purple-700 font-medium text-white shadow-lg transition-all duration-300 hover:from-indigo-700 hover:to-purple-800 hover:shadow-xl active:scale-[0.98]"
                   disabled={isSubmitting}
                 >
                   {isSubmitting ? (
@@ -307,33 +484,34 @@ const Login: React.FC = () => {
                       {loadingStage || "Đang đăng nhập..."}
                     </div>
                   ) : (
-                    <div className="flex items-center">
+                    <div className="flex items-center justify-center">
                       <span>Đăng nhập</span>
-                      <ArrowRight className="w-4 h-4 ml-2" />
+                      <ArrowRight className="w-4 h-4 ml-2 transition-transform duration-200 group-hover:translate-x-1" />
                     </div>
                   )}
                 </Button>
               </form>
 
+              {/* ✅ Social Login */}
               <div className="mt-8">
                 <div className="relative">
                   <div className="absolute inset-0 flex items-center">
-                    <div className="w-full border-t border-gray-300" />
+                    <div className="w-full border-t border-slate-700" />
                   </div>
                   <div className="relative flex justify-center text-sm">
-                    <span className="px-2 text-gray-500 bg-white">
-                      Hoặc tiếp tục với
+                    <span className="px-2 text-gray-500 bg-slate-900">
+                      Hoặc đăng nhập với
                     </span>
                   </div>
                 </div>
 
-                <div className="grid grid-cols-2 gap-3 mt-6">
+                <div className="grid grid-cols-1 gap-3 mt-6 sm:grid-cols-2">
                   <Button
                     variant="outline"
-                    className="w-full border-gray-300 h-11 hover:bg-gray-50"
+                    className="h-11 w-full justify-center border-slate-700 bg-slate-800 text-gray-300 hover:border-slate-600 hover:bg-slate-700 hover:text-white active:scale-[0.98]"
                     disabled={isSubmitting}
                   >
-                    <svg className="w-5 h-5" viewBox="0 0 24 24">
+                    <svg className="w-5 h-5 text-gray-400" viewBox="0 0 24 24">
                       <path
                         fill="currentColor"
                         d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"
@@ -356,11 +534,11 @@ const Login: React.FC = () => {
 
                   <Button
                     variant="outline"
-                    className="w-full border-gray-300 h-11 hover:bg-gray-50"
+                    className="h-11 w-full justify-center border-slate-700 bg-slate-800 text-gray-300 hover:border-slate-600 hover:bg-slate-700 hover:text-white active:scale-[0.98]"
                     disabled={isSubmitting}
                   >
                     <svg
-                      className="w-5 h-5"
+                      className="w-5 h-5 text-gray-400"
                       fill="currentColor"
                       viewBox="0 0 24 24"
                     >
@@ -371,12 +549,13 @@ const Login: React.FC = () => {
                 </div>
               </div>
 
+              {/* ✅ Register Link */}
               <div className="mt-8 text-center">
-                <p className="text-sm text-gray-600">
+                <p className="text-sm text-gray-400">
                   Chưa có tài khoản?{" "}
                   <Link
                     to="/auth/register"
-                    className="font-medium text-blue-600 transition-colors hover:text-blue-500"
+                    className="font-medium text-indigo-500 transition-colors hover:text-indigo-400"
                   >
                     Đăng ký ngay
                   </Link>
@@ -385,28 +564,11 @@ const Login: React.FC = () => {
             </CardContent>
           </Card>
 
-          {/* Mobile Home Button */}
-          <div className="mt-6 text-center lg:hidden">
-            <Button
-              variant="outline"
-              onClick={() => navigate("/")}
-              className="bg-white border-gray-300 hover:bg-gray-50"
-            >
-              <Home className="w-4 h-4 mr-2" />
-              Về trang chủ
-            </Button>
-          </div>
-
-          <div className="mt-8 text-center">
+          {/* ✅ Security Note */}
+          <div className="mt-6 text-center">
             <p className="text-xs text-gray-500">
-              Bằng việc đăng nhập, bạn đồng ý với{" "}
-              <Link to="/terms" className="text-blue-600 hover:underline">
-                Điều khoản dịch vụ
-              </Link>{" "}
-              và{" "}
-              <Link to="/privacy" className="text-blue-600 hover:underline">
-                Chính sách bảo mật
-              </Link>
+              <Sparkles className="inline-block w-3 h-3 mr-1 text-gray-500 align-middle" />{" "}
+              Đăng nhập an toàn với mã hóa SSL 256-bit
             </p>
           </div>
         </motion.div>

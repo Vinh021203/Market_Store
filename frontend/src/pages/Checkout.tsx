@@ -14,6 +14,12 @@ import { Badge } from "@/components/ui/badge";
 import { useCart } from "@/contexts/CartContext";
 import { useAuth } from "@/contexts/AuthContext";
 import { formatPrice } from "@/lib/products";
+import {
+  createSuccessSound,
+  createErrorSound,
+  createProcessingSound,
+  createCoinSound,
+} from "@/utils/audioUtils";
 import { motion, AnimatePresence } from "framer-motion";
 import {
   CreditCard,
@@ -282,6 +288,8 @@ const Checkout: React.FC = () => {
   };
 
   const handlePaymentSuccess = () => {
+    createCoinSound();
+    setTimeout(() => createSuccessSound(), 200);
     clearCart();
     toast({
       title: "🎉 Thanh toán thành công!",

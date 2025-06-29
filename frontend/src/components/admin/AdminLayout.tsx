@@ -34,6 +34,7 @@ import {
   User,
   Crown,
   TrendingUp,
+  MessageCircle,
 } from "lucide-react";
 import { toast } from "@/hooks/use-toast";
 
@@ -97,6 +98,12 @@ const AdminLayout: React.FC = () => {
       icon: Users,
       href: "/admin/users",
       gradient: "from-orange-500 to-red-500",
+    },
+    {
+      title: "Live Chat",
+      icon: MessageCircle,
+      href: "/admin/chat",
+      gradient: "from-pink-500 to-rose-500",
     },
     {
       title: "Thống kê",

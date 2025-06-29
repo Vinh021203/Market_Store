@@ -1,3 +1,4 @@
+// pages/auth/Register.tsx - Kết hợp layout đẹp + form design từ file
 import React, { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { useForm } from "react-hook-form";
@@ -29,6 +30,11 @@ import {
   Star,
   Trophy,
   Zap,
+  LayoutGrid,
+  Shield,
+  Users,
+  Code,
+  Palette,
 } from "lucide-react";
 import { toast } from "@/hooks/use-toast";
 import { motion } from "framer-motion";
@@ -62,53 +68,6 @@ const Register: React.FC = () => {
     resolver: zodResolver(registerSchema),
   });
 
-  // const onSubmit = async (data: RegisterData) => {
-  //   if (!navigator.onLine) {
-  //     setError("Không có kết nối internet. Vui lòng kiểm tra lại.");
-  //     return;
-  //   }
-
-  //   setError("");
-  //   setIsSubmitting(true);
-  //   setLoadingStage("Đang tạo tài khoản...");
-
-  //   const timeoutId = setTimeout(() => {
-  //     setIsSubmitting(false);
-  //     setLoadingStage("");
-  //     setError("Đăng ký quá lâu. Vui lòng thử lại.");
-  //   }, 15000);
-
-  //   try {
-  //     setLoadingStage("Đang xác thực thông tin...");
-  //     const success = await registerUser(data);
-
-  //     clearTimeout(timeoutId);
-
-  //     if (success) {
-  //       setLoadingStage("Đăng ký thành công!");
-  //       toast({
-  //         title: "Đăng ký thành công",
-  //         description: "Chào mừng bạn đến với Template Market!",
-  //       });
-
-  //       setTimeout(() => {
-  //         navigate("/");
-  //       }, 500);
-  //     } else {
-  //       setError("Email đã được sử dụng. Vui lòng chọn email khác.");
-  //     }
-  //   } catch (error) {
-  //     clearTimeout(timeoutId);
-  //     console.error("Register error:", error);
-  //     setError("Có lỗi xảy ra khi đăng ký. Vui lòng thử lại.");
-  //   } finally {
-  //     setTimeout(() => {
-  //       setIsSubmitting(false);
-  //       setLoadingStage("");
-  //     }, 1000);
-  //   }
-  // };
-  // pages/auth/Register.tsx - Enhanced onSubmit
   const onSubmit = async (data: RegisterData) => {
     if (!navigator.onLine) {
       setError("Không có kết nối internet. Vui lòng kiểm tra lại.");
@@ -126,15 +85,13 @@ const Register: React.FC = () => {
       if (success) {
         setLoadingStage("Đăng ký thành công!");
 
-        // ✅ Updated success message cho email confirmation
         toast({
           title: "Kiểm tra email của bạn",
           description:
             "Chúng tôi đã gửi link xác thực đến email của bạn. Vui lòng click vào link để kích hoạt tài khoản.",
-          duration: 10000, // 10 giây để user đọc kỹ
+          duration: 10000,
         });
 
-        // ✅ Redirect về login thay vì home
         setTimeout(() => {
           navigate("/auth/login?message=check-email");
         }, 2000);
@@ -142,7 +99,6 @@ const Register: React.FC = () => {
     } catch (error: any) {
       console.error("Register error:", error);
 
-      // ✅ Enhanced error handling
       if (error.message?.includes("Email này đã được đăng ký")) {
         setError(
           "Email này đã được sử dụng. Vui lòng chọn email khác hoặc đăng nhập.",
@@ -162,260 +118,423 @@ const Register: React.FC = () => {
     }
   };
 
+  // ✅ Animation variants
+  const textRevealVariants = {
+    hidden: { opacity: 0, y: 30 },
+    visible: {
+      opacity: 1,
+      y: 0,
+      transition: {
+        type: "spring" as const,
+        damping: 10,
+        stiffness: 100,
+        staggerChildren: 0.1,
+      },
+    },
+  };
+
+  const itemSlideInVariants = {
+    hidden: { opacity: 0, x: -30 },
+    visible: { opacity: 1, x: 0, transition: { duration: 0.5 } },
+  };
+
+  const floatingShapeVariants = {
+    animate: {
+      y: ["0%", "10%", "0%"],
+      x: ["0%", "5%", "0%"],
+      rotate: [0, 5, 0, -5, 0],
+      scale: [1, 1.02, 1],
+      opacity: [0.3, 0.4, 0.3],
+      transition: {
+        duration: Math.random() * 10 + 10,
+        repeat: Infinity,
+        repeatType: "reverse" as const,
+        ease: "easeInOut" as const,
+      },
+    },
+  };
+
   return (
     <div className="flex min-h-screen">
-      {/* Left Side - Branding */}
-      <div className="relative hidden overflow-hidden lg:flex lg:w-1/2 bg-gradient-to-br from-emerald-600 via-teal-600 to-cyan-700">
-        <div className="absolute inset-0 bg-black/20"></div>
-        <div className="relative z-10 flex flex-col justify-center px-12 text-white">
+      {/* ✅ Left Side - Enhanced Branding (Tăng kích thước và căn đều) */}
+      <div className="relative hidden w-1/2 overflow-hidden bg-slate-900 lg:flex">
+        {/* ✅ Enhanced Background với CSS keyframes */}
+        <motion.div
+          className="absolute inset-0 z-0"
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          transition={{ duration: 1.5 }}
+          style={{
+            background: `
+              radial-gradient(at 20% 50%, hsla(160, 70%, 40%, 0.8) 0px, transparent 50%),
+              radial-gradient(at 80% 30%, hsla(170, 70%, 45%, 0.7) 0px, transparent 50%),
+              radial-gradient(at 50% 90%, hsla(190, 70%, 50%, 0.6) 0px, transparent 50%)
+            `,
+            backgroundSize: "200% 200%",
+            animation: "gradientShift 30s ease infinite",
+          }}
+        />
+
+        {/* ✅ Floating Shapes - Enhanced */}
+        <motion.div
+          className="absolute w-40 h-40 rounded-full bg-emerald-400/10 blur-xl"
+          variants={floatingShapeVariants}
+          style={{ top: "10%", left: "15%" }}
+          animate="animate"
+        />
+        <motion.div
+          className="absolute rounded-full h-60 w-60 bg-teal-400/10 blur-xl"
+          variants={floatingShapeVariants}
+          style={{ bottom: "5%", right: "20%" }}
+          animate="animate"
+        />
+        <motion.div
+          className="absolute w-32 h-32 rounded-xl bg-cyan-400/10 blur-xl"
+          variants={floatingShapeVariants}
+          style={{ top: "40%", right: "10%" }}
+          animate="animate"
+        />
+
+        {/* ✅ Main Content - Căn đều và to hơn */}
+        <motion.div
+          className="relative z-10 flex flex-col justify-center px-20 text-white"
+          variants={textRevealVariants}
+          initial="hidden"
+          animate="visible"
+        >
+          {/* ✅ Logo - To hơn */}
           <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.8 }}
+            variants={itemSlideInVariants}
+            className="flex items-center mb-12"
           >
-            <div className="flex items-center mb-8">
-              <Sparkles className="w-8 h-8 mr-3" />
-              <h1 className="text-3xl font-bold">Template Market</h1>
-            </div>
-
-            <h2 className="mb-6 text-4xl font-bold leading-tight">
-              Tham gia cộng đồng sáng tạo!
-            </h2>
-
-            <p className="mb-8 text-xl text-emerald-100">
-              Khởi đầu hành trình sáng tạo với hàng nghìn tài nguyên chất lượng
-            </p>
-
-            <div className="space-y-4">
-              <div className="flex items-center">
-                <Trophy className="w-5 h-5 mr-3 text-yellow-400" />
-                <span>Truy cập miễn phí 1000+ templates</span>
-              </div>
-              <div className="flex items-center">
-                <Star className="w-5 h-5 mr-3 text-yellow-400" />
-                <span>E-books độc quyền từ chuyên gia</span>
-              </div>
-              <div className="flex items-center">
-                <Zap className="w-5 h-5 mr-3 text-yellow-400" />
-                <span>Cập nhật nội dung hàng tuần</span>
-              </div>
-              <div className="flex items-center">
-                <CheckCircle className="w-5 h-5 mr-3 text-green-400" />
-                <span>Hỗ trợ kỹ thuật 24/7</span>
-              </div>
-            </div>
-
-            <div className="p-4 mt-8 rounded-lg bg-white/10 backdrop-blur-sm">
-              <p className="mb-2 text-sm text-emerald-100">
-                <strong>Ưu đãi đặc biệt:</strong>
-              </p>
-              <p className="text-lg font-semibold">
-                🎉 Giảm 50% cho đơn hàng đầu tiên!
+            <LayoutGrid className="mr-5 h-14 w-14 text-emerald-300" />
+            <div>
+              <h1 className="text-5xl font-extrabold tracking-tight">
+                Template Market
+              </h1>
+              <p className="mt-2 text-lg text-emerald-200">
+                Where creativity meets technology
               </p>
             </div>
           </motion.div>
-        </div>
 
-        {/* Decorative elements */}
-        <div className="absolute w-32 h-32 rounded-full top-20 right-20 bg-white/10 blur-xl"></div>
-        <div className="absolute w-24 h-24 rounded-full bottom-20 left-20 bg-emerald-300/20 blur-lg"></div>
-        <div className="absolute w-16 h-16 rounded-full top-1/2 right-10 bg-teal-300/30 blur-md"></div>
+          {/* ✅ Main Heading - To hơn và căn đều */}
+          <motion.h2
+            variants={itemSlideInVariants}
+            className="mb-8 text-6xl font-bold leading-tight"
+          >
+            Tham gia
+            <span className="block text-transparent bg-gradient-to-r from-emerald-400 to-teal-400 bg-clip-text">
+              Cộng đồng
+            </span>
+            <span className="block">Sáng tạo!</span>
+          </motion.h2>
+
+          <motion.p
+            variants={itemSlideInVariants}
+            className="mb-12 text-2xl leading-relaxed text-emerald-100 opacity-90"
+          >
+            Khám phá hàng nghìn template chất lượng cao và tài nguyên thiết kế
+            độc quyền
+          </motion.p>
+
+          {/* ✅ Features - To hơn và spacing đều */}
+          <motion.div
+            variants={textRevealVariants}
+            initial="hidden"
+            animate="visible"
+            className="mb-12 space-y-6 text-xl"
+          >
+            <motion.div
+              variants={itemSlideInVariants}
+              className="flex items-center"
+            >
+              <Trophy className="w-8 h-8 mr-6 text-yellow-400" />
+              <span>Truy cập không giới hạn 1000+ templates cao cấp</span>
+            </motion.div>
+            <motion.div
+              variants={itemSlideInVariants}
+              className="flex items-center"
+            >
+              <Star className="w-8 h-8 mr-6 text-yellow-400" />
+              <span>Thư viện e-books độc quyền, cập nhật liên tục</span>
+            </motion.div>
+            <motion.div
+              variants={itemSlideInVariants}
+              className="flex items-center"
+            >
+              <Zap className="w-8 h-8 mr-6 text-yellow-400" />
+              <span>Công cụ AI hỗ trợ sáng tạo mạnh mẽ</span>
+            </motion.div>
+            <motion.div
+              variants={itemSlideInVariants}
+              className="flex items-center"
+            >
+              <CheckCircle className="w-8 h-8 mr-6 text-green-400" />
+              <span>Cộng đồng hỗ trợ sôi nổi, chia sẻ kinh nghiệm</span>
+            </motion.div>
+          </motion.div>
+
+          {/* ✅ Special Offer - Enhanced */}
+          <motion.div
+            className="p-8 border rounded-2xl bg-gradient-to-r from-emerald-500/20 to-teal-500/20 backdrop-blur-sm border-emerald-400/30"
+            initial={{ opacity: 0, scale: 0.9 }}
+            animate={{ opacity: 1, scale: 1 }}
+            transition={{ delay: 0.8 }}
+            whileHover={{ scale: 1.02 }}
+          >
+            <div className="flex items-center mb-4">
+              <Zap className="w-10 h-10 mr-4 text-yellow-400" />
+              <p className="text-2xl font-bold text-emerald-300">
+                🚀 50% OFF cho 100 người đầu tiên!
+              </p>
+            </div>
+            <p className="text-lg text-emerald-200">
+              Đăng ký ngay để không bỏ lỡ cơ hội vàng này
+            </p>
+          </motion.div>
+        </motion.div>
       </div>
 
-      {/* Right Side - Register Form */}
-      <div className="flex items-center justify-center flex-1 px-4 sm:px-6 lg:px-8 bg-gray-50">
+      {/* ✅ Right Side - Form từ file bạn cung cấp */}
+      <div className="flex items-center justify-center flex-1 px-4 py-12 bg-slate-950 sm:px-6 lg:w-1/2 lg:px-8">
         <motion.div
-          initial={{ opacity: 0, x: 20 }}
+          initial={{ opacity: 0, x: 50 }}
           animate={{ opacity: 1, x: 0 }}
-          transition={{ duration: 0.6 }}
-          className="w-full max-w-md"
+          transition={{ duration: 0.7, delay: 0.2 }}
+          className="w-full max-w-lg"
         >
-          <Card className="border-0 shadow-2xl">
-            <CardHeader className="pb-8 space-y-1">
+          <Card className="p-8 border shadow-2xl rounded-xl border-emerald-800 bg-slate-900 sm:p-10">
+            <CardHeader className="mb-6 text-center">
               <div className="flex items-center justify-center mb-4">
-                <div className="flex items-center justify-center w-12 h-12 bg-gradient-to-r from-emerald-500 to-teal-600 rounded-xl">
-                  <User className="w-6 h-6 text-white" />
-                </div>
+                <motion.div
+                  className="flex items-center justify-center w-16 h-16 rounded-full shadow-lg bg-gradient-to-r from-emerald-600 to-teal-700"
+                  initial={{ scale: 0 }}
+                  animate={{ scale: 1 }}
+                  transition={{ type: "spring", stiffness: 260, damping: 20 }}
+                >
+                  <motion.div
+                    animate={{
+                      rotate: [0, 360],
+                      scale: [1, 1.1, 1],
+                      opacity: [1, 0.8, 1],
+                    }}
+                    transition={{
+                      duration: 8,
+                      ease: "linear",
+                      repeat: Infinity,
+                    }}
+                  >
+                    <Sparkles className="w-8 h-8 text-white" />
+                  </motion.div>
+                </motion.div>
               </div>
-              <CardTitle className="text-2xl font-bold text-center text-gray-900">
-                Tạo tài khoản mới
+              <CardTitle className="text-3xl font-bold text-white">
+                Chào mừng bạn!
               </CardTitle>
-              <CardDescription className="text-center text-gray-600">
-                Điền thông tin để tạo tài khoản Template Market
+              <CardDescription className="mt-2 text-base text-gray-400">
+                Hãy tạo tài khoản để bắt đầu hành trình sáng tạo của bạn.
               </CardDescription>
             </CardHeader>
 
             <CardContent>
-              <form onSubmit={handleSubmit(onSubmit)} className="space-y-5">
+              <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
                 {error && (
                   <motion.div
                     initial={{ opacity: 0, y: -10 }}
                     animate={{ opacity: 1, y: 0 }}
                   >
-                    <Alert variant="destructive">
+                    <Alert
+                      variant="destructive"
+                      className="text-red-300 border-red-700 bg-red-900/30"
+                    >
                       <AlertDescription>{error}</AlertDescription>
                     </Alert>
                   </motion.div>
                 )}
 
-                <div className="space-y-2">
-                  <Label
-                    htmlFor="name"
-                    className="text-sm font-medium text-gray-700"
-                  >
-                    Họ và tên
-                  </Label>
-                  <div className="relative">
-                    <User className="absolute w-4 h-4 text-gray-400 transform -translate-y-1/2 left-3 top-1/2" />
-                    <Input
-                      id="name"
-                      type="text"
-                      placeholder="Nguyễn Văn A"
-                      {...register("name")}
-                      className={`pl-10 h-12 ${errors.name ? "border-red-500" : "border-gray-300"} focus:border-emerald-500 focus:ring-emerald-500`}
-                      disabled={isSubmitting}
-                    />
-                  </div>
-                  {errors.name && (
-                    <p className="text-sm text-red-500">
-                      {errors.name.message}
-                    </p>
-                  )}
-                </div>
-
-                <div className="space-y-2">
-                  <Label
-                    htmlFor="email"
-                    className="text-sm font-medium text-gray-700"
-                  >
-                    Địa chỉ email
-                  </Label>
-                  <div className="relative">
-                    <Mail className="absolute w-4 h-4 text-gray-400 transform -translate-y-1/2 left-3 top-1/2" />
-                    <Input
-                      id="email"
-                      type="email"
-                      placeholder="example@email.com"
-                      {...register("email")}
-                      className={`pl-10 h-12 ${errors.email ? "border-red-500" : "border-gray-300"} focus:border-emerald-500 focus:ring-emerald-500`}
-                      disabled={isSubmitting}
-                    />
-                  </div>
-                  {errors.email && (
-                    <p className="text-sm text-red-500">
-                      {errors.email.message}
-                    </p>
-                  )}
-                </div>
-
-                <div className="space-y-2">
-                  <Label
-                    htmlFor="password"
-                    className="text-sm font-medium text-gray-700"
-                  >
-                    Mật khẩu
-                  </Label>
-                  <div className="relative">
-                    <Lock className="absolute w-4 h-4 text-gray-400 transform -translate-y-1/2 left-3 top-1/2" />
-                    <Input
-                      id="password"
-                      type={showPassword ? "text" : "password"}
-                      placeholder="Tối thiểu 6 ký tự"
-                      {...register("password")}
-                      className={`pl-10 pr-12 h-12 ${errors.password ? "border-red-500" : "border-gray-300"} focus:border-emerald-500 focus:ring-emerald-500`}
-                      disabled={isSubmitting}
-                    />
-                    <button
-                      type="button"
-                      onClick={() => setShowPassword(!showPassword)}
-                      className="absolute text-gray-400 transform -translate-y-1/2 right-3 top-1/2 hover:text-gray-600"
-                      disabled={isSubmitting}
+                {/* ✅ Name and Email in one row */}
+                <div className="grid grid-cols-1 gap-6 md:grid-cols-2">
+                  <div className="space-y-2">
+                    <Label
+                      htmlFor="name"
+                      className="text-sm font-medium text-gray-300"
                     >
-                      {showPassword ? (
-                        <EyeOff className="w-4 h-4" />
-                      ) : (
-                        <Eye className="w-4 h-4" />
-                      )}
-                    </button>
+                      Họ và tên
+                    </Label>
+                    <div className="relative">
+                      <User className="absolute w-4 h-4 text-gray-400 -translate-y-1/2 left-3 top-1/2" />
+                      <Input
+                        id="name"
+                        type="text"
+                        placeholder="Nguyễn Văn A"
+                        {...register("name")}
+                        className={`h-11 pl-10 text-white ${
+                          errors.name
+                            ? "border-red-500 ring-red-500"
+                            : "border-slate-700 focus:ring-emerald-500"
+                        } bg-slate-800 focus:border-emerald-500 focus:ring-1 focus:ring-offset-0`}
+                        disabled={isSubmitting}
+                      />
+                    </div>
+                    {errors.name && (
+                      <p className="text-sm text-red-400">
+                        {errors.name.message}
+                      </p>
+                    )}
                   </div>
-                  {errors.password && (
-                    <p className="text-sm text-red-500">
-                      {errors.password.message}
-                    </p>
-                  )}
-                </div>
 
-                <div className="space-y-2">
-                  <Label
-                    htmlFor="confirmPassword"
-                    className="text-sm font-medium text-gray-700"
-                  >
-                    Xác nhận mật khẩu
-                  </Label>
-                  <div className="relative">
-                    <Lock className="absolute w-4 h-4 text-gray-400 transform -translate-y-1/2 left-3 top-1/2" />
-                    <Input
-                      id="confirmPassword"
-                      type={showConfirmPassword ? "text" : "password"}
-                      placeholder="Nhập lại mật khẩu"
-                      {...register("confirmPassword")}
-                      className={`pl-10 pr-12 h-12 ${errors.confirmPassword ? "border-red-500" : "border-gray-300"} focus:border-emerald-500 focus:ring-emerald-500`}
-                      disabled={isSubmitting}
-                    />
-                    <button
-                      type="button"
-                      onClick={() =>
-                        setShowConfirmPassword(!showConfirmPassword)
-                      }
-                      className="absolute text-gray-400 transform -translate-y-1/2 right-3 top-1/2 hover:text-gray-600"
-                      disabled={isSubmitting}
+                  <div className="space-y-2">
+                    <Label
+                      htmlFor="email"
+                      className="text-sm font-medium text-gray-300"
                     >
-                      {showConfirmPassword ? (
-                        <EyeOff className="w-4 h-4" />
-                      ) : (
-                        <Eye className="w-4 h-4" />
-                      )}
-                    </button>
+                      Địa chỉ email
+                    </Label>
+                    <div className="relative">
+                      <Mail className="absolute w-4 h-4 text-gray-400 -translate-y-1/2 left-3 top-1/2" />
+                      <Input
+                        id="email"
+                        type="email"
+                        placeholder="example@email.com"
+                        {...register("email")}
+                        className={`h-11 pl-10 text-white ${
+                          errors.email
+                            ? "border-red-500 ring-red-500"
+                            : "border-slate-700 focus:ring-emerald-500"
+                        } bg-slate-800 focus:border-emerald-500 focus:ring-1 focus:ring-offset-0`}
+                        disabled={isSubmitting}
+                      />
+                    </div>
+                    {errors.email && (
+                      <p className="text-sm text-red-400">
+                        {errors.email.message}
+                      </p>
+                    )}
                   </div>
-                  {errors.confirmPassword && (
-                    <p className="text-sm text-red-500">
-                      {errors.confirmPassword.message}
-                    </p>
-                  )}
                 </div>
 
+                {/* ✅ Password and Confirm Password in one row */}
+                <div className="grid grid-cols-1 gap-6 md:grid-cols-2">
+                  <div className="space-y-2">
+                    <Label
+                      htmlFor="password"
+                      className="text-sm font-medium text-gray-300"
+                    >
+                      Mật khẩu
+                    </Label>
+                    <div className="relative">
+                      <Lock className="absolute w-4 h-4 text-gray-400 -translate-y-1/2 left-3 top-1/2" />
+                      <Input
+                        id="password"
+                        type={showPassword ? "text" : "password"}
+                        placeholder="Tối thiểu 6 ký tự"
+                        {...register("password")}
+                        className={`h-11 pl-10 pr-12 text-white ${
+                          errors.password
+                            ? "border-red-500 ring-red-500"
+                            : "border-slate-700 focus:ring-emerald-500"
+                        } bg-slate-800 focus:border-emerald-500 focus:ring-1 focus:ring-offset-0`}
+                        disabled={isSubmitting}
+                      />
+                      <button
+                        type="button"
+                        onClick={() => setShowPassword(!showPassword)}
+                        className="absolute text-gray-400 -translate-y-1/2 right-3 top-1/2 hover:text-gray-300"
+                        disabled={isSubmitting}
+                      >
+                        {showPassword ? (
+                          <EyeOff className="w-4 h-4" />
+                        ) : (
+                          <Eye className="w-4 h-4" />
+                        )}
+                      </button>
+                    </div>
+                    {errors.password && (
+                      <p className="text-sm text-red-400">
+                        {errors.password.message}
+                      </p>
+                    )}
+                  </div>
+
+                  <div className="space-y-2">
+                    <Label
+                      htmlFor="confirmPassword"
+                      className="text-sm font-medium text-gray-300"
+                    >
+                      Xác nhận mật khẩu
+                    </Label>
+                    <div className="relative">
+                      <Lock className="absolute w-4 h-4 text-gray-400 -translate-y-1/2 left-3 top-1/2" />
+                      <Input
+                        id="confirmPassword"
+                        type={showConfirmPassword ? "text" : "password"}
+                        placeholder="Nhập lại mật khẩu"
+                        {...register("confirmPassword")}
+                        className={`h-11 pl-10 pr-12 text-white ${
+                          errors.confirmPassword
+                            ? "border-red-500 ring-red-500"
+                            : "border-slate-700 focus:ring-emerald-500"
+                        } bg-slate-800 focus:border-emerald-500 focus:ring-1 focus:ring-offset-0`}
+                        disabled={isSubmitting}
+                      />
+                      <button
+                        type="button"
+                        onClick={() =>
+                          setShowConfirmPassword(!showConfirmPassword)
+                        }
+                        className="absolute text-gray-400 -translate-y-1/2 right-3 top-1/2 hover:text-gray-300"
+                        disabled={isSubmitting}
+                      >
+                        {showConfirmPassword ? (
+                          <EyeOff className="w-4 h-4" />
+                        ) : (
+                          <Eye className="w-4 h-4" />
+                        )}
+                      </button>
+                    </div>
+                    {errors.confirmPassword && (
+                      <p className="text-sm text-red-400">
+                        {errors.confirmPassword.message}
+                      </p>
+                    )}
+                  </div>
+                </div>
+
+                {/* ✅ Terms */}
                 <div className="flex items-center">
                   <input
                     id="terms"
                     name="terms"
                     type="checkbox"
                     required
-                    className="w-4 h-4 border-gray-300 rounded text-emerald-600 focus:ring-emerald-500"
+                    className="w-4 h-4 border-gray-600 rounded bg-slate-800 text-emerald-500 focus:ring-emerald-500"
                   />
                   <label
                     htmlFor="terms"
-                    className="block ml-2 text-sm text-gray-700"
+                    className="block ml-2 text-sm text-gray-400"
                   >
                     Tôi đồng ý với{" "}
                     <Link
                       to="/terms"
-                      className="font-medium text-emerald-600 hover:text-emerald-500"
+                      className="font-medium text-emerald-500 hover:text-emerald-400"
                     >
                       Điều khoản dịch vụ
                     </Link>{" "}
                     và{" "}
                     <Link
                       to="/privacy"
-                      className="font-medium text-emerald-600 hover:text-emerald-500"
+                      className="font-medium text-emerald-500 hover:text-emerald-400"
                     >
                       Chính sách bảo mật
                     </Link>
                   </label>
                 </div>
 
+                {/* ✅ Submit Button */}
                 <Button
                   type="submit"
-                  className="w-full h-12 bg-gradient-to-r from-emerald-500 to-teal-600 hover:from-emerald-600 hover:to-teal-700 text-white font-medium rounded-lg transition-all duration-200 transform hover:scale-[1.02]"
+                  className="group h-12 w-full rounded-lg bg-gradient-to-r from-emerald-600 to-teal-700 font-medium text-white shadow-lg transition-all duration-300 hover:from-emerald-700 hover:to-teal-800 hover:shadow-xl active:scale-[0.98]"
                   disabled={isSubmitting}
                 >
                   {isSubmitting ? (
@@ -424,33 +543,34 @@ const Register: React.FC = () => {
                       {loadingStage || "Đang đăng ký..."}
                     </div>
                   ) : (
-                    <div className="flex items-center">
+                    <div className="flex items-center justify-center">
                       <span>Tạo tài khoản</span>
-                      <ArrowRight className="w-4 h-4 ml-2" />
+                      <ArrowRight className="w-4 h-4 ml-2 transition-transform duration-200 group-hover:translate-x-1" />
                     </div>
                   )}
                 </Button>
               </form>
 
-              <div className="mt-6">
+              {/* ✅ Social Login */}
+              <div className="mt-8">
                 <div className="relative">
                   <div className="absolute inset-0 flex items-center">
-                    <div className="w-full border-t border-gray-300" />
+                    <div className="w-full border-t border-slate-700" />
                   </div>
                   <div className="relative flex justify-center text-sm">
-                    <span className="px-2 text-gray-500 bg-white">
+                    <span className="px-2 text-gray-500 bg-slate-900">
                       Hoặc đăng ký với
                     </span>
                   </div>
                 </div>
 
-                <div className="grid grid-cols-2 gap-3 mt-6">
+                <div className="grid grid-cols-1 gap-3 mt-6 sm:grid-cols-2">
                   <Button
                     variant="outline"
-                    className="w-full border-gray-300 h-11 hover:bg-gray-50"
+                    className="h-11 w-full justify-center border-slate-700 bg-slate-800 text-gray-300 hover:border-slate-600 hover:bg-slate-700 hover:text-white active:scale-[0.98]"
                     disabled={isSubmitting}
                   >
-                    <svg className="w-5 h-5" viewBox="0 0 24 24">
+                    <svg className="w-5 h-5 text-gray-400" viewBox="0 0 24 24">
                       <path
                         fill="currentColor"
                         d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"
@@ -473,11 +593,11 @@ const Register: React.FC = () => {
 
                   <Button
                     variant="outline"
-                    className="w-full border-gray-300 h-11 hover:bg-gray-50"
+                    className="h-11 w-full justify-center border-slate-700 bg-slate-800 text-gray-300 hover:border-slate-600 hover:bg-slate-700 hover:text-white active:scale-[0.98]"
                     disabled={isSubmitting}
                   >
                     <svg
-                      className="w-5 h-5"
+                      className="w-5 h-5 text-gray-400"
                       fill="currentColor"
                       viewBox="0 0 24 24"
                     >
@@ -488,12 +608,13 @@ const Register: React.FC = () => {
                 </div>
               </div>
 
+              {/* ✅ Login Link */}
               <div className="mt-8 text-center">
-                <p className="text-sm text-gray-600">
+                <p className="text-sm text-gray-400">
                   Đã có tài khoản?{" "}
                   <Link
                     to="/auth/login"
-                    className="font-medium transition-colors text-emerald-600 hover:text-emerald-500"
+                    className="font-medium transition-colors text-emerald-500 hover:text-emerald-400"
                   >
                     Đăng nhập ngay
                   </Link>
@@ -502,9 +623,11 @@ const Register: React.FC = () => {
             </CardContent>
           </Card>
 
+          {/* ✅ Security Note */}
           <div className="mt-6 text-center">
             <p className="text-xs text-gray-500">
-              🔒 Thông tin của bạn được bảo mật tuyệt đối
+              <Sparkles className="inline-block w-3 h-3 mr-1 text-gray-500 align-middle" />{" "}
+              Thông tin của bạn được bảo mật tuyệt đối
             </p>
           </div>
         </motion.div>
