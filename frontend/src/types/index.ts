@@ -153,3 +153,15 @@ export interface FilterOptions {
     | "popular";
   search?: string;
 }
+
+export interface Review {
+  id: string;
+  userId: string;
+  userName: string;
+  userAvatar?: string;
+  rating: number;
+  comment: string;
+  createdAt: string;
+  helpful: number;
+  verified: boolean;
+}
