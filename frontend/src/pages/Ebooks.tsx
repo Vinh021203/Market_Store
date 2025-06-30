@@ -1,3 +1,4 @@
+// pages/Ebooks.tsx - Fixed version với tag filtering
 import React, { useState, useMemo, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -15,6 +16,7 @@ import ProductCard from "@/components/ProductCard";
 import { filterProducts, getProductsByCategory } from "@/lib/products";
 import { FilterOptions, Product } from "@/types";
 import { useCart } from "@/contexts/CartContext";
+import { useSearchParams } from "react-router-dom";
 import { motion, AnimatePresence } from "framer-motion";
 import {
   Search,
@@ -47,11 +49,15 @@ import {
 import { toast } from "@/hooks/use-toast";
 
 const Ebooks: React.FC = () => {
+  // ✅ FIX: Khai báo selectedTag trước khi sử dụng
+  const [searchParams, setSearchParams] = useSearchParams();
+  const selectedTag = searchParams.get("tag");
+
   const [filters, setFilters] = useState<FilterOptions>({
     category: "ebook",
     sortBy: "newest",
     search: "",
-    tags: [],
+    tags: selectedTag ? [selectedTag] : [], // ✅ Set initial tag từ URL
     priceRange: undefined,
   });
 
@@ -62,6 +68,16 @@ const Ebooks: React.FC = () => {
   const [loading, setLoading] = useState(true);
   const [isVisible, setIsVisible] = useState<Record<string, boolean>>({});
   const { addToCart } = useCart();
+
+  // ✅ Handle URL tag changes
+  useEffect(() => {
+    if (selectedTag) {
+      setFilters((prev) => ({
+        ...prev,
+        tags: [selectedTag],
+      }));
+    }
+  }, [selectedTag]);
 
   useEffect(() => {
     const fetchData = async () => {
@@ -145,6 +161,9 @@ const Ebooks: React.FC = () => {
   };
 
   const clearFilters = () => {
+    // ✅ Clear URL params
+    setSearchParams({});
+
     setFilters({
       category: "ebook",
       sortBy: "newest",
@@ -177,8 +196,8 @@ const Ebooks: React.FC = () => {
   const sortOptions = [
     { value: "newest", label: "Mới nhất", icon: Clock },
     { value: "oldest", label: "Cũ nhất", icon: Clock },
-    { value: "price-low", label: "Giá thấp đến cao", icon: TrendingUp },
-    { value: "price-high", label: "Giá cao đến thấp", icon: TrendingUp },
+    { value: "price_low", label: "Giá thấp đến cao", icon: TrendingUp },
+    { value: "price_high", label: "Giá cao đến thấp", icon: TrendingUp },
     { value: "rating", label: "Đánh giá cao", icon: Star },
     { value: "popular", label: "Phổ biến", icon: Award },
   ];
@@ -310,6 +329,39 @@ const Ebooks: React.FC = () => {
             ))}
           </div>
         </motion.div>
+
+        {/* ✅ Current Filter Display */}
+        {selectedTag && (
+          <motion.div
+            initial={{ opacity: 0, y: -10 }}
+            animate={{ opacity: 1, y: 0 }}
+            className="mb-6"
+          >
+            <div className="flex items-center p-4 space-x-4 border border-green-200 rounded-lg bg-green-50 dark:bg-green-900/20 dark:border-green-800">
+              <div className="flex items-center space-x-2">
+                <Filter className="w-4 h-4 text-green-600" />
+                <span className="text-sm font-medium text-green-700 dark:text-green-300">
+                  Đang lọc theo:
+                </span>
+              </div>
+              <Badge className="text-green-800 bg-green-100 dark:bg-green-900 dark:text-green-200">
+                📚 {selectedTag}
+                <button
+                  onClick={() => {
+                    setSearchParams({});
+                    setFilters((prev) => ({ ...prev, tags: [] }));
+                  }}
+                  className="ml-2 transition-colors hover:text-red-500"
+                >
+                  <X className="w-3 h-3" />
+                </button>
+              </Badge>
+              <span className="text-sm text-green-600 dark:text-green-400">
+                {filteredProducts.length} kết quả
+              </span>
+            </div>
+          </motion.div>
+        )}
 
         {/* ✅ Enhanced Search and Filters */}
         <motion.div
@@ -696,7 +748,6 @@ const Ebooks: React.FC = () => {
                   >
                     <ProductCard
                       product={product}
-                      showAddToCart
                       onAddToCart={() => {
                         addToCart(product);
                         toast({

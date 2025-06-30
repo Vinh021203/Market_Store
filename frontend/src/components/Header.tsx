@@ -103,104 +103,6 @@ const Header: React.FC = () => {
     return () => window.removeEventListener("scroll", handleScroll);
   }, []);
 
-  // Template categories
-  const templateCategories = [
-    {
-      title: "React Templates",
-      description: "Modern React components và applications",
-      icon: Code,
-      href: "/templates/react",
-      count: "200+",
-      color: "from-blue-500 to-cyan-500",
-      featured: true,
-    },
-    {
-      title: "Vue.js Templates",
-      description: "Vue.js applications và components",
-      icon: Zap,
-      href: "/templates/vue",
-      count: "150+",
-      color: "from-green-500 to-emerald-500",
-    },
-    {
-      title: "Angular Templates",
-      description: "Enterprise Angular applications",
-      icon: Globe,
-      href: "/templates/angular",
-      count: "100+",
-      color: "from-red-500 to-pink-500",
-    },
-    {
-      title: "Mobile Templates",
-      description: "React Native & Flutter apps",
-      icon: Smartphone,
-      href: "/templates/mobile",
-      count: "80+",
-      color: "from-purple-500 to-indigo-500",
-    },
-    {
-      title: "Design Systems",
-      description: "UI/UX design systems và components",
-      icon: Palette,
-      href: "/templates/design",
-      count: "60+",
-      color: "from-orange-500 to-yellow-500",
-    },
-    {
-      title: "Admin Dashboards",
-      description: "Professional admin interfaces",
-      icon: Grid,
-      href: "/templates/admin",
-      count: "120+",
-      color: "from-indigo-500 to-purple-500",
-    },
-  ];
-
-  // E-book categories
-  const ebookCategories = [
-    {
-      title: "JavaScript & TypeScript",
-      description: "Modern JavaScript development",
-      icon: Code,
-      href: "/ebooks/javascript",
-      count: "80+",
-      color: "from-yellow-500 to-orange-500",
-      featured: true,
-    },
-    {
-      title: "React & Next.js",
-      description: "React ecosystem và best practices",
-      icon: Zap,
-      href: "/ebooks/react",
-      count: "60+",
-      color: "from-blue-500 to-cyan-500",
-    },
-    {
-      title: "UI/UX Design",
-      description: "Design principles và user experience",
-      icon: Palette,
-      href: "/ebooks/design",
-      count: "40+",
-      color: "from-pink-500 to-rose-500",
-    },
-    {
-      title: "Backend Development",
-      description: "Server-side development guides",
-      icon: Globe,
-      href: "/ebooks/backend",
-      count: "50+",
-      color: "from-green-500 to-teal-500",
-    },
-    {
-      title: "DevOps & Cloud",
-      description: "Deployment và cloud services",
-      icon: Settings,
-      href: "/ebooks/devops",
-      count: "30+",
-      color: "from-purple-500 to-violet-500",
-    },
-  ];
-
   // Quick actions
   const quickActions = [
     {
@@ -366,44 +268,152 @@ const Header: React.FC = () => {
                         </div>
 
                         <div className="grid grid-cols-2 gap-3">
-                          {templateCategories.map((category, index) => (
-                            <NavigationMenuLink key={index} asChild>
-                              <Link
-                                to={category.href}
-                                className="block p-3 transition-all duration-300 rounded-lg group hover:bg-muted hover:shadow-md"
-                              >
-                                <div className="flex items-center space-x-3">
-                                  <div
-                                    className={`w-10 h-10 rounded-lg bg-gradient-to-r ${category.color} flex items-center justify-center group-hover:scale-110 transition-transform duration-300`}
+                          {/* ✅ React Templates - Fixed với tag navigation */}
+                          <button
+                            onClick={() => navigate("/templates?tag=react")}
+                            className="block w-full p-3 text-left transition-all duration-300 rounded-lg group hover:bg-muted hover:shadow-md"
+                          >
+                            <div className="flex items-center space-x-3">
+                              <div className="flex items-center justify-center w-10 h-10 transition-transform duration-300 rounded-lg bg-gradient-to-r from-blue-500 to-cyan-500 group-hover:scale-110">
+                                <Code className="w-5 h-5 text-white" />
+                              </div>
+                              <div className="flex-1">
+                                <div className="flex items-center space-x-2">
+                                  <div className="font-medium transition-colors group-hover:text-primary">
+                                    React Templates
+                                  </div>
+                                  <Badge
+                                    variant="secondary"
+                                    className="text-xs text-orange-800 bg-orange-100"
                                   >
-                                    <category.icon className="w-5 h-5 text-white" />
-                                  </div>
-                                  <div className="flex-1">
-                                    <div className="flex items-center space-x-2">
-                                      <div className="font-medium transition-colors group-hover:text-primary">
-                                        {category.title}
-                                      </div>
-                                      {category.featured && (
-                                        <Badge
-                                          variant="secondary"
-                                          className="text-xs text-orange-800 bg-orange-100"
-                                        >
-                                          <Flame className="w-3 h-3 mr-1" />
-                                          Hot
-                                        </Badge>
-                                      )}
-                                    </div>
-                                    <div className="text-sm text-muted-foreground">
-                                      {category.description}
-                                    </div>
-                                    <div className="mt-1 text-xs text-muted-foreground">
-                                      {category.count} templates
-                                    </div>
-                                  </div>
+                                    <Flame className="w-3 h-3 mr-1" />
+                                    Hot
+                                  </Badge>
                                 </div>
-                              </Link>
-                            </NavigationMenuLink>
-                          ))}
+                                <div className="text-sm text-muted-foreground">
+                                  Modern React components và applications
+                                </div>
+                                <div className="mt-1 text-xs text-muted-foreground">
+                                  200+ templates
+                                </div>
+                              </div>
+                            </div>
+                          </button>
+
+                          {/* ✅ Vue.js Templates */}
+                          <button
+                            onClick={() => navigate("/templates?tag=vue")}
+                            className="block w-full p-3 text-left transition-all duration-300 rounded-lg group hover:bg-muted hover:shadow-md"
+                          >
+                            <div className="flex items-center space-x-3">
+                              <div className="flex items-center justify-center w-10 h-10 transition-transform duration-300 rounded-lg bg-gradient-to-r from-green-500 to-emerald-500 group-hover:scale-110">
+                                <Zap className="w-5 h-5 text-white" />
+                              </div>
+                              <div className="flex-1">
+                                <div className="font-medium transition-colors group-hover:text-primary">
+                                  Vue.js Templates
+                                </div>
+                                <div className="text-sm text-muted-foreground">
+                                  Vue.js applications và components
+                                </div>
+                                <div className="mt-1 text-xs text-muted-foreground">
+                                  150+ templates
+                                </div>
+                              </div>
+                            </div>
+                          </button>
+
+                          {/* ✅ Angular Templates */}
+                          <button
+                            onClick={() => navigate("/templates?tag=angular")}
+                            className="block w-full p-3 text-left transition-all duration-300 rounded-lg group hover:bg-muted hover:shadow-md"
+                          >
+                            <div className="flex items-center space-x-3">
+                              <div className="flex items-center justify-center w-10 h-10 transition-transform duration-300 rounded-lg bg-gradient-to-r from-red-500 to-pink-500 group-hover:scale-110">
+                                <Globe className="w-5 h-5 text-white" />
+                              </div>
+                              <div className="flex-1">
+                                <div className="font-medium transition-colors group-hover:text-primary">
+                                  Angular Templates
+                                </div>
+                                <div className="text-sm text-muted-foreground">
+                                  Enterprise Angular applications
+                                </div>
+                                <div className="mt-1 text-xs text-muted-foreground">
+                                  100+ templates
+                                </div>
+                              </div>
+                            </div>
+                          </button>
+
+                          {/* ✅ Mobile Templates */}
+                          <button
+                            onClick={() => navigate("/templates?tag=mobile")}
+                            className="block w-full p-3 text-left transition-all duration-300 rounded-lg group hover:bg-muted hover:shadow-md"
+                          >
+                            <div className="flex items-center space-x-3">
+                              <div className="flex items-center justify-center w-10 h-10 transition-transform duration-300 rounded-lg bg-gradient-to-r from-purple-500 to-indigo-500 group-hover:scale-110">
+                                <Smartphone className="w-5 h-5 text-white" />
+                              </div>
+                              <div className="flex-1">
+                                <div className="font-medium transition-colors group-hover:text-primary">
+                                  Mobile Templates
+                                </div>
+                                <div className="text-sm text-muted-foreground">
+                                  React Native & Flutter apps
+                                </div>
+                                <div className="mt-1 text-xs text-muted-foreground">
+                                  80+ templates
+                                </div>
+                              </div>
+                            </div>
+                          </button>
+
+                          {/* ✅ Design Systems */}
+                          <button
+                            onClick={() => navigate("/templates?tag=design")}
+                            className="block w-full p-3 text-left transition-all duration-300 rounded-lg group hover:bg-muted hover:shadow-md"
+                          >
+                            <div className="flex items-center space-x-3">
+                              <div className="flex items-center justify-center w-10 h-10 transition-transform duration-300 rounded-lg bg-gradient-to-r from-orange-500 to-yellow-500 group-hover:scale-110">
+                                <Palette className="w-5 h-5 text-white" />
+                              </div>
+                              <div className="flex-1">
+                                <div className="font-medium transition-colors group-hover:text-primary">
+                                  Design Systems
+                                </div>
+                                <div className="text-sm text-muted-foreground">
+                                  UI/UX design systems và components
+                                </div>
+                                <div className="mt-1 text-xs text-muted-foreground">
+                                  60+ templates
+                                </div>
+                              </div>
+                            </div>
+                          </button>
+
+                          {/* ✅ Admin Dashboards */}
+                          <button
+                            onClick={() => navigate("/templates?tag=admin")}
+                            className="block w-full p-3 text-left transition-all duration-300 rounded-lg group hover:bg-muted hover:shadow-md"
+                          >
+                            <div className="flex items-center space-x-3">
+                              <div className="flex items-center justify-center w-10 h-10 transition-transform duration-300 rounded-lg bg-gradient-to-r from-indigo-500 to-purple-500 group-hover:scale-110">
+                                <Grid className="w-5 h-5 text-white" />
+                              </div>
+                              <div className="flex-1">
+                                <div className="font-medium transition-colors group-hover:text-primary">
+                                  Admin Dashboards
+                                </div>
+                                <div className="text-sm text-muted-foreground">
+                                  Professional admin interfaces
+                                </div>
+                                <div className="mt-1 text-xs text-muted-foreground">
+                                  120+ templates
+                                </div>
+                              </div>
+                            </div>
+                          </button>
                         </div>
 
                         {/* ✅ Footer với "Browse All Templates" button */}
@@ -421,6 +431,7 @@ const Header: React.FC = () => {
                         </div>
                       </div>
 
+                      {/* Right Column - Quick Actions giữ nguyên */}
                       <div className="space-y-4">
                         <h4 className="text-sm font-semibold tracking-wide uppercase text-muted-foreground">
                           Quick Actions
@@ -449,7 +460,7 @@ const Header: React.FC = () => {
                           </Link>
                         ))}
 
-                        {/* ✅ Admin Quick Actions (chỉ hiển thị cho admin) */}
+                        {/* Admin Quick Actions giữ nguyên */}
                         {user && isAdmin(user) && (
                           <>
                             <Separator />
@@ -524,44 +535,152 @@ const Header: React.FC = () => {
 
                         {/* Categories Grid - 2 columns */}
                         <div className="grid grid-cols-2 gap-3">
-                          {ebookCategories.map((category, index) => (
-                            <NavigationMenuLink key={index} asChild>
-                              <Link
-                                to={category.href}
-                                className="block p-3 transition-all duration-300 rounded-lg group hover:bg-muted hover:shadow-md"
-                              >
-                                <div className="flex items-center space-x-3">
-                                  <div
-                                    className={`w-10 h-10 rounded-lg bg-gradient-to-r ${category.color} flex items-center justify-center group-hover:scale-110 transition-transform duration-300`}
+                          {/* ✅ JavaScript & TypeScript - Fixed với tag navigation */}
+                          <button
+                            onClick={() => navigate("/ebooks?tag=javascript")}
+                            className="block w-full p-3 text-left transition-all duration-300 rounded-lg group hover:bg-muted hover:shadow-md"
+                          >
+                            <div className="flex items-center space-x-3">
+                              <div className="flex items-center justify-center w-10 h-10 transition-transform duration-300 rounded-lg bg-gradient-to-r from-yellow-500 to-orange-500 group-hover:scale-110">
+                                <Code className="w-10 h-6 text-white" />
+                              </div>
+                              <div className="flex-1">
+                                <div className="flex items-center space-x-2">
+                                  <div className="text-sm font-medium transition-colors group-hover:text-primary">
+                                    JavaScript & TypeScript
+                                  </div>
+                                  <Badge
+                                    variant="secondary"
+                                    className="text-xs text-yellow-800 bg-yellow-100"
                                   >
-                                    <category.icon className="w-5 h-5 text-white" />
-                                  </div>
-                                  <div className="flex-1">
-                                    <div className="flex items-center space-x-2">
-                                      <div className="text-sm font-medium transition-colors group-hover:text-primary">
-                                        {category.title}
-                                      </div>
-                                      {category.featured && (
-                                        <Badge
-                                          variant="secondary"
-                                          className="text-xs text-yellow-800 bg-yellow-100"
-                                        >
-                                          <Star className="w-3 h-3 mr-1" />
-                                          Hot
-                                        </Badge>
-                                      )}
-                                    </div>
-                                    <div className="mt-1 text-xs text-muted-foreground">
-                                      {category.description}
-                                    </div>
-                                    <div className="text-xs text-muted-foreground">
-                                      {category.count} e-books
-                                    </div>
-                                  </div>
+                                    <Star className="w-3 h-3 mr-1" />
+                                    Hot
+                                  </Badge>
                                 </div>
-                              </Link>
-                            </NavigationMenuLink>
-                          ))}
+                                <div className="mt-1 text-xs text-muted-foreground">
+                                  Modern JavaScript development
+                                </div>
+                                <div className="text-xs text-muted-foreground">
+                                  80+ e-books
+                                </div>
+                              </div>
+                            </div>
+                          </button>
+
+                          {/* ✅ React & Next.js */}
+                          <button
+                            onClick={() => navigate("/ebooks?tag=react")}
+                            className="block w-full p-3 text-left transition-all duration-300 rounded-lg group hover:bg-muted hover:shadow-md"
+                          >
+                            <div className="flex items-center space-x-3">
+                              <div className="flex items-center justify-center w-10 h-10 transition-transform duration-300 rounded-lg bg-gradient-to-r from-blue-500 to-cyan-500 group-hover:scale-110">
+                                <Zap className="w-5 h-5 text-white" />
+                              </div>
+                              <div className="flex-1">
+                                <div className="text-sm font-medium transition-colors group-hover:text-primary">
+                                  React & Next.js
+                                </div>
+                                <div className="mt-1 text-xs text-muted-foreground">
+                                  React ecosystem và best practices
+                                </div>
+                                <div className="text-xs text-muted-foreground">
+                                  60+ e-books
+                                </div>
+                              </div>
+                            </div>
+                          </button>
+
+                          {/* ✅ UI/UX Design */}
+                          <button
+                            onClick={() => navigate("/ebooks?tag=design")}
+                            className="block w-full p-3 text-left transition-all duration-300 rounded-lg group hover:bg-muted hover:shadow-md"
+                          >
+                            <div className="flex items-center space-x-3">
+                              <div className="flex items-center justify-center w-10 h-10 transition-transform duration-300 rounded-lg bg-gradient-to-r from-pink-500 to-rose-500 group-hover:scale-110">
+                                <Palette className="w-5 h-5 text-white" />
+                              </div>
+                              <div className="flex-1">
+                                <div className="text-sm font-medium transition-colors group-hover:text-primary">
+                                  UI/UX Design
+                                </div>
+                                <div className="mt-1 text-xs text-muted-foreground">
+                                  Design principles và user experience
+                                </div>
+                                <div className="text-xs text-muted-foreground">
+                                  40+ e-books
+                                </div>
+                              </div>
+                            </div>
+                          </button>
+
+                          {/* ✅ Backend Development */}
+                          <button
+                            onClick={() => navigate("/ebooks?tag=backend")}
+                            className="block w-full p-3 text-left transition-all duration-300 rounded-lg group hover:bg-muted hover:shadow-md"
+                          >
+                            <div className="flex items-center space-x-3">
+                              <div className="flex items-center justify-center w-10 h-10 transition-transform duration-300 rounded-lg bg-gradient-to-r from-green-500 to-teal-500 group-hover:scale-110">
+                                <Globe className="w-5 h-5 text-white" />
+                              </div>
+                              <div className="flex-1">
+                                <div className="text-sm font-medium transition-colors group-hover:text-primary">
+                                  Backend Development
+                                </div>
+                                <div className="mt-1 text-xs text-muted-foreground">
+                                  Server-side development guides
+                                </div>
+                                <div className="text-xs text-muted-foreground">
+                                  50+ e-books
+                                </div>
+                              </div>
+                            </div>
+                          </button>
+
+                          {/* ✅ DevOps & Cloud */}
+                          <button
+                            onClick={() => navigate("/ebooks?tag=devops")}
+                            className="block w-full p-3 text-left transition-all duration-300 rounded-lg group hover:bg-muted hover:shadow-md"
+                          >
+                            <div className="flex items-center space-x-3">
+                              <div className="flex items-center justify-center w-10 h-10 transition-transform duration-300 rounded-lg bg-gradient-to-r from-purple-500 to-violet-500 group-hover:scale-110">
+                                <Settings className="w-5 h-5 text-white" />
+                              </div>
+                              <div className="flex-1">
+                                <div className="text-sm font-medium transition-colors group-hover:text-primary">
+                                  DevOps & Cloud
+                                </div>
+                                <div className="mt-1 text-xs text-muted-foreground">
+                                  Deployment và cloud services
+                                </div>
+                                <div className="text-xs text-muted-foreground">
+                                  30+ e-books
+                                </div>
+                              </div>
+                            </div>
+                          </button>
+
+                          {/* ✅ Mobile Development */}
+                          <button
+                            onClick={() => navigate("/ebooks?tag=mobile")}
+                            className="block w-full p-3 text-left transition-all duration-300 rounded-lg group hover:bg-muted hover:shadow-md"
+                          >
+                            <div className="flex items-center space-x-3">
+                              <div className="flex items-center justify-center w-10 h-10 transition-transform duration-300 rounded-lg bg-gradient-to-r from-indigo-500 to-purple-500 group-hover:scale-110">
+                                <Smartphone className="w-5 h-5 text-white" />
+                              </div>
+                              <div className="flex-1">
+                                <div className="text-sm font-medium transition-colors group-hover:text-primary">
+                                  Mobile Development
+                                </div>
+                                <div className="mt-1 text-xs text-muted-foreground">
+                                  iOS, Android & React Native
+                                </div>
+                                <div className="text-xs text-muted-foreground">
+                                  35+ e-books
+                                </div>
+                              </div>
+                            </div>
+                          </button>
                         </div>
 
                         {/* Footer CTA */}
@@ -579,7 +698,7 @@ const Header: React.FC = () => {
                         </div>
                       </div>
 
-                      {/* Right Column - Featured Content (2 columns) */}
+                      {/* Right Column - Featured Content (2 columns) - Giữ nguyên */}
                       <div className="col-span-2 space-y-4">
                         <h4 className="text-sm font-semibold tracking-wide uppercase text-muted-foreground">
                           Featured Content
@@ -598,7 +717,7 @@ const Header: React.FC = () => {
                           </div>
                           <p className="mb-3 text-xs leading-relaxed text-muted-foreground">
                             Exclusive content from industry experts with
-                            advanced techniques and insider knowledge.
+                            advanced techniques.
                           </p>
                           <Button
                             size="sm"
@@ -621,8 +740,7 @@ const Header: React.FC = () => {
                             </Badge>
                           </div>
                           <p className="mb-3 text-xs leading-relaxed text-muted-foreground">
-                            High-quality free resources perfect for developers
-                            starting their journey.
+                            High-quality free resources perfect for developers.
                           </p>
                           <Button
                             size="sm"
@@ -647,7 +765,7 @@ const Header: React.FC = () => {
                           </div>
                           <p className="mb-3 text-xs leading-relaxed text-muted-foreground">
                             Fresh content covering the latest trends and
-                            technologies in development.
+                            technologies.
                           </p>
                           <Button
                             size="sm"
@@ -672,7 +790,7 @@ const Header: React.FC = () => {
                           </div>
                           <p className="mb-3 text-xs leading-relaxed text-muted-foreground">
                             Most popular e-books loved by thousands of
-                            developers worldwide.
+                            developers.
                           </p>
                           <Button
                             size="sm"
@@ -1218,301 +1336,3 @@ const Header: React.FC = () => {
 };
 
 export default Header;
-
-// import React, { useState, useEffect } from "react";
-// import { Link, useLocation, useNavigate } from "react-router-dom";
-// import { Button } from "@/components/ui/button";
-// import { Input } from "@/components/ui/input";
-// import {
-//   NavigationMenu,
-//   NavigationMenuList,
-//   NavigationMenuItem,
-//   NavigationMenuLink,
-// } from "@/components/ui/navigation-menu";
-// import {
-//   DropdownMenu,
-//   DropdownMenuContent,
-//   DropdownMenuItem,
-//   DropdownMenuTrigger,
-// } from "@/components/ui/dropdown-menu";
-// import { Badge } from "@/components/ui/badge";
-// import {
-//   Search,
-//   X,
-//   ShoppingCart,
-//   Heart,
-//   Sun,
-//   Moon,
-//   Monitor,
-//   Package,
-//   BookOpen,
-//   Award,
-//   MessageCircle,
-//   Bell,
-// } from "lucide-react";
-// import { useAuth } from "@/contexts/AuthContext";
-// import { useCart } from "@/contexts/CartContext";
-// import { useTheme } from "@/contexts/ThemeContext";
-// import { useWishlist } from "@/hooks/useWishlist";
-// import { motion, AnimatePresence } from "framer-motion";
-
-// // ✅ CHỈ IMPORT 2 COMPONENTS
-// import MegaDropdown from "./navigation/MegaDropdown";
-// import UserMenu from "./navigation/UserMenu";
-
-// const Header: React.FC = () => {
-//   const { user } = useAuth();
-//   const { getTotalItems } = useCart();
-//   const { getTotalWishlistItems } = useWishlist();
-//   const { theme, setTheme } = useTheme();
-//   const location = useLocation();
-//   const navigate = useNavigate();
-
-//   const [isScrolled, setIsScrolled] = useState(false);
-//   const [searchQuery, setSearchQuery] = useState("");
-//   const [isSearchFocused, setIsSearchFocused] = useState(false);
-//   const [notifications, setNotifications] = useState(3);
-
-//   const totalItems = getTotalItems();
-//   const totalWishlistItems = getTotalWishlistItems() || 0;
-
-//   useEffect(() => {
-//     const handleScroll = () => {
-//       setIsScrolled(window.scrollY > 20);
-//     };
-//     window.addEventListener("scroll", handleScroll);
-//     return () => window.removeEventListener("scroll", handleScroll);
-//   }, []);
-
-//   const handleSearch = (e: React.FormEvent) => {
-//     e.preventDefault();
-//     if (searchQuery.trim()) {
-//       navigate(`/search?q=${encodeURIComponent(searchQuery.trim())}`);
-//       setSearchQuery("");
-//       setIsSearchFocused(false);
-//     }
-//   };
-
-//   return (
-//     <header
-//       className={`sticky top-0 z-50 transition-all duration-300 ${
-//         isScrolled
-//           ? "bg-background/95 backdrop-blur-md shadow-lg border-b"
-//           : "bg-background/80 backdrop-blur-sm"
-//       }`}
-//     >
-//       <div className="container px-4 mx-auto">
-//         <div className="flex items-center justify-between h-16">
-//           {/* Logo */}
-//           <Link to="/" className="flex items-center space-x-3 group">
-//             <motion.div
-//               whileHover={{ scale: 1.1, rotate: 5 }}
-//               className="flex items-center justify-center w-10 h-10 shadow-lg rounded-xl bg-gradient-to-r from-blue-500 to-purple-600"
-//             >
-//               <span className="text-lg font-bold text-white">TM</span>
-//             </motion.div>
-//             <div className="hidden sm:block">
-//               <div className="text-xl font-bold text-transparent bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text">
-//                 Template Market
-//               </div>
-//               <div className="-mt-1 text-xs text-muted-foreground">
-//                 Premium Quality Store
-//               </div>
-//             </div>
-//           </Link>
-
-//           {/* Desktop Navigation */}
-//           <NavigationMenu className="hidden lg:flex">
-//             <NavigationMenuList>
-//               {/* ✅ SỬ DỤNG MEGADROPDOWN COMPONENT */}
-//               <MegaDropdown
-//                 category="template"
-//                 title="Templates"
-//                 icon={Package}
-//                 badgeText="Hot"
-//                 badgeColor="text-blue-800 bg-blue-100"
-//               />
-//               <MegaDropdown
-//                 category="ebook"
-//                 title="E-books"
-//                 icon={BookOpen}
-//                 badgeText="New"
-//                 badgeColor="text-green-800 bg-green-100"
-//               />
-
-//               {/* Other Navigation Items */}
-//               <NavigationMenuItem>
-//                 <NavigationMenuLink asChild>
-//                   <Link
-//                     to="/pricing"
-//                     className={`group inline-flex h-10 w-max items-center justify-center rounded-md bg-background px-4 py-2 text-sm font-medium transition-colors hover:bg-accent hover:text-accent-foreground focus:bg-accent focus:text-accent-foreground focus:outline-none disabled:pointer-events-none disabled:opacity-50 ${
-//                       location.pathname === "/pricing"
-//                         ? "bg-accent text-accent-foreground"
-//                         : ""
-//                     }`}
-//                   >
-//                     <Award className="w-4 h-4 mr-2" />
-//                     Pricing
-//                   </Link>
-//                 </NavigationMenuLink>
-//               </NavigationMenuItem>
-
-//               <NavigationMenuItem>
-//                 <NavigationMenuLink asChild>
-//                   <Link
-//                     to="/blog"
-//                     className={`group inline-flex h-10 w-max items-center justify-center rounded-md bg-background px-4 py-2 text-sm font-medium transition-colors hover:bg-accent hover:text-accent-foreground focus:bg-accent focus:text-accent-foreground focus:outline-none disabled:pointer-events-none disabled:opacity-50 ${
-//                       location.pathname === "/blog"
-//                         ? "bg-accent text-accent-foreground"
-//                         : ""
-//                     }`}
-//                   >
-//                     <MessageCircle className="w-4 h-4 mr-2" />
-//                     Blog
-//                   </Link>
-//                 </NavigationMenuLink>
-//               </NavigationMenuItem>
-//             </NavigationMenuList>
-//           </NavigationMenu>
-
-//           {/* Search Bar */}
-//           <div className="flex-1 hidden max-w-md mx-8 md:flex">
-//             <form onSubmit={handleSearch} className="relative w-full">
-//               <Search className="absolute w-4 h-4 transform -translate-y-1/2 left-3 top-1/2 text-muted-foreground" />
-//               <Input
-//                 type="text"
-//                 placeholder="Tìm kiếm templates, e-books..."
-//                 value={searchQuery}
-//                 onChange={(e) => setSearchQuery(e.target.value)}
-//                 onFocus={() => setIsSearchFocused(true)}
-//                 onBlur={() => setIsSearchFocused(false)}
-//                 className="pl-10 pr-4 border-0 bg-muted/50 focus:bg-background"
-//               />
-//               {searchQuery && (
-//                 <Button
-//                   type="button"
-//                   variant="ghost"
-//                   size="sm"
-//                   className="absolute w-8 h-8 p-0 transform -translate-y-1/2 right-1 top-1/2"
-//                   onClick={() => setSearchQuery("")}
-//                 >
-//                   <X className="w-4 h-4" />
-//                 </Button>
-//               )}
-//             </form>
-//           </div>
-
-//           {/* Right Side Actions */}
-//           <div className="flex items-center space-x-2">
-//             {/* Theme Toggle */}
-//             <DropdownMenu>
-//               <DropdownMenuTrigger asChild>
-//                 <Button variant="ghost" size="sm" className="p-0 w-9 h-9">
-//                   <Sun className="w-4 h-4 transition-all scale-100 rotate-0 dark:-rotate-90 dark:scale-0" />
-//                   <Moon className="absolute w-4 h-4 transition-all scale-0 rotate-90 dark:rotate-0 dark:scale-100" />
-//                   <span className="sr-only">Toggle theme</span>
-//                 </Button>
-//               </DropdownMenuTrigger>
-//               <DropdownMenuContent align="end">
-//                 <DropdownMenuItem onClick={() => setTheme("light")}>
-//                   <Sun className="w-4 h-4 mr-2" />
-//                   <span>Light</span>
-//                 </DropdownMenuItem>
-//                 <DropdownMenuItem onClick={() => setTheme("dark")}>
-//                   <Moon className="w-4 h-4 mr-2" />
-//                   <span>Dark</span>
-//                 </DropdownMenuItem>
-//                 <DropdownMenuItem onClick={() => setTheme("system")}>
-//                   <Monitor className="w-4 h-4 mr-2" />
-//                   <span>System</span>
-//                 </DropdownMenuItem>
-//               </DropdownMenuContent>
-//             </DropdownMenu>
-
-//             {/* Notifications */}
-//             {user && (
-//               <Button
-//                 variant="ghost"
-//                 size="sm"
-//                 className="relative p-0 w-9 h-9"
-//               >
-//                 <Bell className="w-4 h-4" />
-//                 {notifications > 0 && (
-//                   <Badge className="absolute flex items-center justify-center w-5 h-5 p-0 text-xs bg-red-500 -top-1 -right-1 hover:bg-red-600">
-//                     {notifications}
-//                   </Badge>
-//                 )}
-//               </Button>
-//             )}
-
-//             {/* Wishlist */}
-//             {user && (
-//               <motion.div
-//                 whileHover={{ scale: 1.05 }}
-//                 whileTap={{ scale: 0.95 }}
-//               >
-//                 <Button
-//                   variant="ghost"
-//                   size="sm"
-//                   asChild
-//                   className="relative p-0 w-9 h-9"
-//                 >
-//                   <Link to="/wishlist">
-//                     <Heart className="w-4 h-4" />
-//                     <AnimatePresence>
-//                       {totalWishlistItems > 0 && (
-//                         <motion.div
-//                           initial={{ scale: 0, opacity: 0 }}
-//                           animate={{ scale: 1, opacity: 1 }}
-//                           exit={{ scale: 0, opacity: 0 }}
-//                           className="absolute -top-1 -right-1"
-//                         >
-//                           <Badge className="flex items-center justify-center w-5 h-5 p-0 text-xs bg-primary hover:bg-primary/90">
-//                             {totalWishlistItems}
-//                           </Badge>
-//                         </motion.div>
-//                       )}
-//                     </AnimatePresence>
-//                   </Link>
-//                 </Button>
-//               </motion.div>
-//             )}
-
-//             {/* Cart */}
-//             <motion.div whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }}>
-//               <Button
-//                 variant="ghost"
-//                 size="sm"
-//                 asChild
-//                 className="relative p-0 w-9 h-9"
-//               >
-//                 <Link to="/cart">
-//                   <ShoppingCart className="w-4 h-4" />
-//                   <AnimatePresence>
-//                     {totalItems > 0 && (
-//                       <motion.div
-//                         initial={{ scale: 0, opacity: 0 }}
-//                         animate={{ scale: 1, opacity: 1 }}
-//                         exit={{ scale: 0, opacity: 0 }}
-//                         className="absolute -top-1 -right-1"
-//                       >
-//                         <Badge className="flex items-center justify-center w-5 h-5 p-0 text-xs bg-primary hover:bg-primary/90">
-//                           {totalItems}
-//                         </Badge>
-//                       </motion.div>
-//                     )}
-//                   </AnimatePresence>
-//                 </Link>
-//               </Button>
-//             </motion.div>
-
-//             {/* ✅ SỬ DỤNG USERMENU COMPONENT */}
-//             <UserMenu />
-//           </div>
-//         </div>
-//       </div>
-//     </header>
-//   );
-// };
-
-// export default Header;

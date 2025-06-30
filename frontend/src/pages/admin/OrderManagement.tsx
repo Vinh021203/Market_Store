@@ -1,3 +1,4 @@
+// pages/admin/OrderManagement.tsx - Mã hoàn chỉnh với fix payment status
 import React, { useState, useEffect } from "react";
 import { Navigate } from "react-router-dom";
 import OrderDetailModal from "@/components/OrderDetails";
@@ -74,7 +75,7 @@ const OrderManagement: React.FC = () => {
     "all" | "pending" | "processing" | "completed" | "cancelled"
   >("all");
   const [paymentFilter, setPaymentFilter] = useState<
-    "all" | "paid" | "pending" | "failed"
+    "all" | "completed" | "paid" | "pending" | "failed"
   >("all");
   const [isVisible, setIsVisible] = useState<Record<string, boolean>>({});
 
@@ -164,7 +165,8 @@ const OrderManagement: React.FC = () => {
   const filteredOrders = orders.filter((order) => {
     const matchesSearch =
       order.id.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      order.email?.toLowerCase().includes(searchQuery.toLowerCase());
+      order.email?.toLowerCase().includes(searchQuery.toLowerCase()) ||
+      order.full_name?.toLowerCase().includes(searchQuery.toLowerCase());
 
     const matchesStatus =
       statusFilter === "all" || order.status === statusFilter;
@@ -308,28 +310,53 @@ const OrderManagement: React.FC = () => {
   const getStatusColor = (status: Order["status"]) => {
     switch (status) {
       case "completed":
-        return "default";
+        return "default"; // Green
       case "processing":
-        return "secondary";
+        return "secondary"; // Blue
       case "pending":
-        return "outline";
+        return "outline"; // Gray
       case "cancelled":
-        return "destructive";
+        return "destructive"; // Red
       default:
         return "outline";
     }
   };
 
+  // ✅ FIXED: Payment status color function
   const getPaymentColor = (status: Order["payment_status"] | null) => {
     switch (status) {
+      case "completed": // ✅ Thêm case cho "completed"
       case "paid":
-        return "default";
+        return "default"; // Green
+      case "processing":
+        return "secondary"; // Blue
       case "pending":
-        return "secondary";
+        return "outline"; // Gray
       case "failed":
-        return "destructive";
+        return "destructive"; // Red
+      case "refunded":
+        return "destructive"; // Red
       default:
-        return "outline";
+        return "outline"; // Gray cho unknown
+    }
+  };
+
+  // ✅ FIXED: Payment status text function
+  const getPaymentStatusText = (status: Order["payment_status"] | null) => {
+    switch (status) {
+      case "completed": // ✅ Thêm case cho "completed"
+      case "paid":
+        return "Đã thanh toán";
+      case "processing":
+        return "Đang xử lý";
+      case "pending":
+        return "Chờ thanh toán";
+      case "failed":
+        return "Thất bại";
+      case "refunded":
+        return "Đã hoàn tiền";
+      default:
+        return "Chưa xác định"; // ✅ Thay vì "Thất bại"
     }
   };
 
@@ -597,7 +624,7 @@ const OrderManagement: React.FC = () => {
                 >
                   <Search className="absolute w-4 h-4 transform -translate-y-1/2 left-3 top-1/2 text-muted-foreground" />
                   <Input
-                    placeholder="Tìm kiếm theo mã đơn hàng hoặc email..."
+                    placeholder="Tìm kiếm theo mã đơn hàng, email hoặc tên khách hàng..."
                     value={searchQuery}
                     onChange={(e) => setSearchQuery(e.target.value)}
                     className="h-12 pl-10 transition-all duration-300 border-0 bg-background/50 focus:ring-2 focus:ring-primary/20"
@@ -632,7 +659,10 @@ const OrderManagement: React.FC = () => {
                     </SelectTrigger>
                     <SelectContent>
                       <SelectItem value="all">Tất cả</SelectItem>
-                      <SelectItem value="paid">Đã thanh toán</SelectItem>
+                      <SelectItem value="completed">Đã thanh toán</SelectItem>
+                      <SelectItem value="paid">
+                        Đã thanh toán (Legacy)
+                      </SelectItem>
                       <SelectItem value="pending">Chờ thanh toán</SelectItem>
                       <SelectItem value="failed">Thất bại</SelectItem>
                     </SelectContent>
@@ -719,7 +749,7 @@ const OrderManagement: React.FC = () => {
                           <TableCell>
                             <div>
                               <div className="font-medium">
-                                {order.full_name}
+                                {order.full_name || "Khách hàng không xác định"}
                               </div>
                               <div className="text-sm text-muted-foreground">
                                 {order.email}
@@ -730,7 +760,8 @@ const OrderManagement: React.FC = () => {
                             <div className="space-y-1">
                               {order.items.map((item, itemIndex) => (
                                 <div key={itemIndex} className="text-sm">
-                                  {item.product.title}
+                                  {item.product?.title ||
+                                    "Sản phẩm không xác định"}
                                   {item.quantity > 1 && (
                                     <span className="text-muted-foreground">
                                       {" "}
@@ -757,20 +788,23 @@ const OrderManagement: React.FC = () => {
                                   ? "Đang xử lý"
                                   : order.status === "completed"
                                     ? "Hoàn thành"
-                                    : "Đã hủy"}
+                                    : order.status === "cancelled"
+                                      ? "Đã hủy"
+                                      : "Chưa xác định"}
                             </Badge>
                           </TableCell>
                           <TableCell>
+                            {/* ✅ FIXED: Payment status display */}
                             <Badge
                               variant={getPaymentColor(order.payment_status)}
                               className="transition-all duration-300 group-hover:scale-105"
                             >
-                              {order.payment_status === "paid"
-                                ? "Đã thanh toán"
-                                : order.payment_status === "pending"
-                                  ? "Chờ thanh toán"
-                                  : "Thất bại"}
+                              {getPaymentStatusText(order.payment_status)}
                             </Badge>
+                            {/* ✅ Debug info (remove in production) */}
+                            <div className="mt-1 text-xs text-muted-foreground">
+                              DB: {order.payment_status}
+                            </div>
                           </TableCell>
                           <TableCell>
                             <div>

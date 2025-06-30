@@ -1,4 +1,4 @@
-// pages/Templates.tsx - Khôi phục version cũ, bỏ phần Popular Keywords
+// pages/Templates.tsx - Mã hoàn chỉnh với enhanced UI và pagination
 import React, { useState, useMemo, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -13,11 +13,13 @@ import { Badge } from "@/components/ui/badge";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Separator } from "@/components/ui/separator";
 import ProductCard from "@/components/ProductCard";
+import Pagination from "@/components/Pagination";
 import { filterProducts, getAllTags } from "@/lib/products";
 import { getProductsByCategory } from "@/lib/products";
 import { Product } from "@/types";
 import { FilterOptions } from "@/types";
 import { useCart } from "@/contexts/CartContext";
+import { useSearchParams } from "react-router-dom";
 import { motion, AnimatePresence } from "framer-motion";
 import {
   Search,
@@ -42,15 +44,23 @@ import {
   Clock,
   CheckCircle,
   AlertCircle,
+  Settings,
+  BarChart3,
+  Layers,
 } from "lucide-react";
 import { toast } from "@/hooks/use-toast";
 
 const Templates: React.FC = () => {
+  // ✅ Enhanced state với pagination
+  const [searchParams, setSearchParams] = useSearchParams();
+  const selectedTag = searchParams.get("tag");
+  const pageFromUrl = searchParams.get("page");
+
   const [filters, setFilters] = useState<FilterOptions>({
     category: "template",
     sortBy: "newest",
     search: "",
-    tags: [],
+    tags: selectedTag ? [selectedTag] : [],
     priceRange: undefined,
   });
 
@@ -61,6 +71,30 @@ const Templates: React.FC = () => {
   const [loading, setLoading] = useState(true);
   const [isVisible, setIsVisible] = useState<Record<string, boolean>>({});
   const { addToCart } = useCart();
+
+  // ✅ Pagination state
+  const [currentPage, setCurrentPage] = useState(
+    pageFromUrl ? parseInt(pageFromUrl, 10) : 1,
+  );
+  const [itemsPerPage] = useState(12);
+
+  // ✅ Handle URL tag changes
+  useEffect(() => {
+    if (selectedTag) {
+      setFilters((prev) => ({
+        ...prev,
+        tags: [selectedTag],
+      }));
+    }
+  }, [selectedTag]);
+
+  // ✅ Handle page changes in URL
+  useEffect(() => {
+    const page = searchParams.get("page");
+    if (page) {
+      setCurrentPage(parseInt(page, 10));
+    }
+  }, [searchParams]);
 
   useEffect(() => {
     const fetchData = async () => {
@@ -116,6 +150,38 @@ const Templates: React.FC = () => {
     return filterProducts(products, filters);
   }, [filters, products]);
 
+  // ✅ Pagination logic
+  const indexOfLastItem = currentPage * itemsPerPage;
+  const indexOfFirstItem = indexOfLastItem - itemsPerPage;
+  const currentProducts = filteredProducts.slice(
+    indexOfFirstItem,
+    indexOfLastItem,
+  );
+  const totalPages = Math.ceil(filteredProducts.length / itemsPerPage);
+
+  // ✅ Reset to first page when filters change
+  useEffect(() => {
+    setCurrentPage(1);
+    const params = new URLSearchParams(searchParams);
+    params.delete("page");
+    setSearchParams(params);
+  }, [filters, setSearchParams]);
+
+  // ✅ Handle page change with URL update
+  const handlePageChange = (page: number) => {
+    setCurrentPage(page);
+    const params = new URLSearchParams(searchParams);
+    if (page > 1) {
+      params.set("page", page.toString());
+    } else {
+      params.delete("page");
+    }
+    setSearchParams(params);
+
+    // Scroll to top
+    window.scrollTo({ top: 0, behavior: "smooth" });
+  };
+
   const handleSearch = (e: React.FormEvent) => {
     e.preventDefault();
     setFilters((prev) => ({ ...prev, search: searchInput }));
@@ -142,6 +208,7 @@ const Templates: React.FC = () => {
   };
 
   const clearFilters = () => {
+    setSearchParams({});
     setFilters({
       category: "template",
       sortBy: "newest",
@@ -253,7 +320,7 @@ const Templates: React.FC = () => {
             </div>
           </div>
 
-          {/* Stats */}
+          {/* Enhanced Stats */}
           <div className="grid grid-cols-2 gap-4 md:grid-cols-4">
             {[
               {
@@ -269,15 +336,15 @@ const Templates: React.FC = () => {
                 color: "from-green-500 to-emerald-500",
               },
               {
-                label: "Tags",
-                value: templateTags.length,
-                icon: Star,
+                label: "Trang hiện tại",
+                value: `${currentPage}/${totalPages}`,
+                icon: BarChart3,
                 color: "from-purple-500 to-pink-500",
               },
               {
-                label: "Chất lượng",
-                value: "Premium",
-                icon: Award,
+                label: "Hiển thị",
+                value: `${currentProducts.length}/${itemsPerPage}`,
+                icon: Layers,
                 color: "from-orange-500 to-red-500",
               },
             ].map((stat, index) => (
@@ -307,6 +374,39 @@ const Templates: React.FC = () => {
             ))}
           </div>
         </motion.div>
+
+        {/* ✅ Current Filter Display */}
+        {selectedTag && (
+          <motion.div
+            initial={{ opacity: 0, y: -10 }}
+            animate={{ opacity: 1, y: 0 }}
+            className="mb-6"
+          >
+            <div className="flex items-center p-4 space-x-4 border border-blue-200 rounded-lg bg-blue-50 dark:bg-blue-900/20 dark:border-blue-800">
+              <div className="flex items-center space-x-2">
+                <Filter className="w-4 h-4 text-blue-600" />
+                <span className="text-sm font-medium text-blue-700 dark:text-blue-300">
+                  Đang lọc theo:
+                </span>
+              </div>
+              <Badge className="text-blue-800 bg-blue-100 dark:bg-blue-900 dark:text-blue-200">
+                🏷️ {selectedTag}
+                <button
+                  onClick={() => {
+                    setSearchParams({});
+                    setFilters((prev) => ({ ...prev, tags: [] }));
+                  }}
+                  className="ml-2 transition-colors hover:text-red-500"
+                >
+                  <X className="w-3 h-3" />
+                </button>
+              </Badge>
+              <span className="text-sm text-blue-600 dark:text-blue-400">
+                {filteredProducts.length} kết quả
+              </span>
+            </div>
+          </motion.div>
+        )}
 
         {/* ✅ Enhanced Search and Filters */}
         <motion.div
@@ -612,7 +712,7 @@ const Templates: React.FC = () => {
           </AnimatePresence>
         </motion.div>
 
-        {/* ✅ Enhanced Results */}
+        {/* ✅ Enhanced Results với pagination */}
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
@@ -625,6 +725,10 @@ const Templates: React.FC = () => {
             <div className="flex items-center space-x-4">
               <p className="text-muted-foreground">
                 Hiển thị{" "}
+                <span className="font-semibold text-primary">
+                  {currentProducts.length}
+                </span>{" "}
+                trên{" "}
                 <span className="font-semibold text-primary">
                   {filteredProducts.length}
                 </span>{" "}
@@ -665,7 +769,7 @@ const Templates: React.FC = () => {
           </div>
 
           <AnimatePresence mode="wait">
-            {filteredProducts.length > 0 ? (
+            {currentProducts.length > 0 ? (
               <motion.div
                 key="products-grid"
                 initial={{ opacity: 0 }}
@@ -673,11 +777,11 @@ const Templates: React.FC = () => {
                 exit={{ opacity: 0 }}
                 className={
                   viewMode === "grid"
-                    ? "grid grid-cols-1 gap-6 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 items-stretch"
+                    ? "grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 2xl:grid-cols-5"
                     : "space-y-6"
                 }
               >
-                {filteredProducts.map((product, index) => (
+                {currentProducts.map((product, index) => (
                   <motion.div
                     key={product.id}
                     initial={{ opacity: 0, y: 20 }}
@@ -753,6 +857,17 @@ const Templates: React.FC = () => {
               </motion.div>
             )}
           </AnimatePresence>
+
+          {/* ✅ Enhanced Pagination */}
+          {filteredProducts.length > 0 && (
+            <Pagination
+              currentPage={currentPage}
+              totalPages={totalPages}
+              totalItems={filteredProducts.length}
+              itemsPerPage={itemsPerPage}
+              onPageChange={handlePageChange}
+            />
+          )}
         </motion.div>
       </div>
     </div>

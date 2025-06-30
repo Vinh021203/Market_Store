@@ -1,3 +1,4 @@
+// App.tsx - Fixed version
 import React, { Suspense } from "react";
 import { Toaster } from "@/components/ui/toaster";
 import { Toaster as Sonner } from "@/components/ui/sonner";
@@ -20,6 +21,7 @@ import AdminLayout from "@/components/admin/AdminLayout";
 import AdminChatPanel from "@/pages/admin/AdminChatPanel";
 import PageTransition from "@/components/PageTransition";
 import GlobalLoading from "@/components/GlobalLoading";
+import LoadingSpinner from "@/components/LoadingSpinner";
 import { isAdmin } from "@/lib/auth";
 
 // ✅ Lazy Load Pages - Public
@@ -42,7 +44,7 @@ const Wishlist = React.lazy(() => import("./pages/Wishlist"));
 const Profile = React.lazy(() => import("./pages/Profile"));
 const MyOrders = React.lazy(() => import("./pages/MyOrders"));
 const Downloads = React.lazy(() => import("./pages/Downloads"));
-const UserSettings = React.lazy(() => import("./pages/Settings")); // ✅ Rename để tránh conflict
+const UserSettings = React.lazy(() => import("./pages/Settings"));
 
 // ✅ Auth pages
 const Login = React.lazy(() => import("./pages/auth/Login"));
@@ -64,10 +66,13 @@ const BlogCreate = React.lazy(() => import("./pages/admin/BlogCreate"));
 const BlogCategories = React.lazy(() => import("./pages/admin/BlogCategories"));
 const Analytics = React.lazy(() => import("./pages/admin/Analytics"));
 const Reports = React.lazy(() => import("./pages/admin/Reports"));
-const AdminSettings = React.lazy(() => import("./pages/admin/Settings")); // ✅ Rename để tránh conflict
+const AdminSettings = React.lazy(() => import("./pages/admin/Settings"));
 const NotFound = React.lazy(() => import("./pages/NotFound"));
 
 const queryClient = new QueryClient();
+
+// ✅ Enhanced Suspense Fallback
+const SuspenseFallback: React.FC = () => <LoadingSpinner fullscreen />;
 
 // Protected Route Component
 interface ProtectedRouteProps {
@@ -83,7 +88,7 @@ const ProtectedRoute: React.FC<ProtectedRouteProps> = ({
   const location = useLocation();
 
   if (isLoading) {
-    return <GlobalLoading />;
+    return <LoadingSpinner fullscreen />;
   }
 
   if (!user) {
@@ -102,7 +107,7 @@ const PublicRoute: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const { user, isLoading } = useAuth();
 
   if (isLoading) {
-    return <GlobalLoading />;
+    return <LoadingSpinner fullscreen />;
   }
 
   if (user) {
@@ -127,456 +132,461 @@ const ConditionalLayout: React.FC<{ children: React.ReactNode }> = ({
   return <Layout>{children}</Layout>;
 };
 
-// ✅ App Routes Component
+// ✅ App Routes Component - Bây giờ có thể sử dụng useLocation
 const AppRoutes = () => {
   const { isLoading } = useAuth();
 
   if (isLoading) {
-    return <GlobalLoading />;
+    return <LoadingSpinner fullscreen />;
   }
 
   return (
-    <Routes>
-      {/* Public Routes */}
-      <Route
-        path="/"
-        element={
-          <ConditionalLayout>
-            <Suspense fallback={<GlobalLoading />}>
-              <PageTransition>
-                <Index />
-              </PageTransition>
-            </Suspense>
-          </ConditionalLayout>
-        }
-      />
-      <Route
-        path="/templates"
-        element={
-          <ConditionalLayout>
-            <Suspense fallback={<GlobalLoading />}>
-              <PageTransition>
-                <Templates />
-              </PageTransition>
-            </Suspense>
-          </ConditionalLayout>
-        }
-      />
-      <Route
-        path="/ebooks"
-        element={
-          <ConditionalLayout>
-            <Suspense fallback={<GlobalLoading />}>
-              <PageTransition>
-                <Ebooks />
-              </PageTransition>
-            </Suspense>
-          </ConditionalLayout>
-        }
-      />
-      <Route
-        path="/blog"
-        element={
-          <ConditionalLayout>
-            <Suspense fallback={<GlobalLoading />}>
-              <PageTransition>
-                <Blog />
-              </PageTransition>
-            </Suspense>
-          </ConditionalLayout>
-        }
-      />
-      <Route
-        path="/blog/:slug"
-        element={
-          <ConditionalLayout>
-            <Suspense fallback={<GlobalLoading />}>
-              <PageTransition>
-                <BlogPost />
-              </PageTransition>
-            </Suspense>
-          </ConditionalLayout>
-        }
-      />
-      <Route
-        path="/product/:id"
-        element={
-          <ConditionalLayout>
-            <Suspense fallback={<GlobalLoading />}>
-              <PageTransition>
-                <ProductDetail />
-              </PageTransition>
-            </Suspense>
-          </ConditionalLayout>
-        }
-      />
-      <Route
-        path="/cart"
-        element={
-          <ConditionalLayout>
-            <Suspense fallback={<GlobalLoading />}>
-              <PageTransition>
-                <Cart />
-              </PageTransition>
-            </Suspense>
-          </ConditionalLayout>
-        }
-      />
-      <Route
-        path="/about"
-        element={
-          <ConditionalLayout>
-            <Suspense fallback={<GlobalLoading />}>
-              <PageTransition>
-                <About />
-              </PageTransition>
-            </Suspense>
-          </ConditionalLayout>
-        }
-      />
-      <Route
-        path="/contact"
-        element={
-          <ConditionalLayout>
-            <Suspense fallback={<GlobalLoading />}>
-              <PageTransition>
-                <Contact />
-              </PageTransition>
-            </Suspense>
-          </ConditionalLayout>
-        }
-      />
-      <Route
-        path="/careers"
-        element={
-          <ConditionalLayout>
-            <Suspense fallback={<GlobalLoading />}>
-              <PageTransition>
-                <Careers />
-              </PageTransition>
-            </Suspense>
-          </ConditionalLayout>
-        }
-      />
-      <Route
-        path="/wishlist"
-        element={
-          <ConditionalLayout>
-            <Suspense fallback={<GlobalLoading />}>
-              <PageTransition>
-                <Wishlist />
-              </PageTransition>
-            </Suspense>
-          </ConditionalLayout>
-        }
-      />
-      <Route
-        path="/pricing"
-        element={
-          <ConditionalLayout>
-            <Suspense fallback={<GlobalLoading />}>
-              <PageTransition>
-                <Pricing />
-              </PageTransition>
-            </Suspense>
-          </ConditionalLayout>
-        }
-      />
-      <Route
-        path="/search"
-        element={
-          <ConditionalLayout>
-            <Suspense fallback={<GlobalLoading />}>
-              <PageTransition>
-                <SearchResults />
-              </PageTransition>
-            </Suspense>
-          </ConditionalLayout>
-        }
-      />
+    <>
+      {/* ✅ GlobalLoading bây giờ có thể sử dụng LoadingContext */}
+      <GlobalLoading />
+      <Routes>
+        {/* Public Routes */}
+        <Route
+          path="/"
+          element={
+            <ConditionalLayout>
+              <Suspense fallback={<SuspenseFallback />}>
+                <PageTransition>
+                  <Index />
+                </PageTransition>
+              </Suspense>
+            </ConditionalLayout>
+          }
+        />
+        <Route
+          path="/templates"
+          element={
+            <ConditionalLayout>
+              <Suspense fallback={<SuspenseFallback />}>
+                <PageTransition>
+                  <Templates />
+                </PageTransition>
+              </Suspense>
+            </ConditionalLayout>
+          }
+        />
+        <Route
+          path="/ebooks"
+          element={
+            <ConditionalLayout>
+              <Suspense fallback={<SuspenseFallback />}>
+                <PageTransition>
+                  <Ebooks />
+                </PageTransition>
+              </Suspense>
+            </ConditionalLayout>
+          }
+        />
+        <Route
+          path="/blog"
+          element={
+            <ConditionalLayout>
+              <Suspense fallback={<SuspenseFallback />}>
+                <PageTransition>
+                  <Blog />
+                </PageTransition>
+              </Suspense>
+            </ConditionalLayout>
+          }
+        />
+        <Route
+          path="/blog/:slug"
+          element={
+            <ConditionalLayout>
+              <Suspense fallback={<SuspenseFallback />}>
+                <PageTransition>
+                  <BlogPost />
+                </PageTransition>
+              </Suspense>
+            </ConditionalLayout>
+          }
+        />
+        <Route
+          path="/product/:id"
+          element={
+            <ConditionalLayout>
+              <Suspense fallback={<SuspenseFallback />}>
+                <PageTransition>
+                  <ProductDetail />
+                </PageTransition>
+              </Suspense>
+            </ConditionalLayout>
+          }
+        />
+        <Route
+          path="/cart"
+          element={
+            <ConditionalLayout>
+              <Suspense fallback={<SuspenseFallback />}>
+                <PageTransition>
+                  <Cart />
+                </PageTransition>
+              </Suspense>
+            </ConditionalLayout>
+          }
+        />
+        <Route
+          path="/about"
+          element={
+            <ConditionalLayout>
+              <Suspense fallback={<SuspenseFallback />}>
+                <PageTransition>
+                  <About />
+                </PageTransition>
+              </Suspense>
+            </ConditionalLayout>
+          }
+        />
+        <Route
+          path="/contact"
+          element={
+            <ConditionalLayout>
+              <Suspense fallback={<SuspenseFallback />}>
+                <PageTransition>
+                  <Contact />
+                </PageTransition>
+              </Suspense>
+            </ConditionalLayout>
+          }
+        />
+        <Route
+          path="/careers"
+          element={
+            <ConditionalLayout>
+              <Suspense fallback={<SuspenseFallback />}>
+                <PageTransition>
+                  <Careers />
+                </PageTransition>
+              </Suspense>
+            </ConditionalLayout>
+          }
+        />
+        <Route
+          path="/wishlist"
+          element={
+            <ConditionalLayout>
+              <Suspense fallback={<SuspenseFallback />}>
+                <PageTransition>
+                  <Wishlist />
+                </PageTransition>
+              </Suspense>
+            </ConditionalLayout>
+          }
+        />
+        <Route
+          path="/pricing"
+          element={
+            <ConditionalLayout>
+              <Suspense fallback={<SuspenseFallback />}>
+                <PageTransition>
+                  <Pricing />
+                </PageTransition>
+              </Suspense>
+            </ConditionalLayout>
+          }
+        />
+        <Route
+          path="/search"
+          element={
+            <ConditionalLayout>
+              <Suspense fallback={<SuspenseFallback />}>
+                <PageTransition>
+                  <SearchResults />
+                </PageTransition>
+              </Suspense>
+            </ConditionalLayout>
+          }
+        />
 
-      {/* ✅ Protected User Routes */}
-      <Route
-        path="/profile"
-        element={
-          <ProtectedRoute>
-            <ConditionalLayout>
-              <Suspense fallback={<GlobalLoading />}>
-                <PageTransition>
-                  <Profile />
-                </PageTransition>
-              </Suspense>
-            </ConditionalLayout>
-          </ProtectedRoute>
-        }
-      />
-      <Route
-        path="/my-orders"
-        element={
-          <ProtectedRoute>
-            <ConditionalLayout>
-              <Suspense fallback={<GlobalLoading />}>
-                <PageTransition>
-                  <MyOrders />
-                </PageTransition>
-              </Suspense>
-            </ConditionalLayout>
-          </ProtectedRoute>
-        }
-      />
-      <Route
-        path="/downloads"
-        element={
-          <ProtectedRoute>
-            <ConditionalLayout>
-              <Suspense fallback={<GlobalLoading />}>
-                <PageTransition>
-                  <Downloads />
-                </PageTransition>
-              </Suspense>
-            </ConditionalLayout>
-          </ProtectedRoute>
-        }
-      />
-      <Route
-        path="/settings"
-        element={
-          <ProtectedRoute>
-            <ConditionalLayout>
-              <Suspense fallback={<GlobalLoading />}>
-                <PageTransition>
-                  <UserSettings /> {/* ✅ Sử dụng UserSettings */}
-                </PageTransition>
-              </Suspense>
-            </ConditionalLayout>
-          </ProtectedRoute>
-        }
-      />
-      <Route
-        path="/checkout"
-        element={
-          <ProtectedRoute>
-            <ConditionalLayout>
-              <Suspense fallback={<GlobalLoading />}>
-                <PageTransition>
-                  <Checkout />
-                </PageTransition>
-              </Suspense>
-            </ConditionalLayout>
-          </ProtectedRoute>
-        }
-      />
+        {/* ✅ Protected User Routes */}
+        <Route
+          path="/profile"
+          element={
+            <ProtectedRoute>
+              <ConditionalLayout>
+                <Suspense fallback={<SuspenseFallback />}>
+                  <PageTransition>
+                    <Profile />
+                  </PageTransition>
+                </Suspense>
+              </ConditionalLayout>
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/my-orders"
+          element={
+            <ProtectedRoute>
+              <ConditionalLayout>
+                <Suspense fallback={<SuspenseFallback />}>
+                  <PageTransition>
+                    <MyOrders />
+                  </PageTransition>
+                </Suspense>
+              </ConditionalLayout>
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/downloads"
+          element={
+            <ProtectedRoute>
+              <ConditionalLayout>
+                <Suspense fallback={<SuspenseFallback />}>
+                  <PageTransition>
+                    <Downloads />
+                  </PageTransition>
+                </Suspense>
+              </ConditionalLayout>
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/settings"
+          element={
+            <ProtectedRoute>
+              <ConditionalLayout>
+                <Suspense fallback={<SuspenseFallback />}>
+                  <PageTransition>
+                    <UserSettings />
+                  </PageTransition>
+                </Suspense>
+              </ConditionalLayout>
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/checkout"
+          element={
+            <ProtectedRoute>
+              <ConditionalLayout>
+                <Suspense fallback={<SuspenseFallback />}>
+                  <PageTransition>
+                    <Checkout />
+                  </PageTransition>
+                </Suspense>
+              </ConditionalLayout>
+            </ProtectedRoute>
+          }
+        />
 
-      {/* ✅ Auth Routes */}
-      <Route
-        path="/auth/login"
-        element={
-          <PublicRoute>
-            <ConditionalLayout>
-              <Suspense fallback={<GlobalLoading />}>
-                <PageTransition>
-                  <Login />
-                </PageTransition>
-              </Suspense>
-            </ConditionalLayout>
-          </PublicRoute>
-        }
-      />
-      <Route
-        path="/auth/register"
-        element={
-          <PublicRoute>
-            <ConditionalLayout>
-              <Suspense fallback={<GlobalLoading />}>
-                <PageTransition>
-                  <Register />
-                </PageTransition>
-              </Suspense>
-            </ConditionalLayout>
-          </PublicRoute>
-        }
-      />
-      <Route
-        path="/auth/email-confirmed"
-        element={
-          <Suspense fallback={<GlobalLoading />}>
-            <PageTransition>
-              <EmailConfirmed />
-            </PageTransition>
-          </Suspense>
-        }
-      />
-      {/* ✅ Admin Routes with Protection */}
-      <Route
-        path="/admin"
-        element={
-          <ProtectedRoute requireAdmin>
-            <Suspense fallback={<GlobalLoading />}>
-              <AdminLayout />
-            </Suspense>
-          </ProtectedRoute>
-        }
-      >
+        {/* ✅ Auth Routes */}
         <Route
-          index
+          path="/auth/login"
           element={
-            <Suspense fallback={<GlobalLoading />}>
+            <PublicRoute>
+              <ConditionalLayout>
+                <Suspense fallback={<SuspenseFallback />}>
+                  <PageTransition>
+                    <Login />
+                  </PageTransition>
+                </Suspense>
+              </ConditionalLayout>
+            </PublicRoute>
+          }
+        />
+        <Route
+          path="/auth/register"
+          element={
+            <PublicRoute>
+              <ConditionalLayout>
+                <Suspense fallback={<SuspenseFallback />}>
+                  <PageTransition>
+                    <Register />
+                  </PageTransition>
+                </Suspense>
+              </ConditionalLayout>
+            </PublicRoute>
+          }
+        />
+        <Route
+          path="/auth/email-confirmed"
+          element={
+            <Suspense fallback={<SuspenseFallback />}>
               <PageTransition>
-                <AdminDashboard />
+                <EmailConfirmed />
               </PageTransition>
             </Suspense>
           }
         />
-        <Route
-          path="products"
-          element={
-            <Suspense fallback={<GlobalLoading />}>
-              <PageTransition>
-                <ProductManagement />
-              </PageTransition>
-            </Suspense>
-          }
-        />
-        <Route
-          path="products/create"
-          element={
-            <Suspense fallback={<GlobalLoading />}>
-              <PageTransition>
-                <ProductCreate />
-              </PageTransition>
-            </Suspense>
-          }
-        />
-        <Route
-          path="products/edit/:id"
-          element={
-            <Suspense fallback={<GlobalLoading />}>
-              <PageTransition>
-                <ProductCreate />
-              </PageTransition>
-            </Suspense>
-          }
-        />
-        <Route
-          path="orders"
-          element={
-            <Suspense fallback={<GlobalLoading />}>
-              <PageTransition>
-                <OrderManagement />
-              </PageTransition>
-            </Suspense>
-          }
-        />
-        <Route
-          path="chat"
-          element={
-            <Suspense fallback={<GlobalLoading />}>
-              <PageTransition>
-                <AdminChatPanel />
-              </PageTransition>
-            </Suspense>
-          }
-        />
-        <Route
-          path="blog"
-          element={
-            <Suspense fallback={<GlobalLoading />}>
-              <PageTransition>
-                <BlogManagement />
-              </PageTransition>
-            </Suspense>
-          }
-        />
-        <Route
-          path="blog/create"
-          element={
-            <Suspense fallback={<GlobalLoading />}>
-              <PageTransition>
-                <BlogCreate />
-              </PageTransition>
-            </Suspense>
-          }
-        />
-        <Route
-          path="blog/edit/:id"
-          element={
-            <Suspense fallback={<GlobalLoading />}>
-              <PageTransition>
-                <BlogCreate />
-              </PageTransition>
-            </Suspense>
-          }
-        />
-        <Route
-          path="blog/categories"
-          element={
-            <Suspense fallback={<GlobalLoading />}>
-              <PageTransition>
-                <BlogCategories />
-              </PageTransition>
-            </Suspense>
-          }
-        />
-        <Route
-          path="users"
-          element={
-            <Suspense fallback={<GlobalLoading />}>
-              <PageTransition>
-                <UserManagement />
-              </PageTransition>
-            </Suspense>
-          }
-        />
-        <Route
-          path="analytics"
-          element={
-            <Suspense fallback={<GlobalLoading />}>
-              <PageTransition>
-                <Analytics />
-              </PageTransition>
-            </Suspense>
-          }
-        />
-        <Route
-          path="reports"
-          element={
-            <Suspense fallback={<GlobalLoading />}>
-              <PageTransition>
-                <Reports />
-              </PageTransition>
-            </Suspense>
-          }
-        />
-        <Route
-          path="settings"
-          element={
-            <Suspense fallback={<GlobalLoading />}>
-              <PageTransition>
-                <AdminSettings />
-              </PageTransition>
-            </Suspense>
-          }
-        />
-      </Route>
 
-      {/* 404 Route */}
-      <Route
-        path="*"
-        element={
-          <ConditionalLayout>
-            <Suspense fallback={<GlobalLoading />}>
-              <PageTransition>
-                <NotFound />
-              </PageTransition>
-            </Suspense>
-          </ConditionalLayout>
-        }
-      />
-    </Routes>
+        {/* ✅ Admin Routes with Protection */}
+        <Route
+          path="/admin"
+          element={
+            <ProtectedRoute requireAdmin>
+              <Suspense fallback={<SuspenseFallback />}>
+                <AdminLayout />
+              </Suspense>
+            </ProtectedRoute>
+          }
+        >
+          <Route
+            index
+            element={
+              <Suspense fallback={<SuspenseFallback />}>
+                <PageTransition>
+                  <AdminDashboard />
+                </PageTransition>
+              </Suspense>
+            }
+          />
+          <Route
+            path="products"
+            element={
+              <Suspense fallback={<SuspenseFallback />}>
+                <PageTransition>
+                  <ProductManagement />
+                </PageTransition>
+              </Suspense>
+            }
+          />
+          <Route
+            path="products/create"
+            element={
+              <Suspense fallback={<SuspenseFallback />}>
+                <PageTransition>
+                  <ProductCreate />
+                </PageTransition>
+              </Suspense>
+            }
+          />
+          <Route
+            path="products/edit/:id"
+            element={
+              <Suspense fallback={<SuspenseFallback />}>
+                <PageTransition>
+                  <ProductCreate />
+                </PageTransition>
+              </Suspense>
+            }
+          />
+          <Route
+            path="orders"
+            element={
+              <Suspense fallback={<SuspenseFallback />}>
+                <PageTransition>
+                  <OrderManagement />
+                </PageTransition>
+              </Suspense>
+            }
+          />
+          <Route
+            path="chat"
+            element={
+              <Suspense fallback={<SuspenseFallback />}>
+                <PageTransition>
+                  <AdminChatPanel />
+                </PageTransition>
+              </Suspense>
+            }
+          />
+          <Route
+            path="blog"
+            element={
+              <Suspense fallback={<SuspenseFallback />}>
+                <PageTransition>
+                  <BlogManagement />
+                </PageTransition>
+              </Suspense>
+            }
+          />
+          <Route
+            path="blog/create"
+            element={
+              <Suspense fallback={<SuspenseFallback />}>
+                <PageTransition>
+                  <BlogCreate />
+                </PageTransition>
+              </Suspense>
+            }
+          />
+          <Route
+            path="blog/edit/:id"
+            element={
+              <Suspense fallback={<SuspenseFallback />}>
+                <PageTransition>
+                  <BlogCreate />
+                </PageTransition>
+              </Suspense>
+            }
+          />
+          <Route
+            path="blog/categories"
+            element={
+              <Suspense fallback={<SuspenseFallback />}>
+                <PageTransition>
+                  <BlogCategories />
+                </PageTransition>
+              </Suspense>
+            }
+          />
+          <Route
+            path="users"
+            element={
+              <Suspense fallback={<SuspenseFallback />}>
+                <PageTransition>
+                  <UserManagement />
+                </PageTransition>
+              </Suspense>
+            }
+          />
+          <Route
+            path="analytics"
+            element={
+              <Suspense fallback={<SuspenseFallback />}>
+                <PageTransition>
+                  <Analytics />
+                </PageTransition>
+              </Suspense>
+            }
+          />
+          <Route
+            path="reports"
+            element={
+              <Suspense fallback={<SuspenseFallback />}>
+                <PageTransition>
+                  <Reports />
+                </PageTransition>
+              </Suspense>
+            }
+          />
+          <Route
+            path="settings"
+            element={
+              <Suspense fallback={<SuspenseFallback />}>
+                <PageTransition>
+                  <AdminSettings />
+                </PageTransition>
+              </Suspense>
+            }
+          />
+        </Route>
+
+        {/* 404 Route */}
+        <Route
+          path="*"
+          element={
+            <ConditionalLayout>
+              <Suspense fallback={<SuspenseFallback />}>
+                <PageTransition>
+                  <NotFound />
+                </PageTransition>
+              </Suspense>
+            </ConditionalLayout>
+          }
+        />
+      </Routes>
+    </>
   );
 };
 
-// Main App Component
+// ✅ FIXED: Main App Component - LoadingProvider bên trong BrowserRouter
 const App = () => (
   <QueryClientProvider client={queryClient}>
     <ThemeProvider defaultTheme="system" storageKey="vite-ui-theme">
@@ -584,18 +594,19 @@ const App = () => (
         <AuthProvider>
           <WishlistProvider>
             <CartProvider>
-              <LoadingProvider>
-                <Toaster />
-                <Sonner />
-                <BrowserRouter
-                  future={{
-                    v7_startTransition: true,
-                    v7_relativeSplatPath: true,
-                  }}
-                >
+              <Toaster />
+              <Sonner />
+              <BrowserRouter
+                future={{
+                  v7_startTransition: true,
+                  v7_relativeSplatPath: true,
+                }}
+              >
+                {/* ✅ FIXED: LoadingProvider bây giờ bên trong BrowserRouter */}
+                <LoadingProvider>
                   <AppRoutes />
-                </BrowserRouter>
-              </LoadingProvider>
+                </LoadingProvider>
+              </BrowserRouter>
             </CartProvider>
           </WishlistProvider>
         </AuthProvider>

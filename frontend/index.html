@@ -1,22 +1,115 @@
 <!doctype html>
-<html lang="en">
+<html lang="vi"> <!-- ✅ Đổi thành tiếng Việt -->
   <head>
     <meta charset="UTF-8" />
-    <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    
+    <!-- ✅ TITLE - Quan trọng nhất cho SEO -->
+    <title>Template Market - Premium Templates & E-books cho Developers Việt Nam</title>
+    
+    <!-- ✅ META DESCRIPTION - Hiển thị trên Google -->
+    <meta 
+      name="description" 
+      content="Khám phá hàng nghìn template React, Vue, Angular và e-books chất lượng cao. Download ngay templates admin dashboard, landing page, e-commerce với giá tốt nhất tại Template Market Việt Nam." 
+    />
+    
+    <!-- ✅ META KEYWORDS -->
+    <meta 
+      name="keywords" 
+      content="template react, vue template, angular template, admin dashboard, landing page, e-commerce template, ui kit, ebook web design, template việt nam, premium template" 
+    />
+    
+    <!-- ✅ BASIC SEO META -->
     <meta name="author" content="Template Market" />
+    <meta name="robots" content="index, follow, max-snippet:-1, max-image-preview:large, max-video-preview:-1" />
+    <meta name="googlebot" content="index, follow" />
+    <meta name="language" content="Vietnamese" />
+    <meta name="revisit-after" content="1 days" />
+    
+    <!-- ✅ CANONICAL URL -->
+    <link rel="canonical" href="https://marketstore-two.vercel.app/" />
+    
+    <!-- ✅ FAVICON & ICONS -->
+    <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+    <link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png" />
+    <link rel="icon" type="image/png" sizes="32x32" href="/favicon-32x32.png" />
+    <link rel="icon" type="image/png" sizes="16x16" href="/favicon-16x16.png" />
+    <link rel="manifest" href="/site.webmanifest" />
+    
+    <!-- ✅ OPEN GRAPH (Facebook, LinkedIn) -->
+    <meta property="og:type" content="website" />
+    <meta property="og:site_name" content="Template Market" />
+    <meta property="og:title" content="Template Market - Premium Templates & E-books cho Developers" />
+    <meta property="og:description" content="Khám phá hàng nghìn template React, Vue, Angular và e-books chất lượng cao cho developers Việt Nam." />
+    <meta property="og:url" content="https://marketstore-two.vercel.app/" />
+    <meta property="og:image" content="https://marketstore-two.vercel.app/og-image.jpg" />
+    <meta property="og:image:width" content="1200" />
+    <meta property="og:image:height" content="630" />
+    <meta property="og:image:alt" content="Template Market - Premium Templates & E-books" />
+    <meta property="og:locale" content="vi_VN" />
+    
+    <!-- ✅ TWITTER CARDS -->
+    <meta name="twitter:card" content="summary_large_image" />
+    <meta name="twitter:site" content="@templatemarket" />
+    <meta name="twitter:creator" content="@templatemarket" />
+    <meta name="twitter:title" content="Template Market - Premium Templates & E-books" />
+    <meta name="twitter:description" content="Khám phá hàng nghìn template React, Vue, Angular và e-books chất lượng cao." />
+    <meta name="twitter:image" content="https://marketstore-two.vercel.app/twitter-image.jpg" />
+    
+    <!-- ✅ VIEWPORT & MOBILE -->
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0" />
+    <meta name="format-detection" content="telephone=no" />
+    <meta name="mobile-web-app-capable" content="yes" />
+    <meta name="apple-mobile-web-app-capable" content="yes" />
+    <meta name="apple-mobile-web-app-status-bar-style" content="default" />
+    <meta name="theme-color" content="#3b82f6" />
+    
+    <!-- ✅ PRECONNECT & DNS-PREFETCH -->
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link rel="dns-prefetch" href="//www.google-analytics.com" />
+    <link rel="dns-prefetch" href="//www.googletagmanager.com" />
+    
+    <!-- ✅ FONTS -->
     <link
       href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap"
       rel="stylesheet"
     />
-
-    </head>
+    
+    <!-- ✅ SITEMAP -->
+    <link rel="sitemap" type="application/xml" href="/sitemap.xml" />
+    
+    <!-- ✅ STRUCTURED DATA - JSON-LD -->
+    <script type="application/ld+json">
+    {
+      "@context": "https://schema.org",
+      "@type": "WebSite",
+      "name": "Template Market",
+      "description": "Premium templates và e-books cho developers Việt Nam",
+      "url": "https://marketstore-two.vercel.app/",
+      "potentialAction": {
+        "@type": "SearchAction",
+        "target": "https://marketstore-two.vercel.app/search?q={search_term_string}",
+        "query-input": "required name=search_term_string"
+      },
+      "publisher": {
+        "@type": "Organization",
+        "name": "Template Market",
+        "url": "https://marketstore-two.vercel.app/",
+        "logo": {
+          "@type": "ImageObject",
+          "url": "https://marketstore-two.vercel.app/logo.png"
+        }
+      }
+    }
+    </script>
+    
+    <!-- ✅ GOOGLE ANALYTICS (Optional) -->
+    <!-- <script async src="https://www.googletagmanager.com/gtag/js?id=GA_MEASUREMENT_ID"></script> -->
+    
+  </head>
 
   <body>
     <div id="root"></div>
-
     <script type="module" src="/src/main.tsx"></script>
   </body>
 </html>

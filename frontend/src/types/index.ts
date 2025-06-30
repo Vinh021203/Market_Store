@@ -45,7 +45,14 @@ export interface Order {
   user_id: string | null; // match với Supabase
   status: "pending" | "processing" | "completed" | "cancelled" | null;
   payment_method: string | null;
-  payment_status: "pending" | "paid" | "failed" | null; // Có thể null
+  payment_status:
+    | "pending"
+    | "processing"
+    | "completed"
+    | "paid"
+    | "failed"
+    | "refunded"
+    | null;
   total_price: number | null;
   created_at: string | null;
   updated_at?: string | null;

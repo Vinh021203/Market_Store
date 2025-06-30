@@ -87,7 +87,8 @@ export async function getAllOrders(): Promise<Order[]> {
     .select(
       `*,
       order_items(*, products(*))
-    `)
+    `,
+    )
     .order("created_at", { ascending: false });
 
   if (error || !data) return [];
@@ -96,7 +97,7 @@ export async function getAllOrders(): Promise<Order[]> {
     const items: OrderItemUI[] = order.order_items.map((item: any) => ({
       ...item,
       // product: item.products as Product,
-      product: item.products ? item.products as Product : null,
+      product: item.products ? (item.products as Product) : null,
     }));
     return mapOrder(order, items);
   });
@@ -104,7 +105,7 @@ export async function getAllOrders(): Promise<Order[]> {
 
 export async function updateOrderStatus(
   orderId: string,
-  status: Order["status"]
+  status: Order["status"],
 ): Promise<boolean> {
   const { error } = await supabase
     .from("orders")
@@ -114,7 +115,9 @@ export async function updateOrderStatus(
   return !error;
 }
 
-export async function getOrderWithItems(orderId: string): Promise<Order | null> {
+export async function getOrderWithItems(
+  orderId: string,
+): Promise<Order | null> {
   const { data, error } = await supabase
     .from("orders")
     .select(`*, order_items(*, products(*))`)
@@ -129,4 +132,51 @@ export async function getOrderWithItems(orderId: string): Promise<Order | null> 
   }));
 
   return mapOrder(data, items);
+}
+
+// lib/order.ts - Thêm function update payment
+export async function updateOrderPaymentStatus(
+  orderId: string,
+  paymentStatus:
+    | "pending"
+    | "processing"
+    | "completed"
+    | "paid"
+    | "failed"
+    | "refunded",
+): Promise<boolean> {
+  const { error } = await supabase
+    .from("orders")
+    .update({
+      payment_status: paymentStatus,
+      updated_at: new Date().toISOString(),
+    })
+    .eq("id", orderId);
+
+  return !error;
+}
+
+// ✅ Enhanced function để update cả status và payment_status
+export async function updateOrderComplete(
+  orderId: string,
+  isSuccess: boolean,
+): Promise<boolean> {
+  const updateData = isSuccess
+    ? {
+        status: "completed",
+        payment_status: "completed", // ✅ Hoặc "paid" tùy logic
+        updated_at: new Date().toISOString(),
+      }
+    : {
+        status: "cancelled",
+        payment_status: "failed",
+        updated_at: new Date().toISOString(),
+      };
+
+  const { error } = await supabase
+    .from("orders")
+    .update(updateData)
+    .eq("id", orderId);
+
+  return !error;
 }
