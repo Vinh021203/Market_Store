@@ -1,4 +1,4 @@
-// pages/auth/Register.tsx - Kết hợp layout đẹp + form design từ file
+// pages/auth/Register.tsx - Mã hoàn chỉnh với enhanced UI và OTP flow
 import React, { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { useForm } from "react-hook-form";
@@ -15,7 +15,9 @@ import {
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Alert, AlertDescription } from "@/components/ui/alert";
-import { useAuth } from "@/contexts/AuthContext";
+import { Checkbox } from "@/components/ui/checkbox";
+import { Progress } from "@/components/ui/progress";
+import { registerUser } from "@/lib/auth";
 import { RegisterData } from "@/types";
 import {
   Eye,
@@ -35,9 +37,12 @@ import {
   Users,
   Code,
   Palette,
+  Wifi,
+  WifiOff,
+  UserPlus,
 } from "lucide-react";
 import { toast } from "@/hooks/use-toast";
-import { motion } from "framer-motion";
+import { motion, AnimatePresence } from "framer-motion";
 
 const registerSchema = z
   .object({
@@ -45,6 +50,9 @@ const registerSchema = z
     email: z.string().email("Email không hợp lệ"),
     password: z.string().min(6, "Mật khẩu phải có ít nhất 6 ký tự"),
     confirmPassword: z.string(),
+    acceptTerms: z.boolean().refine((val) => val === true, {
+      message: "Bạn phải đồng ý với điều khoản sử dụng",
+    }),
   })
   .refine((data) => data.password === data.confirmPassword, {
     message: "Mật khẩu xác nhận không khớp",
@@ -52,25 +60,74 @@ const registerSchema = z
   });
 
 const Register: React.FC = () => {
-  const { register: registerUser } = useAuth();
   const navigate = useNavigate();
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
   const [error, setError] = useState("");
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [loadingStage, setLoadingStage] = useState("");
+  const [isOnline, setIsOnline] = useState(navigator.onLine);
 
   const {
     register,
     handleSubmit,
     formState: { errors },
+    watch,
   } = useForm<RegisterData>({
     resolver: zodResolver(registerSchema),
   });
 
+  // Monitor online status
+  React.useEffect(() => {
+    const handleOnline = () => setIsOnline(true);
+    const handleOffline = () => setIsOnline(false);
+
+    window.addEventListener("online", handleOnline);
+    window.addEventListener("offline", handleOffline);
+
+    return () => {
+      window.removeEventListener("online", handleOnline);
+      window.removeEventListener("offline", handleOffline);
+    };
+  }, []);
+
+  // Password strength calculation
+  const password = watch("password", "");
+  const getPasswordStrength = () => {
+    let strength = 0;
+    if (password.length >= 6) strength += 25;
+    if (password.length >= 8) strength += 25;
+    if (/[A-Z]/.test(password)) strength += 25;
+    if (/[0-9]/.test(password)) strength += 25;
+    return strength;
+  };
+
+  const getPasswordStrengthText = () => {
+    const strength = getPasswordStrength();
+    if (strength < 25) return "Rất yếu";
+    if (strength < 50) return "Yếu";
+    if (strength < 75) return "Trung bình";
+    return "Mạnh";
+  };
+
+  const getPasswordStrengthColor = () => {
+    const strength = getPasswordStrength();
+    if (strength < 25) return "bg-red-500";
+    if (strength < 50) return "bg-orange-500";
+    if (strength < 75) return "bg-yellow-500";
+    return "bg-green-500";
+  };
+
+  // ✅ Enhanced onSubmit function với OTP redirect
   const onSubmit = async (data: RegisterData) => {
-    if (!navigator.onLine) {
+    // ✅ Check internet connection
+    if (!navigator.onLine || !isOnline) {
       setError("Không có kết nối internet. Vui lòng kiểm tra lại.");
+      toast({
+        title: "❌ Không có kết nối",
+        description: "Vui lòng kiểm tra kết nối internet và thử lại.",
+        variant: "destructive",
+      });
       return;
     }
 
@@ -80,36 +137,78 @@ const Register: React.FC = () => {
 
     try {
       setLoadingStage("Đang xác thực thông tin...");
+
+      // ✅ Call register API
       const success = await registerUser(data);
 
       if (success) {
         setLoadingStage("Đăng ký thành công!");
 
         toast({
-          title: "Kiểm tra email của bạn",
+          title: "📧 Kiểm tra email của bạn",
           description:
-            "Chúng tôi đã gửi link xác thực đến email của bạn. Vui lòng click vào link để kích hoạt tài khoản.",
-          duration: 10000,
+            "Chúng tôi đã gửi mã OTP 6 chữ số để xác nhận tài khoản.",
+          duration: 5000,
         });
 
+        // ✅ Redirect to OTP verification with email parameter
         setTimeout(() => {
-          navigate("/auth/login?message=check-email");
-        }, 2000);
+          navigate(
+            `/auth/email-verification?email=${encodeURIComponent(data.email)}`,
+          );
+        }, 1500);
       }
     } catch (error: any) {
       console.error("Register error:", error);
+      setLoadingStage("");
 
-      if (error.message?.includes("Email này đã được đăng ký")) {
-        setError(
-          "Email này đã được sử dụng. Vui lòng chọn email khác hoặc đăng nhập.",
-        );
-      } else if (error.message?.includes("Password")) {
-        setError("Mật khẩu không đủ mạnh. Vui lòng chọn mật khẩu khác.");
-      } else {
-        setError(
-          error.message || "Có lỗi xảy ra khi đăng ký. Vui lòng thử lại.",
-        );
+      // ✅ Enhanced error handling
+      let errorMessage = "Có lỗi xảy ra khi đăng ký. Vui lòng thử lại.";
+
+      if (error.message) {
+        if (
+          error.message.includes("User already registered") ||
+          error.message.includes("Email này đã được đăng ký") ||
+          error.message.includes("already exists")
+        ) {
+          errorMessage =
+            "Email này đã được sử dụng. Vui lòng chọn email khác hoặc đăng nhập.";
+        } else if (
+          error.message.includes("Password") ||
+          error.message.includes("password")
+        ) {
+          errorMessage = "Mật khẩu không đủ mạnh. Vui lòng chọn mật khẩu khác.";
+        } else if (
+          error.message.includes("Invalid email") ||
+          error.message.includes("email")
+        ) {
+          errorMessage = "Địa chỉ email không hợp lệ. Vui lòng kiểm tra lại.";
+        } else if (
+          error.message.includes("Network") ||
+          error.message.includes("fetch")
+        ) {
+          errorMessage =
+            "Lỗi kết nối mạng. Vui lòng kiểm tra internet và thử lại.";
+        } else if (
+          error.message.includes("rate limit") ||
+          error.message.includes("too many")
+        ) {
+          errorMessage =
+            "Quá nhiều yêu cầu. Vui lòng đợi một chút rồi thử lại.";
+        } else {
+          errorMessage = error.message;
+        }
       }
+
+      setError(errorMessage);
+
+      // ✅ Show toast notification for errors
+      toast({
+        title: "❌ Đăng ký thất bại",
+        description: errorMessage,
+        variant: "destructive",
+        duration: 8000,
+      });
     } finally {
       setTimeout(() => {
         setIsSubmitting(false);
@@ -156,7 +255,25 @@ const Register: React.FC = () => {
 
   return (
     <div className="flex min-h-screen">
-      {/* ✅ Left Side - Enhanced Branding (Tăng kích thước và căn đều) */}
+      {/* ✅ Online/Offline indicator */}
+      <div className="fixed z-50 top-4 right-4">
+        <div
+          className={`flex items-center space-x-2 px-3 py-1 rounded-full text-sm ${
+            isOnline
+              ? "bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200"
+              : "bg-red-100 text-red-800 dark:bg-red-900 dark:text-red-200"
+          }`}
+        >
+          {isOnline ? (
+            <Wifi className="w-4 h-4" />
+          ) : (
+            <WifiOff className="w-4 h-4" />
+          )}
+          <span>{isOnline ? "Online" : "Offline"}</span>
+        </div>
+      </div>
+
+      {/* ✅ Left Side - Enhanced Branding */}
       <div className="relative hidden w-1/2 overflow-hidden bg-slate-900 lg:flex">
         {/* ✅ Enhanced Background với CSS keyframes */}
         <motion.div
@@ -296,7 +413,7 @@ const Register: React.FC = () => {
         </motion.div>
       </div>
 
-      {/* ✅ Right Side - Form từ file bạn cung cấp */}
+      {/* ✅ Right Side - Enhanced Form */}
       <div className="flex items-center justify-center flex-1 px-4 py-12 bg-slate-950 sm:px-6 lg:w-1/2 lg:px-8">
         <motion.div
           initial={{ opacity: 0, x: 50 }}
@@ -325,7 +442,7 @@ const Register: React.FC = () => {
                       repeat: Infinity,
                     }}
                   >
-                    <Sparkles className="w-8 h-8 text-white" />
+                    <UserPlus className="w-8 h-8 text-white" />
                   </motion.div>
                 </motion.div>
               </div>
@@ -339,6 +456,27 @@ const Register: React.FC = () => {
 
             <CardContent>
               <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
+                {/* ✅ Loading stage indicator */}
+                <AnimatePresence>
+                  {isSubmitting && (
+                    <motion.div
+                      initial={{ opacity: 0, height: 0 }}
+                      animate={{ opacity: 1, height: "auto" }}
+                      exit={{ opacity: 0, height: 0 }}
+                      className="space-y-3"
+                    >
+                      <div className="flex items-center space-x-2 text-emerald-400">
+                        <Loader2 className="w-4 h-4 animate-spin" />
+                        <span className="text-sm font-medium">
+                          {loadingStage}
+                        </span>
+                      </div>
+                      <Progress value={isSubmitting ? 75 : 0} className="h-2" />
+                    </motion.div>
+                  )}
+                </AnimatePresence>
+
+                {/* ✅ Error alert */}
                 {error && (
                   <motion.div
                     initial={{ opacity: 0, y: -10 }}
@@ -450,6 +588,35 @@ const Register: React.FC = () => {
                         )}
                       </button>
                     </div>
+
+                    {/* ✅ Password strength indicator */}
+                    {password && (
+                      <div className="space-y-2">
+                        <div className="flex items-center justify-between text-xs">
+                          <span className="text-gray-400">
+                            Độ mạnh mật khẩu
+                          </span>
+                          <span
+                            className={`font-medium ${
+                              getPasswordStrength() >= 75
+                                ? "text-green-400"
+                                : getPasswordStrength() >= 50
+                                  ? "text-yellow-400"
+                                  : "text-red-400"
+                            }`}
+                          >
+                            {getPasswordStrengthText()}
+                          </span>
+                        </div>
+                        <div className="h-2 overflow-hidden rounded-full bg-slate-700">
+                          <div
+                            className={`h-full transition-all duration-300 ${getPasswordStrengthColor()}`}
+                            style={{ width: `${getPasswordStrength()}%` }}
+                          />
+                        </div>
+                      </div>
+                    )}
+
                     {errors.password && (
                       <p className="text-sm text-red-400">
                         {errors.password.message}
@@ -501,41 +668,49 @@ const Register: React.FC = () => {
                   </div>
                 </div>
 
-                {/* ✅ Terms */}
-                <div className="flex items-center">
-                  <input
-                    id="terms"
-                    name="terms"
-                    type="checkbox"
-                    required
-                    className="w-4 h-4 border-gray-600 rounded bg-slate-800 text-emerald-500 focus:ring-emerald-500"
+                {/* ✅ Terms checkbox */}
+                <div className="flex items-start space-x-2">
+                  <Checkbox
+                    id="acceptTerms"
+                    {...register("acceptTerms")}
+                    disabled={isSubmitting}
+                    className={
+                      errors.acceptTerms ? "border-red-500" : "border-slate-600"
+                    }
                   />
-                  <label
-                    htmlFor="terms"
-                    className="block ml-2 text-sm text-gray-400"
-                  >
-                    Tôi đồng ý với{" "}
-                    <Link
-                      to="/terms"
-                      className="font-medium text-emerald-500 hover:text-emerald-400"
+                  <div className="grid gap-1.5 leading-none">
+                    <Label
+                      htmlFor="acceptTerms"
+                      className="text-sm font-medium leading-none text-gray-300 peer-disabled:cursor-not-allowed peer-disabled:opacity-70"
                     >
-                      Điều khoản dịch vụ
-                    </Link>{" "}
-                    và{" "}
-                    <Link
-                      to="/privacy"
-                      className="font-medium text-emerald-500 hover:text-emerald-400"
-                    >
-                      Chính sách bảo mật
-                    </Link>
-                  </label>
+                      Tôi đồng ý với{" "}
+                      <Link
+                        to="/terms"
+                        className="font-medium text-emerald-500 hover:text-emerald-400"
+                      >
+                        Điều khoản dịch vụ
+                      </Link>{" "}
+                      và{" "}
+                      <Link
+                        to="/privacy"
+                        className="font-medium text-emerald-500 hover:text-emerald-400"
+                      >
+                        Chính sách bảo mật
+                      </Link>
+                    </Label>
+                    {errors.acceptTerms && (
+                      <p className="text-xs text-red-400">
+                        {errors.acceptTerms.message}
+                      </p>
+                    )}
+                  </div>
                 </div>
 
                 {/* ✅ Submit Button */}
                 <Button
                   type="submit"
                   className="group h-12 w-full rounded-lg bg-gradient-to-r from-emerald-600 to-teal-700 font-medium text-white shadow-lg transition-all duration-300 hover:from-emerald-700 hover:to-teal-800 hover:shadow-xl active:scale-[0.98]"
-                  disabled={isSubmitting}
+                  disabled={isSubmitting || !isOnline}
                 >
                   {isSubmitting ? (
                     <div className="flex items-center">
@@ -626,7 +801,7 @@ const Register: React.FC = () => {
           {/* ✅ Security Note */}
           <div className="mt-6 text-center">
             <p className="text-xs text-gray-500">
-              <Sparkles className="inline-block w-3 h-3 mr-1 text-gray-500 align-middle" />{" "}
+              <Shield className="inline-block w-3 h-3 mr-1 text-gray-500 align-middle" />{" "}
               Thông tin của bạn được bảo mật tuyệt đối
             </p>
           </div>

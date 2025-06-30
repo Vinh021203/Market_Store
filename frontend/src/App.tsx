@@ -1,4 +1,4 @@
-// App.tsx - Fixed version
+// App.tsx - Mã hoàn chỉnh với enhanced auth flow
 import React, { Suspense } from "react";
 import { Toaster } from "@/components/ui/toaster";
 import { Toaster as Sonner } from "@/components/ui/sonner";
@@ -46,10 +46,15 @@ const MyOrders = React.lazy(() => import("./pages/MyOrders"));
 const Downloads = React.lazy(() => import("./pages/Downloads"));
 const UserSettings = React.lazy(() => import("./pages/Settings"));
 
-// ✅ Auth pages
+// ✅ Enhanced Auth pages
 const Login = React.lazy(() => import("./pages/auth/Login"));
 const Register = React.lazy(() => import("./pages/auth/Register"));
 const EmailConfirmed = React.lazy(() => import("./pages/auth/EmailConfirmed"));
+const EmailVerification = React.lazy(
+  () => import("./pages/auth/EmailVerification"),
+);
+const ForgotPassword = React.lazy(() => import("./pages/auth/ForgotPassword"));
+const ResetPassword = React.lazy(() => import("./pages/auth/ResetPassword"));
 
 // ✅ Admin pages
 const AdminDashboard = React.lazy(() => import("./pages/admin/Dashboard"));
@@ -122,7 +127,14 @@ const ConditionalLayout: React.FC<{ children: React.ReactNode }> = ({
   children,
 }) => {
   const location = useLocation();
-  const excludedRoutes = ["/auth/login", "/auth/register"];
+  const excludedRoutes = [
+    "/auth/login",
+    "/auth/register",
+    "/auth/email-verification",
+    "/auth/forgot-password",
+    "/auth/reset-password",
+    "/auth/email-confirmed",
+  ];
   const shouldHideLayout = excludedRoutes.includes(location.pathname);
 
   if (shouldHideLayout) {
@@ -132,7 +144,7 @@ const ConditionalLayout: React.FC<{ children: React.ReactNode }> = ({
   return <Layout>{children}</Layout>;
 };
 
-// ✅ App Routes Component - Bây giờ có thể sử dụng useLocation
+// ✅ App Routes Component
 const AppRoutes = () => {
   const { isLoading } = useAuth();
 
@@ -142,7 +154,6 @@ const AppRoutes = () => {
 
   return (
     <>
-      {/* ✅ GlobalLoading bây giờ có thể sử dụng LoadingContext */}
       <GlobalLoading />
       <Routes>
         {/* Public Routes */}
@@ -375,7 +386,7 @@ const AppRoutes = () => {
           }
         />
 
-        {/* ✅ Auth Routes */}
+        {/* ✅ Enhanced Auth Routes */}
         <Route
           path="/auth/login"
           element={
@@ -402,6 +413,46 @@ const AppRoutes = () => {
                 </Suspense>
               </ConditionalLayout>
             </PublicRoute>
+          }
+        />
+
+        {/* ✅ New Auth Routes */}
+        <Route
+          path="/auth/email-verification"
+          element={
+            <ConditionalLayout>
+              <Suspense fallback={<SuspenseFallback />}>
+                <PageTransition>
+                  <EmailVerification />
+                </PageTransition>
+              </Suspense>
+            </ConditionalLayout>
+          }
+        />
+        <Route
+          path="/auth/forgot-password"
+          element={
+            <PublicRoute>
+              <ConditionalLayout>
+                <Suspense fallback={<SuspenseFallback />}>
+                  <PageTransition>
+                    <ForgotPassword />
+                  </PageTransition>
+                </Suspense>
+              </ConditionalLayout>
+            </PublicRoute>
+          }
+        />
+        <Route
+          path="/auth/reset-password"
+          element={
+            <ConditionalLayout>
+              <Suspense fallback={<SuspenseFallback />}>
+                <PageTransition>
+                  <ResetPassword />
+                </PageTransition>
+              </Suspense>
+            </ConditionalLayout>
           }
         />
         <Route
@@ -586,7 +637,7 @@ const AppRoutes = () => {
   );
 };
 
-// ✅ FIXED: Main App Component - LoadingProvider bên trong BrowserRouter
+// ✅ Main App Component
 const App = () => (
   <QueryClientProvider client={queryClient}>
     <ThemeProvider defaultTheme="system" storageKey="vite-ui-theme">
@@ -602,7 +653,6 @@ const App = () => (
                   v7_relativeSplatPath: true,
                 }}
               >
-                {/* ✅ FIXED: LoadingProvider bây giờ bên trong BrowserRouter */}
                 <LoadingProvider>
                   <AppRoutes />
                 </LoadingProvider>
