@@ -1,7 +1,7 @@
-// pages/auth/Register.tsx - Fixed version
+// pages/auth/Register.tsx - Mã hoàn chỉnh với Controller fix
 import React, { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
-import { useForm } from "react-hook-form";
+import { useForm, Controller } from "react-hook-form"; // ✅ Thêm Controller
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
 import { Button } from "@/components/ui/button";
@@ -17,7 +17,7 @@ import { Label } from "@/components/ui/label";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Progress } from "@/components/ui/progress";
-import { registerUser } from "@/lib/auth"; // ✅ Import từ lib/auth
+import { registerUser } from "@/lib/auth";
 import { RegisterData } from "@/types";
 import {
   Eye,
@@ -66,13 +66,22 @@ const Register: React.FC = () => {
   const [loadingStage, setLoadingStage] = useState("");
   const [isOnline, setIsOnline] = useState(navigator.onLine);
 
+  // ✅ Thêm control vào useForm
   const {
     register,
     handleSubmit,
+    control, // ✅ Thêm control
     formState: { errors },
     watch,
   } = useForm<RegisterData>({
     resolver: zodResolver(registerSchema),
+    defaultValues: {
+      name: "",
+      email: "",
+      password: "",
+      confirmPassword: "",
+      acceptTerms: false, // ✅ Set default value
+    },
   });
 
   // Monitor online status
@@ -646,15 +655,24 @@ const Register: React.FC = () => {
                   </div>
                 </div>
 
-                {/* ✅ Terms checkbox - Fixed */}
+                {/* ✅ Terms checkbox - Fixed với Controller */}
                 <div className="flex items-start space-x-2">
-                  <Checkbox
-                    id="acceptTerms"
-                    {...register("acceptTerms")}
-                    disabled={isSubmitting}
-                    className={
-                      errors.acceptTerms ? "border-red-500" : "border-slate-600"
-                    }
+                  <Controller
+                    name="acceptTerms"
+                    control={control}
+                    render={({ field: { onChange, value } }) => (
+                      <Checkbox
+                        id="acceptTerms"
+                        checked={value}
+                        onCheckedChange={onChange}
+                        disabled={isSubmitting}
+                        className={
+                          errors.acceptTerms
+                            ? "border-red-500"
+                            : "border-slate-600"
+                        }
+                      />
+                    )}
                   />
                   <div className="grid gap-1.5 leading-none">
                     <Label
