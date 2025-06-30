@@ -1,4 +1,4 @@
-// pages/auth/Register.tsx - Mã hoàn chỉnh với enhanced UI và OTP flow
+// pages/auth/Register.tsx - Fixed version
 import React, { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { useForm } from "react-hook-form";
@@ -17,7 +17,7 @@ import { Label } from "@/components/ui/label";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Progress } from "@/components/ui/progress";
-import { registerUser } from "@/lib/auth";
+import { registerUser } from "@/lib/auth"; // ✅ Import từ lib/auth
 import { RegisterData } from "@/types";
 import {
   Eye,
@@ -34,16 +34,14 @@ import {
   Zap,
   LayoutGrid,
   Shield,
-  Users,
-  Code,
-  Palette,
+  UserPlus,
   Wifi,
   WifiOff,
-  UserPlus,
 } from "lucide-react";
 import { toast } from "@/hooks/use-toast";
 import { motion, AnimatePresence } from "framer-motion";
 
+// ✅ Schema với acceptTerms boolean
 const registerSchema = z
   .object({
     name: z.string().min(2, "Tên phải có ít nhất 2 ký tự"),
@@ -118,9 +116,8 @@ const Register: React.FC = () => {
     return "bg-green-500";
   };
 
-  // ✅ Enhanced onSubmit function với OTP redirect
+  // ✅ Enhanced onSubmit với proper error handling
   const onSubmit = async (data: RegisterData) => {
-    // ✅ Check internet connection
     if (!navigator.onLine || !isOnline) {
       setError("Không có kết nối internet. Vui lòng kiểm tra lại.");
       toast({
@@ -138,7 +135,7 @@ const Register: React.FC = () => {
     try {
       setLoadingStage("Đang xác thực thông tin...");
 
-      // ✅ Call register API
+      // ✅ Call registerUser function
       const success = await registerUser(data);
 
       if (success) {
@@ -151,7 +148,7 @@ const Register: React.FC = () => {
           duration: 5000,
         });
 
-        // ✅ Redirect to OTP verification with email parameter
+        // ✅ Redirect to OTP verification
         setTimeout(() => {
           navigate(
             `/auth/email-verification?email=${encodeURIComponent(data.email)}`,
@@ -162,7 +159,6 @@ const Register: React.FC = () => {
       console.error("Register error:", error);
       setLoadingStage("");
 
-      // ✅ Enhanced error handling
       let errorMessage = "Có lỗi xảy ra khi đăng ký. Vui lòng thử lại.";
 
       if (error.message) {
@@ -178,23 +174,6 @@ const Register: React.FC = () => {
           error.message.includes("password")
         ) {
           errorMessage = "Mật khẩu không đủ mạnh. Vui lòng chọn mật khẩu khác.";
-        } else if (
-          error.message.includes("Invalid email") ||
-          error.message.includes("email")
-        ) {
-          errorMessage = "Địa chỉ email không hợp lệ. Vui lòng kiểm tra lại.";
-        } else if (
-          error.message.includes("Network") ||
-          error.message.includes("fetch")
-        ) {
-          errorMessage =
-            "Lỗi kết nối mạng. Vui lòng kiểm tra internet và thử lại.";
-        } else if (
-          error.message.includes("rate limit") ||
-          error.message.includes("too many")
-        ) {
-          errorMessage =
-            "Quá nhiều yêu cầu. Vui lòng đợi một chút rồi thử lại.";
         } else {
           errorMessage = error.message;
         }
@@ -202,7 +181,6 @@ const Register: React.FC = () => {
 
       setError(errorMessage);
 
-      // ✅ Show toast notification for errors
       toast({
         title: "❌ Đăng ký thất bại",
         description: errorMessage,
@@ -217,7 +195,7 @@ const Register: React.FC = () => {
     }
   };
 
-  // ✅ Animation variants
+  // Animation variants
   const textRevealVariants = {
     hidden: { opacity: 0, y: 30 },
     visible: {
@@ -255,7 +233,7 @@ const Register: React.FC = () => {
 
   return (
     <div className="flex min-h-screen">
-      {/* ✅ Online/Offline indicator */}
+      {/* Online/Offline indicator */}
       <div className="fixed z-50 top-4 right-4">
         <div
           className={`flex items-center space-x-2 px-3 py-1 rounded-full text-sm ${
@@ -273,9 +251,9 @@ const Register: React.FC = () => {
         </div>
       </div>
 
-      {/* ✅ Left Side - Enhanced Branding */}
+      {/* Left Side - Enhanced Branding */}
       <div className="relative hidden w-1/2 overflow-hidden bg-slate-900 lg:flex">
-        {/* ✅ Enhanced Background với CSS keyframes */}
+        {/* Enhanced Background */}
         <motion.div
           className="absolute inset-0 z-0"
           initial={{ opacity: 0 }}
@@ -292,7 +270,7 @@ const Register: React.FC = () => {
           }}
         />
 
-        {/* ✅ Floating Shapes - Enhanced */}
+        {/* Floating Shapes */}
         <motion.div
           className="absolute w-40 h-40 rounded-full bg-emerald-400/10 blur-xl"
           variants={floatingShapeVariants}
@@ -312,14 +290,14 @@ const Register: React.FC = () => {
           animate="animate"
         />
 
-        {/* ✅ Main Content - Căn đều và to hơn */}
+        {/* Main Content */}
         <motion.div
           className="relative z-10 flex flex-col justify-center px-20 text-white"
           variants={textRevealVariants}
           initial="hidden"
           animate="visible"
         >
-          {/* ✅ Logo - To hơn */}
+          {/* Logo */}
           <motion.div
             variants={itemSlideInVariants}
             className="flex items-center mb-12"
@@ -335,7 +313,7 @@ const Register: React.FC = () => {
             </div>
           </motion.div>
 
-          {/* ✅ Main Heading - To hơn và căn đều */}
+          {/* Main Heading */}
           <motion.h2
             variants={itemSlideInVariants}
             className="mb-8 text-6xl font-bold leading-tight"
@@ -355,7 +333,7 @@ const Register: React.FC = () => {
             độc quyền
           </motion.p>
 
-          {/* ✅ Features - To hơn và spacing đều */}
+          {/* Features */}
           <motion.div
             variants={textRevealVariants}
             initial="hidden"
@@ -392,7 +370,7 @@ const Register: React.FC = () => {
             </motion.div>
           </motion.div>
 
-          {/* ✅ Special Offer - Enhanced */}
+          {/* Special Offer */}
           <motion.div
             className="p-8 border rounded-2xl bg-gradient-to-r from-emerald-500/20 to-teal-500/20 backdrop-blur-sm border-emerald-400/30"
             initial={{ opacity: 0, scale: 0.9 }}
@@ -413,7 +391,7 @@ const Register: React.FC = () => {
         </motion.div>
       </div>
 
-      {/* ✅ Right Side - Enhanced Form */}
+      {/* Right Side - Enhanced Form */}
       <div className="flex items-center justify-center flex-1 px-4 py-12 bg-slate-950 sm:px-6 lg:w-1/2 lg:px-8">
         <motion.div
           initial={{ opacity: 0, x: 50 }}
@@ -456,7 +434,7 @@ const Register: React.FC = () => {
 
             <CardContent>
               <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
-                {/* ✅ Loading stage indicator */}
+                {/* Loading stage indicator */}
                 <AnimatePresence>
                   {isSubmitting && (
                     <motion.div
@@ -476,7 +454,7 @@ const Register: React.FC = () => {
                   )}
                 </AnimatePresence>
 
-                {/* ✅ Error alert */}
+                {/* Error alert */}
                 {error && (
                   <motion.div
                     initial={{ opacity: 0, y: -10 }}
@@ -491,7 +469,7 @@ const Register: React.FC = () => {
                   </motion.div>
                 )}
 
-                {/* ✅ Name and Email in one row */}
+                {/* Name and Email in one row */}
                 <div className="grid grid-cols-1 gap-6 md:grid-cols-2">
                   <div className="space-y-2">
                     <Label
@@ -552,7 +530,7 @@ const Register: React.FC = () => {
                   </div>
                 </div>
 
-                {/* ✅ Password and Confirm Password in one row */}
+                {/* Password and Confirm Password in one row */}
                 <div className="grid grid-cols-1 gap-6 md:grid-cols-2">
                   <div className="space-y-2">
                     <Label
@@ -589,7 +567,7 @@ const Register: React.FC = () => {
                       </button>
                     </div>
 
-                    {/* ✅ Password strength indicator */}
+                    {/* Password strength indicator */}
                     {password && (
                       <div className="space-y-2">
                         <div className="flex items-center justify-between text-xs">
@@ -668,7 +646,7 @@ const Register: React.FC = () => {
                   </div>
                 </div>
 
-                {/* ✅ Terms checkbox */}
+                {/* ✅ Terms checkbox - Fixed */}
                 <div className="flex items-start space-x-2">
                   <Checkbox
                     id="acceptTerms"
@@ -706,7 +684,7 @@ const Register: React.FC = () => {
                   </div>
                 </div>
 
-                {/* ✅ Submit Button */}
+                {/* Submit Button */}
                 <Button
                   type="submit"
                   className="group h-12 w-full rounded-lg bg-gradient-to-r from-emerald-600 to-teal-700 font-medium text-white shadow-lg transition-all duration-300 hover:from-emerald-700 hover:to-teal-800 hover:shadow-xl active:scale-[0.98]"
@@ -726,7 +704,7 @@ const Register: React.FC = () => {
                 </Button>
               </form>
 
-              {/* ✅ Social Login */}
+              {/* Social Login */}
               <div className="mt-8">
                 <div className="relative">
                   <div className="absolute inset-0 flex items-center">
@@ -783,7 +761,7 @@ const Register: React.FC = () => {
                 </div>
               </div>
 
-              {/* ✅ Login Link */}
+              {/* Login Link */}
               <div className="mt-8 text-center">
                 <p className="text-sm text-gray-400">
                   Đã có tài khoản?{" "}
@@ -798,10 +776,10 @@ const Register: React.FC = () => {
             </CardContent>
           </Card>
 
-          {/* ✅ Security Note */}
+          {/* Security Note */}
           <div className="mt-6 text-center">
             <p className="text-xs text-gray-500">
-              <Shield className="inline-block w-3 h-3 mr-1 text-gray-500 align-middle" />{" "}
+              <Shield className="inline-block w-3 h-3 mr-1 text-gray-500 align-middle" />
               Thông tin của bạn được bảo mật tuyệt đối
             </p>
           </div>
