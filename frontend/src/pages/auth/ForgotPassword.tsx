@@ -1,293 +1,286 @@
-import React, { useState, useEffect } from "react";
-import { useNavigate, useSearchParams } from "react-router-dom";
+import React, { useState } from "react";
+import { Link } from "react-router-dom";
+import { useForm } from "react-hook-form";
+import { zodResolver } from "@hookform/resolvers/zod";
+import { z } from "zod";
 import { supabase } from "@/lib/supabase";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Alert, AlertDescription } from "@/components/ui/alert";
-import { motion } from "framer-motion";
+import { motion, AnimatePresence } from "framer-motion";
 import {
-  Lock,
-  Eye,
-  EyeOff,
+  Mail,
+  ArrowLeft,
   Loader2,
   CheckCircle,
-  Shield,
   Key,
-  XCircle,
+  Shield,
+  Clock,
+  AlertTriangle,
+  Send,
 } from "lucide-react";
 import { toast } from "@/hooks/use-toast";
 
-const ResetPassword: React.FC = () => {
-  const [searchParams] = useSearchParams();
-  const navigate = useNavigate();
-  const [password, setPassword] = useState("");
-  const [confirmPassword, setConfirmPassword] = useState("");
-  const [showPassword, setShowPassword] = useState(false);
-  const [showConfirmPassword, setShowConfirmPassword] = useState(false);
+const forgotPasswordSchema = z.object({
+  email: z.string().email("Email không hợp lệ"),
+});
+
+type ForgotPasswordData = z.infer<typeof forgotPasswordSchema>;
+
+const ForgotPassword: React.FC = () => {
   const [isSubmitting, setIsSubmitting] = useState(false);
-  const [isValidating, setIsValidating] = useState(true);
-  const [isValidToken, setIsValidToken] = useState(false);
+  const [isEmailSent, setIsEmailSent] = useState(false);
   const [error, setError] = useState("");
+  const [countdown, setCountdown] = useState(0);
 
-  useEffect(() => {
-    const validateToken = async () => {
-      const error = searchParams.get("error");
-      const errorCode = searchParams.get("error_code");
-      const errorDescription = searchParams.get("error_description");
+  const {
+    register,
+    handleSubmit,
+    formState: { errors },
+    getValues,
+  } = useForm<ForgotPasswordData>({
+    resolver: zodResolver(forgotPasswordSchema),
+  });
 
-      // Check for errors in URL
-      if (error) {
-        console.error("Reset password error:", {
-          error,
-          errorCode,
-          errorDescription,
-        });
-
-        if (errorCode === "otp_expired") {
-          setError(
-            "Link đặt lại mật khẩu đã hết hạn. Vui lòng yêu cầu link mới.",
-          );
-        } else if (error === "access_denied") {
-          setError("Link đặt lại mật khẩu không hợp lệ hoặc đã được sử dụng.");
-        } else {
-          setError("Có lỗi xảy ra với link đặt lại mật khẩu.");
-        }
-
-        setIsValidToken(false);
-        setIsValidating(false);
-        return;
-      }
-
-      // Check for valid session
-      try {
-        const {
-          data: { session },
-          error: sessionError,
-        } = await supabase.auth.getSession();
-
-        if (sessionError) {
-          throw sessionError;
-        }
-
-        if (session?.user) {
-          setIsValidToken(true);
-        } else {
-          setError(
-            "Phiên đăng nhập không hợp lệ. Vui lòng yêu cầu link đặt lại mật khẩu mới.",
-          );
-          setIsValidToken(false);
-        }
-      } catch (error: any) {
-        console.error("Token validation error:", error);
-        setError("Link đặt lại mật khẩu đã hết hạn hoặc không hợp lệ.");
-        setIsValidToken(false);
-      } finally {
-        setIsValidating(false);
-      }
-    };
-
-    validateToken();
-  }, [searchParams]);
-
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-
-    if (password !== confirmPassword) {
-      setError("Mật khẩu xác nhận không khớp.");
-      return;
-    }
-
-    if (password.length < 6) {
-      setError("Mật khẩu phải có ít nhất 6 ký tự.");
-      return;
-    }
-
+  const onSubmit = async (data: ForgotPasswordData) => {
     setIsSubmitting(true);
     setError("");
 
     try {
-      const { error } = await supabase.auth.updateUser({
-        password: password,
+      const { error } = await supabase.auth.resetPasswordForEmail(data.email, {
+        redirectTo: `${window.location.origin}/auth/reset-password`,
       });
 
       if (error) throw error;
 
+      setIsEmailSent(true);
+      setCountdown(300); // 5 minutes countdown
+
       toast({
-        title: "🎉 Đặt lại mật khẩu thành công!",
-        description: "Mật khẩu của bạn đã được cập nhật.",
+        title: "📧 Email đã được gửi",
+        description: "Vui lòng kiểm tra hộp thư để đặt lại mật khẩu.",
       });
 
-      // Sign out and redirect to login
-      await supabase.auth.signOut();
-
-      setTimeout(() => {
-        navigate("/auth/login?reset=success");
-      }, 2000);
+      // Start countdown
+      const timer = setInterval(() => {
+        setCountdown((prev) => {
+          if (prev <= 1) {
+            clearInterval(timer);
+            return 0;
+          }
+          return prev - 1;
+        });
+      }, 1000);
     } catch (error: any) {
-      console.error("Reset password error:", error);
-      setError("Có lỗi xảy ra khi đặt lại mật khẩu. Vui lòng thử lại.");
+      console.error("Forgot password error:", error);
+      setError(
+        error.message === "User not found"
+          ? "Email này chưa được đăng ký trong hệ thống."
+          : error.message === "Email rate limit exceeded"
+            ? "Quá nhiều yêu cầu. Vui lòng đợi 60 giây rồi thử lại."
+            : "Có lỗi xảy ra. Vui lòng thử lại sau.",
+      );
     } finally {
       setIsSubmitting(false);
     }
   };
 
-  if (isValidating) {
-    return (
-      <div className="flex items-center justify-center min-h-screen p-4 bg-gradient-to-br from-blue-50 via-indigo-50 to-purple-50 dark:from-slate-900 dark:via-blue-900 dark:to-purple-900">
-        <Card className="w-full max-w-md shadow-2xl">
-          <CardContent className="p-8 text-center">
-            <Loader2 className="w-12 h-12 mx-auto mb-4 text-blue-500 animate-spin" />
-            <h2 className="mb-2 text-xl font-semibold">Đang xác thực...</h2>
-            <p className="text-muted-foreground">Vui lòng đợi trong giây lát</p>
-          </CardContent>
-        </Card>
-      </div>
-    );
-  }
+  const formatTime = (seconds: number) => {
+    const mins = Math.floor(seconds / 60);
+    const secs = seconds % 60;
+    return `${mins}:${secs.toString().padStart(2, "0")}`;
+  };
 
-  if (!isValidToken) {
+  if (isEmailSent) {
     return (
-      <div className="flex items-center justify-center min-h-screen p-4 bg-gradient-to-br from-red-50 via-orange-50 to-yellow-50 dark:from-slate-900 dark:via-red-900 dark:to-orange-900">
-        <Card className="w-full max-w-md shadow-2xl">
-          <CardContent className="p-8 text-center">
-            <div className="flex items-center justify-center w-16 h-16 mx-auto mb-4 bg-red-100 rounded-full dark:bg-red-900/20">
-              <XCircle className="w-8 h-8 text-red-500" />
-            </div>
-            <h2 className="mb-4 text-xl font-semibold text-red-600">
-              Link không hợp lệ
-            </h2>
-            <p className="mb-6 text-muted-foreground">{error}</p>
-            <Button
-              onClick={() => navigate("/auth/forgot-password")}
-              className="w-full"
-            >
-              Yêu cầu link mới
-            </Button>
-          </CardContent>
-        </Card>
+      <div className="flex items-center justify-center min-h-screen p-4 bg-gradient-to-br from-green-50 via-emerald-50 to-teal-50 dark:from-slate-900 dark:via-green-900 dark:to-emerald-900">
+        <motion.div
+          initial={{ opacity: 0, scale: 0.8 }}
+          animate={{ opacity: 1, scale: 1 }}
+          className="w-full max-w-lg"
+        >
+          <Card className="border-0 shadow-2xl bg-white/90 dark:bg-slate-900/90 backdrop-blur-sm">
+            <CardContent className="p-10 text-center">
+              <motion.div
+                initial={{ scale: 0 }}
+                animate={{ scale: 1 }}
+                transition={{ type: "spring", stiffness: 200, delay: 0.2 }}
+                className="flex items-center justify-center w-20 h-20 mx-auto mb-6 rounded-full bg-gradient-to-r from-green-500 to-emerald-600"
+              >
+                <CheckCircle className="w-10 h-10 text-white" />
+              </motion.div>
+
+              <h2 className="mb-4 text-3xl font-bold">Email đã được gửi!</h2>
+
+              <p className="mb-2 text-lg text-muted-foreground">
+                Chúng tôi đã gửi link đặt lại mật khẩu đến
+              </p>
+              <p className="mb-8 text-lg font-semibold text-blue-600">
+                {getValues("email")}
+              </p>
+
+              <div className="space-y-6">
+                {countdown > 0 && (
+                  <div className="p-4 bg-blue-50 dark:bg-blue-900/20 rounded-xl">
+                    <div className="flex items-center justify-center mb-2 space-x-2 text-blue-700 dark:text-blue-300">
+                      <Clock className="w-5 h-5" />
+                      <span className="font-medium">
+                        Link có hiệu lực trong:
+                      </span>
+                    </div>
+                    <div className="text-2xl font-bold text-blue-600">
+                      {formatTime(countdown)}
+                    </div>
+                  </div>
+                )}
+
+                <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
+                  <div className="p-4 rounded-lg bg-orange-50 dark:bg-orange-900/20">
+                    <AlertTriangle className="w-5 h-5 mx-auto mb-2 text-orange-600" />
+                    <p className="text-sm text-orange-700 dark:text-orange-300">
+                      Kiểm tra thư mục spam
+                    </p>
+                  </div>
+
+                  <div className="p-4 rounded-lg bg-purple-50 dark:bg-purple-900/20">
+                    <Mail className="w-5 h-5 mx-auto mb-2 text-purple-600" />
+                    <p className="text-sm text-purple-700 dark:text-purple-300">
+                      Có thể mất vài phút
+                    </p>
+                  </div>
+                </div>
+
+                <div className="space-y-3">
+                  <Button asChild className="w-full h-12">
+                    <Link to="/auth/login">
+                      <ArrowLeft className="w-4 h-4 mr-2" />
+                      Quay lại đăng nhập
+                    </Link>
+                  </Button>
+
+                  <Button
+                    variant="outline"
+                    onClick={() => setIsEmailSent(false)}
+                    className="w-full h-12"
+                  >
+                    <Send className="w-4 h-4 mr-2" />
+                    Gửi lại email
+                  </Button>
+                </div>
+              </div>
+            </CardContent>
+          </Card>
+        </motion.div>
       </div>
     );
   }
 
   return (
-    <div className="flex items-center justify-center min-h-screen p-4 bg-gradient-to-br from-green-50 via-emerald-50 to-teal-50 dark:from-slate-900 dark:via-green-900 dark:to-emerald-900">
+    <div className="flex items-center justify-center min-h-screen p-4 bg-gradient-to-br from-orange-50 via-red-50 to-pink-50 dark:from-slate-900 dark:via-orange-900 dark:to-red-900">
+      {/* Back button */}
+      <div className="absolute top-6 left-6">
+        <Button variant="outline" size="sm" asChild className="group">
+          <Link to="/auth/login">
+            <ArrowLeft className="w-4 h-4 mr-2 transition-transform group-hover:-translate-x-1" />
+            Quay lại đăng nhập
+          </Link>
+        </Button>
+      </div>
+
       <motion.div
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
-        className="w-full max-w-md"
+        className="w-full max-w-lg"
       >
         <Card className="border-0 shadow-2xl bg-white/90 dark:bg-slate-900/90 backdrop-blur-sm">
           <CardHeader className="text-center">
-            <div className="flex items-center justify-center w-16 h-16 mx-auto mb-4 rounded-full bg-gradient-to-r from-green-500 to-emerald-600">
-              <Key className="w-8 h-8 text-white" />
+            <div className="flex items-center justify-center w-20 h-20 mx-auto mb-6 rounded-full bg-gradient-to-r from-orange-500 to-red-600">
+              <Key className="w-10 h-10 text-white" />
             </div>
-            <CardTitle className="text-2xl font-bold">
-              Đặt lại mật khẩu
-            </CardTitle>
-            <p className="text-muted-foreground">
-              Nhập mật khẩu mới cho tài khoản của bạn
+            <CardTitle className="text-3xl font-bold">Quên mật khẩu?</CardTitle>
+            <p className="mt-2 text-lg text-muted-foreground">
+              Nhập email để nhận link đặt lại mật khẩu
             </p>
           </CardHeader>
 
-          <CardContent>
-            <form onSubmit={handleSubmit} className="space-y-6">
-              {error && (
-                <Alert variant="destructive">
-                  <AlertDescription>{error}</AlertDescription>
-                </Alert>
-              )}
+          <CardContent className="space-y-8">
+            <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
+              <AnimatePresence>
+                {error && (
+                  <motion.div
+                    initial={{ opacity: 0, y: -10 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    exit={{ opacity: 0, y: -10 }}
+                  >
+                    <Alert variant="destructive">
+                      <AlertDescription>{error}</AlertDescription>
+                    </Alert>
+                  </motion.div>
+                )}
+              </AnimatePresence>
 
-              <div className="space-y-2">
-                <Label htmlFor="password" className="text-sm font-medium">
-                  Mật khẩu mới
+              <div className="space-y-3">
+                <Label htmlFor="email" className="text-lg font-medium">
+                  Địa chỉ email
                 </Label>
                 <div className="relative">
-                  <Lock className="absolute w-4 h-4 text-gray-400 transform -translate-y-1/2 left-3 top-1/2" />
+                  <Mail className="absolute w-5 h-5 text-gray-400 transform -translate-y-1/2 left-4 top-1/2" />
                   <Input
-                    id="password"
-                    type={showPassword ? "text" : "password"}
-                    placeholder="Tối thiểu 6 ký tự"
-                    value={password}
-                    onChange={(e) => setPassword(e.target.value)}
-                    className="pl-10 pr-12 h-11"
+                    id="email"
+                    type="email"
+                    placeholder="example@email.com"
+                    {...register("email")}
+                    className={`pl-12 h-14 text-lg ${
+                      errors.email
+                        ? "border-red-500 focus:ring-red-500"
+                        : "focus:ring-orange-500"
+                    }`}
                     disabled={isSubmitting}
-                    required
                   />
-                  <button
-                    type="button"
-                    onClick={() => setShowPassword(!showPassword)}
-                    className="absolute text-gray-400 transform -translate-y-1/2 right-3 top-1/2 hover:text-gray-600"
-                    disabled={isSubmitting}
-                  >
-                    {showPassword ? (
-                      <EyeOff className="w-4 h-4" />
-                    ) : (
-                      <Eye className="w-4 h-4" />
-                    )}
-                  </button>
                 </div>
-              </div>
-
-              <div className="space-y-2">
-                <Label
-                  htmlFor="confirmPassword"
-                  className="text-sm font-medium"
-                >
-                  Xác nhận mật khẩu
-                </Label>
-                <div className="relative">
-                  <Lock className="absolute w-4 h-4 text-gray-400 transform -translate-y-1/2 left-3 top-1/2" />
-                  <Input
-                    id="confirmPassword"
-                    type={showConfirmPassword ? "text" : "password"}
-                    placeholder="Nhập lại mật khẩu mới"
-                    value={confirmPassword}
-                    onChange={(e) => setConfirmPassword(e.target.value)}
-                    className="pl-10 pr-12 h-11"
-                    disabled={isSubmitting}
-                    required
-                  />
-                  <button
-                    type="button"
-                    onClick={() => setShowConfirmPassword(!showConfirmPassword)}
-                    className="absolute text-gray-400 transform -translate-y-1/2 right-3 top-1/2 hover:text-gray-600"
-                    disabled={isSubmitting}
-                  >
-                    {showConfirmPassword ? (
-                      <EyeOff className="w-4 h-4" />
-                    ) : (
-                      <Eye className="w-4 h-4" />
-                    )}
-                  </button>
-                </div>
+                {errors.email && (
+                  <p className="text-sm text-red-500">{errors.email.message}</p>
+                )}
               </div>
 
               <Button
                 type="submit"
-                className="w-full h-11 bg-gradient-to-r from-green-500 to-emerald-600 hover:from-green-600 hover:to-emerald-700"
+                className="w-full text-lg h-14 bg-gradient-to-r from-orange-500 to-red-600 hover:from-orange-600 hover:to-red-700"
                 disabled={isSubmitting}
               >
                 {isSubmitting ? (
                   <>
-                    <Loader2 className="w-4 h-4 mr-2 animate-spin" />
-                    Đang cập nhật...
+                    <Loader2 className="w-5 h-5 mr-2 animate-spin" />
+                    Đang gửi...
                   </>
                 ) : (
                   <>
-                    <CheckCircle className="w-4 h-4 mr-2" />
-                    Cập nhật mật khẩu
+                    <Send className="w-5 h-5 mr-2" />
+                    Gửi link đặt lại
                   </>
                 )}
               </Button>
             </form>
 
-            <div className="mt-6 text-center">
-              <p className="text-xs text-muted-foreground">
-                <Shield className="inline w-3 h-3 mr-1" />
-                Mật khẩu được mã hóa an toàn
+            <div className="space-y-4 text-center">
+              <p className="text-sm text-muted-foreground">
+                Nhớ lại mật khẩu?{" "}
+                <Link
+                  to="/auth/login"
+                  className="font-medium text-orange-600 hover:text-orange-500"
+                >
+                  Đăng nhập ngay
+                </Link>
               </p>
+
+              <div className="pt-4 border-t">
+                <p className="text-xs text-muted-foreground">
+                  <Shield className="inline w-3 h-3 mr-1" />
+                  Link đặt lại mật khẩu có hiệu lực trong 5 phút
+                </p>
+              </div>
             </div>
           </CardContent>
         </Card>
@@ -296,4 +289,4 @@ const ResetPassword: React.FC = () => {
   );
 };
 
-export default ResetPassword;
+export default ForgotPassword;
