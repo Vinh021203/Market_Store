@@ -54,19 +54,20 @@ const ResetPassword: React.FC = () => {
 
   useEffect(() => {
     const validateToken = async () => {
-      const accessToken = searchParams.get("access_token");
-      const refreshToken = searchParams.get("refresh_token");
+      const code = searchParams.get("code");
+      const email = searchParams.get("email");
 
-      if (!accessToken || !refreshToken) {
+      if (!code || !email) {
         setError("Link đặt lại mật khẩu không hợp lệ.");
         setIsValidating(false);
         return;
       }
 
       try {
-        const { data, error } = await supabase.auth.setSession({
-          access_token: accessToken,
-          refresh_token: refreshToken,
+        const { data, error } = await supabase.auth.verifyOtp({
+          type: "recovery",
+          token: code,
+          email: email,
         });
 
         if (error) throw error;
