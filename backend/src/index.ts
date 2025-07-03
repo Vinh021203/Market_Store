@@ -55,7 +55,7 @@ app.use("/api", limiter);
 // 🌐 CORS Configuration
 const isDevelopment = process.env.NODE_ENV === "development";
 const allowedOrigins = [
-  "https://marketstore-two.vercel.app",
+  "https://marketstoreapp.vercel.app",
   ...(isDevelopment ? ["http://localhost:3000", "http://localhost:8080"] : []),
 ];
 
