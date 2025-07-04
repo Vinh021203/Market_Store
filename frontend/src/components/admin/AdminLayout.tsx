@@ -45,10 +45,8 @@ const AdminLayout: React.FC = () => {
   const [isMobile, setIsMobile] = useState(false);
   const [notifications, setNotifications] = useState(3);
 
-  // This will trigger loading on route changes
   useNavigationLoading();
 
-  // ✅ Enhanced responsive detection
   useEffect(() => {
     const checkScreenSize = () => {
       const width = window.innerWidth;
@@ -56,7 +54,6 @@ const AdminLayout: React.FC = () => {
 
       setIsMobile(mobile);
 
-      // Auto-collapse sidebar trên mobile
       if (mobile) {
         setSidebarOpen(false);
       }
@@ -67,7 +64,6 @@ const AdminLayout: React.FC = () => {
     return () => window.removeEventListener("resize", checkScreenSize);
   }, []);
 
-  // ✅ Sidebar items giữ nguyên design đẹp
   const sidebarItems = [
     {
       title: "Dashboard",
@@ -141,7 +137,7 @@ const AdminLayout: React.FC = () => {
     }
   };
 
-  // ✅ Sidebar Component giữ nguyên design đẹp của bạn
+  // ✅ Enhanced Sidebar với scroll và layout cố định
   const Sidebar = () => (
     <AnimatePresence>
       {(sidebarOpen || !isMobile) && (
@@ -157,21 +153,21 @@ const AdminLayout: React.FC = () => {
             />
           )}
 
-          {/* ✅ Sidebar với design đẹp của bạn */}
+          {/* ✅ Sidebar với layout cố định và scroll */}
           <motion.div
             initial={isMobile ? { x: -280 } : undefined}
             animate={{ x: 0 }}
             exit={isMobile ? { x: -280 } : undefined}
             transition={{ type: "spring", damping: 25, stiffness: 200 }}
-            className={`fixed left-0 top-0 h-full bg-gradient-to-br from-slate-900 via-purple-900 to-slate-900 dark:from-slate-950 dark:via-purple-950 dark:to-slate-950 border-r border-border/10 z-50 overflow-hidden transition-all duration-300`}
+            className={`fixed left-0 top-0 h-full bg-gradient-to-br from-slate-900 via-purple-900 to-slate-900 dark:from-slate-950 dark:via-purple-950 dark:to-slate-950 border-r border-border/10 z-50 transition-all duration-300 flex flex-col`}
             style={{ width: sidebarOpen ? 280 : 80 }}
           >
-            {/* Header - giữ nguyên design đẹp */}
-            <div className="p-4 border-b border-border/10">
+            {/* ✅ Header cố định - không scroll */}
+            <div className="flex-shrink-0 p-4 border-b border-border/10">
               <div className="flex items-center space-x-3">
                 <motion.div
                   whileHover={{ scale: 1.05 }}
-                  className="flex items-center justify-center w-12 h-12 transition-transform shadow-lg cursor-pointer bg-gradient-to-br from-blue-500 to-purple-600 rounded-xl"
+                  className="flex items-center justify-center flex-shrink-0 w-12 h-12 transition-transform shadow-lg cursor-pointer bg-gradient-to-br from-blue-500 to-purple-600 rounded-xl"
                 >
                   <span className="text-lg font-bold text-white">TM</span>
                 </motion.div>
@@ -179,14 +175,14 @@ const AdminLayout: React.FC = () => {
                   <motion.div
                     initial={{ opacity: 0, x: -20 }}
                     animate={{ opacity: 1, x: 0 }}
-                    className="text-white duration-200 animate-in slide-in-from-left"
+                    className="min-w-0 text-white duration-200 animate-in slide-in-from-left"
                   >
-                    <h1 className="text-lg font-bold text-transparent bg-gradient-to-r from-blue-400 to-purple-400 bg-clip-text">
+                    <h1 className="text-lg font-bold text-transparent truncate bg-gradient-to-r from-blue-400 to-purple-400 bg-clip-text">
                       Template Market
                     </h1>
                     <div className="flex items-center space-x-2">
                       <p className="text-xs text-white/70">Admin Panel</p>
-                      <Badge className="px-1 py-0 text-xs text-yellow-300 bg-yellow-500/20">
+                      <Badge className="flex-shrink-0 px-1 py-0 text-xs text-yellow-300 bg-yellow-500/20">
                         <Crown className="w-2 h-2 mr-1" />
                         Pro
                       </Badge>
@@ -208,72 +204,76 @@ const AdminLayout: React.FC = () => {
               )}
             </div>
 
-            {/* Navigation - giữ nguyên design đẹp của bạn */}
-            <nav className="p-4 space-y-2">
-              {sidebarItems.map((item, index) => {
-                const isActive = location.pathname === item.href;
-                const Icon = item.icon;
+            {/* ✅ Navigation với scroll - phần này có thể scroll */}
+            <div className="flex-1 overflow-hidden">
+              <div className="h-full overflow-y-auto scrollbar-thin scrollbar-thumb-white/30 scrollbar-track-transparent hover:scrollbar-thumb-white/50">
+                <nav className="p-4 space-y-2">
+                  {sidebarItems.map((item, index) => {
+                    const isActive = location.pathname === item.href;
+                    const Icon = item.icon;
 
-                return (
-                  <motion.div
-                    key={item.href}
-                    initial={{ opacity: 0, x: -20 }}
-                    animate={{ opacity: 1, x: 0 }}
-                    transition={{ delay: index * 0.05 }}
-                  >
-                    <Link to={item.href}>
+                    return (
                       <motion.div
-                        whileHover={{ scale: 1.02, x: 4 }}
-                        className={`relative flex items-center space-x-3 p-3 rounded-xl transition-all duration-200 ${
-                          isActive
-                            ? `bg-gradient-to-r ${item.gradient} text-white shadow-lg`
-                            : "text-white/70 hover:text-white hover:bg-white/10"
-                        }`}
+                        key={item.href}
+                        initial={{ opacity: 0, x: -20 }}
+                        animate={{ opacity: 1, x: 0 }}
+                        transition={{ delay: index * 0.05 }}
                       >
-                        {isActive && (
+                        <Link to={item.href}>
                           <motion.div
-                            layoutId="activeTab"
-                            className="absolute inset-0 duration-300 bg-white/10 rounded-xl animate-in fade-in"
-                            initial={false}
-                            transition={{
-                              type: "spring",
-                              damping: 25,
-                              stiffness: 200,
-                            }}
-                          />
-                        )}
-                        <div className="relative z-10 flex items-center w-full space-x-3">
-                          <Icon className="flex-shrink-0 w-5 h-5" />
-                          {sidebarOpen && (
-                            <motion.span
-                              initial={{ opacity: 0, x: -10 }}
-                              animate={{ opacity: 1, x: 0 }}
-                              className="font-medium duration-200 animate-in slide-in-from-left"
-                            >
-                              {item.title}
-                            </motion.span>
-                          )}
-                        </div>
+                            whileHover={{ scale: 1.02, x: 4 }}
+                            className={`relative flex items-center space-x-3 p-3 rounded-xl transition-all duration-200 group ${
+                              isActive
+                                ? `bg-gradient-to-r ${item.gradient} text-white shadow-lg`
+                                : "text-white/70 hover:text-white hover:bg-white/10"
+                            }`}
+                          >
+                            {isActive && (
+                              <motion.div
+                                layoutId="activeTab"
+                                className="absolute inset-0 duration-300 bg-white/10 rounded-xl animate-in fade-in"
+                                initial={false}
+                                transition={{
+                                  type: "spring",
+                                  damping: 25,
+                                  stiffness: 200,
+                                }}
+                              />
+                            )}
+                            <div className="relative z-10 flex items-center w-full min-w-0 space-x-3">
+                              <Icon className="flex-shrink-0 w-5 h-5" />
+                              {sidebarOpen && (
+                                <motion.span
+                                  initial={{ opacity: 0, x: -10 }}
+                                  animate={{ opacity: 1, x: 0 }}
+                                  className="font-medium truncate duration-200 animate-in slide-in-from-left"
+                                >
+                                  {item.title}
+                                </motion.span>
+                              )}
+                            </div>
+                          </motion.div>
+                        </Link>
                       </motion.div>
-                    </Link>
-                  </motion.div>
-                );
-              })}
-            </nav>
+                    );
+                  })}
+                </nav>
+              </div>
+            </div>
 
-            {/* Footer - giữ nguyên design đẹp */}
-            <div className="absolute bottom-4 left-4 right-4">
+            {/* ✅ Footer cố định - không scroll */}
+            <div className="flex-shrink-0 p-4 border-t border-border/10">
               <Link to="/">
                 <motion.div
                   whileHover={{ scale: 1.02 }}
-                  className="flex items-center p-3 space-x-3 transition-all rounded-xl text-white/70 hover:text-white hover:bg-white/10"
+                  className="flex items-center min-w-0 p-3 space-x-3 transition-all rounded-xl text-white/70 hover:text-white hover:bg-white/10"
                 >
-                  <Home className="w-5 h-5" />
+                  <Home className="flex-shrink-0 w-5 h-5" />
                   {sidebarOpen && (
                     <motion.span
                       initial={{ opacity: 0, x: -10 }}
                       animate={{ opacity: 1, x: 0 }}
-                      className="font-medium duration-200 animate-in slide-in-from-left"
+                      className="font-medium truncate duration-200 animate-in slide-in-from-left"
                     >
                       Về trang chủ
                     </motion.span>
@@ -303,7 +303,7 @@ const AdminLayout: React.FC = () => {
           className="sticky top-0 z-30 duration-300 border-b bg-white/80 dark:bg-slate-900/80 backdrop-blur-lg border-border/50 animate-in slide-in-from-top"
         >
           <div className="flex items-center justify-between p-4">
-            <div className="flex items-center space-x-4">
+            <div className="flex items-center min-w-0 space-x-4">
               <motion.div
                 whileHover={{ scale: 1.05 }}
                 whileTap={{ scale: 0.95 }}
@@ -312,7 +312,7 @@ const AdminLayout: React.FC = () => {
                   variant="ghost"
                   size="sm"
                   onClick={() => setSidebarOpen(!sidebarOpen)}
-                  className="p-2 transition-transform hover:scale-105 group"
+                  className="flex-shrink-0 p-2 transition-transform hover:scale-105 group"
                 >
                   <motion.div
                     animate={{ rotate: sidebarOpen ? 180 : 0 }}
@@ -324,23 +324,24 @@ const AdminLayout: React.FC = () => {
                 </Button>
               </motion.div>
 
-              <div className="hidden md:block">
+              <div className="hidden min-w-0 md:block">
                 <motion.div
                   initial={{ opacity: 0, x: -20 }}
                   animate={{ opacity: 1, x: 0 }}
                   transition={{ delay: 0.2 }}
+                  className="min-w-0"
                 >
-                  <h2 className="text-xl font-semibold text-transparent bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text">
+                  <h2 className="text-xl font-semibold text-transparent truncate bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text">
                     Bảng điều khiển quản trị
                   </h2>
-                  <p className="text-sm text-muted-foreground">
+                  <p className="text-sm truncate text-muted-foreground">
                     Chào mừng trở lại, {user?.name} 👋
                   </p>
                 </motion.div>
               </div>
             </div>
 
-            <div className="flex items-center space-x-4">
+            <div className="flex items-center flex-shrink-0 space-x-4">
               {/* Search */}
               <motion.div
                 initial={{ opacity: 0, scale: 0.8 }}
@@ -348,7 +349,7 @@ const AdminLayout: React.FC = () => {
                 transition={{ delay: 0.3 }}
                 className="items-center hidden px-3 py-2 space-x-2 transition-all duration-300 rounded-lg md:flex bg-muted/50 hover:border-primary/20 group"
               >
-                <Search className="w-4 h-4 transition-colors text-muted-foreground group-hover:text-primary" />
+                <Search className="flex-shrink-0 w-4 h-4 transition-colors text-muted-foreground group-hover:text-primary" />
                 <input
                   type="text"
                   placeholder="Tìm kiếm..."
@@ -366,7 +367,7 @@ const AdminLayout: React.FC = () => {
               >
                 <Button
                   size="sm"
-                  className="transition-transform shadow-lg bg-gradient-to-r from-blue-500 to-purple-600 hover:from-blue-600 hover:to-purple-700 hover:scale-105 hover:shadow-xl group"
+                  className="flex-shrink-0 transition-transform shadow-lg bg-gradient-to-r from-blue-500 to-purple-600 hover:from-blue-600 hover:to-purple-700 hover:scale-105 hover:shadow-xl group"
                 >
                   <Plus className="w-4 h-4 mr-2 transition-transform duration-300 group-hover:rotate-90" />
                   <span className="hidden sm:inline">Thêm mới</span>
@@ -384,7 +385,7 @@ const AdminLayout: React.FC = () => {
                 <Button
                   variant="ghost"
                   size="sm"
-                  className="relative transition-transform hover:scale-105 hover:bg-primary/10 group"
+                  className="relative flex-shrink-0 transition-transform hover:scale-105 hover:bg-primary/10 group"
                 >
                   <Bell className="w-5 h-5 transition-colors group-hover:text-primary" />
                   {notifications > 0 && (
@@ -409,7 +410,7 @@ const AdminLayout: React.FC = () => {
                   <DropdownMenuTrigger asChild>
                     <Button
                       variant="ghost"
-                      className="relative w-8 h-8 transition-transform duration-300 rounded-full hover:scale-105"
+                      className="relative flex-shrink-0 w-8 h-8 transition-transform duration-300 rounded-full hover:scale-105"
                     >
                       <Avatar className="w-8 h-8 transition-transform cursor-pointer hover:scale-105">
                         <AvatarImage src={user?.avatar} />
@@ -426,15 +427,15 @@ const AdminLayout: React.FC = () => {
                     <DropdownMenuLabel className="font-normal">
                       <div className="flex flex-col space-y-2">
                         <div className="flex items-center space-x-2">
-                          <p className="text-sm font-medium leading-none">
+                          <p className="text-sm font-medium leading-none truncate">
                             {user?.name}
                           </p>
-                          <Badge className="text-xs text-yellow-800 bg-yellow-100">
+                          <Badge className="flex-shrink-0 text-xs text-yellow-800 bg-yellow-100">
                             <Crown className="w-2 h-2 mr-1" />
                             Admin
                           </Badge>
                         </div>
-                        <p className="text-xs leading-none text-muted-foreground">
+                        <p className="text-xs leading-none truncate text-muted-foreground">
                           {user?.email}
                         </p>
                       </div>
@@ -443,21 +444,21 @@ const AdminLayout: React.FC = () => {
 
                     <DropdownMenuItem asChild>
                       <Link to="/profile" className="cursor-pointer">
-                        <User className="w-4 h-4 mr-2" />
+                        <User className="flex-shrink-0 w-4 h-4 mr-2" />
                         <span>Hồ sơ cá nhân</span>
                       </Link>
                     </DropdownMenuItem>
 
                     <DropdownMenuItem asChild>
                       <Link to="/admin/settings" className="cursor-pointer">
-                        <Settings className="w-4 h-4 mr-2" />
+                        <Settings className="flex-shrink-0 w-4 h-4 mr-2" />
                         <span>Cài đặt</span>
                       </Link>
                     </DropdownMenuItem>
 
                     <DropdownMenuItem asChild>
                       <Link to="/admin/analytics" className="cursor-pointer">
-                        <BarChart3 className="w-4 h-4 mr-2" />
+                        <BarChart3 className="flex-shrink-0 w-4 h-4 mr-2" />
                         <span>Thống kê</span>
                       </Link>
                     </DropdownMenuItem>
@@ -467,7 +468,7 @@ const AdminLayout: React.FC = () => {
                       onClick={handleLogout}
                       className="text-red-600 cursor-pointer focus:text-red-600"
                     >
-                      <LogOut className="w-4 h-4 mr-2" />
+                      <LogOut className="flex-shrink-0 w-4 h-4 mr-2" />
                       <span>Đăng xuất</span>
                     </DropdownMenuItem>
                   </DropdownMenuContent>
@@ -492,11 +493,11 @@ const AdminLayout: React.FC = () => {
               transition={{ delay: 0.4 }}
               className="flex items-center space-x-2 text-sm text-muted-foreground"
             >
-              <Home className="w-4 h-4" />
+              <Home className="flex-shrink-0 w-4 h-4" />
               <span>/</span>
               <span>Admin</span>
               <span>/</span>
-              <span className="font-medium text-foreground">
+              <span className="font-medium truncate text-foreground">
                 {sidebarItems.find((item) => item.href === location.pathname)
                   ?.title || "Dashboard"}
               </span>
