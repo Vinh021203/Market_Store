@@ -776,7 +776,7 @@ router.post("/payment/create-link", async (req: Request, res: Response) => {
     }
 
     // Tạo payment link và QR
-    const paymentLink = `${process.env.FRONTEND_URL}/pay/${orderId}`;
+    const paymentLink = `${process.env.FRONTEND_API_URL}/pay/${orderId}`;
     const paymentContent = `DH${orderId}`;
     const qrUrl = generateVietQRUrl(order.total_price, paymentContent);
 

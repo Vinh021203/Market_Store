@@ -48,7 +48,8 @@ const PaymentLinkPayment: React.FC<PaymentLinkPaymentProps> = ({
   // ✅ Tạo payment link
   const generatePaymentLink = async () => {
     try {
-      const response = await fetch("/api/payment/create-link", {
+      const API_URL = import.meta.env.VITE_API_URL;
+      const response = await fetch(`${API_URL}/api/payment/create-link`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ orderId: order.id }),
