@@ -4,6 +4,7 @@ import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
 import VietQRPayment from "@/components/VietQRPayment";
+import PaymentLinkPayment from "@/components/PaymentLinkPayment";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
@@ -48,6 +49,8 @@ import {
   Package,
   Heart,
   Zap,
+  ExternalLink,
+  Copy,
 } from "lucide-react";
 import { toast } from "@/hooks/use-toast";
 import { supabase } from "@/lib/supabase";
@@ -60,7 +63,13 @@ const checkoutSchema = z.object({
   address: z.string().min(5, "Địa chỉ phải có ít nhất 5 ký tự"),
   city: z.string().min(2, "Thành phố không được bỏ trống"),
   country: z.string().min(2, "Quốc gia không được bỏ trống"),
-  paymentMethod: z.enum(["vietqr", "credit_card", "paypal", "bank_transfer"]),
+  paymentMethod: z.enum([
+    "vietqr",
+    "payment_link",
+    "credit_card",
+    "paypal",
+    "bank_transfer",
+  ]),
 });
 
 type CheckoutData = z.infer<typeof checkoutSchema>;
@@ -129,6 +138,15 @@ const Checkout: React.FC = () => {
       badge: "Khuyến nghị",
       color: "from-green-500 to-emerald-500",
       benefits: ["Miễn phí giao dịch", "Thanh toán tức thì", "Bảo mật cao"],
+    },
+    {
+      id: "payment_link",
+      name: "Link thanh toán",
+      description: "Nhận link thanh toán qua email/SMS",
+      icon: ExternalLink,
+      fee: "0%",
+      color: "from-indigo-500 to-blue-500",
+      benefits: ["Thanh toán từ xa", "Chia sẻ dễ dàng", "Không cần app"],
     },
     {
       id: "credit_card",
@@ -371,6 +389,138 @@ const Checkout: React.FC = () => {
                 }}
                 onPaymentSuccess={handlePaymentSuccess}
               />
+            ) : paymentMethod === "payment_link" ? (
+              <PaymentLinkPayment
+                order={{
+                  id: currentOrder.id,
+                  total: currentOrder.total_price,
+                  email: currentOrder.email,
+                }}
+                onPaymentSuccess={handlePaymentSuccess}
+              />
+            ) : paymentMethod === "credit_card" ? (
+              <motion.div
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+              >
+                <Card className="border-0 shadow-2xl bg-gradient-to-br from-white to-blue-50 dark:from-slate-800 dark:to-blue-900">
+                  <CardHeader className="text-center">
+                    <CardTitle className="flex items-center justify-center space-x-2">
+                      <div className="flex items-center justify-center w-10 h-10 rounded-full bg-gradient-to-r from-blue-500 to-purple-600">
+                        <CreditCard className="w-5 h-5 text-white" />
+                      </div>
+                      <span>Thanh toán bằng thẻ tín dụng</span>
+                    </CardTitle>
+                  </CardHeader>
+                  <CardContent className="space-y-6">
+                    <div className="text-center">
+                      <div className="mb-2 text-3xl font-bold text-primary">
+                        {formatPrice(currentOrder.total_price)}
+                      </div>
+                      <p className="text-muted-foreground">
+                        Đơn hàng #{currentOrder.id.slice(0, 8)}
+                      </p>
+                    </div>
+
+                    <div className="p-4 rounded-lg bg-blue-50 dark:bg-blue-900/20">
+                      <p className="text-sm text-blue-700 dark:text-blue-300">
+                        <AlertCircle className="inline w-4 h-4 mr-2" />
+                        Bạn sẽ được chuyển đến trang thanh toán an toàn của
+                        Stripe
+                      </p>
+                    </div>
+
+                    <Button
+                      className="w-full bg-gradient-to-r from-blue-500 to-purple-600 hover:from-blue-600 hover:to-purple-700"
+                      size="lg"
+                      onClick={() => {
+                        // TODO: Implement Stripe payment
+                        toast({
+                          title: "🚧 Đang phát triển",
+                          description:
+                            "Tính năng thanh toán thẻ đang được phát triển",
+                        });
+                      }}
+                    >
+                      <Lock className="w-4 h-4 mr-2" />
+                      Tiến hành thanh toán
+                    </Button>
+                  </CardContent>
+                </Card>
+              </motion.div>
+            ) : paymentMethod === "bank_transfer" ? (
+              <motion.div
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+              >
+                <Card className="border-0 shadow-2xl bg-gradient-to-br from-white to-green-50 dark:from-slate-800 dark:to-green-900">
+                  <CardHeader className="text-center">
+                    <CardTitle className="flex items-center justify-center space-x-2">
+                      <div className="flex items-center justify-center w-10 h-10 rounded-full bg-gradient-to-r from-green-500 to-emerald-600">
+                        <Building className="w-5 h-5 text-white" />
+                      </div>
+                      <span>Chuyển khoản ngân hàng</span>
+                    </CardTitle>
+                  </CardHeader>
+                  <CardContent className="space-y-6">
+                    <div className="text-center">
+                      <div className="mb-2 text-3xl font-bold text-primary">
+                        {formatPrice(currentOrder.total_price)}
+                      </div>
+                      <p className="text-muted-foreground">
+                        Đơn hàng #{currentOrder.id.slice(0, 8)}
+                      </p>
+                    </div>
+
+                    <div className="p-4 rounded-lg bg-green-50 dark:bg-green-900/20">
+                      <p className="text-sm text-green-700 dark:text-green-300">
+                        <AlertCircle className="inline w-4 h-4 mr-2" />
+                        Chuyển khoản thủ công với thông tin bên dưới
+                      </p>
+                    </div>
+
+                    <div className="space-y-3 text-sm">
+                      <div className="flex justify-between">
+                        <span className="text-muted-foreground">
+                          Ngân hàng:
+                        </span>
+                        <span className="font-medium">MBBANK</span>
+                      </div>
+                      <div className="flex justify-between">
+                        <span className="text-muted-foreground">
+                          Số tài khoản:
+                        </span>
+                        <span className="font-mono">0971386588</span>
+                      </div>
+                      <div className="flex justify-between">
+                        <span className="text-muted-foreground">
+                          Chủ tài khoản:
+                        </span>
+                        <span className="font-medium">LUONG THE VINH</span>
+                      </div>
+                      <div className="flex justify-between">
+                        <span className="text-muted-foreground">Nội dung:</span>
+                        <span className="font-mono">DH{currentOrder.id}</span>
+                      </div>
+                    </div>
+
+                    <Button
+                      className="w-full bg-gradient-to-r from-green-500 to-emerald-600 hover:from-green-600 hover:to-emerald-700"
+                      size="lg"
+                      onClick={() => {
+                        toast({
+                          title: "📋 Thông tin đã sao chép",
+                          description:
+                            "Vui lòng chuyển khoản theo thông tin trên",
+                        });
+                      }}
+                    >
+                      <Copy className="w-4 h-4 mr-2" />
+                      Sao chép thông tin
+                    </Button>
+                  </CardContent>
+                </Card>
+              </motion.div>
             ) : (
               <motion.div
                 initial={{ opacity: 0, y: 20 }}
