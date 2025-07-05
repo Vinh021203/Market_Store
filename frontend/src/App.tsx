@@ -33,6 +33,7 @@ const BlogPost = React.lazy(() => import("./pages/BlogPost"));
 const ProductDetail = React.lazy(() => import("./pages/ProductDetail"));
 const Cart = React.lazy(() => import("./pages/Cart"));
 const Checkout = React.lazy(() => import("./pages/Checkout"));
+const PaymentPage = React.lazy(() => import("./pages/PaymentPage"));
 const About = React.lazy(() => import("./pages/About"));
 const Contact = React.lazy(() => import("./pages/Contact"));
 const Pricing = React.lazy(() => import("./pages/Pricing"));
@@ -383,6 +384,19 @@ const AppRoutes = () => {
                 </Suspense>
               </ConditionalLayout>
             </ProtectedRoute>
+          }
+        />
+        {/* ✅ Payment Page Route - Public */}
+        <Route
+          path="/pay/:orderId"
+          element={
+            <ConditionalLayout>
+              <Suspense fallback={<SuspenseFallback />}>
+                <PageTransition>
+                  <PaymentPage />
+                </PageTransition>
+              </Suspense>
+            </ConditionalLayout>
           }
         />
 
