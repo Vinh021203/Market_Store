@@ -3,6 +3,7 @@ import { Navigate, useNavigate, useParams } from "react-router-dom";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
+import FormattedDescription from "@/components/FormattedDescription";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
@@ -44,6 +45,7 @@ import {
   CheckCircle,
   FileText,
   Globe,
+  Info,
   Zap,
   Target,
   Star,
@@ -480,17 +482,43 @@ const ProductCreate: React.FC = () => {
                             <FileText className="w-4 h-4" />
                             <span>Mô tả chi tiết *</span>
                           </Label>
+
                           <Textarea
                             id="description"
-                            placeholder="Mô tả chi tiết về tính năng, lợi ích và giá trị của sản phẩm..."
-                            rows={6}
+                            placeholder={`Mô tả chi tiết về sản phẩm. Bạn có thể sử dụng:
+
+• Bullet point với dấu •
+- Hoặc dấu gạch ngang -
+* Hoặc dấu sao *
+
+1. Danh sách có số thứ tự
+2. Tiếp tục với số 2
+3. Và số 3
+
+Xuống dòng bình thường bằng cách nhấn Enter
+
+Ví dụ:
+Tech Blog VN là template React cao cấp
+
+Tính năng chính:
+• Giao diện hiện đại
+• Admin Dashboard
+• Responsive design
+
+Công nghệ sử dụng:
+1. React 18
+2. TypeScript
+3. Tailwind CSS`}
+                            rows={10}
                             {...register("description")}
-                            className={`resize-none transition-all duration-300 ${
+                            className={`resize-none transition-all duration-300 font-mono ${
                               errors.description
                                 ? "border-red-500 shake"
                                 : "focus:ring-2 focus:ring-primary/20"
                             }`}
+                            style={{ whiteSpace: "pre-wrap" }}
                           />
+
                           {errors.description && (
                             <motion.p
                               initial={{ opacity: 0, y: -10 }}
@@ -501,8 +529,60 @@ const ProductCreate: React.FC = () => {
                               <span>{errors.description.message}</span>
                             </motion.p>
                           )}
-                          <div className="text-xs text-muted-foreground">
-                            {watchedValues.description?.length || 0}/500 ký tự
+
+                          {/* Preview mô tả */}
+                          {watchedValues.description && (
+                            <motion.div
+                              initial={{ opacity: 0, height: 0 }}
+                              animate={{ opacity: 1, height: "auto" }}
+                              className="p-4 mt-4 border rounded-lg bg-slate-50 dark:bg-slate-800"
+                            >
+                              <Label className="flex items-center mb-2 space-x-2 text-sm font-medium text-slate-700 dark:text-slate-300">
+                                <Eye className="w-4 h-4" />
+                                <span>Xem trước mô tả:</span>
+                              </Label>
+                              <div className="prose-sm prose max-w-none dark:prose-invert">
+                                <FormattedDescription
+                                  text={watchedValues.description}
+                                  className="text-slate-600 dark:text-slate-300"
+                                />
+                              </div>
+                            </motion.div>
+                          )}
+
+                          {/* Hướng dẫn nhanh */}
+                          <div className="p-3 text-xs rounded-lg text-muted-foreground bg-blue-50 dark:bg-blue-900/20">
+                            <div className="flex items-center mb-2 space-x-2">
+                              <Info className="w-3 h-3 text-blue-600" />
+                              <span className="font-medium">
+                                Hướng dẫn định dạng:
+                              </span>
+                            </div>
+                            <div className="grid grid-cols-2 gap-2 text-xs">
+                              <div>
+                                • <code>• Text</code> → Bullet point
+                              </div>
+                              <div>
+                                • <code>1. Text</code> → Numbered list
+                              </div>
+                              <div>
+                                • <code>Enter</code> → Xuống dòng
+                              </div>
+                              <div>
+                                • <code>**Text**</code> →{" "}
+                                <strong>In đậm</strong>
+                              </div>
+                            </div>
+                          </div>
+
+                          <div className="flex items-center justify-between text-xs text-muted-foreground">
+                            <span>
+                              {watchedValues.description?.length || 0}/1000 ký
+                              tự
+                            </span>
+                            <span className="text-green-600">
+                              ✓ Hỗ trợ định dạng văn bản
+                            </span>
                           </div>
                         </motion.div>
 

@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from "react";
 import { useParams, useNavigate } from "react-router-dom";
+import FormattedDescription from "@/components/FormattedDescription";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
@@ -607,7 +608,15 @@ const ProductDetail: React.FC = () => {
                 transition={{ delay: 0.6 }}
                 className="leading-relaxed text-muted-foreground"
               >
-                {product.description}
+                {/* {product.description} */}
+                <FormattedDescription
+                  text={
+                    product.description.length > 1000
+                      ? product.description.substring(0, 1000) + "..."
+                      : product.description
+                  }
+                  className="leading-relaxed"
+                />
               </motion.p>
             </div>
 
@@ -951,9 +960,10 @@ const ProductDetail: React.FC = () => {
                   <Card className="border-0 shadow-lg bg-gradient-to-br from-white to-blue-50 dark:from-slate-800 dark:to-blue-900">
                     <CardContent className="pt-6">
                       <div className="prose max-w-none">
-                        <p className="text-lg leading-relaxed">
-                          {product.description}
-                        </p>
+                        <FormattedDescription
+                          text={product.description}
+                          className="text-lg leading-relaxed text-slate-700 dark:text-slate-300"
+                        />
 
                         {product.category === "template" &&
                           product.technologies && (
