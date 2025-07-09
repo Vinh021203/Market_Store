@@ -1,16 +1,7 @@
-User-agent: Googlebot
-Allow: /
-
-User-agent: Bingbot
-Allow: /
-
-User-agent: Twitterbot
-Allow: /
-
-User-agent: facebookexternalhit
-Allow: /
-
+# public/robots.txt
 User-agent: *
 Allow: /
-
-Sitemap: https://marketstore-two.vercel.app/sitemap.xml
+Disallow: /admin/
+Disallow: /api/
+Disallow: /auth/
+Sitemap: https://marketstoreapp.vercel.app/sitemap.xml
