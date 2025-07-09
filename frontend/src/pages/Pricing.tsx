@@ -151,23 +151,23 @@ const Pricing: React.FC = () => {
 
   const testimonials = [
     {
-      name: "Nguyễn Minh Tuấn",
-      role: "Senior Developer",
-      company: "FPT Software",
+      name: "Hoàng Huy Thành",
+      role: "Frontend Developer",
+      company: "Viettel Digital",
       content:
-        "Professional plan đã giúp team tôi tiết kiệm 70% thời gian development. ROI rất cao!",
+        "Mình đã mua React template từ đây để làm dự án internal tool cho công ty. Code structure rất clean, responsive design mượt mà, và đặc biệt là gradient UI effects rất đẹp mắt. Team mình tiết kiệm được 2 tuần development time. Chất lượng thực sự đáng tiền!",
       avatar:
-        "https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?w=100&h=100&fit=crop&crop=face",
+        "https://scontent.fhan14-3.fna.fbcdn.net/v/t39.30808-1/475306604_1341522327007451_8012558107895950745_n.jpg?stp=dst-jpg_s200x200_tt6&_nc_cat=103&ccb=1-7&_nc_sid=1d2534&_nc_eui2=AeHsFEN0ZG42f3eH6Uy4HGHnjv7iIe7y9imO_uIh7vL2KUIy0JC4y-1x3Bg275E6CAGJsECLBRmEJ0iY7CN0pxHs&_nc_ohc=7nkctwp8M30Q7kNvwFcOfgi&_nc_oc=AdlP5Yjh2mQ4dLwOO9AyvOGYwu1BEht3ixGAHQcpjE2usq8_VpYFzxq9gD88e0mbFcs&_nc_zt=24&_nc_ht=scontent.fhan14-3.fna&_nc_gid=CBBKKXJsF0cIxGaVCC9cBA&oh=00_AfSvNhW0QXxH3s6FCpC_GVYWKAtKeuRJhy-ZLmfGgiMd1Q&oe=68747061",
       rating: 5,
     },
     {
-      name: "Sarah Chen",
+      name: "Ngô Thị Hà",
       role: "UI/UX Designer",
-      company: "Google Singapore",
+      company: "VNG Corporation",
       content:
-        "Template quality tuyệt vời, documentation chi tiết. Đáng đồng tiền bát gạo!",
+        "E-book về React patterns và design system documentation thực sự hữu ích cho career development. Nội dung được trình bày rõ ràng, có nhiều case study thực tế. Sau khi học xong, mình apply được ngay vào dự án và workflow improve đáng kể. Highly recommended!",
       avatar:
-        "https://images.unsplash.com/photo-1494790108755-2616b612f5e6?w=100&h=100&fit=crop&crop=face",
+        "https://scontent.fhan14-4.fna.fbcdn.net/v/t39.30808-1/449773850_2622629564611139_5225033693435173954_n.jpg?stp=c0.0.496.496a_dst-jpg_s200x200_tt6&_nc_cat=107&ccb=1-7&_nc_sid=1d2534&_nc_eui2=AeG9H0VlyI6NAgciIDaqlislwj0esVBx0-vCPR6xUHHT60cZCpTK1tixyGyYyuOuxlZUH3uvWWZ0nu-EynC2N9pT&_nc_ohc=O_qZcX8B1QAQ7kNvwFO3k0_&_nc_oc=AdnTVeCD96_gpX771r_S9kMzwmX9RHEBFDpY_pCF8YSxA8fBjgTAOi9HkGJrXRCzMnM&_nc_zt=24&_nc_ht=scontent.fhan14-4.fna&_nc_gid=PkB9UfxgOKNyfp-wRqiLxA&oh=00_AfQNPPoy5mJzJ07bNy_tPXzlJ14MFrvZol9QosooEsDPMQ&oe=68745E01",
       rating: 5,
     },
   ];

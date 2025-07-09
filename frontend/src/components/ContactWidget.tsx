@@ -1,4 +1,3 @@
-// components/ContactWidget.tsx - Fixed height cho responsive
 import React, { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";

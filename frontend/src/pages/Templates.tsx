@@ -1,5 +1,5 @@
-// pages/Templates.tsx - Mã hoàn chỉnh với enhanced UI và pagination
-import React, { useState, useMemo, useEffect } from "react";
+// pages/Templates.tsx - Mã hoàn chỉnh đã fix pagination
+import React, { useState, useMemo, useEffect, useRef } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import {
@@ -78,6 +78,10 @@ const Templates: React.FC = () => {
   );
   const [itemsPerPage] = useState(12);
 
+  // ✅ Fix pagination - Thêm state để kiểm soát reset
+  const [shouldResetPage, setShouldResetPage] = useState(false);
+  const prevFiltersRef = useRef<FilterOptions>();
+
   // ✅ Handle URL tag changes
   useEffect(() => {
     if (selectedTag) {
@@ -85,6 +89,7 @@ const Templates: React.FC = () => {
         ...prev,
         tags: [selectedTag],
       }));
+      setShouldResetPage(true);
     }
   }, [selectedTag]);
 
@@ -95,6 +100,17 @@ const Templates: React.FC = () => {
       setCurrentPage(parseInt(page, 10));
     }
   }, [searchParams]);
+
+  // ✅ Fix pagination - Chỉ reset khi shouldResetPage = true
+  useEffect(() => {
+    if (shouldResetPage) {
+      setCurrentPage(1);
+      const params = new URLSearchParams(searchParams);
+      params.delete("page");
+      setSearchParams(params);
+      setShouldResetPage(false);
+    }
+  }, [shouldResetPage, setSearchParams]);
 
   useEffect(() => {
     const fetchData = async () => {
@@ -159,14 +175,6 @@ const Templates: React.FC = () => {
   );
   const totalPages = Math.ceil(filteredProducts.length / itemsPerPage);
 
-  // ✅ Reset to first page when filters change
-  useEffect(() => {
-    setCurrentPage(1);
-    const params = new URLSearchParams(searchParams);
-    params.delete("page");
-    setSearchParams(params);
-  }, [filters, setSearchParams]);
-
   // ✅ Handle page change with URL update
   const handlePageChange = (page: number) => {
     setCurrentPage(page);
@@ -182,9 +190,11 @@ const Templates: React.FC = () => {
     window.scrollTo({ top: 0, behavior: "smooth" });
   };
 
+  // ✅ Fix pagination - Thêm setShouldResetPage vào handleSearch
   const handleSearch = (e: React.FormEvent) => {
     e.preventDefault();
     setFilters((prev) => ({ ...prev, search: searchInput }));
+    setShouldResetPage(true);
     toast({
       title: "🔍 Đang tìm kiếm...",
       description: `Tìm kiếm "${searchInput}" trong ${products.length} templates.`,
@@ -196,8 +206,10 @@ const Templates: React.FC = () => {
       ...prev,
       sortBy: value as FilterOptions["sortBy"],
     }));
+    // Không reset page khi chỉ sort
   };
 
+  // ✅ Fix pagination - Thêm setShouldResetPage vào toggleTag
   const toggleTag = (tag: string) => {
     setFilters((prev) => ({
       ...prev,
@@ -205,8 +217,10 @@ const Templates: React.FC = () => {
         ? prev.tags.filter((t) => t !== tag)
         : [...(prev.tags || []), tag],
     }));
+    setShouldResetPage(true);
   };
 
+  // ✅ Fix pagination - Thêm setShouldResetPage vào clearFilters
   const clearFilters = () => {
     setSearchParams({});
     setFilters({
@@ -217,10 +231,20 @@ const Templates: React.FC = () => {
       priceRange: undefined,
     });
     setSearchInput("");
+    setShouldResetPage(true);
     toast({
       title: "🧹 Đã xóa bộ lọc",
       description: "Hiển thị tất cả templates.",
     });
+  };
+
+  // ✅ Fix pagination - Thêm handler cho price range
+  const handlePriceRangeChange = (range: [number, number] | undefined) => {
+    setFilters((prev) => ({
+      ...prev,
+      priceRange: range,
+    }));
+    setShouldResetPage(true);
   };
 
   const priceRanges = [
@@ -337,7 +361,7 @@ const Templates: React.FC = () => {
               },
               {
                 label: "Trang hiện tại",
-                value: `${currentPage}/${totalPages}`,
+                value: `${currentPage}/${totalPages || 1}`,
                 icon: BarChart3,
                 color: "from-purple-500 to-pink-500",
               },
@@ -395,6 +419,7 @@ const Templates: React.FC = () => {
                   onClick={() => {
                     setSearchParams({});
                     setFilters((prev) => ({ ...prev, tags: [] }));
+                    setShouldResetPage(true);
                   }}
                   className="ml-2 transition-colors hover:text-red-500"
                 >
@@ -531,10 +556,7 @@ const Templates: React.FC = () => {
                                 }
                                 size="sm"
                                 onClick={() =>
-                                  setFilters((prev) => ({
-                                    ...prev,
-                                    priceRange: range.value,
-                                  }))
+                                  handlePriceRangeChange(range.value)
                                 }
                                 className="justify-start w-full"
                               >
@@ -661,6 +683,7 @@ const Templates: React.FC = () => {
                       onClick={() => {
                         setFilters((prev) => ({ ...prev, search: "" }));
                         setSearchInput("");
+                        setShouldResetPage(true);
                       }}
                       className="ml-2 transition-colors hover:text-red-500"
                     >
@@ -695,12 +718,7 @@ const Templates: React.FC = () => {
                         ? "200K-500K"
                         : "Trên 500K"}
                     <button
-                      onClick={() =>
-                        setFilters((prev) => ({
-                          ...prev,
-                          priceRange: undefined,
-                        }))
-                      }
+                      onClick={() => handlePriceRangeChange(undefined)}
                       className="ml-2 transition-colors hover:text-red-500"
                     >
                       <X className="w-3 h-3" />
@@ -859,7 +877,7 @@ const Templates: React.FC = () => {
           </AnimatePresence>
 
           {/* ✅ Enhanced Pagination */}
-          {filteredProducts.length > 0 && (
+          {filteredProducts.length > 0 && totalPages > 1 && (
             <Pagination
               currentPage={currentPage}
               totalPages={totalPages}

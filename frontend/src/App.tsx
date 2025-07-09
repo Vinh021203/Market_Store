@@ -1,4 +1,3 @@
-// App.tsx - Mã hoàn chỉnh với enhanced auth flow
 import React, { Suspense } from "react";
 import { Toaster } from "@/components/ui/toaster";
 import { Toaster as Sonner } from "@/components/ui/sonner";
@@ -25,7 +24,7 @@ import LoadingSpinner from "@/components/LoadingSpinner";
 import { isAdmin } from "@/lib/auth";
 
 // ✅ Lazy Load Pages - Public
-const Index = React.lazy(() => import("./pages/Index"));
+const Home = React.lazy(() => import("./pages/Home"));
 const Templates = React.lazy(() => import("./pages/Templates"));
 const Ebooks = React.lazy(() => import("./pages/Ebooks"));
 const Blog = React.lazy(() => import("./pages/Blog"));
@@ -164,7 +163,7 @@ const AppRoutes = () => {
             <ConditionalLayout>
               <Suspense fallback={<SuspenseFallback />}>
                 <PageTransition>
-                  <Index />
+                  <Home />
                 </PageTransition>
               </Suspense>
             </ConditionalLayout>

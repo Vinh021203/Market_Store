@@ -162,10 +162,10 @@ const About: React.FC = () => {
 
   const team = [
     {
-      name: "Nguyễn Minh Tuấn",
+      name: "Lương Thế Vinh",
       role: "CEO & Founder",
       avatar:
-        "https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?w=200&h=200&fit=crop&crop=face",
+        "https://scontent.fhan14-1.fna.fbcdn.net/v/t39.30808-1/489339899_1650866852469101_623711763546528465_n.jpg?stp=dst-jpg_s200x200_tt6&_nc_cat=105&ccb=1-7&_nc_sid=e99d92&_nc_eui2=AeEfo6NAiKObTSuGQGmzXTWx4R4fBEydIHbhHh8ETJ0gdmBgKULBkSzt-3_DuFpZso6cy6nHPJFpizFNBK4ARHRL&_nc_ohc=BFtcZY0GlXoQ7kNvwFX6FuH&_nc_oc=Adnu6UIXOZGbD4Q0s_Q2p5Udtmgajhnk3WvrwrvrXZGdqASgu8BbxQb79rM-aB4SL6I&_nc_zt=24&_nc_ht=scontent.fhan14-1.fna&_nc_gid=_9U5S6yfc979wb7DtGBdEQ&oh=00_AfQtJWKR7P0nEFA2sRh0T05hNXWHIQSwiJOr-ksLaPtgXw&oe=68743CCE",
       description:
         "10+ năm kinh nghiệm trong lĩnh vực công nghệ và thiết kế web. Tốt nghiệp Stanford University với bằng Computer Science.",
       expertise: [
@@ -181,10 +181,10 @@ const About: React.FC = () => {
       achievements: ["Forbes 30 Under 30", "Tech Innovation Award 2023"],
     },
     {
-      name: "Sarah Chen",
+      name: "Trần Đức Chính",
       role: "CTO & Co-founder",
       avatar:
-        "https://images.unsplash.com/photo-1494790108755-2616b612f5e6?w=200&h=200&fit=crop&crop=face",
+        "https://scontent.fhan14-3.fna.fbcdn.net/v/t39.30808-1/451068920_2388215684719568_3299302164425753155_n.jpg?stp=dst-jpg_s200x200_tt6&_nc_cat=103&ccb=1-7&_nc_sid=e99d92&_nc_eui2=AeF1EbICdJdegUNXxKUueqCmCOJkARQeGogI4mQBFB4aiHNBF_HIYyXg9Yf0WM19Mtji0tBhQyzVbiSWaL_aHvNu&_nc_ohc=ZNglImxlUYYQ7kNvwHNUSZy&_nc_oc=AdnX8vra2qcjKbl2qlepltxxmAwid5mlf2FrwVmPzD5lgRn8KKiBMrYHvyfMOaimDYk&_nc_zt=24&_nc_ht=scontent.fhan14-3.fna&_nc_gid=UzqrUqLj7n459RjNlsi8MA&oh=00_AfTTml8ehFKJZexXHz3cZKQdR0oev_LqZy-AUKCnmwnDFQ&oe=6874692C",
       description:
         "Chuyên gia về kiến trúc hệ thống và phát triển sản phẩm. Ex-Google Senior Engineer với 12 năm kinh nghiệm.",
       expertise: ["System Architecture", "Cloud Computing", "AI/ML"],
@@ -196,10 +196,10 @@ const About: React.FC = () => {
       achievements: ["Google Cloud Architect", "AWS Solutions Architect"],
     },
     {
-      name: "David Kim",
+      name: "Ngô Minh Phương",
       role: "Creative Director",
       avatar:
-        "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=200&h=200&fit=crop&crop=face",
+        "https://scontent.fhan14-3.fna.fbcdn.net/v/t39.30808-1/504634478_1796619404219357_83029977015560976_n.jpg?stp=dst-jpg_s200x200_tt6&_nc_cat=111&ccb=1-7&_nc_sid=e99d92&_nc_eui2=AeGBgPa_0LZw7w5QFF3itDgg1fKmzU9JdTHV8qbNT0l1MXD5mzv1axtv5s3-Cjl8hxlfm_w0tyjRO66otKpTnw_2&_nc_ohc=EzmSbNmpiiwQ7kNvwHGpoVU&_nc_oc=AdmxEG3stdVq5HcNQqIUsMdK9dqufo_Ul5F-mhCWTlh7TAab8KfvQHz5JTF7JahINbE&_nc_zt=24&_nc_ht=scontent.fhan14-3.fna&_nc_gid=BPrahFw-vCPq8t7nEFhYZQ&oh=00_AfTl8IiZSDrPROGBjK5d4dawoVxGUjXMSZjfoheuz4ifXg&oe=68746CEE",
       description:
         "Chuyên gia thiết kế UI/UX với hơn 8 năm kinh nghiệm. Từng làm việc tại Apple và Adobe.",
       expertise: ["UI/UX Design", "Design Systems", "Brand Identity"],

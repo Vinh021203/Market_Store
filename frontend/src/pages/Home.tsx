@@ -1,4 +1,3 @@
-// pages/Index.tsx - Mã hoàn chỉnh với enhanced gradients và fixes
 import { useState, useEffect } from "react";
 import React from "react";
 import { Helmet } from "react-helmet-async";
@@ -89,78 +88,78 @@ const Index: React.FC = () => {
   // ✅ Enhanced testimonials với ảnh thật và tên Việt Nam
   const testimonials = [
     {
-      name: "Nguyễn Minh Tuấn",
+      name: "Nguyễn Quang Anh",
       role: "Senior Frontend Developer",
       company: "FPT Software",
       location: "Hồ Chí Minh, Việt Nam",
       content:
-        "Mình đã sử dụng React template từ Template Market cho dự án e-commerce của công ty. Code structure rất clean, documentation chi tiết và đặc biệt là responsive design cực kỳ mượt mà. Team mình tiết kiệm được gần 1 tháng development time. Chất lượng thực sự đáng đồng tiền!",
+        "Thật sự mình hơi hoài nghi lúc đầu khi mua template này, nhưng sau khi download về thì wow! Code được viết rất sạch sẽ, folder structure hợp lý, và quan trọng nhất là không có những đoạn code thừa hay comment lung tung. Mình đã dùng để build website bán hàng cho khách, chỉ cần customize màu sắc và content là xong. Khách hàng feedback rất tích cực về UI/UX. Cảm ơn tác giả!",
       avatar:
-        "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=100&h=100&fit=crop&crop=face",
+        "https://scontent.fhan14-2.fna.fbcdn.net/v/t39.30808-1/404568384_3605339516346021_1390983089401404751_n.jpg?stp=dst-jpg_s200x200_tt6&_nc_cat=100&ccb=1-7&_nc_sid=e99d92&_nc_eui2=AeHSVRE_B2j_csmkyCswyqF_uWe3A-uAy6W5Z7cD64DLpf2ezk_YZ0dFr1IHFJITsVTZxOIbGNzF7eMrFhBBUeho&_nc_ohc=6Q8h5puJ0nUQ7kNvwF4Pl_t&_nc_oc=Admkoz1KHOdEJzNqIN5NJM3lW2FvssxD3bO9JI5F6oPCSBgatzPl6uqa8iRJIeDVUqY&_nc_zt=24&_nc_ht=scontent.fhan14-2.fna&_nc_gid=nxh1GeBy5AWCJbFkxApznw&oh=00_AfRgrZXHX4aRPKK5ppu3F943WvMgouHaG-ooesNyo_cifw&oe=68744EAC",
       rating: 5,
       date: "2 tuần trước",
       verified: true,
-      projectType: "E-commerce Platform",
+      projectType: "Website Bán Hàng Online",
       flag: "🇻🇳",
     },
     {
-      name: "Trần Thị Hương Lan",
+      name: "Nguyễn Thị Hoài Ngọc",
       role: "UI/UX Designer",
       company: "Vingroup Technology",
       location: "Hà Nội, Việt Nam",
       content:
-        "E-book 'Advanced React Patterns' thực sự hữu ích cho career development của mình. Nội dung được trình bày rõ ràng, có nhiều case study thực tế từ các dự án lớn. Sau khi học xong, mình đã apply được ngay vào dự án VinFast và performance tăng 40%. Highly recommended!",
+        "Mình làm designer nhưng cũng cần hiểu code để communicate với dev team tốt hơn. E-book về React này viết rất dễ hiểu, không quá technical mà vẫn đầy đủ kiến thức. Phần về component design patterns giúp mình hiểu được tại sao dev team lại structure code như vậy. Giờ mình design UI cũng có tính đến việc implement, collaboration với team smooth hơn nhiều.",
       avatar:
-        "https://images.unsplash.com/photo-1494790108755-2616b612f5e6?w=100&h=100&fit=crop&crop=face",
+        "https://scontent.fhan14-5.fna.fbcdn.net/v/t39.30808-1/474033394_628434136317476_1405476397981786571_n.jpg?stp=dst-jpg_s200x200_tt6&_nc_cat=109&ccb=1-7&_nc_sid=e99d92&_nc_eui2=AeET-qxbnq2AteKMscWwdz2bixSqw47bX_uLFKrDjttf-4DLRBw8SwT5dr7NZVkffXvW7ySU8M1D7HdcQ_9-mfFC&_nc_ohc=liJCQrWA4ykQ7kNvwE5LrKR&_nc_oc=AdkEsqf0ZnHog-wC0QoCcfmPiQqbQL7nawCYt-FSiR0HUVstgJsHLodNNkg0V6OngS8&_nc_zt=24&_nc_ht=scontent.fhan14-5.fna&_nc_gid=5nOMmcBtUkml22w9GPuvKQ&oh=00_AfQNeq5jkDllhyUOjZF7ltT0TlFG7sltVeChOKloKRUFjw&oe=6874554F",
       rating: 5,
       date: "1 tuần trước",
       verified: true,
-      projectType: "React E-book",
+      projectType: "E-book React Patterns",
       flag: "🇻🇳",
     },
     {
-      name: "Lê Văn Đức",
+      name: "Bùi Huy Đức",
       role: "Fullstack Developer",
       company: "Tiki Corporation",
       location: "Hồ Chí Minh, Việt Nam",
       content:
-        "Admin dashboard template từ đây thực sự impressive! Mình đã customize cho hệ thống quản lý inventory của Tiki. Authentication system, role-based access control và data visualization đều work perfectly. Support team response trong vòng 2 tiếng, rất professional.",
+        "Honestly, mình đã thử nhiều admin template khác nhau rồi, đa số đều có vấn đề về performance hoặc code quality. Cái này khác, authentication flow được implement chuẩn chỉ, role management linh hoạt, và charts/tables render rất mượt. Mình chỉ cần focus vào business logic thay vì phải fix những bug cơ bản. Đáng tiền nhất là có support, inbox hỏi gì cũng được trả lời nhanh.",
       avatar:
-        "https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?w=100&h=100&fit=crop&crop=face",
+        "https://scontent.fhan14-4.fna.fbcdn.net/v/t39.30808-1/441194208_1124384071937544_5042461177258539917_n.jpg?stp=dst-jpg_s200x200_tt6&_nc_cat=107&ccb=1-7&_nc_sid=1d2534&_nc_eui2=AeHbRjXDIjEt9Ok0TNHhadAP1bO-eXKEB4TVs755coQHhPOyzPK2p7lrMiSzMsdWtwwN5H66qIuAhjRCZI3-qYi2&_nc_ohc=lLhkYorSFh4Q7kNvwED7fKP&_nc_oc=AdmzpjmnFJW5MO8Rzc-75lmqpUhc5CzrlA7IxJnUP465SfhB16cPq7u9BOGT0I3xIk0&_nc_zt=24&_nc_ht=scontent.fhan14-4.fna&_nc_gid=gndF3FimEdykNlqtkuo7LA&oh=00_AfS7_5tWuYVF5sBoPge6bhjVHD828hiYFo8_MltVb7O0fw&oe=68745604",
       rating: 5,
       date: "3 ngày trước",
       verified: true,
-      projectType: "Admin Dashboard",
+      projectType: "Admin Dashboard Template",
       flag: "🇻🇳",
     },
     {
-      name: "Phạm Thị Mai",
+      name: "Vũ Thành Đạt",
       role: "Mobile Developer",
       company: "VNG Corporation",
       location: "Hồ Chí Minh, Việt Nam",
       content:
-        "React Native template cho app Zalo Pay integration cực kỳ smooth. Navigation structure hợp lý, state management với Redux Toolkit rất clean. Đặc biệt là payment flow và security implementation đã được optimize sẵn. Launch app lên store chỉ trong 2 tuần thay vì 2 tháng như dự kiến.",
+        "Lúc đầu team mình định tự code từ đầu, nhưng timeline quá gấp. May mắn tìm được template này, navigation structure đã được optimize cho UX, state management clear, và quan trọng nhất là performance trên cả iOS lẫn Android đều ổn. Mình chỉ cần customize UI theo brand guideline và integrate API. Từ 3 tháng estimate giờ chỉ còn 3 tuần là done.",
       avatar:
-        "https://images.unsplash.com/photo-1438761681033-6461ffad8d80?w=100&h=100&fit=crop&crop=face",
+        "https://scontent.fhan14-1.fna.fbcdn.net/v/t39.30808-1/414662311_1430374387826190_1868360130151648161_n.jpg?stp=dst-jpg_s200x200_tt6&_nc_cat=105&ccb=1-7&_nc_sid=e99d92&_nc_eui2=AeE1OagPYL3YlJaoglbGtE8_8NCribnV4lrw0KuJudXiWsJXsWnEzW1-uZTFo-rtM-GFAnvikcQqZ7KdhFtprhpg&_nc_ohc=VpUMP1RFcToQ7kNvwHOzXuk&_nc_oc=AdlYWvkN--TcZJs8NEJ0nGd5aANPHf8ABvI6EmB4pk3KyJNS0P4cq8icDMTD-13_NCw&_nc_zt=24&_nc_ht=scontent.fhan14-1.fna&_nc_gid=2lC-McJ6aI1UoXfRiL8kkg&oh=00_AfSQaHpu1WeRGjJJTsX_i46YN6nWITeSLCeIfJCfi8IqrA&oe=68744267",
       rating: 5,
       date: "5 ngày trước",
       verified: true,
-      projectType: "Mobile App",
+      projectType: "React Native App Template",
       flag: "🇻🇳",
     },
     {
-      name: "Nguyễn Hoàng Nam",
+      name: "Phạm Minh Công",
       role: "Tech Lead",
       company: "Shopee Vietnam",
       location: "Hồ Chí Minh, Việt Nam",
       content:
-        "Next.js SaaS template được team mình sử dụng cho internal tool của Shopee. TypeScript implementation flawless, architecture follow best practices của industry. Microservices integration và monitoring system đã setup sẵn rất professional. Definitely worth the investment!",
+        "Mình đã review code của template này khá kỹ trước khi approve cho team sử dụng. Phải nói là impressed với code quality - TypeScript được sử dụng đúng cách, error handling comprehensive, và architecture scalable. Đặc biệt là folder structure và naming convention rất consistent, junior dev vào cũng dễ hiểu. Đây là template đầu tiên mình thấy có thể dùng cho production mà không cần refactor nhiều.",
       avatar:
-        "https://images.unsplash.com/photo-1500648767791-00dcc994a43e?w=100&h=100&fit=crop&crop=face",
+        "https://scontent.fhan14-1.fna.fbcdn.net/v/t39.30808-1/503753507_2219147335183489_5815809593221351603_n.jpg?stp=dst-jpg_s200x200_tt6&_nc_cat=105&ccb=1-7&_nc_sid=e99d92&_nc_eui2=AeEPF1_5nRui_Psxqu7w5Cog5tFVd3PajnPm0VV3c9qOc0vB_3S6HP2bs1YvWJ5nw0ojFWwTV9LDdALDJFOB3Eu2&_nc_ohc=lBOk3djSgNcQ7kNvwGxeNmX&_nc_oc=AdlrTiLG-J16xZxAJNhV35siKRZxZwFLvVvWmDnmv-dKUsAyERCDL2DLEfYyrUxDvUI&_nc_zt=24&_nc_ht=scontent.fhan14-1.fna&_nc_gid=tWGD1KhYtMxPgyaHdtwrAQ&oh=00_AfSYdFjtDtpIKO8a3jjEYsuKeTNXpcyWRf8c_WQz2AfiPw&oe=68744028",
       rating: 5,
       date: "1 tuần trước",
       verified: true,
-      projectType: "SaaS Platform",
+      projectType: "Next.js SaaS Boilerplate",
       flag: "🇻🇳",
     },
     {
@@ -169,13 +168,13 @@ const Index: React.FC = () => {
       company: "Grab Vietnam",
       location: "Hà Nội, Việt Nam",
       content:
-        "Design system documentation thực sự phenomenal! Mọi component đều có usage guidelines chi tiết và accessibility considerations. Design team Grab đã adopt làm standard và workflow improve significantly. Color palette và typography system rất consistent và modern.",
+        "Mình thường không review technical stuff, nhưng design system guide này thực sự helpful. Nó không chỉ show components mà còn explain khi nào dùng cái gì, accessibility guidelines, và cả responsive behavior. Team dev giờ implement design của mình accurate hơn vì có reference cụ thể. Đặc biệt là color system và typography scale rất well-thought, mình đã adapt cho design system của Grab.",
       avatar:
         "https://images.unsplash.com/photo-1487412720507-e7ab37603c6f?w=100&h=100&fit=crop&crop=face",
       rating: 5,
       date: "4 ngày trước",
       verified: true,
-      projectType: "Design System",
+      projectType: "Design System Documentation",
       flag: "🇻🇳",
     },
   ];
