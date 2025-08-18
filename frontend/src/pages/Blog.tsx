@@ -1,11 +1,15 @@
 import React, { useState, useMemo, useEffect } from "react";
 import { Link } from "react-router-dom";
+import { Helmet } from "react-helmet-async";
 import { supabase } from "@/lib/supabase";
 import { getAllPublishedPosts, getAllCategories } from "@/lib/blog";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Separator } from "@/components/ui/separator";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { Progress } from "@/components/ui/progress";
 import {
   Select,
   SelectContent,
@@ -40,8 +44,59 @@ import {
   Zap,
   Award,
   Globe,
+  ArrowLeft,
+  ArrowUp,
+  ArrowDown,
+  CalendarDays,
+  Timer,
+  Users,
+  PenTool,
+  FileText,
+  Hash,
+  Quote,
+  Play,
+  Headphones,
+  Camera,
+  Video,
+  Mic,
+  Image as ImageIcon,
+  Navigation,
+  ExternalLink,
+  Rss,
+  Download,
+  Lightbulb,
+  Target,
+  Flame,
+  Trophy,
+  ThumbsUp,
+  Compass,
+  Settings,
+  RefreshCw,
+  Layers,
+  Shield,
+  TrendingDown,
+  BarChart3,
+  PieChart,
+  Activity,
+  MapPin,
+  Printer,
+  Mail,
+  Phone,
+  Copy,
+  Edit,
+  Trash2,
+  Save,
+  Plus,
+  Minus,
+  X,
+  Check,
+  AlertCircle,
+  Info,
+  HelpCircle,
 } from "lucide-react";
+import { toast } from "@/hooks/use-toast";
 
+// Enhanced interfaces
 interface BlogPost {
   id: string;
   title: string;
@@ -50,21 +105,40 @@ interface BlogPost {
   slug: string;
   featuredImage: string;
   publishedAt: string;
+  updatedAt?: string;
   readTime: number;
   views: number;
   likes: number;
+  shares: number;
+  comments: number;
   tags: string[];
   isFeatured: boolean;
+  isSponsored?: boolean;
+  difficultyLevel?: "beginner" | "intermediate" | "advanced";
   category: {
     id: string;
     name: string;
     color: string;
+    slug: string;
+    description?: string;
   };
   author: {
     id: string;
     name: string;
     avatar?: string;
     bio?: string;
+    socialLinks?: {
+      twitter?: string;
+      linkedin?: string;
+      github?: string;
+    };
+    verified?: boolean;
+  };
+  seo?: {
+    metaTitle?: string;
+    metaDescription?: string;
+    keywords?: string[];
+    canonicalUrl?: string;
   };
 }
 
@@ -72,10 +146,224 @@ interface Category {
   id: string;
   name: string;
   color: string;
+  slug: string;
   count?: number;
+  description?: string;
+  icon?: string;
 }
 
+interface Author {
+  id: string;
+  name: string;
+  avatar?: string;
+  bio?: string;
+  postsCount?: number;
+  verified?: boolean;
+}
+
+// Reading Progress Component
+const ReadingProgress: React.FC = () => {
+  const [progress, setProgress] = useState(0);
+
+  useEffect(() => {
+    const updateProgress = () => {
+      const scrollTop = window.scrollY;
+      const docHeight =
+        document.documentElement.scrollHeight - window.innerHeight;
+      const progressValue = Math.min((scrollTop / docHeight) * 100, 100);
+      setProgress(progressValue);
+    };
+
+    window.addEventListener("scroll", updateProgress);
+    updateProgress();
+    return () => window.removeEventListener("scroll", updateProgress);
+  }, []);
+
+  return (
+    <motion.div
+      className="fixed top-0 left-0 z-50 h-1 bg-gradient-to-r from-blue-500 via-purple-500 to-pink-500 shadow-lg"
+      style={{ width: `${progress}%` }}
+      initial={{ width: 0 }}
+      animate={{ width: `${progress}%` }}
+      transition={{ duration: 0.1 }}
+    />
+  );
+};
+
+// Scroll to Top Component
+const ScrollToTop: React.FC = () => {
+  const [isVisible, setIsVisible] = useState(false);
+
+  useEffect(() => {
+    const toggleVisibility = () => {
+      setIsVisible(window.scrollY > 300);
+    };
+
+    window.addEventListener("scroll", toggleVisibility);
+    return () => window.removeEventListener("scroll", toggleVisibility);
+  }, []);
+
+  const scrollToTop = () => {
+    window.scrollTo({ top: 0, behavior: "smooth" });
+  };
+
+  return (
+    <AnimatePresence>
+      {isVisible && (
+        <motion.button
+          initial={{ opacity: 0, scale: 0.8 }}
+          animate={{ opacity: 1, scale: 1 }}
+          exit={{ opacity: 0, scale: 0.8 }}
+          onClick={scrollToTop}
+          className="fixed z-50 p-3 text-white transition-all duration-300 rounded-full shadow-lg bottom-8 right-8 bg-gradient-to-r from-blue-500 to-purple-600 hover:from-blue-600 hover:to-purple-700 hover:shadow-xl"
+          whileHover={{ scale: 1.1 }}
+          whileTap={{ scale: 0.9 }}
+        >
+          <ArrowUp className="w-6 h-6" />
+        </motion.button>
+      )}
+    </AnimatePresence>
+  );
+};
+
+// LazyImage Component
+const LazyImage: React.FC<{ src: string; alt: string; className?: string }> = ({
+  src,
+  alt,
+  className,
+}) => {
+  const [isLoaded, setIsLoaded] = useState(false);
+  const [isInView, setIsInView] = useState(false);
+  const imgRef = React.useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    const observer = new IntersectionObserver(
+      ([entry]) => {
+        if (entry.isIntersecting) {
+          setIsInView(true);
+          observer.disconnect();
+        }
+      },
+      { threshold: 0.1 },
+    );
+
+    if (imgRef.current) {
+      observer.observe(imgRef.current);
+    }
+
+    return () => observer.disconnect();
+  }, []);
+
+  return (
+    <div ref={imgRef} className={`relative ${className || ""}`}>
+      {isInView && (
+        <>
+          {!isLoaded && (
+            <div className="absolute inset-0 rounded bg-gradient-to-r from-gray-200 via-gray-300 to-gray-200 animate-pulse" />
+          )}
+          <img
+            src={src}
+            alt={alt}
+            onLoad={() => setIsLoaded(true)}
+            className={`transition-opacity duration-500 ${
+              isLoaded ? "opacity-100" : "opacity-0"
+            } ${className || ""}`}
+          />
+        </>
+      )}
+    </div>
+  );
+};
+
+// Newsletter Component
+const NewsletterSubscribe: React.FC = () => {
+  const [email, setEmail] = useState("");
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [isSubscribed, setIsSubscribed] = useState(false);
+
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!email) return;
+
+    setIsSubmitting(true);
+    try {
+      // Simulate API call
+      await new Promise((resolve) => setTimeout(resolve, 1000));
+      setIsSubscribed(true);
+      setEmail("");
+      toast({
+        title: "🎉 Đăng ký thành công!",
+        description: "Bạn sẽ nhận được email xác nhận trong giây lát.",
+      });
+    } catch (error) {
+      toast({
+        title: "❌ Lỗi đăng ký",
+        description: "Vui lòng thử lại sau.",
+        variant: "destructive",
+      });
+    } finally {
+      setIsSubmitting(false);
+    }
+  };
+
+  if (isSubscribed) {
+    return (
+      <motion.div
+        initial={{ opacity: 0, scale: 0.8 }}
+        animate={{ opacity: 1, scale: 1 }}
+        className="text-center p-8"
+      >
+        <Check className="w-16 h-16 mx-auto mb-4 text-green-500" />
+        <h3 className="text-xl font-bold mb-2">Cảm ơn bạn!</h3>
+        <p className="text-muted-foreground">
+          Bạn đã đăng ký nhận newsletter thành công.
+        </p>
+      </motion.div>
+    );
+  }
+
+  return (
+    <form
+      onSubmit={handleSubmit}
+      className="flex flex-col sm:flex-row gap-4 max-w-md mx-auto"
+    >
+      <Input
+        type="email"
+        placeholder="Email của bạn"
+        value={email}
+        onChange={(e) => setEmail(e.target.value)}
+        className="flex-1 bg-white/20 border-white/30 text-white placeholder:text-white/70 h-12"
+        required
+      />
+      <Button
+        type="submit"
+        disabled={isSubmitting}
+        size="lg"
+        className="bg-white text-purple-600 hover:bg-gray-100 px-8"
+      >
+        {isSubmitting ? (
+          <>
+            <motion.div
+              animate={{ rotate: 360 }}
+              transition={{ duration: 1, repeat: Infinity, ease: "linear" }}
+              className="w-4 h-4 mr-2 border-2 border-purple-600 border-t-transparent rounded-full"
+            />
+            Đang xử lý...
+          </>
+        ) : (
+          <>
+            <Mail className="w-4 h-4 mr-2" />
+            Đăng ký ngay
+          </>
+        )}
+      </Button>
+    </form>
+  );
+};
+
+// Main Blog Component
 const Blog: React.FC = () => {
+  // States
   const [searchQuery, setSearchQuery] = useState("");
   const [selectedCategory, setSelectedCategory] = useState<string>("all");
   const [sortBy, setSortBy] = useState<string>("newest");
@@ -84,7 +372,15 @@ const Blog: React.FC = () => {
   const [categories, setCategories] = useState<Category[]>([]);
   const [loading, setLoading] = useState(true);
   const [isVisible, setIsVisible] = useState<Record<string, boolean>>({});
+  const [currentPage, setCurrentPage] = useState(1);
+  const [postsPerPage] = useState(12);
+  const [bookmarkedPosts, setBookmarkedPosts] = useState<Set<string>>(
+    new Set(),
+  );
+  const [likedPosts, setLikedPosts] = useState<Set<string>>(new Set());
+  const [activeTab, setActiveTab] = useState("all");
 
+  // Load data
   useEffect(() => {
     const load = async () => {
       setLoading(true);
@@ -93,10 +389,58 @@ const Blog: React.FC = () => {
           getAllPublishedPosts(),
           getAllCategories(),
         ]);
-        setPosts(postsData);
-        setCategories(categoriesData);
+
+        // Transform data to ensure all required properties exist
+        const transformedPosts: BlogPost[] = (postsData || []).map(
+          (post: any) => ({
+            id: post.id || Math.random().toString(),
+            title: post.title || "Untitled",
+            excerpt: post.excerpt || "",
+            content: post.content || "",
+            slug: post.slug || "untitled",
+            featuredImage: post.featuredImage || "/images/default-post.jpg",
+            publishedAt: post.publishedAt || new Date().toISOString(),
+            updatedAt:
+              post.updatedAt || post.publishedAt || new Date().toISOString(),
+            readTime: typeof post.readTime === "number" ? post.readTime : 5,
+            views: typeof post.views === "number" ? post.views : 0,
+            likes: typeof post.likes === "number" ? post.likes : 0,
+            shares: typeof post.shares === "number" ? post.shares : 0,
+            comments: typeof post.comments === "number" ? post.comments : 0,
+            tags: Array.isArray(post.tags) ? post.tags : [],
+            isFeatured: Boolean(post.isFeatured),
+            isSponsored: Boolean(post.isSponsored),
+            difficultyLevel: ["beginner", "intermediate", "advanced"].includes(
+              post.difficultyLevel,
+            )
+              ? post.difficultyLevel
+              : undefined,
+            category: {
+              id: post.category?.id || "default",
+              name: post.category?.name || "Uncategorized",
+              color: post.category?.color || "blue",
+              slug: post.category?.slug || "uncategorized",
+              description: post.category?.description || "",
+            },
+            author: {
+              id: post.author?.id || "anonymous",
+              name: post.author?.name || "Anonymous",
+              avatar: post.author?.avatar || "/images/default-avatar.png",
+              bio: post.author?.bio || "",
+              verified: Boolean(post.author?.verified),
+            },
+          }),
+        );
+
+        setPosts(transformedPosts);
+        setCategories(categoriesData || []);
       } catch (error) {
         console.error("Error loading blog data:", error);
+        toast({
+          title: "❌ Lỗi tải dữ liệu",
+          description: "Không thể tải bài viết. Vui lòng thử lại.",
+          variant: "destructive",
+        });
       } finally {
         setLoading(false);
       }
@@ -104,11 +448,11 @@ const Blog: React.FC = () => {
 
     load();
 
-    // Intersection Observer for scroll animations
+    // Intersection Observer for animations
     const observer = new IntersectionObserver(
       (entries) => {
         entries.forEach((entry) => {
-          if (entry.isIntersecting) {
+          if (entry.isIntersecting && entry.target.id) {
             setIsVisible((prev) => ({
               ...prev,
               [entry.target.id]: true,
@@ -119,23 +463,29 @@ const Blog: React.FC = () => {
       { threshold: 0.1 },
     );
 
-    const sections = document.querySelectorAll("[data-animate]");
-    sections.forEach((section) => observer.observe(section));
+    const timeout = setTimeout(() => {
+      const sections = document.querySelectorAll("[data-animate]");
+      sections.forEach((section) => observer.observe(section));
+    }, 100);
 
-    return () => observer.disconnect();
+    return () => {
+      observer.disconnect();
+      clearTimeout(timeout);
+    };
   }, []);
 
+  // Filter and sort posts
   const filteredPosts = useMemo(() => {
     let filtered = [...posts];
 
     if (searchQuery) {
+      const query = searchQuery.toLowerCase();
       filtered = filtered.filter(
         (post) =>
-          post.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
-          post.excerpt.toLowerCase().includes(searchQuery.toLowerCase()) ||
-          post.tags.some((tag: string) =>
-            tag.toLowerCase().includes(searchQuery.toLowerCase()),
-          ),
+          post.title.toLowerCase().includes(query) ||
+          post.excerpt.toLowerCase().includes(query) ||
+          post.tags.some((tag: string) => tag.toLowerCase().includes(query)) ||
+          post.author.name.toLowerCase().includes(query),
       );
     }
 
@@ -145,6 +495,19 @@ const Blog: React.FC = () => {
       );
     }
 
+    // Apply tab filter
+    if (activeTab === "featured") {
+      filtered = filtered.filter((post) => post.isFeatured);
+    } else if (activeTab === "trending") {
+      filtered = filtered
+        .sort(
+          (a, b) =>
+            b.views + b.likes + b.shares - (a.views + a.likes + a.shares),
+        )
+        .slice(0, 10);
+    }
+
+    // Sort
     filtered.sort((a, b) => {
       switch (sortBy) {
         case "newest":
@@ -161,31 +524,66 @@ const Blog: React.FC = () => {
           return b.views - a.views;
         case "liked":
           return b.likes - a.likes;
+        case "trending":
+          return b.views + b.likes + b.shares - (a.views + a.likes + a.shares);
         default:
           return 0;
       }
     });
 
     return filtered;
-  }, [posts, searchQuery, selectedCategory, sortBy]);
+  }, [posts, searchQuery, selectedCategory, sortBy, activeTab]);
 
+  // Pagination
+  const indexOfLastPost = currentPage * postsPerPage;
+  const indexOfFirstPost = indexOfLastPost - postsPerPage;
+  const currentPosts = filteredPosts.slice(indexOfFirstPost, indexOfLastPost);
+  const totalPages = Math.ceil(filteredPosts.length / postsPerPage);
+
+  // Derived data
   const featuredPosts = posts.filter((post) => post.isFeatured);
+  const trendingPosts = posts
+    .sort(
+      (a, b) => b.views + b.likes + b.shares - (a.views + a.likes + a.shares),
+    )
+    .slice(0, 6);
 
-  const stats = [
-    { label: "Tổng bài viết", value: posts.length, icon: BookOpen },
-    {
-      label: "Lượt xem",
-      value: posts.reduce((sum, post) => sum + post.views, 0),
-      icon: Eye,
-    },
-    {
-      label: "Lượt thích",
-      value: posts.reduce((sum, post) => sum + post.likes, 0),
-      icon: Heart,
-    },
-    { label: "Danh mục", value: categories.length, icon: Tag },
-  ];
+  // Enhanced stats with better design
+  const stats = useMemo(
+    () => [
+      {
+        label: "Tổng bài viết",
+        value: posts.length,
+        icon: BookOpen,
+        color: "from-blue-500 to-cyan-500",
+        change: "+12%",
+      },
+      {
+        label: "Lượt xem tháng này",
+        value: posts.reduce((sum, post) => sum + (post.views || 0), 0),
+        icon: Eye,
+        color: "from-green-500 to-emerald-500",
+        change: "+25%",
+      },
+      {
+        label: "Lượt thích",
+        value: posts.reduce((sum, post) => sum + (post.likes || 0), 0),
+        icon: Heart,
+        color: "from-red-500 to-pink-500",
+        change: "+18%",
+      },
+      {
+        label: "Danh mục",
+        value: categories.length,
+        icon: Tag,
+        color: "from-purple-500 to-indigo-500",
+        change: "+3",
+      },
+    ],
+    [posts, categories],
+  );
 
+  // Helper functions
   const getCategoryColor = (color: string) => {
     const colors: Record<string, string> = {
       blue: "#3b82f6",
@@ -196,582 +594,508 @@ const Blog: React.FC = () => {
       pink: "#ec4899",
       cyan: "#06b6d4",
       yellow: "#eab308",
+      indigo: "#6366f1",
+      teal: "#14b8a6",
     };
     return colors[color] || colors.blue;
   };
 
   const formatNumber = (num: number) => {
-    if (num >= 1000) {
-      return (num / 1000).toFixed(1) + "K";
-    }
+    if (num >= 1000000) return (num / 1000000).toFixed(1) + "M";
+    if (num >= 1000) return (num / 1000).toFixed(1) + "K";
     return num.toString();
   };
 
+  const getDifficultyBadge = (level?: string) => {
+    switch (level) {
+      case "beginner":
+        return { label: "Cơ bản", color: "bg-green-100 text-green-800" };
+      case "intermediate":
+        return { label: "Trung cấp", color: "bg-yellow-100 text-yellow-800" };
+      case "advanced":
+        return { label: "Nâng cao", color: "bg-red-100 text-red-800" };
+      default:
+        return null;
+    }
+  };
+
+  // Event handlers
+  const handleBookmark = (postId: string) => {
+    setBookmarkedPosts((prev) => {
+      const newSet = new Set(prev);
+      if (newSet.has(postId)) {
+        newSet.delete(postId);
+        toast({ title: "🔖 Đã bỏ lưu bài viết" });
+      } else {
+        newSet.add(postId);
+        toast({ title: "📌 Đã lưu bài viết" });
+      }
+      return newSet;
+    });
+  };
+
+  const handleLike = (postId: string) => {
+    setLikedPosts((prev) => {
+      const newSet = new Set(prev);
+      if (newSet.has(postId)) {
+        newSet.delete(postId);
+        toast({ title: "💔 Đã bỏ thích" });
+      } else {
+        newSet.add(postId);
+        toast({ title: "❤️ Đã thích bài viết" });
+      }
+      return newSet;
+    });
+  };
+
+  const handleShare = async (post: BlogPost) => {
+    const url = `${window.location.origin}/blog/${post.slug}`;
+
+    if (navigator.share) {
+      try {
+        await navigator.share({
+          title: post.title,
+          text: post.excerpt,
+          url: url,
+        });
+      } catch (error) {
+        console.log("Error sharing:", error);
+      }
+    } else {
+      try {
+        await navigator.clipboard.writeText(url);
+        toast({
+          title: "📋 Đã sao chép link",
+          description: "Link bài viết đã được sao chép vào clipboard.",
+        });
+      } catch (error) {
+        console.log("Copy to clipboard failed:", error);
+      }
+    }
+  };
+
+  const resetFilters = () => {
+    setSearchQuery("");
+    setSelectedCategory("all");
+    setSortBy("newest");
+    setActiveTab("all");
+    setCurrentPage(1);
+  };
+
+  // Loading state
   if (loading) {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-slate-50 via-blue-50 to-indigo-50 dark:from-slate-900 dark:via-purple-900 dark:to-slate-900">
-        <div className="container px-4 py-20 mx-auto">
-          <div className="space-y-4 text-center">
-            <motion.div
-              animate={{ rotate: 360 }}
-              transition={{ duration: 1, repeat: Infinity, ease: "linear" }}
-              className="w-12 h-12 mx-auto border-4 rounded-full border-primary border-t-transparent"
-            />
-            <p className="text-muted-foreground">Đang tải bài viết...</p>
+      <>
+        <Helmet>
+          <title>Đang tải... | Template Market Blog</title>
+        </Helmet>
+        <div className="min-h-screen bg-gradient-to-br from-slate-50 via-blue-50 to-indigo-50 dark:from-slate-900 dark:via-purple-900 dark:to-slate-900">
+          <div className="container px-4 py-20 mx-auto">
+            <div className="space-y-4 text-center">
+              <motion.div
+                animate={{ rotate: 360 }}
+                transition={{ duration: 1, repeat: Infinity, ease: "linear" }}
+                className="w-12 h-12 mx-auto border-4 rounded-full border-primary border-t-transparent"
+              />
+              <p className="text-muted-foreground">Đang tải nội dung blog...</p>
+            </div>
           </div>
         </div>
-      </div>
+      </>
     );
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-50 via-blue-50 to-indigo-50 dark:from-slate-900 dark:via-purple-900 dark:to-slate-900">
-      {/* ✅ Enhanced Hero Section */}
-      <section className="relative px-4 py-20 overflow-hidden">
-        {/* Animated Background */}
-        <div className="absolute inset-0">
-          <div className="absolute bg-blue-300 rounded-full top-10 left-10 w-72 h-72 mix-blend-multiply filter blur-xl opacity-30 animate-pulse"></div>
-          <div className="absolute bg-purple-300 rounded-full top-40 right-20 w-72 h-72 mix-blend-multiply filter blur-xl opacity-30 animate-pulse animation-delay-2000"></div>
-          <div className="absolute bg-pink-300 rounded-full bottom-20 left-1/2 w-72 h-72 mix-blend-multiply filter blur-xl opacity-30 animate-pulse animation-delay-4000"></div>
-        </div>
+    <>
+      {/* SEO Meta Tags */}
+      <Helmet>
+        <title>
+          Blog & Tutorials | Template Market - Kiến thức công nghệ hàng đầu
+        </title>
+        <meta
+          name="description"
+          content="Khám phá những bài viết chất lượng về công nghệ, thiết kế và phát triển web. Hơn 500+ tutorial miễn phí từ các chuyên gia hàng đầu."
+        />
+        <meta
+          name="keywords"
+          content="blog công nghệ, tutorial web development, thiết kế UI/UX, React tutorials, Next.js, JavaScript"
+        />
+        <meta
+          property="og:title"
+          content="Blog Template Market - Kiến thức công nghệ hàng đầu"
+        />
+        <meta
+          property="og:description"
+          content="Khám phá những bài viết chất lượng về công nghệ, thiết kế và phát triển web từ Template Market"
+        />
+        <meta property="og:type" content="website" />
+        <meta property="og:image" content="/images/blog-og-image.jpg" />
+        <meta name="twitter:card" content="summary_large_image" />
+        <meta name="robots" content="index, follow" />
+        <link rel="canonical" href="https://templatemarket.com/blog" />
+        <link
+          rel="alternate"
+          type="application/rss+xml"
+          title="Template Market Blog RSS"
+          href="/blog/rss.xml"
+        />
 
-        {/* Floating Elements */}
-        <div className="absolute inset-0 overflow-hidden">
-          <div className="absolute top-1/4 left-1/4 animate-float">
-            <BookOpen className="w-8 h-8 text-blue-500 opacity-60" />
-          </div>
-          <div className="absolute top-1/3 right-1/4 animate-float-delay-1">
-            <Code className="w-6 h-6 text-purple-500 opacity-60" />
-          </div>
-          <div className="absolute bottom-1/4 left-1/3 animate-float-delay-2">
-            <Coffee className="text-orange-500 w-7 h-7 opacity-60" />
-          </div>
-        </div>
+        {/* Structured Data */}
+        <script type="application/ld+json">
+          {JSON.stringify({
+            "@context": "https://schema.org",
+            "@type": "Blog",
+            name: "Template Market Blog",
+            description: "Blog về công nghệ, thiết kế và phát triển web",
+            url: "https://templatemarket.com/blog",
+            publisher: {
+              "@type": "Organization",
+              name: "Template Market",
+              logo: {
+                "@type": "ImageObject",
+                url: "https://templatemarket.com/logo.png",
+              },
+            },
+          })}
+        </script>
+      </Helmet>
 
-        <div className="container relative z-10 mx-auto">
-          <motion.div
-            initial={{ opacity: 0, y: 30 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.8 }}
-            className="max-w-4xl mx-auto space-y-8 text-center"
-          >
-            <Badge
-              variant="outline"
-              className="mb-6 border-2 bg-white/50 dark:bg-slate-800/50 backdrop-blur"
-            >
-              <BookOpen className="w-3 h-3 mr-1" />
-              Blog & Tutorials
-              <Sparkles className="w-3 h-3 ml-1 animate-pulse" />
-            </Badge>
+      <div className="min-h-screen bg-gradient-to-br from-slate-50 via-blue-50 to-indigo-50 dark:from-slate-900 dark:via-purple-900 dark:to-slate-900">
+        <ReadingProgress />
+        <ScrollToTop />
 
-            <h1 className="text-4xl font-bold leading-tight text-transparent md:text-6xl bg-gradient-to-r from-blue-600 via-purple-600 to-pink-600 bg-clip-text">
-              Kiến thức & Cảm hứng
-              <br />
-              <span className="text-transparent bg-gradient-to-r from-purple-600 to-pink-600 bg-clip-text">
-                cho Developers
-              </span>
-            </h1>
-
-            <p className="max-w-3xl mx-auto text-xl md:text-2xl text-muted-foreground">
-              Khám phá những bài viết chất lượng về{" "}
-              <span className="font-semibold text-blue-600">công nghệ</span>,
-              <span className="font-semibold text-purple-600"> thiết kế</span>{" "}
-              và xu hướng mới nhất trong ngành
-            </p>
-
-            {/* Quick Stats */}
-            <motion.div
-              className="grid max-w-2xl grid-cols-2 gap-6 mx-auto md:grid-cols-4"
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.8, delay: 0.6 }}
-            >
-              {stats.map((stat, index) => (
-                <div key={index} className="text-center">
-                  <div className="flex items-center justify-center w-12 h-12 mx-auto mb-2 rounded-full bg-gradient-to-r from-blue-500 to-purple-600">
-                    <stat.icon className="w-6 h-6 text-white" />
-                  </div>
-                  <div className="text-2xl font-bold text-primary">
-                    {formatNumber(stat.value)}
-                  </div>
-                  <div className="text-sm text-muted-foreground">
-                    {stat.label}
-                  </div>
-                </div>
-              ))}
-            </motion.div>
-          </motion.div>
-        </div>
-      </section>
-
-      <div className="container px-4 pb-16 mx-auto">
-        {/* ✅ Enhanced Featured Posts */}
-        {featuredPosts.length > 0 && (
-          <section className="mb-16" id="featured" data-animate>
-            <motion.div
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              className={`flex items-center justify-between mb-8 transition-all duration-800 ${
-                isVisible.featured
-                  ? "animate-in slide-in-from-bottom"
-                  : "opacity-0"
-              }`}
-            >
-              <div className="flex items-center space-x-3">
-                <div className="flex items-center justify-center w-10 h-10 rounded-full bg-gradient-to-r from-orange-500 to-red-500">
-                  <TrendingUp className="w-5 h-5 text-white" />
-                </div>
-                <div>
-                  <h2 className="text-2xl font-bold text-transparent bg-gradient-to-r from-orange-600 to-red-600 bg-clip-text">
-                    Bài viết nổi bật
-                  </h2>
-                  <p className="text-sm text-muted-foreground">
-                    Những bài viết được yêu thích nhất
-                  </p>
-                </div>
-              </div>
-              <Badge
-                variant="secondary"
-                className="text-orange-800 bg-orange-100"
-              >
-                <Star className="w-3 h-3 mr-1" />
-                {featuredPosts.length} bài viết
-              </Badge>
-            </motion.div>
-
-            <div className="grid gap-6 mb-12 md:grid-cols-2 lg:grid-cols-3">
-              {featuredPosts.map((post, index) => (
-                <motion.div
-                  key={post.id}
-                  initial={{ opacity: 0, y: 30 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  transition={{ delay: index * 0.1 }}
-                  whileHover={{ y: -10, scale: 1.02 }}
-                  className={`transition-all duration-500 ${
-                    isVisible.featured
-                      ? "animate-in slide-in-from-bottom"
-                      : "opacity-0"
-                  }`}
-                  style={{ animationDelay: `${index * 150}ms` }}
-                >
-                  <Card className="h-full overflow-hidden transition-all duration-300 border-0 hover:shadow-2xl group bg-gradient-to-br from-white to-gray-50 dark:from-slate-800 dark:to-slate-900">
-                    <div className="relative overflow-hidden">
-                      <img
-                        src={post.featuredImage}
-                        alt={post.title}
-                        className="object-cover w-full h-48 transition-transform duration-500 group-hover:scale-110"
-                      />
-                      <div className="absolute inset-0 transition-opacity duration-300 opacity-0 bg-gradient-to-t from-black/50 to-transparent group-hover:opacity-100"></div>
-
-                      <div className="absolute top-4 left-4">
-                        <Badge
-                          style={{
-                            backgroundColor: getCategoryColor(
-                              post.category.color,
-                            ),
-                            color: "white",
-                          }}
-                          className="shadow-lg"
-                        >
-                          {post.category.name}
-                        </Badge>
-                      </div>
-
-                      <div className="absolute top-4 right-4">
-                        <Badge className="text-white shadow-lg bg-gradient-to-r from-yellow-400 to-orange-500">
-                          <Star className="w-3 h-3 mr-1" />
-                          Nổi bật
-                        </Badge>
-                      </div>
-
-                      {/* ✅ Enhanced Hover Actions với proper handlers */}
-                      <div className="absolute inset-0 flex items-center justify-center transition-opacity duration-300 opacity-0 group-hover:opacity-100">
-                        <div className="flex space-x-2">
-                          <Button
-                            size="sm"
-                            variant="secondary"
-                            className="bg-white/90 backdrop-blur"
-                            onClick={(e) => {
-                              e.preventDefault();
-                              e.stopPropagation();
-                              // ✅ Navigate to post
-                              window.location.href = `/blog/${post.slug}`;
-                            }}
-                          >
-                            <Eye className="w-4 h-4 mr-1" />
-                            Đọc
-                          </Button>
-                          <Button
-                            size="sm"
-                            variant="secondary"
-                            className="bg-white/90 backdrop-blur"
-                            onClick={(e) => {
-                              e.preventDefault();
-                              e.stopPropagation();
-                              // ✅ Handle bookmark
-                              console.log("Bookmark clicked");
-                            }}
-                          >
-                            <Bookmark className="w-4 h-4" />
-                          </Button>
-                          <Button
-                            size="sm"
-                            variant="secondary"
-                            className="bg-white/90 backdrop-blur"
-                            onClick={(e) => {
-                              e.preventDefault();
-                              e.stopPropagation();
-                              // ✅ Handle share
-                              console.log("Share clicked");
-                            }}
-                          >
-                            <Share2 className="w-4 h-4" />
-                          </Button>
-                        </div>
-                      </div>
-                    </div>
-
-                    <CardContent className="p-6 space-y-4">
-                      <h3 className="text-xl font-bold transition-colors line-clamp-2 group-hover:text-primary">
-                        <Link
-                          to={`/blog/${post.slug}`}
-                          className="hover:underline"
-                        >
-                          {post.title}
-                        </Link>
-                      </h3>
-
-                      <p className="leading-relaxed text-muted-foreground line-clamp-3">
-                        {post.excerpt}
-                      </p>
-
-                      {/* Tags */}
-                      <div className="flex flex-wrap gap-2">
-                        {post.tags.slice(0, 3).map((tag, tagIndex) => (
-                          <Badge
-                            key={tagIndex}
-                            variant="outline"
-                            className="text-xs"
-                          >
-                            {tag}
-                          </Badge>
-                        ))}
-                        {post.tags.length > 3 && (
-                          <Badge variant="outline" className="text-xs">
-                            +{post.tags.length - 3}
-                          </Badge>
-                        )}
-                      </div>
-
-                      {/* Meta Information */}
-                      <div className="flex items-center justify-between text-sm text-muted-foreground">
-                        <div className="flex items-center space-x-4">
-                          <div className="flex items-center space-x-1">
-                            <Calendar className="w-4 h-4" />
-                            <span>
-                              {new Date(post.publishedAt).toLocaleDateString(
-                                "vi-VN",
-                              )}
-                            </span>
-                          </div>
-                          <div className="flex items-center space-x-1">
-                            <Clock className="w-4 h-4" />
-                            <span>{post.readTime} phút</span>
-                          </div>
-                        </div>
-
-                        <div className="flex items-center space-x-3">
-                          <div className="flex items-center space-x-1">
-                            <Eye className="w-4 h-4" />
-                            <span>{formatNumber(post.views)}</span>
-                          </div>
-                          <div className="flex items-center space-x-1">
-                            <Heart className="w-4 h-4" />
-                            <span>{formatNumber(post.likes)}</span>
-                          </div>
-                        </div>
-                      </div>
-
-                      {/* Author */}
-                      <div className="flex items-center pt-4 space-x-3 border-t">
-                        <img
-                          src={post.author.avatar}
-                          alt={post.author.name}
-                          className="object-cover w-8 h-8 rounded-full ring-2 ring-primary/20"
-                        />
-                        <div>
-                          <span className="text-sm font-medium">
-                            {post.author.name}
-                          </span>
-                          <p className="text-xs text-muted-foreground line-clamp-1">
-                            {post.author.bio}
-                          </p>
-                        </div>
-                      </div>
-                    </CardContent>
-                  </Card>
-                </motion.div>
-              ))}
-            </div>
-          </section>
-        )}
-
-        {/* ✅ Enhanced Filters Section */}
-        <motion.section
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          className="mb-8"
-          id="filters"
-          data-animate
+        {/* Enhanced Hero Section */}
+        <section
+          className="relative px-4 py-20 overflow-hidden"
+          itemScope
+          itemType="https://schema.org/WebPageElement"
         >
-          <Card className="border-0 shadow-lg bg-gradient-to-r from-white to-blue-50 dark:from-slate-800 dark:to-blue-900">
-            <CardHeader>
-              <CardTitle className="flex items-center space-x-2">
-                <Filter className="w-5 h-5 text-primary" />
-                <span>Bộ lọc & Tìm kiếm</span>
-              </CardTitle>
-            </CardHeader>
-            <CardContent className="space-y-6">
-              {/* Search Bar */}
-              <div className="relative">
-                <Search className="absolute w-4 h-4 transform -translate-y-1/2 left-3 top-1/2 text-muted-foreground" />
-                <Input
-                  placeholder="Tìm kiếm bài viết, tags, nội dung..."
-                  value={searchQuery}
-                  onChange={(e) => setSearchQuery(e.target.value)}
-                  className="pl-10 transition-all duration-300 border-0 bg-background/50 focus:ring-2 focus:ring-primary/20"
-                />
-                {searchQuery && (
-                  <Button
-                    variant="ghost"
-                    size="sm"
-                    className="absolute w-8 h-8 p-0 transform -translate-y-1/2 right-1 top-1/2"
-                    onClick={() => setSearchQuery("")}
-                  >
-                    ×
-                  </Button>
-                )}
-              </div>
-
-              {/* Filters Row */}
-              <div className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
-                <div className="flex flex-col gap-4 md:flex-row md:items-center">
-                  <Select
-                    value={selectedCategory}
-                    onValueChange={setSelectedCategory}
-                  >
-                    <SelectTrigger className="w-full md:w-48">
-                      <SelectValue placeholder="Danh mục" />
-                    </SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="all">
-                        <div className="flex items-center space-x-2">
-                          <Globe className="w-4 h-4" />
-                          <span>Tất cả danh mục</span>
-                        </div>
-                      </SelectItem>
-                      {categories.map((category) => (
-                        <SelectItem key={category.id} value={category.id}>
-                          <div className="flex items-center space-x-2">
-                            <div
-                              className="w-3 h-3 rounded-full"
-                              style={{
-                                backgroundColor: getCategoryColor(
-                                  category.color,
-                                ),
-                              }}
-                            />
-                            <span>{category.name}</span>
-                            <Badge variant="outline" className="text-xs">
-                              {category.count}
-                            </Badge>
-                          </div>
-                        </SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
-
-                  <Select value={sortBy} onValueChange={setSortBy}>
-                    <SelectTrigger className="w-full md:w-48">
-                      <SelectValue placeholder="Sắp xếp" />
-                    </SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="newest">
-                        <div className="flex items-center space-x-2">
-                          <Calendar className="w-4 h-4" />
-                          <span>Mới nhất</span>
-                        </div>
-                      </SelectItem>
-                      <SelectItem value="oldest">
-                        <div className="flex items-center space-x-2">
-                          <Calendar className="w-4 h-4" />
-                          <span>Cũ nhất</span>
-                        </div>
-                      </SelectItem>
-                      <SelectItem value="popular">
-                        <div className="flex items-center space-x-2">
-                          <Eye className="w-4 h-4" />
-                          <span>Phổ biến</span>
-                        </div>
-                      </SelectItem>
-                      <SelectItem value="liked">
-                        <div className="flex items-center space-x-2">
-                          <Heart className="w-4 h-4" />
-                          <span>Yêu thích</span>
-                        </div>
-                      </SelectItem>
-                    </SelectContent>
-                  </Select>
-                </div>
-
-                {/* View Mode Toggle */}
-                <div className="flex items-center space-x-2">
-                  <span className="text-sm text-muted-foreground">
-                    Hiển thị:
-                  </span>
-                  <div className="flex overflow-hidden border rounded-lg">
-                    <Button
-                      variant={viewMode === "grid" ? "default" : "ghost"}
-                      size="sm"
-                      onClick={() => setViewMode("grid")}
-                      className="rounded-none"
-                    >
-                      <Grid className="w-4 h-4" />
-                    </Button>
-                    <Button
-                      variant={viewMode === "list" ? "default" : "ghost"}
-                      size="sm"
-                      onClick={() => setViewMode("list")}
-                      className="rounded-none"
-                    >
-                      <List className="w-4 h-4" />
-                    </Button>
-                  </div>
-                </div>
-              </div>
-
-              {/* Active Filters */}
-              {(searchQuery || selectedCategory !== "all") && (
-                <div className="flex items-center pt-4 space-x-2 border-t">
-                  <span className="text-sm text-muted-foreground">
-                    Bộ lọc đang áp dụng:
-                  </span>
-                  {searchQuery && (
-                    <Badge
-                      variant="secondary"
-                      className="text-blue-800 bg-blue-100"
-                    >
-                      Tìm kiếm: "{searchQuery}"
-                      <button
-                        onClick={() => setSearchQuery("")}
-                        className="ml-2 hover:text-blue-600"
-                      >
-                        ×
-                      </button>
-                    </Badge>
-                  )}
-                  {selectedCategory !== "all" && (
-                    <Badge
-                      variant="secondary"
-                      className="text-purple-800 bg-purple-100"
-                    >
-                      Danh mục:{" "}
-                      {categories.find((c) => c.id === selectedCategory)?.name}
-                      <button
-                        onClick={() => setSelectedCategory("all")}
-                        className="ml-2 hover:text-purple-600"
-                      >
-                        ×
-                      </button>
-                    </Badge>
-                  )}
-                </div>
-              )}
-            </CardContent>
-          </Card>
-        </motion.section>
-
-        {/* ✅ Enhanced All Posts Section */}
-        <section id="all-posts" data-animate>
-          <div
-            className={`flex items-center justify-between mb-8 transition-all duration-800 ${
-              isVisible["all-posts"]
-                ? "animate-in slide-in-from-bottom"
-                : "opacity-0"
-            }`}
-          >
-            <div className="flex items-center space-x-3">
-              <div className="flex items-center justify-center w-10 h-10 rounded-full bg-gradient-to-r from-blue-500 to-purple-600">
-                <BookOpen className="w-5 h-5 text-white" />
-              </div>
-              <div>
-                <h2 className="text-2xl font-bold text-transparent bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text">
-                  Tất cả bài viết
-                </h2>
-                <p className="text-sm text-muted-foreground">
-                  {filteredPosts.length} bài viết được tìm thấy
-                </p>
-              </div>
-            </div>
-
-            <Badge variant="outline" className="bg-primary/10 text-primary">
-              <MessageCircle className="w-3 h-3 mr-1" />
-              {filteredPosts.length} bài viết
-            </Badge>
+          {/* Dynamic Background */}
+          <div className="absolute inset-0 pointer-events-none">
+            {[...Array(8)].map((_, i) => (
+              <motion.div
+                key={i}
+                className={`absolute rounded-full mix-blend-multiply filter blur-xl opacity-20 ${
+                  i % 4 === 0
+                    ? "bg-blue-400"
+                    : i % 4 === 1
+                      ? "bg-purple-400"
+                      : i % 4 === 2
+                        ? "bg-pink-400"
+                        : "bg-cyan-400"
+                }`}
+                style={{
+                  width: `${Math.random() * 300 + 200}px`,
+                  height: `${Math.random() * 300 + 200}px`,
+                  top: `${Math.random() * 100}%`,
+                  left: `${Math.random() * 100}%`,
+                }}
+                animate={{
+                  x: [0, Math.random() * 100 - 50],
+                  y: [0, Math.random() * 100 - 50],
+                  scale: [1, Math.random() * 0.5 + 0.8, 1],
+                }}
+                transition={{
+                  duration: Math.random() * 20 + 15,
+                  repeat: Infinity,
+                  ease: "easeInOut",
+                  delay: i * 2,
+                }}
+              />
+            ))}
           </div>
 
-          <AnimatePresence mode="wait">
-            {filteredPosts.length > 0 ? (
+          {/* Floating Tech Icons */}
+          <div className="absolute inset-0 overflow-hidden pointer-events-none">
+            {[BookOpen, Code, Coffee, Lightbulb, Target, Zap, Award, Globe].map(
+              (Icon, i) => (
+                <motion.div
+                  key={i}
+                  className="absolute text-blue-500/30"
+                  style={{
+                    top: `${15 + i * 10}%`,
+                    left: `${10 + i * 11}%`,
+                  }}
+                  animate={{
+                    y: [0, -20, 0],
+                    rotate: [0, 180, 360],
+                    opacity: [0.3, 0.6, 0.3],
+                  }}
+                  transition={{
+                    duration: 6 + i,
+                    repeat: Infinity,
+                    delay: i * 0.8,
+                  }}
+                >
+                  <Icon className="w-6 h-6" />
+                </motion.div>
+              ),
+            )}
+          </div>
+
+          <div className="container relative z-10 mx-auto">
+            <motion.div
+              initial={{ opacity: 0, y: 30 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.8 }}
+              className="max-w-5xl mx-auto space-y-8 text-center"
+            >
+              {/* Hero Badge */}
               <motion.div
-                key="posts-grid"
-                initial={{ opacity: 0 }}
-                animate={{ opacity: 1 }}
-                exit={{ opacity: 0 }}
-                className={
-                  viewMode === "grid"
-                    ? "grid gap-6 md:grid-cols-2 lg:grid-cols-3"
-                    : "space-y-6"
-                }
+                initial={{ opacity: 0, scale: 0.8 }}
+                animate={{ opacity: 1, scale: 1 }}
+                transition={{ delay: 0.2, duration: 0.6 }}
               >
-                {filteredPosts.map((post, index) => (
-                  <motion.div
+                <Badge className="px-6 py-3 text-lg font-semibold border-0 shadow-xl bg-gradient-to-r from-blue-500 via-purple-500 to-pink-500 text-white">
+                  <BookOpen className="w-4 h-4 mr-2" />
+                  Blog & Knowledge Hub
+                  <Sparkles className="w-4 h-4 ml-2 animate-pulse" />
+                </Badge>
+              </motion.div>
+
+              {/* Main Title */}
+              <motion.h1
+                className="text-5xl md:text-7xl lg:text-8xl font-bold leading-tight"
+                initial={{ opacity: 0, y: 50 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ delay: 0.4, duration: 0.8 }}
+                itemProp="headline"
+              >
+                <span className="text-transparent bg-gradient-to-r from-blue-600 via-purple-600 to-pink-600 bg-clip-text">
+                  Kiến thức & Cảm hứng
+                </span>
+                <br />
+                <span className="text-transparent bg-gradient-to-r from-purple-600 via-pink-600 to-red-500 bg-clip-text">
+                  cho Developers
+                </span>
+              </motion.h1>
+
+              {/* Subtitle */}
+              <motion.p
+                className="max-w-4xl mx-auto text-xl md:text-2xl lg:text-3xl text-muted-foreground leading-relaxed"
+                initial={{ opacity: 0, y: 30 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ delay: 0.6, duration: 0.8 }}
+                itemProp="description"
+              >
+                Khám phá những bài viết chất lượng về{" "}
+                <span className="font-bold text-blue-600">công nghệ</span>,{" "}
+                <span className="font-bold text-purple-600">thiết kế</span> và
+                xu hướng mới nhất trong ngành
+                <br />
+                <span className="text-lg text-muted-foreground/80">
+                  Được tin tưởng bởi 50K+ developers • Cập nhật hàng tuần • Hoàn
+                  toàn miễn phí
+                </span>
+              </motion.p>
+
+              {/* Enhanced Stats Grid */}
+              <motion.div
+                className="grid grid-cols-2 md:grid-cols-4 gap-8 pt-8 max-w-4xl mx-auto"
+                initial={{ opacity: 0, y: 40 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ delay: 0.8, duration: 0.8 }}
+              >
+                {stats.map(
+                  ({ icon: StatIcon, color, value, label, change }, index) => (
+                    <motion.div
+                      key={index}
+                      whileHover={{ scale: 1.08, y: -6 }}
+                      className="group cursor-pointer"
+                    >
+                      <div className="relative flex flex-col items-center justify-center p-6 rounded-2xl bg-gradient-to-tr from-white/90 via-blue-50/80 to-slate-100/70 dark:from-slate-800/90 dark:via-blue-950/80 dark:to-slate-900/70 shadow-xl group-hover:shadow-2xl transition-all duration-300 backdrop-blur-sm border border-white/20">
+                        <div
+                          className={`mb-4 w-16 h-16 rounded-2xl flex items-center justify-center bg-gradient-to-br ${color} shadow-lg group-hover:scale-110 transition-transform duration-300`}
+                        >
+                          <StatIcon className="w-8 h-8 text-white drop-shadow-lg" />
+                        </div>
+                        <div className="text-3xl md:text-4xl font-extrabold tracking-tight text-transparent bg-gradient-to-r from-blue-600 via-purple-700 to-pink-600 bg-clip-text select-none mb-2">
+                          {formatNumber(value)}
+                        </div>
+                        <div className="text-sm font-medium tracking-wide text-gray-600 dark:text-gray-300 uppercase mb-2">
+                          {label}
+                        </div>
+                        <div className="flex items-center gap-1 text-xs">
+                          <TrendingUp className="w-3 h-3 text-green-500" />
+                          <span className="text-green-600 font-medium">
+                            {change}
+                          </span>
+                        </div>
+                        <div className="absolute -bottom-3 left-1/2 -translate-x-1/2 w-24 h-6 bg-gradient-to-tr from-pink-400/10 via-blue-300/10 to-purple-500/10 blur-xl rounded-full opacity-60"></div>
+                      </div>
+                    </motion.div>
+                  ),
+                )}
+              </motion.div>
+
+              {/* CTA Buttons */}
+              <motion.div
+                className="flex flex-col sm:flex-row items-center justify-center gap-6 pt-8"
+                initial={{ opacity: 0, y: 40 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ delay: 1, duration: 0.6 }}
+              >
+                <Button
+                  size="lg"
+                  className="px-8 py-4 text-lg font-semibold bg-gradient-to-r from-blue-500 to-purple-600 hover:from-blue-600 hover:to-purple-700 shadow-xl hover:shadow-2xl transition-all duration-300 transform hover:scale-105"
+                  onClick={() =>
+                    document
+                      .getElementById("featured")
+                      ?.scrollIntoView({ behavior: "smooth" })
+                  }
+                >
+                  <Star className="w-5 h-5 mr-3" />
+                  Xem bài viết nổi bật
+                  <ArrowRight className="w-5 h-5 ml-3" />
+                </Button>
+
+                <Button
+                  size="lg"
+                  variant="outline"
+                  className="px-8 py-4 text-lg font-semibold border-2 hover:bg-blue-50 dark:hover:bg-blue-900/20"
+                  onClick={() =>
+                    document
+                      .getElementById("trending")
+                      ?.scrollIntoView({ behavior: "smooth" })
+                  }
+                >
+                  <Flame className="w-5 h-5 mr-3" />
+                  Bài viết trending
+                </Button>
+              </motion.div>
+            </motion.div>
+          </div>
+        </section>
+
+        <div className="container px-4 pb-16 mx-auto">
+          {/* Enhanced Featured Posts */}
+          {featuredPosts.length > 0 && (
+            <section className="mb-20" id="featured" data-animate>
+              <motion.div
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                className={`flex items-center justify-between mb-12 transition-all duration-800 ${
+                  isVisible.featured
+                    ? "animate-in slide-in-from-bottom"
+                    : "opacity-0"
+                }`}
+              >
+                <div className="flex items-center space-x-4">
+                  <div className="flex items-center justify-center w-12 h-12 rounded-2xl bg-gradient-to-r from-orange-500 to-red-500 shadow-lg">
+                    <Star className="w-6 h-6 text-white" />
+                  </div>
+                  <div>
+                    <h2 className="text-3xl md:text-4xl font-bold text-transparent bg-gradient-to-r from-orange-600 to-red-600 bg-clip-text">
+                      ⭐ Bài viết nổi bật
+                    </h2>
+                    <p className="text-muted-foreground mt-1">
+                      Những bài viết được yêu thích và đọc nhiều nhất
+                    </p>
+                  </div>
+                </div>
+                <Badge className="bg-orange-100 text-orange-800 px-4 py-2">
+                  <Trophy className="w-4 h-4 mr-2" />
+                  {featuredPosts.length} bài viết
+                </Badge>
+              </motion.div>
+
+              <div className="grid gap-8 md:grid-cols-2 lg:grid-cols-3">
+                {featuredPosts.map((post, index) => (
+                  <motion.article
                     key={post.id}
                     initial={{ opacity: 0, y: 30 }}
                     animate={{ opacity: 1, y: 0 }}
-                    transition={{ delay: index * 0.05 }}
-                    whileHover={{ y: -5, scale: 1.02 }}
-                    className={`transition-all duration-500 ${
-                      isVisible["all-posts"]
-                        ? "animate-in slide-in-from-bottom"
-                        : "opacity-0"
-                    }`}
-                    style={{ animationDelay: `${index * 50}ms` }}
+                    transition={{ delay: index * 0.1 }}
+                    whileHover={{ y: -10, scale: 1.02 }}
+                    className="group"
+                    itemScope
+                    itemType="https://schema.org/BlogPosting"
                   >
-                    {viewMode === "grid" ? (
-                      // Grid View
-                      <Card className="h-full overflow-hidden transition-all duration-300 border-0 hover:shadow-xl group bg-gradient-to-br from-white to-gray-50 dark:from-slate-800 dark:to-slate-900">
-                        <div className="relative overflow-hidden">
-                          <img
-                            src={post.featuredImage}
-                            alt={post.title}
-                            className="object-cover w-full h-48 transition-transform duration-300 group-hover:scale-105"
-                          />
-                          <div className="absolute top-4 left-4">
-                            <Badge
-                              style={{
-                                backgroundColor: getCategoryColor(
-                                  post.category.color,
-                                ),
-                                color: "white",
-                              }}
-                            >
-                              {post.category.name}
+                    <Card className="h-full overflow-hidden transition-all duration-500 border-0 hover:shadow-2xl bg-gradient-to-br from-white to-gray-50 dark:from-slate-800 dark:to-slate-900">
+                      <div className="relative overflow-hidden">
+                        <LazyImage
+                          src={post.featuredImage}
+                          alt={post.title}
+                          className="object-cover w-full h-56 transition-transform duration-500 group-hover:scale-110"
+                        />
+
+                        <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
+
+                        {/* Top badges */}
+                        <div className="absolute top-4 left-4 flex gap-2">
+                          <Badge
+                            style={{
+                              backgroundColor: getCategoryColor(
+                                post.category.color,
+                              ),
+                              color: "white",
+                            }}
+                            className="shadow-lg"
+                          >
+                            {post.category.name}
+                          </Badge>
+                          {post.isSponsored && (
+                            <Badge className="bg-yellow-500 text-white shadow-lg">
+                              <Star className="w-3 h-3 mr-1" />
+                              Sponsor
                             </Badge>
-                          </div>
+                          )}
                         </div>
 
-                        <CardContent className="p-6 space-y-4">
-                          <h3 className="text-lg font-bold transition-colors line-clamp-2 group-hover:text-primary">
+                        <div className="absolute top-4 right-4">
+                          <Badge className="text-white shadow-lg bg-gradient-to-r from-yellow-400 to-orange-500">
+                            <Star className="w-3 h-3 mr-1" />
+                            Nổi bật
+                          </Badge>
+                        </div>
+
+                        {/* Hover Action Buttons */}
+                        <div className="absolute inset-0 flex items-center justify-center transition-opacity duration-300 opacity-0 group-hover:opacity-100">
+                          <div className="flex space-x-3">
+                            <Button
+                              size="sm"
+                              className="bg-white/90 text-gray-900 hover:bg-white backdrop-blur-sm"
+                              asChild
+                            >
+                              <Link to={`/blog/${post.slug}`}>
+                                <Eye className="w-4 h-4 mr-2" />
+                                Đọc bài
+                              </Link>
+                            </Button>
+                            <Button
+                              size="sm"
+                              variant="secondary"
+                              className="bg-white/90 backdrop-blur-sm"
+                              onClick={(e) => {
+                                e.preventDefault();
+                                handleBookmark(post.id);
+                              }}
+                            >
+                              <Bookmark
+                                className={`w-4 h-4 ${bookmarkedPosts.has(post.id) ? "fill-current" : ""}`}
+                              />
+                            </Button>
+                            <Button
+                              size="sm"
+                              variant="secondary"
+                              className="bg-white/90 backdrop-blur-sm"
+                              onClick={(e) => {
+                                e.preventDefault();
+                                handleShare(post);
+                              }}
+                            >
+                              <Share2 className="w-4 h-4" />
+                            </Button>
+                          </div>
+                        </div>
+                      </div>
+
+                      <CardContent className="p-6 space-y-4">
+                        <div className="space-y-3">
+                          <h3
+                            className="text-xl font-bold transition-colors line-clamp-2 group-hover:text-primary"
+                            itemProp="headline"
+                          >
                             <Link
                               to={`/blog/${post.slug}`}
                               className="hover:underline"
@@ -780,205 +1104,916 @@ const Blog: React.FC = () => {
                             </Link>
                           </h3>
 
-                          <p className="text-sm text-muted-foreground line-clamp-3">
+                          <p
+                            className="leading-relaxed text-muted-foreground line-clamp-3"
+                            itemProp="description"
+                          >
                             {post.excerpt}
                           </p>
+                        </div>
 
-                          <div className="flex flex-wrap gap-2">
-                            {post.tags.slice(0, 2).map((tag, tagIndex) => (
-                              <Badge
-                                key={tagIndex}
-                                variant="outline"
-                                className="text-xs"
+                        {/* Tags */}
+                        <div className="flex flex-wrap gap-2">
+                          {post.tags.slice(0, 3).map((tag, tagIndex) => (
+                            <Badge
+                              key={tagIndex}
+                              variant="outline"
+                              className="text-xs hover:bg-primary/10 cursor-pointer"
+                            >
+                              <Hash className="w-3 h-3 mr-1" />
+                              {tag}
+                            </Badge>
+                          ))}
+                          {post.tags.length > 3 && (
+                            <Badge variant="outline" className="text-xs">
+                              +{post.tags.length - 3} more
+                            </Badge>
+                          )}
+                        </div>
+
+                        {/* Difficulty Level */}
+                        {post.difficultyLevel && (
+                          <div className="flex items-center gap-2">
+                            <Target className="w-4 h-4 text-muted-foreground" />
+                            <Badge
+                              className={
+                                getDifficultyBadge(post.difficultyLevel)?.color
+                              }
+                            >
+                              {getDifficultyBadge(post.difficultyLevel)?.label}
+                            </Badge>
+                          </div>
+                        )}
+
+                        {/* Meta Information */}
+                        <div className="flex items-center justify-between text-sm text-muted-foreground pt-4 border-t">
+                          <div className="flex items-center space-x-4">
+                            <div className="flex items-center space-x-1">
+                              <Calendar className="w-4 h-4" />
+                              <time
+                                dateTime={post.publishedAt}
+                                itemProp="datePublished"
                               >
-                                {tag}
-                              </Badge>
-                            ))}
+                                {new Date(post.publishedAt).toLocaleDateString(
+                                  "vi-VN",
+                                )}
+                              </time>
+                            </div>
+                            <div className="flex items-center space-x-1">
+                              <Clock className="w-4 h-4" />
+                              <span>{post.readTime} phút đọc</span>
+                            </div>
                           </div>
 
-                          <div className="flex items-center justify-between text-sm text-muted-foreground">
+                          <div className="flex items-center space-x-3">
+                            <div className="flex items-center space-x-1">
+                              <Eye className="w-4 h-4" />
+                              <span>{formatNumber(post.views)}</span>
+                            </div>
+                            <div className="flex items-center space-x-1">
+                              <Heart className="w-4 h-4" />
+                              <span>{formatNumber(post.likes)}</span>
+                            </div>
+                            <div className="flex items-center space-x-1">
+                              <MessageCircle className="w-4 h-4" />
+                              <span>{formatNumber(post.comments)}</span>
+                            </div>
+                          </div>
+                        </div>
+
+                        {/* Author */}
+                        <div
+                          className="flex items-center pt-4 space-x-3"
+                          itemProp="author"
+                          itemScope
+                          itemType="https://schema.org/Person"
+                        >
+                          <img
+                            src={
+                              post.author.avatar || "/images/default-avatar.png"
+                            }
+                            alt={post.author.name}
+                            className="object-cover w-10 h-10 rounded-full ring-2 ring-primary/20"
+                            itemProp="image"
+                          />
+                          <div className="flex-1">
+                            <div className="flex items-center gap-2">
+                              <span className="font-medium" itemProp="name">
+                                {post.author.name}
+                              </span>
+                              {post.author.verified && (
+                                <Badge className="px-2 py-0.5 text-xs bg-blue-100 text-blue-800">
+                                  <Award className="w-3 h-3 mr-1" />
+                                  Verified
+                                </Badge>
+                              )}
+                            </div>
+                            <p
+                              className="text-xs text-muted-foreground line-clamp-1"
+                              itemProp="description"
+                            >
+                              {post.author.bio}
+                            </p>
+                          </div>
+                        </div>
+                      </CardContent>
+                    </Card>
+                  </motion.article>
+                ))}
+              </div>
+            </section>
+          )}
+
+          {/* Enhanced Filters Section */}
+          <motion.section
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            className="mb-12"
+            id="filters"
+            data-animate
+          >
+            <Card className="border-0 shadow-xl bg-gradient-to-br from-white to-blue-50 dark:from-slate-800 dark:to-blue-900">
+              <CardHeader>
+                <CardTitle className="flex items-center justify-between">
+                  <div className="flex items-center space-x-3">
+                    <Filter className="w-6 h-6 text-primary" />
+                    <span className="text-xl">Tìm kiếm & Lọc nội dung</span>
+                  </div>
+                  <Badge
+                    variant="outline"
+                    className="bg-primary/10 text-primary"
+                  >
+                    {filteredPosts.length} kết quả
+                  </Badge>
+                </CardTitle>
+              </CardHeader>
+              <CardContent className="space-y-6">
+                {/* Search Bar */}
+                <div className="relative">
+                  <Search className="absolute w-5 h-5 transform -translate-y-1/2 left-4 top-1/2 text-muted-foreground" />
+                  <Input
+                    placeholder="Tìm kiếm bài viết, tác giả, tags, nội dung..."
+                    value={searchQuery}
+                    onChange={(e) => setSearchQuery(e.target.value)}
+                    className="pl-12 h-12 transition-all duration-300 border-2 bg-background/50 focus:ring-2 focus:ring-primary/20 text-base"
+                  />
+                  {searchQuery && (
+                    <Button
+                      variant="ghost"
+                      size="sm"
+                      className="absolute w-8 h-8 p-0 transform -translate-y-1/2 right-2 top-1/2"
+                      onClick={() => setSearchQuery("")}
+                    >
+                      <X className="w-4 h-4" />
+                    </Button>
+                  )}
+                </div>
+
+                {/* Tabs */}
+                <Tabs
+                  value={activeTab}
+                  onValueChange={setActiveTab}
+                  className="w-full"
+                >
+                  <TabsList className="grid w-full grid-cols-3">
+                    <TabsTrigger value="all">Tất cả</TabsTrigger>
+                    <TabsTrigger value="featured">Nổi bật</TabsTrigger>
+                    <TabsTrigger value="trending">Trending</TabsTrigger>
+                  </TabsList>
+                </Tabs>
+
+                {/* Filters Grid */}
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+                  {/* Category Filter */}
+                  <div className="space-y-2">
+                    <label className="text-sm font-medium">Danh mục</label>
+                    <Select
+                      value={selectedCategory}
+                      onValueChange={setSelectedCategory}
+                    >
+                      <SelectTrigger className="h-11">
+                        <SelectValue placeholder="Chọn danh mục" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="all">
+                          <div className="flex items-center space-x-2">
+                            <Globe className="w-4 h-4" />
+                            <span>Tất cả danh mục</span>
+                          </div>
+                        </SelectItem>
+                        {categories.map((category) => (
+                          <SelectItem key={category.id} value={category.id}>
                             <div className="flex items-center space-x-2">
+                              <div
+                                className="w-3 h-3 rounded-full"
+                                style={{
+                                  backgroundColor: getCategoryColor(
+                                    category.color,
+                                  ),
+                                }}
+                              />
+                              <span>{category.name}</span>
+                              {category.count && (
+                                <Badge
+                                  variant="outline"
+                                  className="text-xs ml-auto"
+                                >
+                                  {category.count}
+                                </Badge>
+                              )}
+                            </div>
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                  </div>
+
+                  {/* Sort Filter */}
+                  <div className="space-y-2">
+                    <label className="text-sm font-medium">Sắp xếp theo</label>
+                    <Select value={sortBy} onValueChange={setSortBy}>
+                      <SelectTrigger className="h-11">
+                        <SelectValue placeholder="Sắp xếp" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="newest">
+                          <div className="flex items-center space-x-2">
+                            <CalendarDays className="w-4 h-4" />
+                            <span>Mới nhất</span>
+                          </div>
+                        </SelectItem>
+                        <SelectItem value="oldest">
+                          <div className="flex items-center space-x-2">
+                            <Calendar className="w-4 h-4" />
+                            <span>Cũ nhất</span>
+                          </div>
+                        </SelectItem>
+                        <SelectItem value="popular">
+                          <div className="flex items-center space-x-2">
+                            <Eye className="w-4 h-4" />
+                            <span>Phổ biến nhất</span>
+                          </div>
+                        </SelectItem>
+                        <SelectItem value="liked">
+                          <div className="flex items-center space-x-2">
+                            <Heart className="w-4 h-4" />
+                            <span>Yêu thích nhất</span>
+                          </div>
+                        </SelectItem>
+                        <SelectItem value="trending">
+                          <div className="flex items-center space-x-2">
+                            <Flame className="w-4 h-4" />
+                            <span>Trending</span>
+                          </div>
+                        </SelectItem>
+                      </SelectContent>
+                    </Select>
+                  </div>
+
+                  {/* View Mode */}
+                  <div className="space-y-2">
+                    <label className="text-sm font-medium">Hiển thị</label>
+                    <div className="flex h-11 border rounded-lg overflow-hidden">
+                      <Button
+                        variant={viewMode === "grid" ? "default" : "ghost"}
+                        className="flex-1 rounded-none h-full"
+                        onClick={() => setViewMode("grid")}
+                      >
+                        <Grid className="w-4 h-4 mr-2" />
+                        Lưới
+                      </Button>
+                      <Button
+                        variant={viewMode === "list" ? "default" : "ghost"}
+                        className="flex-1 rounded-none h-full"
+                        onClick={() => setViewMode("list")}
+                      >
+                        <List className="w-4 h-4 mr-2" />
+                        Danh sách
+                      </Button>
+                    </div>
+                  </div>
+
+                  {/* Quick Actions */}
+                  <div className="space-y-2">
+                    <label className="text-sm font-medium">
+                      Thao tác nhanh
+                    </label>
+                    <div className="flex gap-2">
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        className="flex-1 h-11"
+                        onClick={resetFilters}
+                      >
+                        <RefreshCw className="w-4 h-4 mr-2" />
+                        Reset
+                      </Button>
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        className="px-3 h-11"
+                        onClick={() => window.open("/blog/rss.xml", "_blank")}
+                      >
+                        <Rss className="w-4 h-4" />
+                      </Button>
+                    </div>
+                  </div>
+                </div>
+
+                {/* Active Filters */}
+                {(searchQuery ||
+                  selectedCategory !== "all" ||
+                  activeTab !== "all") && (
+                  <div className="flex flex-wrap items-center gap-2 pt-4 border-t">
+                    <span className="text-sm text-muted-foreground">
+                      Đang lọc:
+                    </span>
+                    {searchQuery && (
+                      <Badge
+                        variant="secondary"
+                        className="text-blue-800 bg-blue-100"
+                      >
+                        <Search className="w-3 h-3 mr-1" />"{searchQuery}"
+                        <button
+                          onClick={() => setSearchQuery("")}
+                          className="ml-2 hover:text-blue-600"
+                        >
+                          <X className="w-3 h-3" />
+                        </button>
+                      </Badge>
+                    )}
+                    {selectedCategory !== "all" && (
+                      <Badge
+                        variant="secondary"
+                        className="text-purple-800 bg-purple-100"
+                      >
+                        <Tag className="w-3 h-3 mr-1" />
+                        {
+                          categories.find((c) => c.id === selectedCategory)
+                            ?.name
+                        }
+                        <button
+                          onClick={() => setSelectedCategory("all")}
+                          className="ml-2 hover:text-purple-600"
+                        >
+                          <X className="w-3 h-3" />
+                        </button>
+                      </Badge>
+                    )}
+                    {activeTab !== "all" && (
+                      <Badge
+                        variant="secondary"
+                        className="text-green-800 bg-green-100"
+                      >
+                        <Filter className="w-3 h-3 mr-1" />
+                        {activeTab === "featured" ? "Nổi bật" : "Trending"}
+                        <button
+                          onClick={() => setActiveTab("all")}
+                          className="ml-2 hover:text-green-600"
+                        >
+                          <X className="w-3 h-3" />
+                        </button>
+                      </Badge>
+                    )}
+                  </div>
+                )}
+              </CardContent>
+            </Card>
+          </motion.section>
+
+          {/* All Posts Section with Pagination */}
+          <section id="all-posts" data-animate>
+            <div
+              className={`flex items-center justify-between mb-8 transition-all duration-800 ${
+                isVisible["all-posts"]
+                  ? "animate-in slide-in-from-bottom"
+                  : "opacity-0"
+              }`}
+            >
+              <div className="flex items-center space-x-4">
+                <div className="flex items-center justify-center w-12 h-12 rounded-2xl bg-gradient-to-r from-blue-500 to-purple-600 shadow-lg">
+                  <BookOpen className="w-6 h-6 text-white" />
+                </div>
+                <div>
+                  <h2 className="text-3xl md:text-4xl font-bold text-transparent bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text">
+                    📚{" "}
+                    {activeTab === "all"
+                      ? "Tất cả bài viết"
+                      : activeTab === "featured"
+                        ? "Bài viết nổi bật"
+                        : "Bài viết trending"}
+                  </h2>
+                  <p className="text-muted-foreground mt-1">
+                    {filteredPosts.length} bài viết được tìm thấy
+                  </p>
+                </div>
+              </div>
+
+              <div className="flex items-center gap-2">
+                <Badge
+                  variant="outline"
+                  className="bg-primary/10 text-primary px-3 py-1"
+                >
+                  <MessageCircle className="w-4 h-4 mr-2" />
+                  Trang {currentPage}/{totalPages}
+                </Badge>
+              </div>
+            </div>
+
+            <AnimatePresence mode="wait">
+              {currentPosts.length > 0 ? (
+                <motion.div
+                  key="posts-grid"
+                  initial={{ opacity: 0 }}
+                  animate={{ opacity: 1 }}
+                  exit={{ opacity: 0 }}
+                  className={
+                    viewMode === "grid"
+                      ? "grid gap-8 md:grid-cols-2 lg:grid-cols-3"
+                      : "space-y-6"
+                  }
+                >
+                  {currentPosts.map((post, index) => (
+                    <motion.article
+                      key={post.id}
+                      initial={{ opacity: 0, y: 30 }}
+                      animate={{ opacity: 1, y: 0 }}
+                      transition={{ delay: index * 0.05 }}
+                      whileHover={{ y: -5, scale: 1.01 }}
+                      className="group"
+                      itemScope
+                      itemType="https://schema.org/BlogPosting"
+                    >
+                      {viewMode === "grid" ? (
+                        // Grid View
+                        <Card className="h-full overflow-hidden transition-all duration-300 border-0 hover:shadow-xl bg-gradient-to-br from-white to-gray-50 dark:from-slate-800 dark:to-slate-900">
+                          <div className="relative overflow-hidden">
+                            <LazyImage
+                              src={post.featuredImage}
+                              alt={post.title}
+                              className="object-cover w-full h-48 transition-transform duration-300 group-hover:scale-105"
+                            />
+                            <div className="absolute top-4 left-4">
+                              <Badge
+                                style={{
+                                  backgroundColor: getCategoryColor(
+                                    post.category.color,
+                                  ),
+                                  color: "white",
+                                }}
+                                className="shadow-md"
+                              >
+                                {post.category.name}
+                              </Badge>
+                            </div>
+                            {post.difficultyLevel && (
+                              <div className="absolute top-4 right-4">
+                                <Badge
+                                  className={
+                                    getDifficultyBadge(post.difficultyLevel)
+                                      ?.color
+                                  }
+                                >
+                                  {
+                                    getDifficultyBadge(post.difficultyLevel)
+                                      ?.label
+                                  }
+                                </Badge>
+                              </div>
+                            )}
+                          </div>
+
+                          <CardContent className="p-6 space-y-4">
+                            <h3
+                              className="text-lg font-bold transition-colors line-clamp-2 group-hover:text-primary"
+                              itemProp="headline"
+                            >
+                              <Link
+                                to={`/blog/${post.slug}`}
+                                className="hover:underline"
+                              >
+                                {post.title}
+                              </Link>
+                            </h3>
+
+                            <p
+                              className="text-sm text-muted-foreground line-clamp-3"
+                              itemProp="description"
+                            >
+                              {post.excerpt}
+                            </p>
+
+                            <div className="flex flex-wrap gap-2">
+                              {post.tags.slice(0, 3).map((tag, tagIndex) => (
+                                <Badge
+                                  key={tagIndex}
+                                  variant="outline"
+                                  className="text-xs hover:bg-primary/10 cursor-pointer"
+                                >
+                                  <Hash className="w-3 h-3 mr-1" />
+                                  {tag}
+                                </Badge>
+                              ))}
+                              {post.tags.length > 3 && (
+                                <Badge variant="outline" className="text-xs">
+                                  +{post.tags.length - 3}
+                                </Badge>
+                              )}
+                            </div>
+
+                            <div className="flex items-center justify-between text-sm text-muted-foreground pt-3 border-t">
+                              <div className="flex items-center space-x-2">
+                                <img
+                                  src={
+                                    post.author.avatar ||
+                                    "/images/default-avatar.png"
+                                  }
+                                  alt={post.author.name}
+                                  className="object-cover w-6 h-6 rounded-full"
+                                />
+                                <span>{post.author.name}</span>
+                              </div>
+
+                              <div className="flex items-center space-x-3">
+                                <div className="flex items-center space-x-1">
+                                  <Eye className="w-3 h-3" />
+                                  <span>{formatNumber(post.views)}</span>
+                                </div>
+                                <div className="flex items-center space-x-1">
+                                  <Heart className="w-3 h-3" />
+                                  <span>{formatNumber(post.likes)}</span>
+                                </div>
+                              </div>
+                            </div>
+
+                            <div className="text-xs text-muted-foreground">
+                              <time
+                                dateTime={post.publishedAt}
+                                itemProp="datePublished"
+                              >
+                                {new Date(post.publishedAt).toLocaleDateString(
+                                  "vi-VN",
+                                )}{" "}
+                                • {post.readTime} phút đọc
+                              </time>
+                            </div>
+                          </CardContent>
+                        </Card>
+                      ) : (
+                        // List View
+                        <Card className="transition-all duration-300 border-0 hover:shadow-lg bg-gradient-to-r from-white to-gray-50 dark:from-slate-800 dark:to-slate-900">
+                          <CardContent className="p-6">
+                            <div className="flex gap-6">
+                              <div className="relative flex-shrink-0 w-48 h-32 overflow-hidden rounded-lg">
+                                <LazyImage
+                                  src={post.featuredImage}
+                                  alt={post.title}
+                                  className="object-cover w-full h-full transition-transform duration-300 group-hover:scale-105"
+                                />
+                              </div>
+
+                              <div className="flex-1 space-y-3">
+                                <div className="flex items-start justify-between">
+                                  <div className="space-y-2 flex-1">
+                                    <div className="flex items-center gap-2">
+                                      <Badge
+                                        style={{
+                                          backgroundColor: getCategoryColor(
+                                            post.category.color,
+                                          ),
+                                          color: "white",
+                                        }}
+                                        className="text-xs"
+                                      >
+                                        {post.category.name}
+                                      </Badge>
+                                      {post.difficultyLevel && (
+                                        <Badge
+                                          className={
+                                            getDifficultyBadge(
+                                              post.difficultyLevel,
+                                            )?.color
+                                          }
+                                        >
+                                          {
+                                            getDifficultyBadge(
+                                              post.difficultyLevel,
+                                            )?.label
+                                          }
+                                        </Badge>
+                                      )}
+                                    </div>
+                                    <h3
+                                      className="text-xl font-bold transition-colors line-clamp-2 group-hover:text-primary"
+                                      itemProp="headline"
+                                    >
+                                      <Link
+                                        to={`/blog/${post.slug}`}
+                                        className="hover:underline"
+                                      >
+                                        {post.title}
+                                      </Link>
+                                    </h3>
+                                  </div>
+                                </div>
+
+                                <p
+                                  className="text-muted-foreground line-clamp-2"
+                                  itemProp="description"
+                                >
+                                  {post.excerpt}
+                                </p>
+
+                                <div className="flex flex-wrap gap-2">
+                                  {post.tags
+                                    .slice(0, 4)
+                                    .map((tag, tagIndex) => (
+                                      <Badge
+                                        key={tagIndex}
+                                        variant="outline"
+                                        className="text-xs hover:bg-primary/10 cursor-pointer"
+                                      >
+                                        <Hash className="w-3 h-3 mr-1" />
+                                        {tag}
+                                      </Badge>
+                                    ))}
+                                  {post.tags.length > 4 && (
+                                    <Badge
+                                      variant="outline"
+                                      className="text-xs"
+                                    >
+                                      +{post.tags.length - 4} more
+                                    </Badge>
+                                  )}
+                                </div>
+
+                                <div className="flex items-center justify-between">
+                                  <div className="flex items-center space-x-4 text-sm text-muted-foreground">
+                                    <div className="flex items-center space-x-1">
+                                      <User className="w-4 h-4" />
+                                      <span>{post.author.name}</span>
+                                    </div>
+                                    <div className="flex items-center space-x-1">
+                                      <Calendar className="w-4 h-4" />
+                                      <time
+                                        dateTime={post.publishedAt}
+                                        itemProp="datePublished"
+                                      >
+                                        {new Date(
+                                          post.publishedAt,
+                                        ).toLocaleDateString("vi-VN")}
+                                      </time>
+                                    </div>
+                                    <div className="flex items-center space-x-1">
+                                      <Timer className="w-4 h-4" />
+                                      <span>{post.readTime} phút</span>
+                                    </div>
+                                  </div>
+
+                                  <div className="flex items-center space-x-4 text-sm text-muted-foreground">
+                                    <div className="flex items-center space-x-1">
+                                      <Eye className="w-4 h-4" />
+                                      <span>{formatNumber(post.views)}</span>
+                                    </div>
+                                    <div className="flex items-center space-x-1">
+                                      <Heart className="w-4 h-4" />
+                                      <span>{formatNumber(post.likes)}</span>
+                                    </div>
+                                    <div className="flex items-center space-x-1">
+                                      <MessageCircle className="w-4 h-4" />
+                                      <span>{formatNumber(post.comments)}</span>
+                                    </div>
+                                  </div>
+                                </div>
+                              </div>
+                            </div>
+                          </CardContent>
+                        </Card>
+                      )}
+                    </motion.article>
+                  ))}
+                </motion.div>
+              ) : (
+                <motion.div
+                  key="no-posts"
+                  initial={{ opacity: 0, scale: 0.8 }}
+                  animate={{ opacity: 1, scale: 1 }}
+                  exit={{ opacity: 0, scale: 0.8 }}
+                >
+                  <Card className="py-16 text-center border-0 bg-gradient-to-br from-white to-gray-50 dark:from-slate-800 dark:to-slate-900">
+                    <CardContent>
+                      <motion.div
+                        initial={{ scale: 0 }}
+                        animate={{ scale: 1 }}
+                        transition={{
+                          delay: 0.2,
+                          type: "spring",
+                          stiffness: 200,
+                        }}
+                      >
+                        <Search className="w-20 h-20 mx-auto mb-6 text-muted-foreground" />
+                      </motion.div>
+                      <h3 className="mb-4 text-2xl font-bold">
+                        Không tìm thấy bài viết nào
+                      </h3>
+                      <p className="mb-6 text-muted-foreground max-w-md mx-auto">
+                        Thử thay đổi từ khóa tìm kiếm hoặc bộ lọc để tìm thấy
+                        nội dung phù hợp với bạn
+                      </p>
+                      <div className="flex flex-col sm:flex-row gap-3 justify-center">
+                        <Button variant="outline" onClick={resetFilters}>
+                          <RefreshCw className="w-4 h-4 mr-2" />
+                          Xóa tất cả bộ lọc
+                        </Button>
+                        <Button
+                          onClick={() =>
+                            document
+                              .getElementById("featured")
+                              ?.scrollIntoView({ behavior: "smooth" })
+                          }
+                        >
+                          <Star className="w-4 h-4 mr-2" />
+                          Xem bài viết nổi bật
+                        </Button>
+                      </div>
+                    </CardContent>
+                  </Card>
+                </motion.div>
+              )}
+            </AnimatePresence>
+
+            {/* Pagination */}
+            {totalPages > 1 && (
+              <motion.div
+                className="mt-12 flex justify-center"
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ delay: 0.5 }}
+              >
+                <div className="flex items-center space-x-2">
+                  <Button
+                    variant="outline"
+                    disabled={currentPage === 1}
+                    onClick={() => setCurrentPage(currentPage - 1)}
+                  >
+                    <ArrowLeft className="w-4 h-4 mr-2" />
+                    Trang trước
+                  </Button>
+
+                  {[...Array(totalPages)].map((_, index) => (
+                    <Button
+                      key={index}
+                      variant={
+                        currentPage === index + 1 ? "default" : "outline"
+                      }
+                      onClick={() => setCurrentPage(index + 1)}
+                      className="w-10 h-10 p-0"
+                    >
+                      {index + 1}
+                    </Button>
+                  ))}
+
+                  <Button
+                    variant="outline"
+                    disabled={currentPage === totalPages}
+                    onClick={() => setCurrentPage(currentPage + 1)}
+                  >
+                    Trang sau
+                    <ArrowRight className="w-4 h-4 ml-2" />
+                  </Button>
+                </div>
+              </motion.div>
+            )}
+          </section>
+
+          {/* Newsletter Subscription */}
+          <motion.section
+            className="mt-20 mb-16"
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+          >
+            <Card className="max-w-3xl mx-auto bg-gradient-to-r from-purple-500/90 to-blue-500/90 text-white shadow-2xl border-0 p-0 overflow-hidden">
+              <div className="absolute right-0 bottom-0 pointer-events-none opacity-20">
+                <Sparkles className="w-32 h-32 text-pink-300" />
+              </div>
+              <CardHeader>
+                <CardTitle className="flex items-center gap-3 justify-center text-white">
+                  <Mail className="w-6 h-6" />
+                  Đăng ký nhận thông báo bài viết mới
+                </CardTitle>
+              </CardHeader>
+              <CardContent>
+                <p className="mb-5 text-xl text-center">
+                  Nhận tin mới nhất về <b>tutorial, xu hướng công nghệ</b> và ưu
+                  đãi sản phẩm!
+                </p>
+                <NewsletterSubscribe />
+              </CardContent>
+            </Card>
+          </motion.section>
+
+          {/* Trending Posts Section */}
+          <section className="mb-20" id="trending" data-animate>
+            <motion.div
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              className={`flex items-center justify-between mb-12 transition-all duration-800 ${
+                isVisible.trending
+                  ? "animate-in slide-in-from-bottom"
+                  : "opacity-0"
+              }`}
+            >
+              <div className="flex items-center space-x-4">
+                <div className="flex items-center justify-center w-12 h-12 rounded-2xl bg-gradient-to-r from-red-500 to-pink-500 shadow-lg">
+                  <Flame className="w-6 h-6 text-white" />
+                </div>
+                <div>
+                  <h2 className="text-3xl md:text-4xl font-bold text-transparent bg-gradient-to-r from-red-600 to-pink-600 bg-clip-text">
+                    🔥 Trending
+                  </h2>
+                  <p className="text-muted-foreground mt-1">
+                    Bài viết hot nhất tuần này
+                  </p>
+                </div>
+              </div>
+            </motion.div>
+
+            <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
+              {trendingPosts.slice(0, 6).map((post, index) => (
+                <motion.article
+                  key={post.id}
+                  initial={{ opacity: 0, scale: 0.9 }}
+                  animate={{ opacity: 1, scale: 1 }}
+                  transition={{ delay: index * 0.1 }}
+                  whileHover={{ scale: 1.02 }}
+                  className="group"
+                >
+                  <Card className="h-full transition-all duration-300 border-0 hover:shadow-lg bg-gradient-to-br from-white to-red-50 dark:from-slate-800 dark:to-red-900/20">
+                    <CardContent className="p-6">
+                      <div className="flex gap-4">
+                        <div className="flex-shrink-0">
+                          <div className="flex items-center justify-center w-8 h-8 rounded-full bg-gradient-to-r from-red-500 to-pink-500 text-white font-bold text-sm">
+                            {index + 1}
+                          </div>
+                        </div>
+
+                        <div className="flex-1 space-y-2">
+                          <Badge
+                            style={{
+                              backgroundColor: getCategoryColor(
+                                post.category.color,
+                              ),
+                              color: "white",
+                            }}
+                            className="text-xs"
+                          >
+                            {post.category.name}
+                          </Badge>
+
+                          <h3 className="font-bold line-clamp-2 group-hover:text-primary transition-colors">
+                            <Link
+                              to={`/blog/${post.slug}`}
+                              className="hover:underline"
+                            >
+                              {post.title}
+                            </Link>
+                          </h3>
+
+                          <div className="flex items-center justify-between text-xs text-muted-foreground">
+                            <div className="flex items-center gap-2">
                               <img
-                                src={post.author.avatar}
+                                src={
+                                  post.author.avatar ||
+                                  "/images/default-avatar.png"
+                                }
                                 alt={post.author.name}
-                                className="object-cover w-6 h-6 rounded-full"
+                                className="w-5 h-5 rounded-full"
                               />
                               <span>{post.author.name}</span>
                             </div>
 
-                            <div className="flex items-center space-x-3">
-                              <div className="flex items-center space-x-1">
-                                <Eye className="w-3 h-3" />
-                                <span>{formatNumber(post.views)}</span>
-                              </div>
-                              <div className="flex items-center space-x-1">
-                                <Heart className="w-3 h-3" />
-                                <span>{formatNumber(post.likes)}</span>
-                              </div>
-                            </div>
-                          </div>
-                        </CardContent>
-                      </Card>
-                    ) : (
-                      // List View
-                      <Card className="transition-all duration-300 border-0 hover:shadow-lg group bg-gradient-to-r from-white to-gray-50 dark:from-slate-800 dark:to-slate-900">
-                        <CardContent className="p-6">
-                          <div className="flex gap-6">
-                            <div className="relative flex-shrink-0 w-48 h-32 overflow-hidden rounded-lg">
-                              <img
-                                src={post.featuredImage}
-                                alt={post.title}
-                                className="object-cover w-full h-full transition-transform duration-300 group-hover:scale-105"
-                              />
-                            </div>
-
-                            <div className="flex-1 space-y-3">
-                              <div className="flex items-start justify-between">
-                                <div className="space-y-2">
-                                  <Badge
-                                    style={{
-                                      backgroundColor: getCategoryColor(
-                                        post.category.color,
-                                      ),
-                                      color: "white",
-                                    }}
-                                  >
-                                    {post.category.name}
-                                  </Badge>
-                                  <h3 className="text-xl font-bold transition-colors line-clamp-2 group-hover:text-primary">
-                                    <Link
-                                      to={`/blog/${post.slug}`}
-                                      className="hover:underline"
-                                    >
-                                      {post.title}
-                                    </Link>
-                                  </h3>
-                                </div>
-                              </div>
-
-                              <p className="text-muted-foreground line-clamp-2">
-                                {post.excerpt}
-                              </p>
-
-                              <div className="flex flex-wrap gap-2">
-                                {post.tags.slice(0, 3).map((tag, tagIndex) => (
-                                  <Badge
-                                    key={tagIndex}
-                                    variant="outline"
-                                    className="text-xs"
-                                  >
-                                    {tag}
-                                  </Badge>
-                                ))}
-                                {post.tags.length > 3 && (
-                                  <Badge variant="outline" className="text-xs">
-                                    +{post.tags.length - 3}
-                                  </Badge>
-                                )}
-                              </div>
-
-                              <div className="flex items-center justify-between">
-                                <div className="flex items-center space-x-4 text-sm text-muted-foreground">
-                                  <div className="flex items-center space-x-1">
-                                    <User className="w-4 h-4" />
-                                    <span>{post.author.name}</span>
-                                  </div>
-                                  <div className="flex items-center space-x-1">
-                                    <Calendar className="w-4 h-4" />
-                                    <span>
-                                      {new Date(
-                                        post.publishedAt,
-                                      ).toLocaleDateString("vi-VN")}
-                                    </span>
-                                  </div>
-                                  <div className="flex items-center space-x-1">
-                                    <Clock className="w-4 h-4" />
-                                    <span>{post.readTime} phút</span>
-                                  </div>
-                                </div>
-
-                                <div className="flex items-center space-x-3 text-sm text-muted-foreground">
-                                  <div className="flex items-center space-x-1">
-                                    <Eye className="w-4 h-4" />
-                                    <span>{formatNumber(post.views)}</span>
-                                  </div>
-                                  <div className="flex items-center space-x-1">
-                                    <Heart className="w-4 h-4" />
-                                    <span>{formatNumber(post.likes)}</span>
-                                  </div>
-                                </div>
+                            <div className="flex items-center gap-3">
+                              <div className="flex items-center gap-1">
+                                <Flame className="w-3 h-3" />
+                                <span>
+                                  {formatNumber(
+                                    post.views + post.likes + post.shares,
+                                  )}
+                                </span>
                               </div>
                             </div>
                           </div>
-                        </CardContent>
-                      </Card>
-                    )}
-                  </motion.div>
-                ))}
-              </motion.div>
-            ) : (
-              <motion.div
-                key="no-posts"
-                initial={{ opacity: 0, scale: 0.8 }}
-                animate={{ opacity: 1, scale: 1 }}
-                exit={{ opacity: 0, scale: 0.8 }}
-              >
-                <Card className="py-12 text-center border-0 bg-gradient-to-br from-white to-gray-50 dark:from-slate-800 dark:to-slate-900">
-                  <CardContent>
-                    <motion.div
-                      initial={{ scale: 0 }}
-                      animate={{ scale: 1 }}
-                      transition={{
-                        delay: 0.2,
-                        type: "spring",
-                        stiffness: 200,
-                      }}
-                    >
-                      <Search className="w-16 h-16 mx-auto mb-4 text-muted-foreground" />
-                    </motion.div>
-                    <h3 className="mb-2 text-lg font-semibold">
-                      Không tìm thấy bài viết
-                    </h3>
-                    <p className="mb-4 text-muted-foreground">
-                      Thử thay đổi từ khóa tìm kiếm hoặc bộ lọc để tìm thấy nội
-                      dung phù hợp
-                    </p>
-                    <Button
-                      variant="outline"
-                      onClick={() => {
-                        setSearchQuery("");
-                        setSelectedCategory("all");
-                      }}
-                    >
-                      Xóa bộ lọc
-                    </Button>
-                  </CardContent>
-                </Card>
-              </motion.div>
-            )}
-          </AnimatePresence>
-        </section>
-
-        {/* ✅ Load More Button */}
-        {filteredPosts.length > 0 && (
-          <motion.div
-            className="mt-12 text-center"
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: 0.5 }}
-          >
-            <Button
-              size="lg"
-              variant="outline"
-              className="transition-all duration-300 group hover:scale-105 hover:shadow-lg"
-            >
-              Xem thêm bài viết
-              <ArrowRight className="w-5 h-5 ml-2 transition-transform group-hover:translate-x-1" />
-            </Button>
-          </motion.div>
-        )}
+                        </div>
+                      </div>
+                    </CardContent>
+                  </Card>
+                </motion.article>
+              ))}
+            </div>
+          </section>
+        </div>
       </div>
-    </div>
+    </>
   );
 };
 

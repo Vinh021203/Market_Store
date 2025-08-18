@@ -47,30 +47,91 @@ import {
   BookOpen,
   Calendar,
   Clock,
-  User,
   TrendingUp,
   RefreshCw,
-  Coffee,
-  Code,
-  Palette,
-  ChevronLeft,
-  ChevronRight,
-  BarChart3,
-  Activity,
-  FileText,
-  Users,
   Heart,
-  MessageCircle,
-  Share2,
   Sparkles,
+  BarChart3,
+  CheckCircle,
+  XCircle,
+  Info,
 } from "lucide-react";
-import { toast } from "@/hooks/use-toast";
+
+// Toast giống Product/Order
+const FloatingToast = ({
+  type = "success",
+  title,
+  description,
+  visible = true,
+  onClose,
+}: {
+  type?: "success" | "error" | "info";
+  title: string;
+  description?: string;
+  visible?: boolean;
+  onClose?: () => void;
+}) => {
+  const iconProps = "w-5 h-5 flex-shrink-0";
+  let icon, colorScheme, bgGradient;
+  switch (type) {
+    case "error":
+      icon = <XCircle className={`${iconProps} text-pink-600`} />;
+      colorScheme = "text-pink-800";
+      bgGradient = "from-pink-50/95 via-orange-50/95 to-white/95";
+      break;
+    case "info":
+      icon = <Info className={`${iconProps} text-sky-600`} />;
+      colorScheme = "text-sky-800";
+      bgGradient = "from-sky-50/95 via-blue-50/95 to-white/95";
+      break;
+    default:
+      icon = <CheckCircle className={`${iconProps} text-emerald-600`} />;
+      colorScheme = "text-emerald-800";
+      bgGradient = "from-emerald-50/95 via-green-50/95 to-white/95";
+  }
+  if (!visible) return null;
+  return (
+    <motion.div
+      initial={{ opacity: 0, scale: 0.8, x: 100 }}
+      animate={{ opacity: 1, scale: 1, x: 0 }}
+      exit={{ opacity: 0, scale: 0.8, x: 100 }}
+      className={`fixed top-6 right-6 z-50 max-w-sm min-w-[300px] p-4 rounded-3xl shadow-2xl backdrop-blur-xl border border-white/30 bg-gradient-to-r ${bgGradient}`}
+    >
+      <div className="flex items-start gap-3">
+        <motion.div
+          initial={{ scale: 0 }}
+          animate={{ scale: 1 }}
+          transition={{ delay: 0.1 }}
+          className="flex-shrink-0 p-2 rounded-2xl bg-white/60"
+        >
+          {icon}
+        </motion.div>
+        <div className="flex-1 min-w-0">
+          <div className={`font-semibold text-sm ${colorScheme}`}>{title}</div>
+          {description && (
+            <div className="text-xs mt-1 text-orange-700/70 leading-relaxed">
+              {description}
+            </div>
+          )}
+        </div>
+        {onClose && (
+          <button
+            onClick={onClose}
+            className="flex-shrink-0 p-1 rounded-full hover:bg-white/60 transition-colors"
+          >
+            <XCircle className="w-4 h-4 text-gray-400" />
+          </button>
+        )}
+      </div>
+    </motion.div>
+  );
+};
 
 const BlogManagement: React.FC = () => {
   const { user } = useAuth();
   const [posts, setPosts] = useState<BlogPost[]>([]);
   const [categories, setCategories] = useState<BlogCategory[]>([]);
-  const [loading, setLoading] = useState(true);
+  const [loading, setLoading] = useState(false);
   const [refreshing, setRefreshing] = useState(false);
   const [searchQuery, setSearchQuery] = useState("");
   const [categoryFilter, setCategoryFilter] = useState<string>("all");
@@ -78,16 +139,35 @@ const BlogManagement: React.FC = () => {
     "all" | "published" | "draft"
   >("all");
   const [isVisible, setIsVisible] = useState<Record<string, boolean>>({});
+  const [toasts, setToasts] = useState<
+    Array<{
+      id: string;
+      type: "success" | "error" | "info";
+      title: string;
+      description?: string;
+    }>
+  >([]);
+  const [page, setPage] = useState(1);
+  const PER_PAGE = 8;
 
-  // ✅ Pagination state
-  const [currentPage, setCurrentPage] = useState(1);
-  const [postsPerPage] = useState(8);
+  if (!user || !isAdmin(user)) return <Navigate to="/" replace />;
 
-  if (!user || !isAdmin(user)) {
-    return <Navigate to="/" replace />;
-  }
+  // Toast hệ thống tự động
+  const showToast = (
+    type: "success" | "error" | "info",
+    title: string,
+    description?: string,
+  ) => {
+    const id = Date.now().toString();
+    setToasts((prev) => [...prev, { id, type, title, description }]);
+    setTimeout(() => {
+      setToasts((prev) => prev.filter((toast) => toast.id !== id));
+    }, 4000);
+  };
+  const removeToast = (id: string) => {
+    setToasts((prev) => prev.filter((toast) => toast.id !== id));
+  };
 
-  // Fetch data từ Supabase
   useEffect(() => {
     const fetchData = async () => {
       setLoading(true);
@@ -98,89 +178,62 @@ const BlogManagement: React.FC = () => {
         ]);
         setPosts(postsData);
         setCategories(categoriesData);
-        toast({
-          title: "✅ Đã tải blog",
-          description: `Tải thành công ${postsData.length} bài viết.`,
-        });
-      } catch (error) {
-        console.error("Error fetching data:", error);
-        toast({
-          title: "❌ Lỗi tải dữ liệu",
-          description: "Không thể tải dữ liệu blog. Vui lòng thử lại.",
-          variant: "destructive",
-        });
+        showToast(
+          "success",
+          "✅ Đã tải blog",
+          `Tải thành công ${postsData.length} bài viết.`,
+        );
+      } catch {
+        showToast("error", "❌ Lỗi tải blog", "Không thể tải dữ liệu blog.");
       } finally {
         setLoading(false);
       }
     };
-
     fetchData();
 
-    // Intersection Observer for scroll animations
-    const observer = new IntersectionObserver(
+    const observer = new window.IntersectionObserver(
       (entries) => {
         entries.forEach((entry) => {
           if (entry.isIntersecting) {
-            setIsVisible((prev) => ({
-              ...prev,
-              [entry.target.id]: true,
-            }));
+            setIsVisible((prev) => ({ ...prev, [entry.target.id]: true }));
           }
         });
       },
       { threshold: 0.1 },
     );
-
     const sections = document.querySelectorAll("[data-animate]");
     sections.forEach((section) => observer.observe(section));
-
     return () => observer.disconnect();
   }, []);
 
-  // ✅ Filter posts
+  // Lọc bài viết
   const filteredPosts = posts.filter((post) => {
-    const matchesSearch =
+    const matchSearch =
       post.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
       post.excerpt.toLowerCase().includes(searchQuery.toLowerCase()) ||
       post.author.name.toLowerCase().includes(searchQuery.toLowerCase());
-
-    const matchesCategory =
+    const matchCategory =
       categoryFilter === "all" || post.category.id === categoryFilter;
-    const matchesStatus =
+    const matchStatus =
       statusFilter === "all" ||
       (statusFilter === "published" && post.isPublished) ||
       (statusFilter === "draft" && !post.isPublished);
-
-    return matchesSearch && matchesCategory && matchesStatus;
+    return matchSearch && matchCategory && matchStatus;
   });
 
-  // ✅ Pagination logic
-  const indexOfLastPost = currentPage * postsPerPage;
-  const indexOfFirstPost = indexOfLastPost - postsPerPage;
-  const currentPosts = filteredPosts.slice(indexOfFirstPost, indexOfLastPost);
-  const totalPages = Math.ceil(filteredPosts.length / postsPerPage);
+  const totalPages = Math.max(1, Math.ceil(filteredPosts.length / PER_PAGE));
+  const pagedPosts = filteredPosts.slice(
+    (page - 1) * PER_PAGE,
+    page * PER_PAGE,
+  );
 
-  // ✅ Pagination handlers
-  const handlePageChange = (pageNumber: number) => {
-    setCurrentPage(pageNumber);
-  };
-
-  const handlePrevPage = () => {
-    if (currentPage > 1) {
-      setCurrentPage(currentPage - 1);
-    }
-  };
-
-  const handleNextPage = () => {
-    if (currentPage < totalPages) {
-      setCurrentPage(currentPage + 1);
-    }
-  };
-
-  // Reset to first page when filters change
   useEffect(() => {
-    setCurrentPage(1);
+    setPage(1);
   }, [searchQuery, categoryFilter, statusFilter]);
+  useEffect(() => {
+    const tableSection = document.getElementById("posts");
+    tableSection?.scrollIntoView({ behavior: "smooth", block: "start" });
+  }, [page]);
 
   const handleRefresh = async () => {
     setRefreshing(true);
@@ -191,65 +244,52 @@ const BlogManagement: React.FC = () => {
       ]);
       setPosts(postsData);
       setCategories(categoriesData);
-      toast({
-        title: "🔄 Đã cập nhật",
-        description: "Dữ liệu blog đã được làm mới.",
-      });
-    } catch (error) {
-      toast({
-        title: "❌ Lỗi cập nhật",
-        description: "Không thể cập nhật dữ liệu blog.",
-        variant: "destructive",
-      });
-    } finally {
-      setRefreshing(false);
+      showToast(
+        "success",
+        "🔄 Đã cập nhật",
+        "Danh sách bài viết đã được làm mới.",
+      );
+    } catch {
+      showToast("error", "❌ Lỗi cập nhật", "Không thể cập nhật dữ liệu blog.");
     }
+    setRefreshing(false);
   };
 
   const handleToggleStatus = async (postId: string) => {
     const post = posts.find((p) => p.id === postId);
     if (!post) return;
-
     const success = await updatePostStatus(postId, !post.isPublished);
-
     if (success) {
       setPosts((prev) =>
-        prev.map((post) =>
-          post.id === postId
-            ? { ...post, isPublished: !post.isPublished }
-            : post,
+        prev.map((p) =>
+          p.id === postId ? { ...p, isPublished: !p.isPublished } : p,
         ),
       );
-
-      toast({
-        title: "✅ Cập nhật thành công",
-        description: "Trạng thái bài viết đã được cập nhật.",
-      });
+      showToast(
+        "success",
+        "✅ Đã cập nhật",
+        "Trạng thái bài viết đã được cập nhật.",
+      );
     } else {
-      toast({
-        title: "❌ Cập nhật thất bại",
-        description: "Có lỗi xảy ra khi cập nhật trạng thái bài viết.",
-        variant: "destructive",
-      });
+      showToast(
+        "error",
+        "❌ Cập nhật thất bại",
+        "Có lỗi xảy ra khi cập nhật trạng thái bài viết.",
+      );
     }
   };
 
   const handleDeletePost = async (postId: string) => {
     const success = await deleteBlogPost(postId);
-
     if (success) {
-      setPosts((prev) => prev.filter((post) => post.id !== postId));
-
-      toast({
-        title: "🗑️ Đã xóa bài viết",
-        description: "Bài viết đã được xóa khỏi hệ thống.",
-      });
+      setPosts((prev) => prev.filter((p) => p.id !== postId));
+      showToast(
+        "success",
+        "🗑️ Đã xóa bài viết",
+        "Bài viết đã được xóa khỏi hệ thống.",
+      );
     } else {
-      toast({
-        title: "❌ Xóa thất bại",
-        description: "Có lỗi xảy ra khi xóa bài viết.",
-        variant: "destructive",
-      });
+      showToast("error", "❌ Xóa thất bại", "Có lỗi xảy ra khi xóa bài viết.");
     }
   };
 
@@ -266,271 +306,161 @@ const BlogManagement: React.FC = () => {
     {
       title: "Tổng bài viết",
       value: stats.total,
-      icon: FileText,
-      gradient: "from-blue-500 to-cyan-500",
-      bgGradient:
-        "from-blue-50 to-cyan-50 dark:from-blue-900/20 dark:to-cyan-900/20",
+      icon: BookOpen,
+      gradient: "from-orange-400 via-amber-500 to-pink-600",
+      bgGradient: "from-orange-50/80 via-amber-50/80 to-pink-50/80",
       description: "Tất cả bài viết",
+      trend: "+5%",
     },
     {
       title: "Đã xuất bản",
       value: stats.published,
-      icon: BookOpen,
-      gradient: "from-green-500 to-emerald-500",
-      bgGradient:
-        "from-green-50 to-emerald-50 dark:from-green-900/20 dark:to-emerald-900/20",
+      icon: Sparkles,
+      gradient: "from-green-400 via-emerald-500 to-teal-600",
+      bgGradient: "from-green-50/80 via-emerald-50/80 to-teal-50/80",
       description: "Công khai",
+      trend: "+3%",
     },
     {
       title: "Bản nháp",
       value: stats.draft,
       icon: Edit,
-      gradient: "from-orange-500 to-amber-500",
-      bgGradient:
-        "from-orange-50 to-amber-50 dark:from-orange-900/20 dark:to-amber-900/20",
+      gradient: "from-yellow-400 via-orange-400 to-pink-400",
+      bgGradient: "from-yellow-50/80 via-orange-50/80 to-pink-50/80",
       description: "Chưa xuất bản",
+      trend: "-2%",
     },
     {
       title: "Nổi bật",
       value: stats.featured,
       icon: TrendingUp,
-      gradient: "from-purple-500 to-violet-500",
-      bgGradient:
-        "from-purple-50 to-violet-50 dark:from-purple-900/20 dark:to-violet-900/20",
+      gradient: "from-purple-400 via-violet-500 to-indigo-600",
+      bgGradient: "from-purple-50/80 via-violet-50/80 to-indigo-50/80",
       description: "Bài hot",
+      trend: "+1%",
     },
     {
       title: "Lượt xem",
       value: stats.totalViews.toLocaleString(),
       icon: Eye,
-      gradient: "from-indigo-500 to-blue-500",
-      bgGradient:
-        "from-indigo-50 to-blue-50 dark:from-indigo-900/20 dark:to-blue-900/20",
+      gradient: "from-indigo-500 via-blue-500 to-cyan-500",
+      bgGradient: "from-indigo-50/80 via-blue-50/80 to-cyan-50/80",
       description: "Tổng views",
+      trend: "+7%",
     },
     {
       title: "Lượt thích",
       value: stats.totalLikes,
       icon: Heart,
-      gradient: "from-red-500 to-pink-500",
-      bgGradient:
-        "from-red-50 to-pink-50 dark:from-red-900/20 dark:to-pink-900/20",
+      gradient: "from-pink-500 via-red-500 to-rose-500",
+      bgGradient: "from-pink-50/80 via-red-50/80 to-rose-50/80",
       description: "Tổng likes",
+      trend: "+4%",
     },
   ];
 
-  const getCategoryColor = (color: string) => {
-    const colors: Record<string, string> = {
-      blue: "#3b82f6",
-      purple: "#8b5cf6",
-      green: "#10b981",
-      orange: "#f59e0b",
-      red: "#ef4444",
-      pink: "#ec4899",
-    };
-    return colors[color] || colors.blue;
-  };
-
-  // ✅ Pagination component
-  const PaginationComponent = () => {
-    if (totalPages <= 1) return null;
-
-    const getVisiblePages = () => {
-      const delta = 2;
-      const range = [];
-      const rangeWithDots = [];
-
-      for (
-        let i = Math.max(2, currentPage - delta);
-        i <= Math.min(totalPages - 1, currentPage + delta);
-        i++
-      ) {
-        range.push(i);
-      }
-
-      if (currentPage - delta > 2) {
-        rangeWithDots.push(1, "...");
-      } else {
-        rangeWithDots.push(1);
-      }
-
-      rangeWithDots.push(...range);
-
-      if (currentPage + delta < totalPages - 1) {
-        rangeWithDots.push("...", totalPages);
-      } else {
-        rangeWithDots.push(totalPages);
-      }
-
-      return rangeWithDots;
-    };
-
-    return (
-      <motion.div
-        initial={{ opacity: 0, y: 20 }}
-        animate={{ opacity: 1, y: 0 }}
-        className="flex items-center justify-between mt-6"
-      >
-        <div className="text-sm text-muted-foreground">
-          Hiển thị {indexOfFirstPost + 1} đến{" "}
-          {Math.min(indexOfLastPost, filteredPosts.length)} của{" "}
-          {filteredPosts.length} bài viết
-        </div>
-
-        <div className="flex items-center space-x-2">
-          <Button
-            variant="outline"
-            size="sm"
-            onClick={handlePrevPage}
-            disabled={currentPage === 1}
-            className="group"
-          >
-            <ChevronLeft className="w-4 h-4 transition-transform group-hover:-translate-x-1" />
-            Trước
-          </Button>
-
-          <div className="flex items-center space-x-1">
-            {getVisiblePages().map((page, index) => (
-              <React.Fragment key={index}>
-                {page === "..." ? (
-                  <span className="px-3 py-2 text-muted-foreground">...</span>
-                ) : (
-                  <motion.div
-                    whileHover={{ scale: 1.05 }}
-                    whileTap={{ scale: 0.95 }}
-                  >
-                    <Button
-                      variant={currentPage === page ? "default" : "outline"}
-                      size="sm"
-                      onClick={() => handlePageChange(page as number)}
-                      className={`min-w-[40px] ${
-                        currentPage === page
-                          ? "bg-gradient-to-r from-blue-500 to-purple-600 text-white"
-                          : ""
-                      }`}
-                    >
-                      {page}
-                    </Button>
-                  </motion.div>
-                )}
-              </React.Fragment>
-            ))}
-          </div>
-
-          <Button
-            variant="outline"
-            size="sm"
-            onClick={handleNextPage}
-            disabled={currentPage === totalPages}
-            className="group"
-          >
-            Sau
-            <ChevronRight className="w-4 h-4 transition-transform group-hover:translate-x-1" />
-          </Button>
-        </div>
-      </motion.div>
-    );
-  };
-
-  // ✅ Loading state
-  if (loading) {
-    return (
-      <div className="min-h-screen bg-gradient-to-br from-slate-50 via-blue-50 to-indigo-50 dark:from-slate-900 dark:via-purple-900 dark:to-slate-900">
-        {/* Floating Elements */}
-        <div className="fixed inset-0 overflow-hidden pointer-events-none">
-          <div className="absolute top-1/4 left-1/4 animate-float">
-            <FileText className="w-8 h-8 text-blue-500 opacity-20" />
-          </div>
-          <div className="absolute top-1/3 right-1/4 animate-float-delay-1">
-            <BookOpen className="w-6 h-6 text-purple-500 opacity-20" />
-          </div>
-          <div className="absolute bottom-1/4 left-1/3 animate-float-delay-2">
-            <Coffee className="text-orange-500 w-7 h-7 opacity-20" />
-          </div>
-        </div>
-
-        <div className="container relative z-10 px-4 py-8 mx-auto">
-          <motion.div
-            initial={{ opacity: 0, scale: 0.8 }}
-            animate={{ opacity: 1, scale: 1 }}
-            className="flex items-center justify-center min-h-screen"
-          >
-            <Card className="py-12 text-center border-0 shadow-2xl bg-gradient-to-br from-white to-gray-50 dark:from-slate-800 dark:to-slate-900">
-              <CardContent>
-                <motion.div
-                  animate={{ rotate: 360 }}
-                  transition={{ duration: 1, repeat: Infinity, ease: "linear" }}
-                  className="w-12 h-12 mx-auto mb-4 border-4 rounded-full border-primary border-t-transparent"
-                />
-                <h2 className="mb-2 text-xl font-semibold">Đang tải blog...</h2>
-                <p className="text-muted-foreground">
-                  Vui lòng đợi trong giây lát
-                </p>
-              </CardContent>
-            </Card>
-          </motion.div>
-        </div>
-      </div>
-    );
-  }
-
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-50 via-blue-50 to-indigo-50 dark:from-slate-900 dark:via-purple-900 dark:to-slate-900">
-      {/* Floating Elements */}
+    <div className="min-h-screen bg-gradient-to-br from-orange-50 via-amber-50 to-pink-50">
+      {/* 🌟 Floating Elements */}
       <div className="fixed inset-0 overflow-hidden pointer-events-none">
-        <div className="absolute top-1/4 left-1/4 animate-float">
-          <Code className="w-8 h-8 text-blue-500 opacity-20" />
-        </div>
-        <div className="absolute top-1/3 right-1/4 animate-float-delay-1">
-          <Palette className="w-6 h-6 text-purple-500 opacity-20" />
-        </div>
-        <div className="absolute bottom-1/4 left-1/3 animate-float-delay-2">
-          <Coffee className="text-orange-500 w-7 h-7 opacity-20" />
-        </div>
+        <motion.div
+          className="absolute top-1/4 left-1/4"
+          animate={{ y: [0, -20, 0], rotate: [0, 10, 0] }}
+          transition={{ duration: 6, repeat: Infinity, ease: "easeInOut" }}
+        >
+          <BookOpen className="w-8 h-8 text-orange-400 opacity-20" />
+        </motion.div>
+        <motion.div
+          className="absolute top-1/3 right-1/4"
+          animate={{ y: [0, -15, 0], rotate: [0, -10, 0] }}
+          transition={{
+            duration: 5,
+            repeat: Infinity,
+            ease: "easeInOut",
+            delay: 1,
+          }}
+        >
+          <Sparkles className="w-6 h-6 text-pink-400 opacity-20" />
+        </motion.div>
+        <motion.div
+          className="absolute bottom-1/4 left-1/3"
+          animate={{ y: [0, -25, 0], rotate: [0, 15, 0] }}
+          transition={{
+            duration: 7,
+            repeat: Infinity,
+            ease: "easeInOut",
+            delay: 2,
+          }}
+        >
+          <Heart className="text-amber-400 w-7 h-7 opacity-20" />
+        </motion.div>
       </div>
 
-      <div className="container relative z-10 px-4 py-8 mx-auto space-y-8">
-        {/* ✅ Enhanced Header */}
+      {/* Toast notification */}
+      <div className="fixed top-0 right-0 z-50 p-4 space-y-3">
+        <AnimatePresence>
+          {toasts.map((toast) => (
+            <FloatingToast
+              key={toast.id}
+              type={toast.type}
+              title={toast.title}
+              description={toast.description}
+              onClose={() => removeToast(toast.id)}
+            />
+          ))}
+        </AnimatePresence>
+      </div>
+
+      <div className="container relative z-10 px-4 py-8 mx-auto">
+        {/* Header */}
         <motion.div
           initial={{ opacity: 0, y: -20 }}
           animate={{ opacity: 1, y: 0 }}
-          className="flex items-center justify-between"
+          className="flex items-center justify-between mb-8 p-6 bg-gradient-to-r from-white/90 via-orange-50/90 to-pink-50/90 backdrop-blur-xl border border-orange-200/50 rounded-3xl shadow-lg"
           id="header"
           data-animate
         >
           <div className="flex items-center space-x-4">
             <motion.div whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }}>
-              <Button variant="ghost" size="sm" asChild className="group">
+              <Button
+                variant="ghost"
+                size="sm"
+                asChild
+                className="group bg-white/60 hover:bg-white/80 rounded-2xl shadow-md"
+              >
                 <Link to="/admin">
-                  <ArrowLeft className="w-4 h-4 mr-1 transition-transform group-hover:-translate-x-1" />
-                  Về Dashboard
+                  <ArrowLeft className="w-4 h-4 mr-1 transition-transform group-hover:-translate-x-1 text-orange-600" />
+                  <span className="font-semibold text-orange-800">
+                    Về Dashboard
+                  </span>
                 </Link>
               </Button>
             </motion.div>
-            <div className="flex items-center space-x-3">
+            <div className="flex items-center space-x-4">
               <motion.div
                 whileHover={{ scale: 1.1, rotate: 5 }}
-                className="flex items-center justify-center w-12 h-12 shadow-lg rounded-2xl bg-gradient-to-r from-blue-500 to-purple-600"
+                className="flex items-center justify-center w-16 h-16 shadow-xl rounded-3xl bg-gradient-to-r from-orange-500 via-amber-500 to-pink-600"
               >
-                <BookOpen className="w-6 h-6 text-white" />
+                <BookOpen className="w-8 h-8 text-white" />
               </motion.div>
               <div>
-                <h1 className="text-3xl font-bold text-transparent bg-gradient-to-r from-blue-600 via-purple-600 to-pink-600 bg-clip-text">
+                <h1 className="text-4xl font-bold text-transparent bg-gradient-to-r from-orange-600 via-amber-600 to-pink-600 bg-clip-text">
                   Quản lý Blog
                 </h1>
-                <p className="text-muted-foreground">
-                  Quản lý bài viết, danh mục và nội dung blog
+                <p className="text-orange-700/80 mt-1 flex items-center space-x-2">
+                  <Sparkles className="w-4 h-4" />
+                  <span>Quản lý, xuất bản và theo dõi bài viết blog</span>
                 </p>
               </div>
             </div>
           </div>
-          <div className="flex items-center space-x-3">
+          <div className="flex space-x-3">
             <motion.div whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }}>
               <Button
                 variant="outline"
                 onClick={handleRefresh}
                 disabled={refreshing}
-                className="transition-all duration-300 group hover:bg-primary/10"
+                className="transition-all duration-300 group bg-white/80 hover:bg-white border-orange-200/50 hover:border-orange-300 rounded-2xl shadow-md hover:shadow-lg"
               >
                 {refreshing ? (
                   <motion.div
@@ -544,85 +474,161 @@ const BlogManagement: React.FC = () => {
                     <RefreshCw className="w-4 h-4 mr-2" />
                   </motion.div>
                 ) : (
-                  <RefreshCw className="w-4 h-4 mr-2 group-hover:animate-spin" />
+                  <RefreshCw className="w-4 h-4 mr-2 group-hover:animate-spin text-orange-600" />
                 )}
-                Làm mới
+                <span className="text-orange-800 font-semibold">Làm mới</span>
               </Button>
             </motion.div>
-
             <motion.div whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }}>
-              <Button variant="outline" asChild>
+              <Button
+                variant="outline"
+                asChild
+                className="bg-white/80 border-orange-200/50 hover:border-orange-300 rounded-2xl shadow-md"
+              >
                 <Link to="/admin/blog/categories">
-                  <Filter className="w-4 h-4 mr-2" />
-                  Quản lý danh mục
+                  <Filter className="w-4 h-4 mr-2 text-orange-600" />
+                  <span className="font-semibold">Danh mục</span>
                 </Link>
               </Button>
             </motion.div>
-
             <motion.div whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }}>
               <Button
                 asChild
-                className="transition-all duration-300 shadow-lg bg-gradient-to-r from-blue-500 to-purple-600 hover:from-blue-600 hover:to-purple-700 hover:shadow-xl"
+                className="transition-all duration-300 shadow-lg bg-gradient-to-r from-orange-500 via-amber-500 to-pink-600 hover:from-orange-600 hover:to-pink-700 rounded-2xl"
               >
                 <Link to="/admin/blog/create">
                   <Plus className="w-4 h-4 mr-2" />
-                  Viết bài mới
+                  <span className="font-semibold">Viết bài mới</span>
+                  <Sparkles className="w-4 h-4 ml-1" />
                 </Link>
               </Button>
             </motion.div>
           </div>
         </motion.div>
 
-        {/* ✅ Enhanced Stats Cards */}
+        {/* Stats Cards */}
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ delay: 0.2 }}
-          className="grid grid-cols-2 gap-4 md:grid-cols-3 lg:grid-cols-6"
-          id="stats"
+          className="grid grid-cols-2 gap-4 mb-4 md:grid-cols-4"
+          id="stats1"
           data-animate
         >
-          {statsCards.map((stat, index) => (
+          {statsCards.slice(0, 4).map((stat, index) => (
             <motion.div
               key={index}
               initial={{ opacity: 0, y: 30 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ delay: 0.3 + index * 0.1 }}
-              whileHover={{ y: -5, scale: 1.02 }}
-              className={`transition-all duration-500 ${
-                isVisible.stats
-                  ? "animate-in slide-in-from-bottom"
-                  : "opacity-0"
-              }`}
-              style={{ animationDelay: `${index * 150}ms` }}
+              whileHover={{ y: -8, scale: 1.03 }}
+              className="transition-all duration-500"
             >
               <Card
-                className={`transition-all duration-300 hover:shadow-xl border-0 bg-gradient-to-br ${stat.bgGradient} group`}
+                className={`relative overflow-hidden border-0 bg-gradient-to-br ${stat.bgGradient} backdrop-blur-sm shadow-lg hover:shadow-2xl group rounded-3xl`}
+                style={{ minHeight: 140 }}
               >
-                <CardContent className="pt-6">
-                  <div className="flex items-center justify-between">
-                    <div>
+                <div className="absolute inset-0 bg-gradient-to-br from-white/20 via-transparent to-transparent opacity-50" />
+                <CardContent className="pt-4 pb-4">
+                  <div className="flex items-start justify-between mb-2">
+                    <div className="flex-1">
                       <motion.div
                         initial={{ scale: 0.8 }}
                         animate={{ scale: 1 }}
                         transition={{ delay: 0.4 + index * 0.1 }}
-                        className="mb-1 text-2xl font-bold text-foreground"
+                        className="text-2xl font-bold text-orange-900 mb-1"
                       >
                         {stat.value}
                       </motion.div>
-                      <div className="mb-1 text-sm font-medium text-muted-foreground">
+                      <div className="text-xs font-semibold text-orange-800/90 mb-1">
                         {stat.title}
                       </div>
-                      <div className="text-xs text-muted-foreground">
+                      <div className="text-xs text-orange-700/70">
                         {stat.description}
                       </div>
                     </div>
                     <motion.div
-                      whileHover={{ scale: 1.1, rotate: 5 }}
-                      className={`w-12 h-12 rounded-xl bg-gradient-to-r ${stat.gradient} flex items-center justify-center shadow-lg group-hover:shadow-xl transition-all duration-300`}
+                      whileHover={{ scale: 1.15, rotate: 10 }}
+                      className={`w-10 h-10 rounded-2xl bg-gradient-to-r ${stat.gradient} flex items-center justify-center shadow-lg group-hover:shadow-xl flex-shrink-0`}
                     >
-                      <stat.icon className="w-6 h-6 text-white" />
+                      <stat.icon className="w-5 h-5 text-white" />
                     </motion.div>
+                  </div>
+                  <div
+                    className={`flex items-center text-xs ${stat.trend.startsWith("+") ? "text-emerald-600" : "text-red-600"}`}
+                  >
+                    <div
+                      className={`p-1 rounded-full mr-1 ${stat.trend.startsWith("+") ? "bg-emerald-100" : "bg-red-100"}`}
+                    >
+                      <TrendingUp
+                        className={`w-2 h-2 ${!stat.trend.startsWith("+") ? "rotate-180" : ""}`}
+                      />
+                    </div>
+                    <span className="font-semibold">{stat.trend}</span>
+                  </div>
+                </CardContent>
+              </Card>
+            </motion.div>
+          ))}
+        </motion.div>
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ delay: 0.28 }}
+          className="grid grid-cols-2 gap-4 mb-8 md:grid-cols-2"
+          id="stats2"
+          data-animate
+        >
+          {statsCards.slice(4).map((stat, index) => (
+            <motion.div
+              key={index}
+              initial={{ opacity: 0, y: 30 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: 0.35 + index * 0.1 }}
+              whileHover={{ y: -8, scale: 1.03 }}
+              className="transition-all duration-500"
+            >
+              <Card
+                className={`relative overflow-hidden border-0 bg-gradient-to-br ${stat.bgGradient} backdrop-blur-sm shadow-lg hover:shadow-2xl group rounded-3xl`}
+                style={{ minHeight: 140 }}
+              >
+                <div className="absolute inset-0 bg-gradient-to-br from-white/20 via-transparent to-transparent opacity-50" />
+                <CardContent className="pt-4 pb-4">
+                  <div className="flex items-start justify-between mb-2">
+                    <div className="flex-1">
+                      <motion.div
+                        initial={{ scale: 0.8 }}
+                        animate={{ scale: 1 }}
+                        transition={{ delay: 0.45 + index * 0.1 }}
+                        className="text-2xl font-bold text-orange-900 mb-1"
+                      >
+                        {stat.value}
+                      </motion.div>
+                      <div className="text-xs font-semibold text-orange-800/90 mb-1">
+                        {stat.title}
+                      </div>
+                      <div className="text-xs text-orange-700/70">
+                        {stat.description}
+                      </div>
+                    </div>
+                    <motion.div
+                      whileHover={{ scale: 1.15, rotate: 10 }}
+                      className={`w-10 h-10 rounded-2xl bg-gradient-to-r ${stat.gradient} flex items-center justify-center shadow-lg group-hover:shadow-xl flex-shrink-0`}
+                    >
+                      <stat.icon className="w-5 h-5 text-white" />
+                    </motion.div>
+                  </div>
+                  <div
+                    className={`flex items-center text-xs ${stat.trend.startsWith("+") ? "text-emerald-600" : "text-red-600"}`}
+                  >
+                    <div
+                      className={`p-1 rounded-full mr-1 ${stat.trend.startsWith("+") ? "bg-emerald-100" : "bg-red-100"}`}
+                    >
+                      <TrendingUp
+                        className={`w-2 h-2 ${!stat.trend.startsWith("+") ? "rotate-180" : ""}`}
+                      />
+                    </div>
+                    <span className="font-semibold">{stat.trend}</span>
                   </div>
                 </CardContent>
               </Card>
@@ -630,85 +636,134 @@ const BlogManagement: React.FC = () => {
           ))}
         </motion.div>
 
-        {/* ✅ Enhanced Filters */}
+        {/* Filters */}
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ delay: 0.4 }}
+          className="mb-6"
           id="filters"
           data-animate
         >
-          <Card className="border-0 shadow-lg bg-gradient-to-r from-white to-blue-50 dark:from-slate-800 dark:to-blue-900">
+          <Card className="border-0 shadow-xl bg-gradient-to-r from-white/95 via-orange-50/80 to-pink-50/80 backdrop-blur-xl rounded-3xl">
             <CardHeader>
-              <div className="flex items-center space-x-3">
-                <div className="flex items-center justify-center w-10 h-10 rounded-xl bg-gradient-to-r from-blue-500 to-cyan-500">
-                  <Filter className="w-5 h-5 text-white" />
+              <div className="flex items-center justify-between">
+                <div className="flex items-center space-x-4">
+                  <div className="flex items-center justify-center w-12 h-12 rounded-2xl bg-gradient-to-r from-orange-500 to-pink-600 shadow-lg">
+                    <Filter className="w-6 h-6 text-white" />
+                  </div>
+                  <div>
+                    <CardTitle className="text-2xl text-transparent bg-gradient-to-r from-orange-600 to-pink-600 bg-clip-text font-bold">
+                      Bộ lọc và tìm kiếm
+                    </CardTitle>
+                    <p className="text-sm text-orange-700/80 mt-1">
+                      Tìm kiếm & lọc bài viết theo nhiều tiêu chí
+                    </p>
+                  </div>
                 </div>
-                <div>
-                  <CardTitle className="text-xl text-transparent bg-gradient-to-r from-blue-600 to-cyan-600 bg-clip-text">
-                    Bộ lọc và tìm kiếm
-                  </CardTitle>
-                  <p className="text-sm text-muted-foreground">
-                    Tìm kiếm và lọc bài viết theo tiêu chí
-                  </p>
-                </div>
+                <Badge className="bg-gradient-to-r from-orange-200 to-pink-200 text-orange-800 border-0 shadow-sm">
+                  {filteredPosts.length} kết quả
+                </Badge>
               </div>
             </CardHeader>
             <CardContent>
-              <div className="flex flex-col gap-4 md:flex-row">
-                <motion.div
-                  className="relative flex-1"
-                  whileFocus={{ scale: 1.01 }}
-                >
-                  <Search className="absolute w-4 h-4 transform -translate-y-1/2 left-3 top-1/2 text-muted-foreground" />
-                  <Input
-                    placeholder="Tìm kiếm bài viết theo tiêu đề, nội dung, tác giả..."
-                    value={searchQuery}
-                    onChange={(e) => setSearchQuery(e.target.value)}
-                    className="h-12 pl-10 transition-all duration-300 border-0 bg-background/50 focus:ring-2 focus:ring-primary/20"
-                  />
+              <div className="space-y-4">
+                {/* Search Bar */}
+                <motion.div className="relative" whileFocus={{ scale: 1.01 }}>
+                  <div className="absolute inset-0 bg-gradient-to-r from-orange-400/20 to-pink-400/20 rounded-3xl blur-lg opacity-0 group-hover:opacity-100 transition-all duration-500" />
+                  <div className="relative flex items-center space-x-3 p-4 bg-gradient-to-r from-white/90 to-orange-50/90 backdrop-blur-xl border border-orange-200/50 rounded-3xl shadow-lg hover:shadow-xl transition-all duration-300 group">
+                    <Search className="flex-shrink-0 w-5 h-5 text-orange-600 group-hover:text-orange-800 transition-colors" />
+                    <Input
+                      placeholder="Tìm kiếm bài viết..."
+                      value={searchQuery}
+                      onChange={(e) => setSearchQuery(e.target.value)}
+                      className="flex-1 text-sm bg-transparent border-none outline-none placeholder:text-orange-500/60 text-orange-800 font-medium"
+                    />
+                  </div>
                 </motion.div>
-
-                <motion.div whileFocus={{ scale: 1.01 }}>
-                  <Select
-                    value={categoryFilter}
-                    onValueChange={setCategoryFilter}
+                {/* Filter Controls */}
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+                  <motion.div whileFocus={{ scale: 1.01 }}>
+                    <label className="text-sm font-semibold text-orange-800 mb-2 block">
+                      Danh mục
+                    </label>
+                    <Select
+                      value={categoryFilter}
+                      onValueChange={setCategoryFilter}
+                    >
+                      <SelectTrigger className="h-12 bg-white/80 border-orange-200/50 rounded-2xl shadow-md">
+                        <SelectValue placeholder="Chọn danh mục" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="all">Tất cả danh mục</SelectItem>
+                        {categories.map((cat) => (
+                          <SelectItem key={cat.id} value={cat.id}>
+                            {cat.name}
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                  </motion.div>
+                  <motion.div whileFocus={{ scale: 1.01 }}>
+                    <label className="text-sm font-semibold text-orange-800 mb-2 block">
+                      Trạng thái
+                    </label>
+                    <Select
+                      value={statusFilter}
+                      onValueChange={(value: any) => setStatusFilter(value)}
+                    >
+                      <SelectTrigger className="h-12 bg-white/80 border-orange-200/50 rounded-2xl shadow-md">
+                        <SelectValue placeholder="Trạng thái" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="all">Tất cả trạng thái</SelectItem>
+                        <SelectItem value="published">Đã xuất bản</SelectItem>
+                        <SelectItem value="draft">Bản nháp</SelectItem>
+                      </SelectContent>
+                    </Select>
+                  </motion.div>
+                </div>
+                {/* Quick Filter Badges */}
+                <div className="flex flex-wrap gap-2 pt-2">
+                  <Badge
+                    variant="outline"
+                    className="cursor-pointer hover:bg-orange-100 transition-colors"
+                    onClick={() => setStatusFilter("published")}
                   >
-                    <SelectTrigger className="w-full md:w-[180px] h-12">
-                      <SelectValue placeholder="Danh mục" />
-                    </SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="all">Tất cả danh mục</SelectItem>
-                      {categories.map((category) => (
-                        <SelectItem key={category.id} value={category.id}>
-                          {category.name}
-                        </SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
-                </motion.div>
-
-                <motion.div whileFocus={{ scale: 1.01 }}>
-                  <Select
-                    value={statusFilter}
-                    onValueChange={(value: any) => setStatusFilter(value)}
+                    ✅ Đã xuất bản
+                  </Badge>
+                  <Badge
+                    variant="outline"
+                    className="cursor-pointer hover:bg-orange-100 transition-colors"
+                    onClick={() => setStatusFilter("draft")}
                   >
-                    <SelectTrigger className="w-full md:w-[180px] h-12">
-                      <SelectValue placeholder="Trạng thái" />
-                    </SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="all">Tất cả trạng thái</SelectItem>
-                      <SelectItem value="published">Đã xuất bản</SelectItem>
-                      <SelectItem value="draft">Bản nháp</SelectItem>
-                    </SelectContent>
-                  </Select>
-                </motion.div>
+                    📝 Bản nháp
+                  </Badge>
+                  <Badge
+                    variant="outline"
+                    className="cursor-pointer hover:bg-orange-100 transition-colors"
+                    onClick={() => setCategoryFilter("all")}
+                  >
+                    🏷️ Tất cả danh mục
+                  </Badge>
+                  <Badge
+                    variant="outline"
+                    className="cursor-pointer hover:bg-orange-100 transition-colors"
+                    onClick={() => {
+                      setSearchQuery("");
+                      setStatusFilter("all");
+                      setCategoryFilter("all");
+                    }}
+                  >
+                    🔄 Reset tất cả
+                  </Badge>
+                </div>
               </div>
             </CardContent>
           </Card>
         </motion.div>
 
-        {/* ✅ Enhanced Posts Table */}
+        {/* Posts Table with pagination */}
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
@@ -716,26 +771,25 @@ const BlogManagement: React.FC = () => {
           id="posts"
           data-animate
         >
-          <Card className="border-0 shadow-xl bg-gradient-to-br from-white to-gray-50 dark:from-slate-800 dark:to-slate-900">
+          <Card className="border-0 shadow-xl bg-gradient-to-br from-white/95 via-orange-50/80 to-pink-50/80 backdrop-blur-xl rounded-3xl overflow-hidden">
             <CardHeader>
               <div className="flex items-center justify-between">
-                <div className="flex items-center space-x-3">
-                  <div className="flex items-center justify-center w-10 h-10 rounded-xl bg-gradient-to-r from-green-500 to-emerald-500">
-                    <BarChart3 className="w-5 h-5 text-white" />
+                <div className="flex items-center space-x-4">
+                  <div className="flex items-center justify-center w-12 h-12 rounded-2xl bg-gradient-to-r from-green-500 to-emerald-600 shadow-lg">
+                    <BarChart3 className="w-6 h-6 text-white" />
                   </div>
                   <div>
-                    <CardTitle className="text-xl text-transparent bg-gradient-to-r from-green-600 to-emerald-600 bg-clip-text">
+                    <CardTitle className="text-2xl text-transparent bg-gradient-to-r from-green-600 to-emerald-600 bg-clip-text font-bold">
                       Danh sách bài viết
                     </CardTitle>
-                    <p className="text-sm text-muted-foreground">
-                      Trang {currentPage} / {totalPages} -{" "}
-                      {filteredPosts.length} bài viết được tìm thấy
+                    <p className="text-sm text-green-700/80 mt-1 flex items-center space-x-2">
+                      {filteredPosts.length} bài viết được tìm thấy (Trang{" "}
+                      {page}/{totalPages})
                     </p>
                   </div>
                 </div>
-                <Badge variant="outline" className="text-blue-800 bg-blue-100">
-                  <Activity className="w-3 h-3 mr-1" />
-                  {currentPosts.length} kết quả
+                <Badge className="bg-gradient-to-r from-green-200 to-emerald-200 text-green-800 border-0 shadow-sm">
+                  {pagedPosts.length} hiển thị
                 </Badge>
               </div>
             </CardHeader>
@@ -743,51 +797,63 @@ const BlogManagement: React.FC = () => {
               <div className="overflow-x-auto">
                 <Table>
                   <TableHeader>
-                    <TableRow className="hover:bg-muted/50">
-                      <TableHead className="font-semibold">Bài viết</TableHead>
-                      <TableHead className="font-semibold">Danh mục</TableHead>
-                      <TableHead className="font-semibold">Tác giả</TableHead>
-                      <TableHead className="font-semibold">
+                    <TableRow className="hover:bg-muted/50 border-orange-200/30">
+                      <TableHead className="font-semibold text-orange-800">
+                        Bài viết
+                      </TableHead>
+                      <TableHead className="font-semibold text-orange-800">
+                        Danh mục
+                      </TableHead>
+                      <TableHead className="font-semibold text-orange-800">
+                        Tác giả
+                      </TableHead>
+                      <TableHead className="font-semibold text-orange-800">
                         Trạng thái
                       </TableHead>
-                      <TableHead className="font-semibold">Thống kê</TableHead>
-                      <TableHead className="font-semibold">Ngày tạo</TableHead>
-                      <TableHead className="font-semibold text-right">
+                      <TableHead className="font-semibold text-orange-800">
+                        Lượt xem
+                      </TableHead>
+                      <TableHead className="font-semibold text-orange-800">
+                        Ngày tạo
+                      </TableHead>
+                      <TableHead className="font-semibold text-orange-800 text-right">
                         Thao tác
                       </TableHead>
                     </TableRow>
                   </TableHeader>
                   <TableBody>
                     <AnimatePresence>
-                      {currentPosts.map((post, index) => (
+                      {pagedPosts.map((post, index) => (
                         <motion.tr
                           key={post.id}
                           initial={{ opacity: 0, x: -20 }}
                           animate={{ opacity: 1, x: 0 }}
                           exit={{ opacity: 0, x: 20 }}
                           transition={{ delay: index * 0.05 }}
-                          whileHover={{ backgroundColor: "rgba(0,0,0,0.02)" }}
-                          className="transition-all duration-300 group hover:shadow-md"
+                          whileHover={{
+                            backgroundColor: "rgba(255,245,235,0.5)",
+                          }}
+                          className="transition-all duration-300 group hover:shadow-md border-orange-200/20"
                         >
                           <TableCell>
-                            <div className="flex items-start space-x-3">
+                            <div className="flex items-center space-x-3">
                               <motion.img
                                 whileHover={{ scale: 1.1 }}
                                 src={post.featuredImage}
                                 alt={post.title}
-                                className="object-cover w-16 h-12 transition-transform duration-300 rounded shadow-md"
+                                className="object-cover w-14 h-12 rounded-lg shadow"
                               />
-                              <div className="space-y-1">
-                                <div className="font-medium transition-colors line-clamp-2 group-hover:text-primary">
+                              <div>
+                                <div className="font-semibold transition-colors group-hover:text-orange-700 text-orange-900">
                                   {post.title}
                                 </div>
-                                <div className="text-sm text-muted-foreground line-clamp-1">
+                                <div className="text-xs text-orange-600/80">
                                   {post.excerpt}
                                 </div>
                                 {post.isFeatured && (
                                   <Badge
                                     variant="outline"
-                                    className="text-xs text-yellow-800 bg-yellow-100"
+                                    className="text-xs text-amber-800 bg-amber-100 ml-1"
                                   >
                                     <TrendingUp className="w-3 h-3 mr-1" />
                                     Nổi bật
@@ -799,13 +865,7 @@ const BlogManagement: React.FC = () => {
                           <TableCell>
                             <Badge
                               variant="outline"
-                              style={{
-                                borderColor: getCategoryColor(
-                                  post.category.color,
-                                ),
-                                color: getCategoryColor(post.category.color),
-                              }}
-                              className="transition-all duration-300 group-hover:scale-105"
+                              className="transition-all duration-300 group-hover:scale-105 bg-purple-100 text-purple-800 border-purple-300"
                             >
                               {post.category.name}
                             </Badge>
@@ -816,7 +876,7 @@ const BlogManagement: React.FC = () => {
                                 whileHover={{ scale: 1.1 }}
                                 src={post.author.avatar}
                                 alt={post.author.name}
-                                className="object-cover w-6 h-6 transition-transform duration-300 rounded-full"
+                                className="object-cover w-6 h-6 rounded-full"
                               />
                               <span className="text-sm font-medium">
                                 {post.author.name}
@@ -825,44 +885,43 @@ const BlogManagement: React.FC = () => {
                           </TableCell>
                           <TableCell>
                             <Badge
-                              variant={
-                                post.isPublished ? "default" : "secondary"
-                              }
-                              className="transition-all duration-300 group-hover:scale-105"
+                              className={`transition-all duration-300 group-hover:scale-105 border-0 shadow-sm ${
+                                post.isPublished
+                                  ? "bg-gradient-to-r from-green-200 to-emerald-200 text-green-800"
+                                  : "bg-gradient-to-r from-red-200 to-pink-200 text-red-800"
+                              }`}
                             >
-                              {post.isPublished ? "Đã xuất bản" : "Bản nháp"}
+                              {post.isPublished ? (
+                                <>
+                                  <CheckCircle className="w-3 h-3 mr-1" />
+                                  Đã xuất bản
+                                </>
+                              ) : (
+                                <>
+                                  <Edit className="w-3 h-3 mr-1" />
+                                  Bản nháp
+                                </>
+                              )}
                             </Badge>
                           </TableCell>
                           <TableCell>
-                            <div className="space-y-1 text-sm">
-                              <div className="flex items-center space-x-1">
-                                <Eye className="w-3 h-3 text-blue-500" />
-                                <span className="font-medium">
-                                  {post.views}
-                                </span>
-                              </div>
-                              <div className="flex items-center space-x-1">
-                                <Heart className="w-3 h-3 text-red-500" />
-                                <span className="font-medium">
-                                  {post.likes}
-                                </span>
-                              </div>
+                            <div className="flex items-center space-x-1 text-sm font-bold text-emerald-600">
+                              <Eye className="w-3 h-3" />
+                              {post.views}
+                              <Heart className="w-3 h-3 text-pink-400 ml-1" />
+                              {post.likes}
                             </div>
                           </TableCell>
                           <TableCell>
-                            <div className="space-y-1 text-sm">
-                              <div className="flex items-center space-x-1">
-                                <Calendar className="w-3 h-3" />
-                                <span>
-                                  {new Date(
-                                    post.publishedAt,
-                                  ).toLocaleDateString("vi-VN")}
-                                </span>
-                              </div>
-                              <div className="flex items-center space-x-1 text-xs text-muted-foreground">
-                                <Clock className="w-3 h-3" />
-                                <span>{post.readTime} phút đọc</span>
-                              </div>
+                            <div className="flex items-center space-x-1 text-sm text-orange-700/80">
+                              <Calendar className="w-3 h-3" />
+                              <span>
+                                {post.publishedAt
+                                  ? new Date(
+                                      post.publishedAt,
+                                    ).toLocaleDateString("vi-VN")
+                                  : "--"}
+                              </span>
                             </div>
                           </TableCell>
                           <TableCell className="text-right">
@@ -875,13 +934,13 @@ const BlogManagement: React.FC = () => {
                                   <Button
                                     variant="ghost"
                                     size="sm"
-                                    className="group/btn"
+                                    className="group/btn bg-white/60 hover:bg-white/80 rounded-2xl shadow-md"
                                   >
-                                    <MoreHorizontal className="w-4 h-4 transition-colors group-hover/btn:text-primary" />
+                                    <MoreHorizontal className="w-4 h-4 transition-colors group-hover/btn:text-orange-600" />
                                   </Button>
                                 </motion.div>
                               </DropdownMenuTrigger>
-                              <DropdownMenuContent align="end">
+                              <DropdownMenuContent align="end" className="w-48">
                                 <DropdownMenuItem asChild>
                                   <Link to={`/blog/${post.slug}`}>
                                     <Eye className="w-4 h-4 mr-2" />
@@ -897,10 +956,17 @@ const BlogManagement: React.FC = () => {
                                 <DropdownMenuItem
                                   onClick={() => handleToggleStatus(post.id)}
                                 >
-                                  <BookOpen className="w-4 h-4 mr-2" />
-                                  {post.isPublished
-                                    ? "Chuyển về nháp"
-                                    : "Xuất bản"}
+                                  {post.isPublished ? (
+                                    <>
+                                      <Edit className="w-4 h-4 mr-2" />
+                                      Chuyển về nháp
+                                    </>
+                                  ) : (
+                                    <>
+                                      <CheckCircle className="w-4 h-4 mr-2" />
+                                      Xuất bản
+                                    </>
+                                  )}
                                 </DropdownMenuItem>
                                 <DropdownMenuItem
                                   onClick={() => handleDeletePost(post.id)}
@@ -918,8 +984,7 @@ const BlogManagement: React.FC = () => {
                   </TableBody>
                 </Table>
               </div>
-
-              {/* ✅ Enhanced Empty State */}
+              {/* Empty State */}
               {filteredPosts.length === 0 && (
                 <motion.div
                   initial={{ opacity: 0, scale: 0.8 }}
@@ -930,49 +995,133 @@ const BlogManagement: React.FC = () => {
                     initial={{ scale: 0 }}
                     animate={{ scale: 1 }}
                     transition={{ delay: 0.2, type: "spring", stiffness: 200 }}
+                    className="mb-6"
                   >
-                    <BookOpen className="w-20 h-20 mx-auto mb-6 text-muted-foreground" />
+                    <div className="relative">
+                      <BookOpen className="w-20 h-20 mx-auto text-orange-400/50" />
+                      <motion.div
+                        animate={{ rotate: [0, 10, -10, 0] }}
+                        transition={{
+                          duration: 2,
+                          repeat: Infinity,
+                          repeatType: "reverse",
+                        }}
+                        className="absolute -top-2 -right-2"
+                      >
+                        <Sparkles className="w-8 h-8 text-amber-500" />
+                      </motion.div>
+                    </div>
                   </motion.div>
-                  <h3 className="mb-4 text-2xl font-semibold">
+                  <h3 className="mb-4 text-2xl font-bold text-transparent bg-gradient-to-r from-orange-600 to-pink-600 bg-clip-text">
                     Không tìm thấy bài viết
                   </h3>
-                  <p className="max-w-md mx-auto mb-6 text-muted-foreground">
-                    Thử thay đổi bộ lọc hoặc tạo bài viết mới để bắt đầu chia sẻ
-                    nội dung.
+                  <p className="max-w-md mx-auto mb-6 text-orange-700/80 leading-relaxed">
+                    Thử thay đổi bộ lọc hoặc từ khóa tìm kiếm để tìm thấy bài
+                    viết phù hợp.
                   </p>
-                  <div className="space-y-3">
-                    <Button
-                      onClick={() => {
-                        setSearchQuery("");
-                        setCategoryFilter("all");
-                        setStatusFilter("all");
-                      }}
-                      variant="outline"
-                      className="mr-3"
-                    >
-                      <RefreshCw className="w-4 h-4 mr-2" />
-                      Xóa bộ lọc
-                    </Button>
-                    <Button
-                      asChild
-                      className="bg-gradient-to-r from-blue-500 to-purple-600 hover:from-blue-600 hover:to-purple-700"
-                    >
-                      <Link to="/admin/blog/create">
-                        <Plus className="w-4 h-4 mr-2" />
-                        Viết bài mới
-                      </Link>
-                    </Button>
-                  </div>
-                  <div className="flex justify-center mt-4 space-x-2">
-                    <Badge variant="outline">💡 Gợi ý: Thử tìm "React"</Badge>
-                    <Badge variant="outline">🔥 Hoặc "Tutorial"</Badge>
-                    <Badge variant="outline">⚡ Hoặc "JavaScript"</Badge>
+                  <div className="space-y-4">
+                    <div className="flex justify-center space-x-3">
+                      <Button
+                        onClick={() => {
+                          setSearchQuery("");
+                          setCategoryFilter("all");
+                          setStatusFilter("all");
+                        }}
+                        variant="outline"
+                        className="bg-white/80 hover:bg-white border-orange-200/50 hover:border-orange-300 rounded-2xl shadow-md"
+                      >
+                        <RefreshCw className="w-4 h-4 mr-2" />
+                        <span className="text-orange-800 font-semibold">
+                          Xóa bộ lọc
+                        </span>
+                      </Button>
+                      <Button
+                        asChild
+                        className="bg-gradient-to-r from-orange-500 via-amber-500 to-pink-600 hover:from-orange-600 hover:to-pink-700 rounded-2xl shadow-lg"
+                      >
+                        <Link to="/admin/blog/create">
+                          <Plus className="w-4 h-4 mr-2" />
+                          <span className="font-semibold">Viết bài mới</span>
+                          <Sparkles className="w-4 h-4 ml-1" />
+                        </Link>
+                      </Button>
+                    </div>
+                    <div className="flex justify-center flex-wrap gap-2">
+                      <Badge
+                        variant="outline"
+                        className="cursor-pointer hover:bg-orange-100 transition-colors"
+                        onClick={() => setStatusFilter("published")}
+                      >
+                        💡 Thử lọc "Đã xuất bản"
+                      </Badge>
+                      <Badge
+                        variant="outline"
+                        className="cursor-pointer hover:bg-orange-100 transition-colors"
+                        onClick={() => setStatusFilter("draft")}
+                      >
+                        📝 Thử lọc "Bản nháp"
+                      </Badge>
+                      <Badge
+                        variant="outline"
+                        className="cursor-pointer hover:bg-orange-100 transition-colors"
+                        onClick={() => setSearchQuery("React")}
+                      >
+                        ⚡ Thử tìm "React"
+                      </Badge>
+                      <Badge
+                        variant="outline"
+                        className="cursor-pointer hover:bg-orange-100 transition-colors"
+                        onClick={() => setSearchQuery("Tutorial")}
+                      >
+                        🔥 Thử tìm "Tutorial"
+                      </Badge>
+                    </div>
                   </div>
                 </motion.div>
               )}
-
-              {/* ✅ Pagination Component */}
-              <PaginationComponent />
+              {/* Pagination */}
+              {totalPages > 1 && (
+                <div className="flex justify-center items-center mt-8 gap-2">
+                  <Button
+                    onClick={() => setPage((p) => Math.max(1, p - 1))}
+                    disabled={page === 1}
+                    variant="outline"
+                    className="bg-white/80 hover:bg-white border-orange-200/50 hover:border-orange-300 rounded-2xl shadow-md"
+                  >
+                    <span className="text-orange-800 font-semibold">Trước</span>
+                  </Button>
+                  {Array.from({ length: Math.min(5, totalPages) }, (_, i) => {
+                    let pageNum;
+                    if (totalPages <= 5) pageNum = i + 1;
+                    else if (page <= 3) pageNum = i + 1;
+                    else if (page >= totalPages - 2)
+                      pageNum = totalPages - 4 + i;
+                    else pageNum = page - 2 + i;
+                    return (
+                      <Button
+                        key={pageNum}
+                        onClick={() => setPage(pageNum)}
+                        variant={page === pageNum ? "default" : "outline"}
+                        className={`w-10 h-10 rounded-2xl transition-all ${
+                          page === pageNum
+                            ? "bg-gradient-to-r from-orange-500 to-pink-600 text-white shadow-lg"
+                            : "bg-white/80 hover:bg-white border-orange-200/50 hover:border-orange-300 text-orange-700 hover:text-orange-900"
+                        }`}
+                      >
+                        {pageNum}
+                      </Button>
+                    );
+                  })}
+                  <Button
+                    onClick={() => setPage((p) => Math.min(totalPages, p + 1))}
+                    disabled={page === totalPages}
+                    variant="outline"
+                    className="bg-white/80 hover:bg-white border-orange-200/50 hover:border-orange-300 rounded-2xl shadow-md"
+                  >
+                    <span className="text-orange-800 font-semibold">Tiếp</span>
+                  </Button>
+                </div>
+              )}
             </CardContent>
           </Card>
         </motion.div>

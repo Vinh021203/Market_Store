@@ -40,6 +40,15 @@ const SearchResults = React.lazy(() => import("./pages/SearchResults"));
 const Careers = React.lazy(() => import("./pages/Careers"));
 const Wishlist = React.lazy(() => import("./pages/Wishlist"));
 
+// ✅ Support Pages
+const Help = React.lazy(() => import("./pages/Help"));
+const FAQ = React.lazy(() => import("./pages/FAQ"));
+const Privacy = React.lazy(() => import("./pages/Privacy"));
+const Terms = React.lazy(() => import("./pages/Terms"));
+const Refund = React.lazy(() => import("./pages/Refund"));
+const APIDocumentation = React.lazy(() => import("./pages/APIDocumentation"));
+const Cookie = React.lazy(() => import("./pages/Cookie"));
+
 // ✅ User Pages - Protected
 const Profile = React.lazy(() => import("./pages/Profile"));
 const MyOrders = React.lazy(() => import("./pages/MyOrders"));
@@ -71,6 +80,10 @@ const BlogCreate = React.lazy(() => import("./pages/admin/BlogCreate"));
 const BlogCategories = React.lazy(() => import("./pages/admin/BlogCategories"));
 const Analytics = React.lazy(() => import("./pages/admin/Analytics"));
 const Reports = React.lazy(() => import("./pages/admin/Reports"));
+const NotificationsManagement = React.lazy(
+  () => import("./pages/admin/NotificationsManagement"),
+);
+const EmailMarketing = React.lazy(() => import("./pages/admin/EmailMarketing"));
 const AdminSettings = React.lazy(() => import("./pages/admin/Settings"));
 const NotFound = React.lazy(() => import("./pages/NotFound"));
 
@@ -308,6 +321,90 @@ const AppRoutes = () => {
               <Suspense fallback={<SuspenseFallback />}>
                 <PageTransition>
                   <SearchResults />
+                </PageTransition>
+              </Suspense>
+            </ConditionalLayout>
+          }
+        />
+        <Route
+          path="/help"
+          element={
+            <ConditionalLayout>
+              <Suspense fallback={<SuspenseFallback />}>
+                <PageTransition>
+                  <Help />
+                </PageTransition>
+              </Suspense>
+            </ConditionalLayout>
+          }
+        />
+        <Route
+          path="/faq"
+          element={
+            <ConditionalLayout>
+              <Suspense fallback={<SuspenseFallback />}>
+                <PageTransition>
+                  <FAQ />
+                </PageTransition>
+              </Suspense>
+            </ConditionalLayout>
+          }
+        />
+        <Route
+          path="/privacy"
+          element={
+            <ConditionalLayout>
+              <Suspense fallback={<SuspenseFallback />}>
+                <PageTransition>
+                  <Privacy />
+                </PageTransition>
+              </Suspense>
+            </ConditionalLayout>
+          }
+        />
+        <Route
+          path="/terms"
+          element={
+            <ConditionalLayout>
+              <Suspense fallback={<SuspenseFallback />}>
+                <PageTransition>
+                  <Terms />
+                </PageTransition>
+              </Suspense>
+            </ConditionalLayout>
+          }
+        />
+        <Route
+          path="/refund"
+          element={
+            <ConditionalLayout>
+              <Suspense fallback={<SuspenseFallback />}>
+                <PageTransition>
+                  <Refund />
+                </PageTransition>
+              </Suspense>
+            </ConditionalLayout>
+          }
+        />
+        <Route
+          path="/api"
+          element={
+            <ConditionalLayout>
+              <Suspense fallback={<SuspenseFallback />}>
+                <PageTransition>
+                  <APIDocumentation />
+                </PageTransition>
+              </Suspense>
+            </ConditionalLayout>
+          }
+        />
+        <Route
+          path="/cookies"
+          element={
+            <ConditionalLayout>
+              <Suspense fallback={<SuspenseFallback />}>
+                <PageTransition>
+                  <Cookie />
                 </PageTransition>
               </Suspense>
             </ConditionalLayout>
@@ -621,6 +718,26 @@ const AppRoutes = () => {
             }
           />
           <Route
+            path="email-marketing"
+            element={
+              <Suspense fallback={<SuspenseFallback />}>
+                <PageTransition>
+                  <EmailMarketing />
+                </PageTransition>
+              </Suspense>
+            }
+          />
+          <Route
+            path="notifications"
+            element={
+              <Suspense fallback={<SuspenseFallback />}>
+                <PageTransition>
+                  <NotificationsManagement />
+                </PageTransition>
+              </Suspense>
+            }
+          />
+          <Route
             path="settings"
             element={
               <Suspense fallback={<SuspenseFallback />}>
@@ -653,7 +770,7 @@ const AppRoutes = () => {
 // ✅ Main App Component
 const App = () => (
   <QueryClientProvider client={queryClient}>
-    <ThemeProvider defaultTheme="system" storageKey="vite-ui-theme">
+    <ThemeProvider defaultTheme="light" storageKey="vite-ui-theme">
       <TooltipProvider>
         <AuthProvider>
           <WishlistProvider>

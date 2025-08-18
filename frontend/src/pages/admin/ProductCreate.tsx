@@ -4,6 +4,7 @@ import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
 import FormattedDescription from "@/components/FormattedDescription";
+import TinyMCEEditor from "@/components/TinyMCEEditor";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
@@ -52,6 +53,9 @@ import {
   Clock,
   BookOpen,
   BarChart3,
+  Heart,
+  Gift,
+  Layers,
 } from "lucide-react";
 import { toast } from "@/hooks/use-toast";
 
@@ -100,7 +104,7 @@ const ProductCreate: React.FC = () => {
     handleSubmit,
     setValue,
     watch,
-    reset, // ✅ Thêm reset method
+    reset,
     formState: { errors },
   } = useForm<ProductFormData>({
     resolver: zodResolver(productSchema),
@@ -129,13 +133,11 @@ const ProductCreate: React.FC = () => {
 
   const watchedValues = watch();
 
-  // ✅ Enhanced useEffect với reset method
   useEffect(() => {
     if (isEdit && id) {
       const fetchProduct = async () => {
         const product = await getProductById(id);
         if (product) {
-          // ✅ Sử dụng reset để set tất cả values cùng lúc
           reset({
             title: product.title,
             description: product.description,
@@ -161,7 +163,6 @@ const ProductCreate: React.FC = () => {
       fetchProduct();
     }
 
-    // Intersection Observer for scroll animations
     const observer = new IntersectionObserver(
       (entries) => {
         entries.forEach((entry) => {
@@ -180,7 +181,7 @@ const ProductCreate: React.FC = () => {
     sections.forEach((section) => observer.observe(section));
 
     return () => observer.disconnect();
-  }, [id, isEdit, reset]); // ✅ Thêm reset vào dependency array
+  }, [id, isEdit, reset]);
 
   const onSubmit = async (data: ProductFormData) => {
     setIsSaving(true);
@@ -249,49 +250,107 @@ const ProductCreate: React.FC = () => {
       id: "basic",
       label: "Thông tin cơ bản",
       icon: Package,
-      color: "from-blue-500 to-cyan-500",
+      color: "from-orange-500 to-amber-500",
     },
     {
       id: "media",
       label: "Hình ảnh",
       icon: Image,
-      color: "from-purple-500 to-pink-500",
+      color: "from-pink-500 to-rose-500",
     },
     {
       id: "details",
       label: "Chi tiết",
       icon: Settings,
-      color: "from-green-500 to-emerald-500",
+      color: "from-emerald-500 to-green-500",
     },
     {
       id: "seo",
       label: "SEO",
       icon: Globe,
-      color: "from-orange-500 to-red-500",
+      color: "from-amber-500 to-yellow-500",
     },
   ];
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-50 via-blue-50 to-indigo-50 dark:from-slate-900 dark:via-purple-900 dark:to-slate-900">
-      {/* Floating Elements */}
+    <div className="min-h-screen bg-gradient-to-br from-orange-50 via-amber-50 to-pink-50 dark:from-slate-900 dark:via-orange-900 dark:to-pink-900">
+      {/* Enhanced Floating Elements */}
       <div className="fixed inset-0 overflow-hidden pointer-events-none">
-        <div className="absolute top-1/4 left-1/4 animate-float">
-          <Code className="w-8 h-8 text-blue-500 opacity-20" />
-        </div>
-        <div className="absolute top-1/3 right-1/4 animate-float-delay-1">
-          <Palette className="w-6 h-6 text-purple-500 opacity-20" />
-        </div>
-        <div className="absolute bottom-1/4 left-1/3 animate-float-delay-2">
-          <Coffee className="text-orange-500 w-7 h-7 opacity-20" />
-        </div>
+        <motion.div
+          className="absolute top-1/4 left-1/4"
+          animate={{ y: [0, -20, 0], rotate: [0, 10, 0] }}
+          transition={{ duration: 6, repeat: Infinity, ease: "easeInOut" }}
+        >
+          <Code className="w-8 h-8 text-orange-400 opacity-20" />
+        </motion.div>
+        <motion.div
+          className="absolute top-1/3 right-1/4"
+          animate={{ y: [0, -15, 0], rotate: [0, -10, 0] }}
+          transition={{
+            duration: 5,
+            repeat: Infinity,
+            ease: "easeInOut",
+            delay: 1,
+          }}
+        >
+          <Palette className="w-6 h-6 text-pink-400 opacity-20" />
+        </motion.div>
+        <motion.div
+          className="absolute bottom-1/4 left-1/3"
+          animate={{ y: [0, -25, 0], rotate: [0, 15, 0] }}
+          transition={{
+            duration: 7,
+            repeat: Infinity,
+            ease: "easeInOut",
+            delay: 2,
+          }}
+        >
+          <Coffee className="text-amber-400 w-7 h-7 opacity-20" />
+        </motion.div>
+        <motion.div
+          className="absolute top-2/3 right-1/3"
+          animate={{ y: [0, -18, 0], scale: [1, 1.1, 1] }}
+          transition={{
+            duration: 4,
+            repeat: Infinity,
+            ease: "easeInOut",
+            delay: 3,
+          }}
+        >
+          <Heart className="w-5 h-5 text-pink-300 opacity-20" />
+        </motion.div>
+        <motion.div
+          className="absolute top-1/6 right-1/6"
+          animate={{ y: [0, -12, 0], rotate: [0, -5, 0] }}
+          transition={{
+            duration: 8,
+            repeat: Infinity,
+            ease: "easeInOut",
+            delay: 1.5,
+          }}
+        >
+          <Sparkles className="w-4 h-4 text-yellow-400 opacity-20" />
+        </motion.div>
+        <motion.div
+          className="absolute bottom-1/6 right-1/5"
+          animate={{ y: [0, -16, 0], scale: [1, 1.2, 1] }}
+          transition={{
+            duration: 5,
+            repeat: Infinity,
+            ease: "easeInOut",
+            delay: 2.5,
+          }}
+        >
+          <Gift className="w-6 h-6 text-purple-300 opacity-20" />
+        </motion.div>
       </div>
 
       <div className="container relative z-10 px-4 py-8 mx-auto">
-        {/* ✅ Enhanced Header */}
+        {/* Enhanced Header */}
         <motion.div
           initial={{ opacity: 0, y: -20 }}
           animate={{ opacity: 1, y: 0 }}
-          className="flex items-center justify-between mb-8"
+          className="flex items-center justify-between mb-8 p-6 bg-gradient-to-r from-white/90 via-orange-50/90 to-pink-50/90 backdrop-blur-xl border border-orange-200/50 rounded-3xl shadow-2xl"
           id="header"
           data-animate
         >
@@ -301,31 +360,34 @@ const ProductCreate: React.FC = () => {
                 variant="ghost"
                 size="sm"
                 onClick={() => navigate("/admin/products")}
-                className="group"
+                className="group bg-white/60 hover:bg-white/80 rounded-2xl shadow-md border border-orange-200/30"
               >
-                <ArrowLeft className="w-4 h-4 mr-1 transition-transform group-hover:-translate-x-1" />
-                Quay lại
+                <ArrowLeft className="w-4 h-4 mr-1 transition-transform group-hover:-translate-x-1 text-orange-600" />
+                <span className="font-semibold text-orange-800">Quay lại</span>
               </Button>
             </motion.div>
-            <div className="flex items-center space-x-3">
+            <div className="flex items-center space-x-4">
               <motion.div
                 whileHover={{ scale: 1.1, rotate: 5 }}
-                className="flex items-center justify-center w-12 h-12 shadow-lg rounded-2xl bg-gradient-to-r from-blue-500 to-purple-600"
+                className="flex items-center justify-center w-16 h-16 shadow-2xl rounded-3xl bg-gradient-to-r from-orange-500 via-amber-500 to-pink-600"
               >
                 {isEdit ? (
-                  <Settings className="w-6 h-6 text-white" />
+                  <Settings className="w-8 h-8 text-white" />
                 ) : (
-                  <Plus className="w-6 h-6 text-white" />
+                  <Plus className="w-8 h-8 text-white" />
                 )}
               </motion.div>
               <div>
-                <h1 className="text-3xl font-bold text-transparent bg-gradient-to-r from-blue-600 via-purple-600 to-pink-600 bg-clip-text">
+                <h1 className="text-4xl font-bold text-transparent bg-gradient-to-r from-orange-600 via-amber-600 to-pink-600 bg-clip-text">
                   {isEdit ? "Chỉnh sửa sản phẩm" : "Thêm sản phẩm mới"}
                 </h1>
-                <p className="text-muted-foreground">
-                  {isEdit
-                    ? "Cập nhật thông tin sản phẩm hiện có"
-                    : "Tạo sản phẩm mới cho cửa hàng của bạn"}
+                <p className="text-orange-700/80 mt-1 flex items-center space-x-2">
+                  <Sparkles className="w-4 h-4" />
+                  <span>
+                    {isEdit
+                      ? "Cập nhật thông tin sản phẩm hiện có"
+                      : "Tạo sản phẩm mới cho cửa hàng của bạn"}
+                  </span>
                 </p>
               </div>
             </div>
@@ -333,9 +395,12 @@ const ProductCreate: React.FC = () => {
 
           <div className="flex items-center space-x-3">
             <motion.div whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }}>
-              <Button variant="outline" className="group">
-                <Eye className="w-4 h-4 mr-2 transition-transform group-hover:scale-110" />
-                Xem trước
+              <Button
+                variant="outline"
+                className="group bg-white/80 hover:bg-white border-orange-200/50 hover:border-orange-300 rounded-2xl shadow-md"
+              >
+                <Eye className="w-4 h-4 mr-2 transition-transform group-hover:scale-110 text-orange-600" />
+                <span className="text-orange-800 font-semibold">Xem trước</span>
               </Button>
             </motion.div>
 
@@ -343,7 +408,7 @@ const ProductCreate: React.FC = () => {
               <Button
                 onClick={handleSubmit(onSubmit)}
                 disabled={isSaving}
-                className="transition-all duration-300 shadow-lg bg-gradient-to-r from-blue-500 to-purple-600 hover:from-blue-600 hover:to-purple-700 hover:shadow-xl"
+                className="transition-all duration-300 shadow-xl bg-gradient-to-r from-orange-500 via-amber-500 to-pink-600 hover:from-orange-600 hover:via-amber-600 hover:to-pink-700 hover:shadow-2xl rounded-2xl"
               >
                 {isSaving ? (
                   <>
@@ -356,12 +421,17 @@ const ProductCreate: React.FC = () => {
                       }}
                       className="w-4 h-4 mr-2 border-2 border-white rounded-full border-t-transparent"
                     />
-                    {isEdit ? "Đang cập nhật..." : "Đang tạo..."}
+                    <span className="font-semibold">
+                      {isEdit ? "Đang cập nhật..." : "Đang tạo..."}
+                    </span>
                   </>
                 ) : (
                   <>
                     <Save className="w-4 h-4 mr-2" />
-                    {isEdit ? "Cập nhật sản phẩm" : "Tạo sản phẩm"}
+                    <span className="font-semibold">
+                      {isEdit ? "Cập nhật sản phẩm" : "Tạo sản phẩm"}
+                    </span>
+                    <Sparkles className="w-4 h-4 ml-1" />
                   </>
                 )}
               </Button>
@@ -370,7 +440,7 @@ const ProductCreate: React.FC = () => {
         </motion.div>
 
         <div className="grid gap-8 lg:grid-cols-3">
-          {/* ✅ Enhanced Main Content */}
+          {/* Enhanced Main Content */}
           <motion.div
             initial={{ opacity: 0, x: -20 }}
             animate={{ opacity: 1, x: 0 }}
@@ -384,28 +454,55 @@ const ProductCreate: React.FC = () => {
               onValueChange={setActiveTab}
               className="w-full"
             >
-              <TabsList className="grid w-full grid-cols-4 mb-8 bg-gradient-to-r from-white to-blue-50 dark:from-slate-800 dark:to-blue-900">
+              <TabsList
+                className="grid w-full grid-cols-4 mb-6 bg-white/60 rounded-xl shadow-sm p-1 border-0 gap-0"
+                style={{
+                  background:
+                    "linear-gradient(90deg, #FFF8F3 0%, #FDF4FF 100%)",
+                  boxShadow: "0 1px 8px 0 #FCA17D08",
+                }}
+              >
                 {tabsConfig.map((tab, index) => (
                   <motion.div
                     key={`tab-config-${tab.id}-${index}`}
-                    initial={{ opacity: 0, y: 20 }}
+                    initial={{ opacity: 0, y: 8 }}
                     animate={{ opacity: 1, y: 0 }}
-                    transition={{ delay: 0.3 + index * 0.1 }}
-                    whileHover={{ scale: 1.02 }}
+                    transition={{ delay: 0.2 + index * 0.06 }}
+                    className="w-full"
                   >
                     <TabsTrigger
                       value={tab.id}
-                      className="flex items-center space-x-2 data-[state=active]:bg-gradient-to-r data-[state=active]:from-blue-500 data-[state=active]:to-purple-600 data-[state=active]:text-white transition-all duration-300"
+                      className={`
+          group relative w-full flex items-center justify-center gap-1.5 rounded-lg py-2 px-2 text-sm font-medium
+          border-0 outline-none transition-all duration-200
+          focus-visible:ring-1 focus-visible:ring-orange-300/50
+          data-[state=active]:bg-gradient-to-r
+          data-[state=active]:from-[#FF6B35] data-[state=active]:to-[#E91E63]
+          data-[state=active]:text-white data-[state=active]:font-semibold
+          data-[state=active]:shadow-md data-[state=active]:scale-[1.02]
+          data-[state=inactive]:bg-transparent data-[state=inactive]:text-[#D97706]
+          hover:data-[state=inactive]:bg-orange-25
+          hover:data-[state=inactive]:text-[#EA580C]
+        `}
                     >
-                      <tab.icon className="w-4 h-4" />
-                      <span className="hidden sm:inline">{tab.label}</span>
+                      <tab.icon
+                        className={`
+            w-4 h-4
+            transition-all duration-150
+            group-data-[state=active]:text-white
+            group-data-[state=inactive]:text-[#D97706]
+          `}
+                      />
+                      <span className="font-medium text-xs sm:text-sm whitespace-nowrap">
+                        {tab.label}
+                      </span>
                     </TabsTrigger>
                   </motion.div>
                 ))}
               </TabsList>
 
               <AnimatePresence>
-                {/* ✅ Basic Info Tab */}
+                {/* Basic Info Tab */}
                 <TabsContent
                   key="basic-tab-content"
                   value="basic"
@@ -418,23 +515,24 @@ const ProductCreate: React.FC = () => {
                     exit={{ opacity: 0, y: -20 }}
                     transition={{ duration: 0.3 }}
                   >
-                    <Card className="border-0 shadow-lg bg-gradient-to-br from-white to-blue-50 dark:from-slate-800 dark:to-blue-900">
+                    <Card className="border-0 shadow-xl bg-gradient-to-br from-white/95 via-orange-50/80 to-amber-50/80 backdrop-blur-xl rounded-3xl">
                       <CardHeader>
-                        <CardTitle className="flex items-center space-x-3">
-                          <div className="flex items-center justify-center w-10 h-10 rounded-xl bg-gradient-to-r from-blue-500 to-cyan-500">
-                            <Package className="w-5 h-5 text-white" />
+                        <CardTitle className="flex items-center space-x-4">
+                          <div className="flex items-center justify-center w-12 h-12 rounded-2xl bg-gradient-to-r from-orange-500 to-amber-500 shadow-lg">
+                            <Package className="w-6 h-6 text-white" />
                           </div>
                           <div>
-                            <span className="text-xl text-transparent bg-gradient-to-r from-blue-600 to-cyan-600 bg-clip-text">
+                            <span className="text-2xl text-transparent bg-gradient-to-r from-orange-600 to-amber-600 bg-clip-text font-bold">
                               Thông tin sản phẩm
                             </span>
-                            <p className="mt-1 text-sm text-muted-foreground">
+                            <p className="mt-1 text-sm text-orange-700/80">
                               Nhập thông tin cơ bản về sản phẩm
                             </p>
                           </div>
                         </CardTitle>
                       </CardHeader>
                       <CardContent className="space-y-6">
+                        {/* Tiêu đề sản phẩm */}
                         <motion.div
                           className="space-y-2"
                           whileFocus={{ scale: 1.01 }}
@@ -443,17 +541,19 @@ const ProductCreate: React.FC = () => {
                             htmlFor="title"
                             className="flex items-center space-x-2"
                           >
-                            <FileText className="w-4 h-4" />
-                            <span>Tiêu đề sản phẩm *</span>
+                            <FileText className="w-4 h-4 text-orange-600" />
+                            <span className="font-semibold text-orange-800">
+                              Tiêu đề sản phẩm *
+                            </span>
                           </Label>
                           <Input
                             id="title"
                             placeholder="Nhập tiêu đề hấp dẫn cho sản phẩm..."
                             {...register("title")}
-                            className={`h-12 transition-all duration-300 ${
+                            className={`h-12 transition-all duration-300 bg-white/80 border-orange-200/50 rounded-2xl ${
                               errors.title
                                 ? "border-red-500 shake"
-                                : "focus:ring-2 focus:ring-primary/20"
+                                : "focus:ring-2 focus:ring-orange-500/20"
                             }`}
                           />
                           {errors.title && (
@@ -466,126 +566,67 @@ const ProductCreate: React.FC = () => {
                               <span>{errors.title.message}</span>
                             </motion.p>
                           )}
-                          <div className="text-xs text-muted-foreground">
+                          <div className="text-xs text-orange-600/70">
                             {watchedValues.title?.length || 0}/100 ký tự
                           </div>
                         </motion.div>
 
-                        <motion.div
-                          className="space-y-2"
-                          whileFocus={{ scale: 1.01 }}
-                        >
+                        {/* ---- PHẦN NHẬP MÔ TẢ CHI TIẾT ĐÃ NÂNG CẤP TINYMCE ---- */}
+                        <motion.div className="space-y-2 mb-4">
                           <Label
                             htmlFor="description"
-                            className="flex items-center space-x-2"
+                            className="flex items-center space-x-2 mb-1 font-semibold text-orange-800"
                           >
-                            <FileText className="w-4 h-4" />
+                            <FileText className="w-4 h-4 text-orange-600" />
                             <span>Mô tả chi tiết *</span>
                           </Label>
-
-                          <Textarea
-                            id="description"
-                            placeholder={`Mô tả chi tiết về sản phẩm. Bạn có thể sử dụng:
-
-• Bullet point với dấu •
-- Hoặc dấu gạch ngang -
-* Hoặc dấu sao *
-
-1. Danh sách có số thứ tự
-2. Tiếp tục với số 2
-3. Và số 3
-
-Xuống dòng bình thường bằng cách nhấn Enter
-
-Ví dụ:
-Tech Blog VN là template React cao cấp
-
-Tính năng chính:
-• Giao diện hiện đại
-• Admin Dashboard
-• Responsive design
-
-Công nghệ sử dụng:
-1. React 18
-2. TypeScript
-3. Tailwind CSS`}
-                            rows={10}
-                            {...register("description")}
-                            className={`resize-none transition-all duration-300 font-mono ${
-                              errors.description
-                                ? "border-red-500 shake"
-                                : "focus:ring-2 focus:ring-primary/20"
-                            }`}
-                            style={{ whiteSpace: "pre-wrap" }}
-                          />
-
+                          <div
+                            className="overflow-y-auto rounded-xl shadow border border-orange-100 scroll-smooth scrollbar-thin scrollbar-thumb-orange-200 scrollbar-track-orange-50 bg-white/90"
+                            style={{ maxHeight: 320, minHeight: 170 }}
+                          >
+                            <TinyMCEEditor
+                              value={watchedValues.description}
+                              onChange={(value) =>
+                                setValue("description", value)
+                              }
+                              placeholder="Nhập mô tả chi tiết về sản phẩm..."
+                              height={220}
+                              theme="light"
+                            />
+                          </div>
                           {errors.description && (
                             <motion.p
                               initial={{ opacity: 0, y: -10 }}
                               animate={{ opacity: 1, y: 0 }}
-                              className="flex items-center space-x-1 text-sm text-red-500"
+                              className="flex items-center space-x-1 text-sm text-red-500 mt-2"
                             >
                               <AlertTriangle className="w-3 h-3" />
                               <span>{errors.description.message}</span>
                             </motion.p>
                           )}
-
-                          {/* Preview mô tả */}
                           {watchedValues.description && (
                             <motion.div
-                              initial={{ opacity: 0, height: 0 }}
-                              animate={{ opacity: 1, height: "auto" }}
-                              className="p-4 mt-4 border rounded-lg bg-slate-50 dark:bg-slate-800"
+                              initial={{ opacity: 0, y: 10 }}
+                              animate={{ opacity: 1, y: 0 }}
+                              className="mt-4 px-4 py-3 border border-orange-100 rounded-2xl bg-orange-50/80 overflow-auto prose max-w-none scrollbar-thin scrollbar-thumb-orange-200"
+                              style={{ maxHeight: 200 }}
                             >
-                              <Label className="flex items-center mb-2 space-x-2 text-sm font-medium text-slate-700 dark:text-slate-300">
+                              <Label className="flex items-center mb-2 space-x-2 font-medium text-orange-700">
                                 <Eye className="w-4 h-4" />
-                                <span>Xem trước mô tả:</span>
+                                <span>Xem trước mô tả</span>
                               </Label>
-                              <div className="prose-sm prose max-w-none dark:prose-invert">
-                                <FormattedDescription
-                                  text={watchedValues.description}
-                                  className="text-slate-600 dark:text-slate-300"
-                                />
-                              </div>
+                              <div
+                                className="text-[15px] leading-relaxed"
+                                dangerouslySetInnerHTML={{
+                                  __html: watchedValues.description,
+                                }}
+                              />
                             </motion.div>
                           )}
-
-                          {/* Hướng dẫn nhanh */}
-                          <div className="p-3 text-xs rounded-lg text-muted-foreground bg-blue-50 dark:bg-blue-900/20">
-                            <div className="flex items-center mb-2 space-x-2">
-                              <Info className="w-3 h-3 text-blue-600" />
-                              <span className="font-medium">
-                                Hướng dẫn định dạng:
-                              </span>
-                            </div>
-                            <div className="grid grid-cols-2 gap-2 text-xs">
-                              <div>
-                                • <code>• Text</code> → Bullet point
-                              </div>
-                              <div>
-                                • <code>1. Text</code> → Numbered list
-                              </div>
-                              <div>
-                                • <code>Enter</code> → Xuống dòng
-                              </div>
-                              <div>
-                                • <code>**Text**</code> →{" "}
-                                <strong>In đậm</strong>
-                              </div>
-                            </div>
-                          </div>
-
-                          <div className="flex items-center justify-between text-xs text-muted-foreground">
-                            <span>
-                              {watchedValues.description?.length || 0}/1000 ký
-                              tự
-                            </span>
-                            <span className="text-green-600">
-                              ✓ Hỗ trợ định dạng văn bản
-                            </span>
-                          </div>
                         </motion.div>
+                        {/* ---- END MÔ TẢ CHI TIẾT TINYMCE ---- */}
 
+                        {/* Tác giả/Nhà phát triển */}
                         <motion.div
                           className="space-y-2"
                           whileFocus={{ scale: 1.01 }}
@@ -594,17 +635,19 @@ Công nghệ sử dụng:
                             htmlFor="author"
                             className="flex items-center space-x-2"
                           >
-                            <Star className="w-4 h-4" />
-                            <span>Tác giả/Nhà phát triển *</span>
+                            <Star className="w-4 h-4 text-orange-600" />
+                            <span className="font-semibold text-orange-800">
+                              Tác giả/Nhà phát triển *
+                            </span>
                           </Label>
                           <Input
                             id="author"
                             placeholder="Tên tác giả hoặc đội ngũ phát triển"
                             {...register("author")}
-                            className={`h-12 transition-all duration-300 ${
+                            className={`h-12 transition-all duration-300 bg-white/80 border-orange-200/50 rounded-2xl ${
                               errors.author
                                 ? "border-red-500 shake"
-                                : "focus:ring-2 focus:ring-primary/20"
+                                : "focus:ring-2 focus:ring-orange-500/20"
                             }`}
                           />
                           {errors.author && (
@@ -623,7 +666,7 @@ Công nghệ sử dụng:
                   </motion.div>
                 </TabsContent>
 
-                {/* ✅ Media Tab */}
+                {/* Media Tab */}
                 <TabsContent
                   key="media-tab-content"
                   value="media"
@@ -636,17 +679,17 @@ Công nghệ sử dụng:
                     exit={{ opacity: 0, y: -20 }}
                     transition={{ duration: 0.3 }}
                   >
-                    <Card className="border-0 shadow-lg bg-gradient-to-br from-white to-purple-50 dark:from-slate-800 dark:to-purple-900">
+                    <Card className="border-0 shadow-xl bg-gradient-to-br from-white/95 via-pink-50/80 to-rose-50/80 backdrop-blur-xl rounded-3xl">
                       <CardHeader>
-                        <CardTitle className="flex items-center space-x-3">
-                          <div className="flex items-center justify-center w-10 h-10 rounded-xl bg-gradient-to-r from-purple-500 to-pink-500">
-                            <Image className="w-5 h-5 text-white" />
+                        <CardTitle className="flex items-center space-x-4">
+                          <div className="flex items-center justify-center w-12 h-12 rounded-2xl bg-gradient-to-r from-pink-500 to-rose-500 shadow-lg">
+                            <Image className="w-6 h-6 text-white" />
                           </div>
                           <div>
-                            <span className="text-xl text-transparent bg-gradient-to-r from-purple-600 to-pink-600 bg-clip-text">
+                            <span className="text-2xl text-transparent bg-gradient-to-r from-pink-600 to-rose-600 bg-clip-text font-bold">
                               Hình ảnh sản phẩm
                             </span>
-                            <p className="mt-1 text-sm text-muted-foreground">
+                            <p className="mt-1 text-sm text-pink-700/80">
                               Tải lên hình ảnh chính và ảnh phụ
                             </p>
                           </div>
@@ -659,8 +702,10 @@ Công nghệ sử dụng:
                             htmlFor="image"
                             className="flex items-center space-x-2"
                           >
-                            <Image className="w-4 h-4" />
-                            <span>Hình ảnh chính *</span>
+                            <Image className="w-4 h-4 text-pink-600" />
+                            <span className="font-semibold text-pink-800">
+                              Hình ảnh chính *
+                            </span>
                           </Label>
 
                           <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
@@ -669,10 +714,10 @@ Công nghệ sử dụng:
                                 id="image"
                                 placeholder="https://example.com/image.jpg"
                                 {...register("image")}
-                                className={`transition-all duration-300 ${
+                                className={`transition-all duration-300 bg-white/80 border-pink-200/50 rounded-2xl ${
                                   errors.image
                                     ? "border-red-500"
-                                    : "focus:ring-2 focus:ring-primary/20"
+                                    : "focus:ring-2 focus:ring-pink-500/20"
                                 }`}
                               />
                               <Input
@@ -700,7 +745,7 @@ Công nghệ sử dụng:
                                     });
                                   }
                                 }}
-                                className="cursor-pointer"
+                                className="cursor-pointer bg-white/80 border-pink-200/50 rounded-2xl"
                               />
                             </div>
 
@@ -712,14 +757,14 @@ Công nghệ sử dụng:
                               >
                                 <img
                                   src={selectedFileUrl || watchedValues.image}
-                                  className="object-cover w-full h-40 rounded-lg shadow-md"
+                                  className="object-cover w-full h-40 rounded-2xl shadow-md"
                                   onError={(e) => {
                                     e.currentTarget.src =
                                       "https://via.placeholder.com/400x300?text=Image+error";
                                   }}
                                 />
                                 <div className="absolute top-2 right-2">
-                                  <Badge className="text-white bg-green-500">
+                                  <Badge className="text-white bg-green-500 border-0 shadow-lg">
                                     <CheckCircle className="w-3 h-3 mr-1" />
                                     Đã tải
                                   </Badge>
@@ -735,8 +780,10 @@ Công nghệ sử dụng:
                             htmlFor="images"
                             className="flex items-center space-x-2"
                           >
-                            <Image className="w-4 h-4" />
-                            <span>Ảnh phụ (Gallery)</span>
+                            <Image className="w-4 h-4 text-pink-600" />
+                            <span className="font-semibold text-pink-800">
+                              Ảnh phụ (Gallery)
+                            </span>
                           </Label>
 
                           <div className="space-y-2">
@@ -753,7 +800,7 @@ Công nghệ sử dụng:
                                     .filter(Boolean),
                                 )
                               }
-                              className="transition-all duration-300 focus:ring-2 focus:ring-primary/20"
+                              className="transition-all duration-300 bg-white/80 border-pink-200/50 rounded-2xl focus:ring-2 focus:ring-pink-500/20"
                             />
                             <Input
                               type="file"
@@ -783,7 +830,7 @@ Công nghệ sử dụng:
                                   });
                                 }
                               }}
-                              className="cursor-pointer"
+                              className="cursor-pointer bg-white/80 border-pink-200/50 rounded-2xl"
                             />
                           </div>
 
@@ -805,7 +852,7 @@ Công nghệ sử dụng:
                                   >
                                     <img
                                       src={img.trim()}
-                                      className="object-cover w-full h-24 rounded-lg shadow-md"
+                                      className="object-cover w-full h-24 rounded-2xl shadow-md"
                                     />
                                     <motion.button
                                       whileHover={{ scale: 1.1 }}
@@ -817,7 +864,7 @@ Công nghệ sử dụng:
                                           );
                                         setValue("images", newImages || []);
                                       }}
-                                      className="absolute flex items-center justify-center w-6 h-6 text-white transition-opacity bg-red-500 rounded-full opacity-0 -top-2 -right-2 group-hover:opacity-100"
+                                      className="absolute flex items-center justify-center w-6 h-6 text-white transition-opacity bg-red-500 rounded-full opacity-0 -top-2 -right-2 group-hover:opacity-100 shadow-lg"
                                     >
                                       <X className="w-3 h-3" />
                                     </motion.button>
@@ -831,7 +878,7 @@ Công nghệ sử dụng:
                   </motion.div>
                 </TabsContent>
 
-                {/* ✅ Details Tab */}
+                {/* Details Tab */}
                 <TabsContent
                   key="details-tab-content"
                   value="details"
@@ -844,17 +891,17 @@ Công nghệ sử dụng:
                     exit={{ opacity: 0, y: -20 }}
                     transition={{ duration: 0.3 }}
                   >
-                    <Card className="border-0 shadow-lg bg-gradient-to-br from-white to-green-50 dark:from-slate-800 dark:to-green-900">
+                    <Card className="border-0 shadow-xl bg-gradient-to-br from-white/95 via-emerald-50/80 to-green-50/80 backdrop-blur-xl rounded-3xl">
                       <CardHeader>
-                        <CardTitle className="flex items-center space-x-3">
-                          <div className="flex items-center justify-center w-10 h-10 rounded-xl bg-gradient-to-r from-green-500 to-emerald-500">
-                            <Settings className="w-5 h-5 text-white" />
+                        <CardTitle className="flex items-center space-x-4">
+                          <div className="flex items-center justify-center w-12 h-12 rounded-2xl bg-gradient-to-r from-emerald-500 to-green-500 shadow-lg">
+                            <Settings className="w-6 h-6 text-white" />
                           </div>
                           <div>
-                            <span className="text-xl text-transparent bg-gradient-to-r from-green-600 to-emerald-600 bg-clip-text">
+                            <span className="text-2xl text-transparent bg-gradient-to-r from-emerald-600 to-green-600 bg-clip-text font-bold">
                               Chi tiết kỹ thuật
                             </span>
-                            <p className="mt-1 text-sm text-muted-foreground">
+                            <p className="mt-1 text-sm text-emerald-700/80">
                               Thông tin chi tiết về sản phẩm
                             </p>
                           </div>
@@ -866,12 +913,17 @@ Công nghệ sử dụng:
                             className="space-y-2"
                             whileFocus={{ scale: 1.01 }}
                           >
-                            <Label htmlFor="fileSize">Dung lượng file</Label>
+                            <Label
+                              htmlFor="fileSize"
+                              className="font-semibold text-emerald-800"
+                            >
+                              Dung lượng file
+                            </Label>
                             <Input
                               id="fileSize"
                               placeholder="VD: 15.2 MB"
                               {...register("fileSize")}
-                              className="h-12 transition-all duration-300 focus:ring-2 focus:ring-primary/20"
+                              className="h-12 transition-all duration-300 bg-white/80 border-emerald-200/50 rounded-2xl focus:ring-2 focus:ring-emerald-500/20"
                             />
                           </motion.div>
 
@@ -879,12 +931,17 @@ Công nghệ sử dụng:
                             className="space-y-2"
                             whileFocus={{ scale: 1.01 }}
                           >
-                            <Label htmlFor="format">Định dạng file</Label>
+                            <Label
+                              htmlFor="format"
+                              className="font-semibold text-emerald-800"
+                            >
+                              Định dạng file
+                            </Label>
                             <Input
                               id="format"
                               placeholder="VD: ZIP, PDF, Figma"
                               {...register("format")}
-                              className="h-12 transition-all duration-300 focus:ring-2 focus:ring-primary/20"
+                              className="h-12 transition-all duration-300 bg-white/80 border-emerald-200/50 rounded-2xl focus:ring-2 focus:ring-emerald-500/20"
                             />
                           </motion.div>
                         </div>
@@ -894,13 +951,18 @@ Công nghệ sử dụng:
                             className="space-y-2"
                             whileFocus={{ scale: 1.01 }}
                           >
-                            <Label htmlFor="pages">Số trang</Label>
+                            <Label
+                              htmlFor="pages"
+                              className="font-semibold text-emerald-800"
+                            >
+                              Số trang
+                            </Label>
                             <Input
                               id="pages"
                               type="number"
                               placeholder="VD: 245"
                               {...register("pages", { valueAsNumber: true })}
-                              className="h-12 transition-all duration-300 focus:ring-2 focus:ring-primary/20"
+                              className="h-12 transition-all duration-300 bg-white/80 border-emerald-200/50 rounded-2xl focus:ring-2 focus:ring-emerald-500/20"
                             />
                           </motion.div>
                         )}
@@ -909,14 +971,19 @@ Công nghệ sử dụng:
                           className="space-y-2"
                           whileFocus={{ scale: 1.01 }}
                         >
-                          <Label htmlFor="difficulty">Độ khó</Label>
+                          <Label
+                            htmlFor="difficulty"
+                            className="font-semibold text-emerald-800"
+                          >
+                            Độ khó
+                          </Label>
                           <Select
                             value={watchedValues.difficulty}
                             onValueChange={(value: any) =>
                               setValue("difficulty", value)
                             }
                           >
-                            <SelectTrigger className="h-12">
+                            <SelectTrigger className="h-12 bg-white/80 border-emerald-200/50 rounded-2xl">
                               <SelectValue placeholder="Chọn độ khó" />
                             </SelectTrigger>
                             <SelectContent>
@@ -946,16 +1013,19 @@ Công nghệ sử dụng:
                           className="space-y-2"
                           whileFocus={{ scale: 1.01 }}
                         >
-                          <Label htmlFor="technologies">
+                          <Label
+                            htmlFor="technologies"
+                            className="font-semibold text-emerald-800"
+                          >
                             Công nghệ sử dụng
                           </Label>
                           <Input
                             id="technologies"
                             placeholder="React, TypeScript, TailwindCSS, Next.js"
                             {...register("technologies")}
-                            className="h-12 transition-all duration-300 focus:ring-2 focus:ring-primary/20"
+                            className="h-12 transition-all duration-300 bg-white/80 border-emerald-200/50 rounded-2xl focus:ring-2 focus:ring-emerald-500/20"
                           />
-                          <p className="text-xs text-muted-foreground">
+                          <p className="text-xs text-emerald-600/70">
                             Các công nghệ cách nhau bằng dấu phẩy
                           </p>
                         </motion.div>
@@ -965,12 +1035,17 @@ Công nghệ sử dụng:
                             className="space-y-2"
                             whileFocus={{ scale: 1.01 }}
                           >
-                            <Label htmlFor="downloadUrl">Link download</Label>
+                            <Label
+                              htmlFor="downloadUrl"
+                              className="font-semibold text-emerald-800"
+                            >
+                              Link download
+                            </Label>
                             <Input
                               id="downloadUrl"
                               placeholder="https://example.com/download"
                               {...register("downloadUrl")}
-                              className="h-12 transition-all duration-300 focus:ring-2 focus:ring-primary/20"
+                              className="h-12 transition-all duration-300 bg-white/80 border-emerald-200/50 rounded-2xl focus:ring-2 focus:ring-emerald-500/20"
                             />
                           </motion.div>
 
@@ -978,14 +1053,17 @@ Công nghệ sử dụng:
                             className="space-y-2"
                             whileFocus={{ scale: 1.01 }}
                           >
-                            <Label htmlFor="previewUrl">
+                            <Label
+                              htmlFor="previewUrl"
+                              className="font-semibold text-emerald-800"
+                            >
                               Link preview/Demo
                             </Label>
                             <Input
                               id="previewUrl"
                               placeholder="https://preview.example.com"
                               {...register("previewUrl")}
-                              className="h-12 transition-all duration-300 focus:ring-2 focus:ring-primary/20"
+                              className="h-12 transition-all duration-300 bg-white/80 border-emerald-200/50 rounded-2xl focus:ring-2 focus:ring-emerald-500/20"
                             />
                           </motion.div>
                         </div>
@@ -993,10 +1071,12 @@ Công nghệ sử dụng:
                         {/* Upload file ZIP/PDF */}
                         <div className="space-y-4">
                           <Label className="flex items-center space-x-2">
-                            <Upload className="w-4 h-4" />
-                            <span>Tải file sản phẩm (ZIP/PDF) *</span>
+                            <Upload className="w-4 h-4 text-emerald-600" />
+                            <span className="font-semibold text-emerald-800">
+                              Tải file sản phẩm (ZIP/PDF) *
+                            </span>
                           </Label>
-                          <div className="p-6 text-center transition-colors border-2 border-dashed rounded-lg border-muted-foreground/25 hover:border-primary/50">
+                          <div className="p-6 text-center transition-colors border-2 border-dashed border-emerald-300/50 rounded-2xl hover:border-emerald-400/50 bg-emerald-50/30">
                             <Input
                               type="file"
                               accept=".zip,.pdf,.rar,.7z"
@@ -1027,7 +1107,7 @@ Công nghệ sử dụng:
                               }}
                               className="cursor-pointer"
                             />
-                            <div className="mt-2 text-sm text-muted-foreground">
+                            <div className="mt-2 text-sm text-emerald-600/70">
                               Kéo thả file hoặc click để chọn file (ZIP, PDF,
                               RAR, 7Z)
                             </div>
@@ -1038,7 +1118,7 @@ Công nghệ sử dụng:
                   </motion.div>
                 </TabsContent>
 
-                {/* ✅ SEO Tab */}
+                {/* SEO Tab */}
                 <TabsContent
                   key="seo-tab-content"
                   value="seo"
@@ -1051,17 +1131,17 @@ Công nghệ sử dụng:
                     exit={{ opacity: 0, y: -20 }}
                     transition={{ duration: 0.3 }}
                   >
-                    <Card className="border-0 shadow-lg bg-gradient-to-br from-white to-orange-50 dark:from-slate-800 dark:to-orange-900">
+                    <Card className="border-0 shadow-xl bg-gradient-to-br from-white/95 via-amber-50/80 to-yellow-50/80 backdrop-blur-xl rounded-3xl">
                       <CardHeader>
-                        <CardTitle className="flex items-center space-x-3">
-                          <div className="flex items-center justify-center w-10 h-10 rounded-xl bg-gradient-to-r from-orange-500 to-red-500">
-                            <Globe className="w-5 h-5 text-white" />
+                        <CardTitle className="flex items-center space-x-4">
+                          <div className="flex items-center justify-center w-12 h-12 rounded-2xl bg-gradient-to-r from-amber-500 to-yellow-500 shadow-lg">
+                            <Globe className="w-6 h-6 text-white" />
                           </div>
                           <div>
-                            <span className="text-xl text-transparent bg-gradient-to-r from-orange-600 to-red-600 bg-clip-text">
+                            <span className="text-2xl text-transparent bg-gradient-to-r from-amber-600 to-yellow-600 bg-clip-text font-bold">
                               Tối ưu SEO
                             </span>
-                            <p className="mt-1 text-sm text-muted-foreground">
+                            <p className="mt-1 text-sm text-amber-700/80">
                               Tối ưu hóa cho công cụ tìm kiếm
                             </p>
                           </div>
@@ -1076,16 +1156,18 @@ Công nghệ sử dụng:
                             htmlFor="tags"
                             className="flex items-center space-x-2"
                           >
-                            <Tag className="w-4 h-4" />
-                            <span>Tags SEO</span>
+                            <Tag className="w-4 h-4 text-amber-600" />
+                            <span className="font-semibold text-amber-800">
+                              Tags SEO
+                            </span>
                           </Label>
                           <Input
                             id="tags"
                             placeholder="react, template, ecommerce, modern, responsive"
                             {...register("tags")}
-                            className="h-12 transition-all duration-300 focus:ring-2 focus:ring-primary/20"
+                            className="h-12 transition-all duration-300 bg-white/80 border-amber-200/50 rounded-2xl focus:ring-2 focus:ring-amber-500/20"
                           />
-                          <p className="text-xs text-muted-foreground">
+                          <p className="text-xs text-amber-600/70">
                             Các tag cách nhau bằng dấu phẩy (tối đa 10 tags)
                           </p>
                         </motion.div>
@@ -1093,13 +1175,15 @@ Công nghệ sử dụng:
                         {/* SEO Preview */}
                         <div className="space-y-4">
                           <Label className="flex items-center space-x-2">
-                            <Eye className="w-4 h-4" />
-                            <span>Xem trước kết quả tìm kiếm</span>
+                            <Eye className="w-4 h-4 text-amber-600" />
+                            <span className="font-semibold text-amber-800">
+                              Xem trước kết quả tìm kiếm
+                            </span>
                           </Label>
                           <motion.div
                             initial={{ opacity: 0, scale: 0.95 }}
                             animate={{ opacity: 1, scale: 1 }}
-                            className="p-6 border rounded-lg bg-gradient-to-r from-blue-50 to-purple-50 dark:from-blue-900/20 dark:to-purple-900/20"
+                            className="p-6 border border-amber-200/50 rounded-2xl bg-gradient-to-r from-blue-50/50 to-purple-50/50"
                           >
                             <div className="space-y-2">
                               <div className="text-lg font-medium text-blue-600 cursor-pointer hover:underline">
@@ -1133,7 +1217,7 @@ Công nghệ sử dụng:
                                       <Badge
                                         key={i}
                                         variant="outline"
-                                        className="text-xs"
+                                        className="text-xs border-amber-300 text-amber-700"
                                       >
                                         {tag.trim()}
                                       </Badge>
@@ -1151,27 +1235,27 @@ Công nghệ sử dụng:
             </Tabs>
           </motion.div>
 
-          {/* ✅ Enhanced Sidebar */}
+          {/* Enhanced Sidebar */}
           <motion.div
             initial={{ opacity: 0, x: 20 }}
             animate={{ opacity: 1, x: 0 }}
             transition={{ delay: 0.4 }}
-            className="space-y-6"
+            className="space-y-6 sticky top-24"
             id="sidebar"
             data-animate
           >
             {/* Pricing */}
-            <Card className="border-0 shadow-lg bg-gradient-to-br from-white to-green-50 dark:from-slate-800 dark:to-green-900">
+            <Card className="border-0 shadow-xl bg-gradient-to-br from-white/95 via-green-50/80 to-emerald-50/80 backdrop-blur-xl rounded-3xl">
               <CardHeader>
-                <CardTitle className="flex items-center space-x-3">
-                  <div className="flex items-center justify-center w-10 h-10 rounded-xl bg-gradient-to-r from-green-500 to-emerald-500">
-                    <DollarSign className="w-5 h-5 text-white" />
+                <CardTitle className="flex items-center space-x-4">
+                  <div className="flex items-center justify-center w-12 h-12 rounded-2xl bg-gradient-to-r from-green-500 to-emerald-500 shadow-lg">
+                    <DollarSign className="w-6 h-6 text-white" />
                   </div>
                   <div>
-                    <span className="text-xl text-transparent bg-gradient-to-r from-green-600 to-emerald-600 bg-clip-text">
+                    <span className="text-2xl text-transparent bg-gradient-to-r from-green-600 to-emerald-600 bg-clip-text font-bold">
                       Giá bán
                     </span>
-                    <p className="mt-1 text-sm text-muted-foreground">
+                    <p className="mt-1 text-sm text-green-700/80">
                       Thiết lập giá cho sản phẩm
                     </p>
                   </div>
@@ -1179,16 +1263,21 @@ Công nghệ sử dụng:
               </CardHeader>
               <CardContent className="space-y-4">
                 <motion.div className="space-y-2" whileFocus={{ scale: 1.01 }}>
-                  <Label htmlFor="price">Giá bán hiện tại *</Label>
+                  <Label
+                    htmlFor="price"
+                    className="font-semibold text-green-800"
+                  >
+                    Giá bán hiện tại *
+                  </Label>
                   <Input
                     id="price"
                     type="number"
                     placeholder="299000"
                     {...register("price", { valueAsNumber: true })}
-                    className={`h-12 transition-all duration-300 ${
+                    className={`h-12 transition-all duration-300 bg-white/80 border-green-200/50 rounded-2xl ${
                       errors.price
                         ? "border-red-500 shake"
-                        : "focus:ring-2 focus:ring-primary/20"
+                        : "focus:ring-2 focus:ring-green-500/20"
                     }`}
                   />
                   {errors.price && (
@@ -1204,7 +1293,10 @@ Công nghệ sử dụng:
                 </motion.div>
 
                 <motion.div className="space-y-2" whileFocus={{ scale: 1.01 }}>
-                  <Label htmlFor="originalPrice">
+                  <Label
+                    htmlFor="originalPrice"
+                    className="font-semibold text-green-800"
+                  >
                     Giá gốc (nếu có giảm giá)
                   </Label>
                   <Input
@@ -1212,7 +1304,7 @@ Công nghệ sử dụng:
                     type="number"
                     placeholder="399000"
                     {...register("originalPrice", { valueAsNumber: true })}
-                    className="h-12 transition-all duration-300 focus:ring-2 focus:ring-primary/20"
+                    className="h-12 transition-all duration-300 bg-white/80 border-green-200/50 rounded-2xl focus:ring-2 focus:ring-green-500/20"
                   />
                 </motion.div>
 
@@ -1220,7 +1312,7 @@ Công nghệ sử dụng:
                   <motion.div
                     initial={{ opacity: 0, scale: 0.8 }}
                     animate={{ opacity: 1, scale: 1 }}
-                    className="p-4 border border-green-200 rounded-lg bg-gradient-to-r from-green-50 to-emerald-50 dark:from-green-900/20 dark:to-emerald-900/20"
+                    className="p-4 border border-green-200/50 rounded-2xl bg-gradient-to-r from-green-50/50 to-emerald-50/50"
                   >
                     <div className="flex items-center mb-2 space-x-2">
                       <Zap className="w-4 h-4 text-green-600" />
@@ -1241,17 +1333,17 @@ Công nghệ sử dụng:
             </Card>
 
             {/* Category & Status */}
-            <Card className="border-0 shadow-lg bg-gradient-to-br from-white to-purple-50 dark:from-slate-800 dark:to-purple-900">
+            <Card className="border-0 shadow-xl bg-gradient-to-br from-white/95 via-purple-50/80 to-pink-50/80 backdrop-blur-xl rounded-3xl">
               <CardHeader>
-                <CardTitle className="flex items-center space-x-3">
-                  <div className="flex items-center justify-center w-10 h-10 rounded-xl bg-gradient-to-r from-purple-500 to-pink-500">
-                    <Tag className="w-5 h-5 text-white" />
+                <CardTitle className="flex items-center space-x-4">
+                  <div className="flex items-center justify-center w-12 h-12 rounded-2xl bg-gradient-to-r from-purple-500 to-pink-500 shadow-lg">
+                    <Tag className="w-6 h-6 text-white" />
                   </div>
                   <div>
-                    <span className="text-xl text-transparent bg-gradient-to-r from-purple-600 to-pink-600 bg-clip-text">
+                    <span className="text-2xl text-transparent bg-gradient-to-r from-purple-600 to-pink-600 bg-clip-text font-bold">
                       Phân loại
                     </span>
-                    <p className="mt-1 text-sm text-muted-foreground">
+                    <p className="mt-1 text-sm text-purple-700/80">
                       Danh mục và trạng thái
                     </p>
                   </div>
@@ -1259,13 +1351,18 @@ Công nghệ sử dụng:
               </CardHeader>
               <CardContent className="space-y-4">
                 <div className="space-y-2">
-                  <Label htmlFor="category">Danh mục sản phẩm *</Label>
+                  <Label
+                    htmlFor="category"
+                    className="font-semibold text-purple-800"
+                  >
+                    Danh mục sản phẩm *
+                  </Label>
                   <Select
                     value={watchedValues.category}
                     onValueChange={(value: any) => setValue("category", value)}
                   >
                     <SelectTrigger
-                      className={`h-12 ${errors.category ? "border-red-500" : ""}`}
+                      className={`h-12 bg-white/80 border-purple-200/50 rounded-2xl ${errors.category ? "border-red-500" : ""}`}
                     >
                       <SelectValue placeholder="Chọn danh mục" />
                     </SelectTrigger>
@@ -1298,15 +1395,18 @@ Công nghệ sử dụng:
 
                 <motion.div
                   whileHover={{ scale: 1.02 }}
-                  className="flex items-center justify-between p-4 transition-all duration-300 border rounded-lg hover:bg-muted/50"
+                  className="flex items-center justify-between p-4 transition-all duration-300 border border-purple-200/50 rounded-2xl hover:bg-purple-50/30"
                 >
                   <div className="flex items-center space-x-3">
                     <CheckCircle className="w-5 h-5 text-green-500" />
                     <div>
-                      <Label htmlFor="isActive" className="font-medium">
+                      <Label
+                        htmlFor="isActive"
+                        className="font-medium text-purple-800"
+                      >
                         Kích hoạt sản phẩm
                       </Label>
-                      <p className="text-xs text-muted-foreground">
+                      <p className="text-xs text-purple-600/70">
                         Hiển thị trên cửa hàng
                       </p>
                     </div>
@@ -1321,15 +1421,18 @@ Công nghệ sử dụng:
 
                 <motion.div
                   whileHover={{ scale: 1.02 }}
-                  className="flex items-center justify-between p-4 transition-all duration-300 border rounded-lg hover:bg-muted/50"
+                  className="flex items-center justify-between p-4 transition-all duration-300 border border-purple-200/50 rounded-2xl hover:bg-purple-50/30"
                 >
                   <div className="flex items-center space-x-3">
                     <Star className="w-5 h-5 text-yellow-500" />
                     <div>
-                      <Label htmlFor="isFeatured" className="font-medium">
+                      <Label
+                        htmlFor="isFeatured"
+                        className="font-medium text-purple-800"
+                      >
                         Sản phẩm nổi bật
                       </Label>
-                      <p className="text-xs text-muted-foreground">
+                      <p className="text-xs text-purple-600/70">
                         Hiển thị ở trang chủ
                       </p>
                     </div>
@@ -1347,13 +1450,17 @@ Công nghệ sử dụng:
             </Card>
 
             {/* Preview */}
-            <Card className="border-0 shadow-lg bg-gradient-to-br from-white to-blue-50 dark:from-slate-800 dark:to-blue-900">
+            <Card className="border-0 shadow-xl bg-gradient-to-br from-white/95 via-blue-50/80 to-cyan-50/80 backdrop-blur-xl rounded-3xl">
               <CardHeader>
-                <CardTitle className="flex items-center space-x-3">
-                  <div className="flex items-center justify-center w-10 h-10 rounded-xl bg-gradient-to-r from-blue-500 to-cyan-500">
-                    <Eye className="w-5 h-5 text-white" />
+                <CardTitle className="flex items-center space-x-4">
+                  <div className="flex items-center justify-center w-12 h-12 rounded-2xl bg-gradient-to-r from-blue-500 to-cyan-500 shadow-lg">
+                    <Eye className="w-6 h-6 text-white" />
                   </div>
-                  <span>Xem trước sản phẩm</span>
+                  <div>
+                    <span className="text-2xl text-transparent bg-gradient-to-r from-blue-600 to-cyan-600 bg-clip-text font-bold">
+                      Xem trước sản phẩm
+                    </span>
+                  </div>
                 </CardTitle>
               </CardHeader>
               <CardContent>
@@ -1363,7 +1470,7 @@ Công nghệ sử dụng:
                     animate={{ opacity: 1, scale: 1 }}
                     className="space-y-4"
                   >
-                    <div className="relative overflow-hidden rounded-lg shadow-md">
+                    <div className="relative overflow-hidden rounded-2xl shadow-md">
                       <img
                         src={selectedFileUrl || watchedValues.image}
                         alt="Preview"
@@ -1393,19 +1500,20 @@ Công nghệ sử dụng:
                               ? "default"
                               : "secondary"
                           }
+                          className="border-0 shadow-sm"
                         >
                           {watchedValues.category === "template"
                             ? "Template"
                             : "E-book"}
                         </Badge>
                         {watchedValues.isFeatured && (
-                          <Badge className="text-yellow-800 bg-yellow-100">
+                          <Badge className="text-yellow-800 bg-yellow-100 border-0 shadow-sm">
                             <Star className="w-3 h-3 mr-1" />
                             Nổi bật
                           </Badge>
                         )}
                       </div>
-                      <div className="text-lg font-bold text-primary">
+                      <div className="text-lg font-bold text-blue-600">
                         {watchedValues.price
                           ? `${watchedValues.price.toLocaleString()} VND`
                           : "Chưa có giá"}

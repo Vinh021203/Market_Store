@@ -13,6 +13,8 @@ import {
   Headphones,
   Star,
   Heart,
+  Gift,
+  X,
 } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 
@@ -38,8 +40,8 @@ const ContactWidget: React.FC = () => {
       label: "Zalo Chat",
       value: "0971386588",
       action: () => window.open("https://zalo.me/0971386588", "_blank"),
-      gradient: "from-blue-500 to-blue-600",
-      hoverGradient: "from-blue-600 to-blue-700",
+      gradient: "from-sky-400 to-blue-500",
+      hoverGradient: "from-sky-500 to-blue-600",
       description: "Chat nhanh nhất",
       status: "online",
       responseTime: "< 1 phút",
@@ -49,8 +51,8 @@ const ContactWidget: React.FC = () => {
       label: "Hotline",
       value: "0971386588",
       action: () => window.open("tel:0971386588"),
-      gradient: "from-green-500 to-emerald-600",
-      hoverGradient: "from-green-600 to-emerald-700",
+      gradient: "from-emerald-400 to-green-500",
+      hoverGradient: "from-emerald-500 to-green-600",
       description: "Gọi ngay",
       status: "available",
       responseTime: "Ngay lập tức",
@@ -60,8 +62,8 @@ const ContactWidget: React.FC = () => {
       label: "Email",
       value: "veutong961@gmail.com",
       action: () => window.open("mailto:veutong961@gmail.com"),
-      gradient: "from-purple-500 to-pink-600",
-      hoverGradient: "from-purple-600 to-pink-700",
+      gradient: "from-pink-400 to-rose-500",
+      hoverGradient: "from-pink-500 to-rose-600",
       description: "Hỗ trợ chi tiết",
       status: "active",
       responseTime: "< 30 phút",
@@ -71,32 +73,32 @@ const ContactWidget: React.FC = () => {
   const getStatusColor = (status: string) => {
     switch (status) {
       case "online":
-        return "bg-green-500";
+        return "bg-emerald-400";
       case "available":
-        return "bg-blue-500";
+        return "bg-sky-400";
       case "active":
-        return "bg-purple-500";
+        return "bg-pink-400";
       default:
-        return "bg-gray-500";
+        return "bg-gray-400";
     }
   };
 
-  // ✅ Dynamic positioning và sizing
+  // ✅ Dynamic positioning và sizing với chiều cao cố định
   const getWidgetStyle = () => {
     if (isMobile) {
       return {
         bottom: "20px",
         left: "20px",
         width: "calc(100vw - 40px)",
-        maxWidth: "320px",
-        maxHeight: "400px", // ✅ Giới hạn chiều cao mobile
+        maxWidth: "340px",
+        height: "380px",
       };
     }
     return {
       bottom: "24px",
       left: "24px",
-      width: "360px",
-      maxHeight: "480px", // ✅ Giới hạn chiều cao desktop
+      width: "380px",
+      height: "450px",
     };
   };
 
@@ -104,7 +106,7 @@ const ContactWidget: React.FC = () => {
 
   return (
     <div
-      className="fixed z-40"
+      className="fixed z-50"
       style={{
         bottom: widgetStyle.bottom,
         left: widgetStyle.left,
@@ -125,138 +127,182 @@ const ContactWidget: React.FC = () => {
             style={{
               width: widgetStyle.width,
               maxWidth: widgetStyle.maxWidth,
-              maxHeight: widgetStyle.maxHeight,
+              height: widgetStyle.height,
             }}
           >
-            <Card className="h-full border-0 shadow-2xl bg-gradient-to-br from-white via-white to-blue-50 dark:from-slate-900 dark:via-slate-800 dark:to-purple-900 backdrop-blur-lg">
+            {/* ✅ Gradient Background sáng hơn */}
+            <Card
+              className="h-full border-0 shadow-2xl overflow-hidden relative"
+              style={{ height: "100%" }}
+            >
+              {/* ✅ Background Gradient sáng rực rỡ */}
+              <div className="absolute inset-0 bg-gradient-to-br from-pink-400 via-purple-400 to-cyan-300" />
+              <div className="absolute inset-0 bg-gradient-to-t from-blue-400/60 to-transparent" />
+              <div className="absolute inset-0 bg-gradient-to-r from-violet-400/40 to-pink-300/40" />
+
+              {/* ✅ Decorative circles sáng hơn */}
+              <div className="absolute top-4 right-4 w-24 h-24 bg-white/20 rounded-full blur-xl animate-pulse" />
+              <div className="absolute bottom-6 left-6 w-20 h-20 bg-yellow-300/30 rounded-full blur-lg animate-pulse" />
+              <div className="absolute top-1/2 right-8 w-16 h-16 bg-cyan-200/25 rounded-full blur-md animate-pulse" />
+
               <CardContent
-                className={`${isMobile ? "p-4" : "p-6"} h-full flex flex-col`}
+                className={`${isMobile ? "p-4" : "p-6"} h-full flex flex-col relative z-10`}
               >
-                <div className="flex-1 space-y-3 overflow-y-auto">
-                  {/* ✅ Compact Header */}
-                  <motion.div
-                    initial={{ opacity: 0, y: -10 }}
-                    animate={{ opacity: 1, y: 0 }}
-                    className="flex-shrink-0 space-y-2 text-center"
+                {/* ✅ Header với Close Button */}
+                <motion.div
+                  initial={{ opacity: 0, y: -10 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  className="flex-shrink-0 space-y-3 text-center mb-4 relative"
+                >
+                  {/* Close Button sáng hơn */}
+                  <Button
+                    onClick={() => setIsExpanded(false)}
+                    className="absolute -top-2 -right-2 w-8 h-8 rounded-full bg-white/30 hover:bg-white/40 border-0 text-white p-0 shadow-lg backdrop-blur-sm"
+                    size="icon"
                   >
-                    <div className="flex items-center justify-center gap-2">
-                      <Headphones
-                        className={`${isMobile ? "w-4 h-4" : "w-5 h-5"} text-blue-600`}
-                      />
-                      <h3
-                        className={`${isMobile ? "text-base" : "text-lg"} font-bold text-transparent bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text`}
-                      >
-                        Hỗ trợ 24/7
-                      </h3>
+                    <X className="w-4 h-4" />
+                  </Button>
+
+                  {/* Gift Icon & Title */}
+                  <div className="flex items-center justify-center gap-2 text-white">
+                    <div className="p-3 bg-white/25 rounded-full shadow-lg backdrop-blur-sm">
+                      <Gift className={`${isMobile ? "w-5 h-5" : "w-6 h-6"}`} />
                     </div>
-                    {!isMobile && (
-                      <>
-                        <p className="text-sm text-muted-foreground">
-                          Chúng tôi luôn sẵn sàng hỗ trợ bạn
-                        </p>
-                        <div className="flex items-center justify-center gap-2">
-                          <div className="flex items-center gap-1">
-                            {[...Array(5)].map((_, i) => (
-                              <Star
-                                key={i}
-                                className="w-3 h-3 text-yellow-500 fill-current"
-                              />
-                            ))}
-                          </div>
-                          <span className="text-xs text-muted-foreground">
-                            5.0 (1,200+ đánh giá)
-                          </span>
-                        </div>
-                      </>
-                    )}
-                  </motion.div>
-
-                  {/* ✅ Compact Contact Methods */}
-                  <div className="flex-1 space-y-2">
-                    {contactMethods.map((method, index) => (
-                      <motion.div
-                        key={method.label}
-                        initial={{ opacity: 0, x: -30 }}
-                        animate={{ opacity: 1, x: 0 }}
-                        transition={{ delay: index * 0.1 }}
-                        onHoverStart={() => setHoveredMethod(method.label)}
-                        onHoverEnd={() => setHoveredMethod(null)}
-                      >
-                        <Button
-                          onClick={method.action}
-                          className={`w-full justify-start gap-3 ${isMobile ? "p-3 h-auto" : "p-4 h-auto"} bg-gradient-to-r ${
-                            hoveredMethod === method.label
-                              ? method.hoverGradient
-                              : method.gradient
-                          } text-white shadow-lg hover:shadow-xl transition-all duration-300 group border-0`}
-                          variant="default"
-                        >
-                          <div className="relative">
-                            <method.icon
-                              className={`${isMobile ? "w-4 h-4" : "w-5 h-5"} transition-transform group-hover:scale-110`}
-                            />
-                            <div
-                              className={`absolute -top-1 -right-1 ${isMobile ? "w-2 h-2" : "w-3 h-3"} ${getStatusColor(method.status)} rounded-full animate-pulse`}
-                            />
-                          </div>
-
-                          <div className="flex-1 space-y-1 text-left">
-                            <div className="flex items-center justify-between">
-                              <div
-                                className={`${isMobile ? "text-sm" : "text-base"} font-semibold`}
-                              >
-                                {method.label}
-                              </div>
-                              <Badge
-                                className={`${isMobile ? "text-xs px-1 py-0" : "text-xs"} text-white border-0 bg-white/20`}
-                              >
-                                {method.responseTime}
-                              </Badge>
-                            </div>
-                            <div
-                              className={`${isMobile ? "text-xs" : "text-sm"} opacity-90`}
-                            >
-                              {method.value}
-                            </div>
-                            {!isMobile && (
-                              <div className="text-xs opacity-75">
-                                {method.description}
-                              </div>
-                            )}
-                          </div>
-
-                          <motion.div
-                            animate={{
-                              x: hoveredMethod === method.label ? 4 : 0,
-                            }}
-                            transition={{ duration: 0.2 }}
-                            className="opacity-60 group-hover:opacity-100"
-                          >
-                            <ChevronUp className="w-4 h-4 rotate-90" />
-                          </motion.div>
-                        </Button>
-                      </motion.div>
-                    ))}
                   </div>
 
-                  {/* ✅ Compact Footer - Chỉ hiện trên desktop */}
+                  <h3
+                    className={`${isMobile ? "text-lg" : "text-xl"} font-bold text-white leading-tight drop-shadow-sm`}
+                  >
+                    Nhận ưu đãi & tài liệu mới
+                  </h3>
+
+                  <p
+                    className={`${isMobile ? "text-sm" : "text-base"} text-white/95 leading-relaxed drop-shadow-sm`}
+                  >
+                    Đăng ký để nhận tài liệu VIP, ưu đãi mới, tips & news hot
+                    qua email mỗi tuần!
+                  </p>
+
+                  {/* Rating sáng hơn */}
                   {!isMobile && (
+                    <div className="flex items-center justify-center gap-2">
+                      <div className="flex items-center gap-1">
+                        {[...Array(5)].map((_, i) => (
+                          <Star
+                            key={i}
+                            className="w-3 h-3 text-yellow-200 fill-current drop-shadow-sm"
+                          />
+                        ))}
+                      </div>
+                      <span className="text-xs text-white/90 drop-shadow-sm">
+                        5.0 (1,200+ đánh giá)
+                      </span>
+                    </div>
+                  )}
+                </motion.div>
+
+                {/* ✅ Scrollable Content Area */}
+                <div className="flex-1 overflow-hidden">
+                  <div className="h-full overflow-y-auto space-y-3 pr-2 custom-scrollbar">
+                    {/* ✅ Contact Methods với style sáng hơn */}
+                    <div className="space-y-3">
+                      {contactMethods.map((method, index) => (
+                        <motion.div
+                          key={method.label}
+                          initial={{ opacity: 0, x: -30 }}
+                          animate={{ opacity: 1, x: 0 }}
+                          transition={{ delay: index * 0.1 }}
+                          onHoverStart={() => setHoveredMethod(method.label)}
+                          onHoverEnd={() => setHoveredMethod(null)}
+                        >
+                          <Button
+                            onClick={method.action}
+                            className={`w-full justify-start gap-3 ${isMobile ? "p-3 h-auto" : "p-4 h-auto"} 
+                              ${
+                                hoveredMethod === method.label
+                                  ? "bg-white/35 border-white/50 shadow-xl"
+                                  : "bg-white/25 border-white/30 shadow-lg"
+                              } 
+                              text-white hover:shadow-2xl transition-all duration-300 group 
+                              border backdrop-blur-md rounded-xl hover:bg-white/35 hover:scale-[1.02]`}
+                            variant="outline"
+                          >
+                            <div className="relative">
+                              <method.icon
+                                className={`${isMobile ? "w-5 h-5" : "w-6 h-6"} transition-transform group-hover:scale-110 drop-shadow-sm`}
+                              />
+                              <div
+                                className={`absolute -top-1 -right-1 ${isMobile ? "w-2 h-2" : "w-3 h-3"} ${getStatusColor(method.status)} rounded-full animate-pulse shadow-md`}
+                              />
+                            </div>
+
+                            <div className="flex-1 space-y-1 text-left">
+                              <div className="flex items-center justify-between">
+                                <div
+                                  className={`${isMobile ? "text-sm" : "text-base"} font-semibold drop-shadow-sm`}
+                                >
+                                  {method.label}
+                                </div>
+                                <Badge
+                                  className={`${isMobile ? "text-xs px-2 py-0.5" : "text-xs px-2 py-1"} text-white border-0 bg-white/30 backdrop-blur-sm shadow-sm`}
+                                >
+                                  {method.responseTime}
+                                </Badge>
+                              </div>
+                              <div
+                                className={`${isMobile ? "text-xs" : "text-sm"} opacity-95 drop-shadow-sm`}
+                              >
+                                {method.value}
+                              </div>
+                              {!isMobile && (
+                                <div className="text-xs opacity-85 drop-shadow-sm">
+                                  {method.description}
+                                </div>
+                              )}
+                            </div>
+
+                            <motion.div
+                              animate={{
+                                x: hoveredMethod === method.label ? 4 : 0,
+                              }}
+                              transition={{ duration: 0.2 }}
+                              className="opacity-70 group-hover:opacity-100"
+                            >
+                              <ChevronUp className="w-4 h-4 rotate-90 drop-shadow-sm" />
+                            </motion.div>
+                          </Button>
+                        </motion.div>
+                      ))}
+                    </div>
+
+                    {/* ✅ Footer Information sáng hơn */}
                     <motion.div
                       initial={{ opacity: 0 }}
                       animate={{ opacity: 1 }}
                       transition={{ delay: 0.4 }}
-                      className="flex-shrink-0 pt-3 space-y-2 border-t border-gray-200 dark:border-gray-700"
+                      className="pt-4 space-y-3 border-t border-white/30 mt-4"
                     >
-                      <div className="flex items-center justify-center gap-2 text-xs text-muted-foreground">
-                        <Clock className="w-3 h-3" />
-                        <span>24/7 - Tất cả các ngày</span>
+                      <div className="text-center">
+                        <p className="text-xs text-white/90 mb-2 drop-shadow-sm">
+                          ⭐ Bảo mật thông tin 100%. Có thể hủy đăng ký bất cứ
+                          lúc nào.
+                        </p>
                       </div>
-                      <div className="flex items-center justify-center gap-1 text-xs text-muted-foreground">
-                        <Heart className="w-3 h-3 text-red-500 fill-current" />
-                        <span>10,000+ khách hàng tin tưởng</span>
+
+                      <div className="flex items-center justify-center gap-4 text-xs text-white/90">
+                        <div className="flex items-center gap-1">
+                          <Clock className="w-3 h-3 drop-shadow-sm" />
+                          <span className="drop-shadow-sm">24/7</span>
+                        </div>
+                        <div className="flex items-center gap-1">
+                          <Heart className="w-3 h-3 text-red-200 fill-current drop-shadow-sm" />
+                          <span className="drop-shadow-sm">
+                            10K+ khách hàng
+                          </span>
+                        </div>
                       </div>
                     </motion.div>
-                  )}
+                  </div>
                 </div>
               </CardContent>
             </Card>
@@ -264,37 +310,37 @@ const ContactWidget: React.FC = () => {
         )}
       </AnimatePresence>
 
-      {/* ✅ Responsive Toggle Button */}
+      {/* ✅ Enhanced Toggle Button sáng hơn */}
       <motion.div
         whileHover={{ scale: 1.1 }}
         whileTap={{ scale: 0.9 }}
         className="relative"
       >
-        {/* Glow effect */}
-        <div className="absolute inset-0 rounded-full opacity-75 bg-gradient-to-r from-green-500 to-blue-500 blur-lg animate-pulse" />
+        {/* Glow effect sáng hơn */}
+        <div className="absolute inset-0 rounded-full opacity-80 bg-gradient-to-r from-pink-400 to-cyan-300 blur-xl animate-pulse" />
 
         <Button
           onClick={() => setIsExpanded(!isExpanded)}
-          className={`relative ${isMobile ? "w-14 h-14" : "w-16 h-16"} overflow-hidden border-2 rounded-full shadow-2xl bg-gradient-to-r from-green-500 to-blue-500 hover:from-green-600 hover:to-blue-600 border-white/20 group`}
+          className={`relative ${isMobile ? "w-14 h-14" : "w-16 h-16"} overflow-hidden border-2 rounded-full shadow-2xl bg-gradient-to-r from-pink-400 to-cyan-300 hover:from-pink-500 hover:to-cyan-400 border-white/30 group`}
           size="icon"
         >
-          {/* Background animation */}
-          <div className="absolute inset-0 transition-opacity duration-300 opacity-0 bg-gradient-to-r from-blue-600 to-purple-600 group-hover:opacity-100" />
+          {/* Background animation sáng hơn */}
+          <div className="absolute inset-0 transition-opacity duration-300 opacity-0 bg-gradient-to-r from-violet-400 to-purple-400 group-hover:opacity-100" />
 
-          {/* Notification badge */}
+          {/* Notification badge sáng hơn */}
           <div
-            className={`absolute flex items-center justify-center ${isMobile ? "w-4 h-4" : "w-5 h-5"} bg-red-500 rounded-full -top-1 -right-1 animate-bounce`}
+            className={`absolute flex items-center justify-center ${isMobile ? "w-4 h-4" : "w-5 h-5"} bg-red-400 rounded-full -top-1 -right-1 animate-bounce shadow-xl border border-white/20`}
           >
             <span
-              className={`${isMobile ? "text-xs" : "text-xs"} font-bold text-white`}
+              className={`${isMobile ? "text-xs" : "text-xs"} font-bold text-white drop-shadow-sm`}
             >
               3
             </span>
           </div>
 
-          {/* Status indicator */}
+          {/* Status indicator sáng hơn */}
           <div
-            className={`absolute ${isMobile ? "w-2 h-2" : "w-3 h-3"} bg-green-400 rounded-full top-1 left-1 animate-pulse`}
+            className={`absolute ${isMobile ? "w-2 h-2" : "w-3 h-3"} bg-emerald-300 rounded-full top-1 left-1 animate-pulse shadow-md border border-white/20`}
           />
 
           <AnimatePresence mode="wait">
@@ -308,7 +354,7 @@ const ContactWidget: React.FC = () => {
                 className="relative z-10"
               >
                 <ChevronDown
-                  className={`${isMobile ? "w-6 h-6" : "w-7 h-7"}`}
+                  className={`${isMobile ? "w-6 h-6" : "w-7 h-7"} drop-shadow-sm`}
                 />
               </motion.div>
             ) : (
@@ -320,38 +366,47 @@ const ContactWidget: React.FC = () => {
                 transition={{ duration: 0.3, ease: "backOut" }}
                 className="relative z-10"
               >
-                <Phone className={`${isMobile ? "w-6 h-6" : "w-7 h-7"}`} />
+                <Phone
+                  className={`${isMobile ? "w-6 h-6" : "w-7 h-7"} drop-shadow-sm`}
+                />
               </motion.div>
             )}
           </AnimatePresence>
 
-          {/* Ripple effect */}
+          {/* Ripple effect sáng hơn */}
           <div className="absolute inset-0 rounded-full">
-            <div className="absolute inset-0 transition-all duration-500 scale-0 rounded-full bg-white/30 group-hover:scale-100 group-hover:opacity-0" />
+            <div className="absolute inset-0 transition-all duration-500 scale-0 rounded-full bg-white/40 group-hover:scale-100 group-hover:opacity-0" />
           </div>
         </Button>
       </motion.div>
 
-      {/* ✅ Floating particles - Chỉ hiện trên desktop */}
+      {/* ✅ Enhanced Floating particles sáng hơn */}
       {!isMobile && (
         <div className="absolute inset-0 pointer-events-none">
-          {[...Array(3)].map((_, i) => (
+          {[...Array(6)].map((_, i) => (
             <motion.div
               key={i}
-              className="absolute w-2 h-2 bg-blue-400 rounded-full opacity-30"
+              className={`absolute w-1.5 h-1.5 rounded-full ${
+                i % 3 === 0
+                  ? "bg-white/60"
+                  : i % 3 === 1
+                    ? "bg-yellow-200/50"
+                    : "bg-cyan-200/50"
+              }`}
               animate={{
-                y: [-20, -40, -20],
-                x: [0, 10, 0],
-                opacity: [0.3, 0.7, 0.3],
+                y: [-20, -80, -20],
+                x: [0, 20, 0],
+                opacity: [0.3, 1, 0.3],
+                scale: [0.5, 1.2, 0.5],
               }}
               transition={{
-                duration: 3,
+                duration: 4 + i * 0.5,
                 repeat: Infinity,
-                delay: i * 0.5,
+                delay: i * 0.6,
               }}
               style={{
-                left: `${20 + i * 15}%`,
-                bottom: `${60 + i * 10}%`,
+                left: `${10 + i * 10}%`,
+                bottom: `${45 + i * 6}%`,
               }}
             />
           ))}

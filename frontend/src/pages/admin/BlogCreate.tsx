@@ -18,9 +18,6 @@ import {
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Alert, AlertDescription } from "@/components/ui/alert";
-import { Separator } from "@/components/ui/separator";
-import { Switch } from "@/components/ui/switch";
 import { motion, AnimatePresence } from "framer-motion";
 import {
   ArrowLeft,
@@ -36,10 +33,8 @@ import {
   Upload,
   X,
   Plus,
-  AlertCircle,
   CheckCircle,
   Clock,
-  // ✅ SEO Tools Icons
   Wand2,
   Brain,
   Target,
@@ -52,8 +47,85 @@ import {
   Cpu,
   Sparkles,
   Zap,
+  XCircle,
+  Info,
+  Coffee,
+  Palette,
+  Heart,
 } from "lucide-react";
-import { toast } from "@/hooks/use-toast";
+
+// Enhanced Toast Component (tương tự Product/Order)
+const FloatingToast = ({
+  type = "success",
+  title,
+  description,
+  visible = true,
+  onClose,
+}: {
+  type?: "success" | "error" | "info";
+  title: string;
+  description?: string;
+  visible?: boolean;
+  onClose?: () => void;
+}) => {
+  const iconProps = "w-5 h-5 flex-shrink-0";
+  let icon, colorScheme, bgGradient;
+
+  switch (type) {
+    case "error":
+      icon = <XCircle className={`${iconProps} text-pink-600`} />;
+      colorScheme = "text-pink-800";
+      bgGradient = "from-pink-50/95 via-orange-50/95 to-white/95";
+      break;
+    case "info":
+      icon = <Info className={`${iconProps} text-sky-600`} />;
+      colorScheme = "text-sky-800";
+      bgGradient = "from-sky-50/95 via-blue-50/95 to-white/95";
+      break;
+    default:
+      icon = <CheckCircle className={`${iconProps} text-emerald-600`} />;
+      colorScheme = "text-emerald-800";
+      bgGradient = "from-emerald-50/95 via-green-50/95 to-white/95";
+  }
+
+  if (!visible) return null;
+
+  return (
+    <motion.div
+      initial={{ opacity: 0, scale: 0.8, x: 100 }}
+      animate={{ opacity: 1, scale: 1, x: 0 }}
+      exit={{ opacity: 0, scale: 0.8, x: 100 }}
+      className={`fixed top-6 right-6 z-50 max-w-sm min-w-[300px] p-4 rounded-3xl shadow-2xl backdrop-blur-xl border border-white/30 bg-gradient-to-r ${bgGradient}`}
+    >
+      <div className="flex items-start gap-3">
+        <motion.div
+          initial={{ scale: 0 }}
+          animate={{ scale: 1 }}
+          transition={{ delay: 0.1 }}
+          className="flex-shrink-0 p-2 rounded-2xl bg-white/60"
+        >
+          {icon}
+        </motion.div>
+        <div className="flex-1 min-w-0">
+          <div className={`font-semibold text-sm ${colorScheme}`}>{title}</div>
+          {description && (
+            <div className="text-xs mt-1 text-orange-700/70 leading-relaxed">
+              {description}
+            </div>
+          )}
+        </div>
+        {onClose && (
+          <button
+            onClick={onClose}
+            className="flex-shrink-0 p-1 rounded-full hover:bg-white/60 transition-colors"
+          >
+            <XCircle className="w-4 h-4 text-gray-400" />
+          </button>
+        )}
+      </div>
+    </motion.div>
+  );
+};
 
 // Blog schema
 const blogSchema = z.object({
@@ -78,15 +150,23 @@ const BlogCreate: React.FC = () => {
   const { id } = useParams();
   const isEditing = Boolean(id);
 
-  // Form state
+  // States
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [activeTab, setActiveTab] = useState("content");
   const [tagInput, setTagInput] = useState("");
   const [selectedTags, setSelectedTags] = useState<string[]>([]);
   const [uploadedImages, setUploadedImages] = useState<string[]>([]);
   const [isUploading, setIsUploading] = useState(false);
+  const [toasts, setToasts] = useState<
+    Array<{
+      id: string;
+      type: "success" | "error" | "info";
+      title: string;
+      description?: string;
+    }>
+  >([]);
 
-  // ✅ SEO Tools State
+  // SEO Tools State
   const [seoSuggestions, setSeoSuggestions] = useState<string[]>([]);
   const [isGeneratingContent, setIsGeneratingContent] = useState(false);
   const [keywordDensity, setKeywordDensity] = useState<Record<string, number>>(
@@ -100,6 +180,23 @@ const BlogCreate: React.FC = () => {
     headings: 0,
     readingTime: 0,
   });
+
+  // Toast system
+  const showToast = (
+    type: "success" | "error" | "info",
+    title: string,
+    description?: string,
+  ) => {
+    const id = Date.now().toString();
+    setToasts((prev) => [...prev, { id, type, title, description }]);
+    setTimeout(() => {
+      setToasts((prev) => prev.filter((toast) => toast.id !== id));
+    }, 4000);
+  };
+
+  const removeToast = (id: string) => {
+    setToasts((prev) => prev.filter((toast) => toast.id !== id));
+  };
 
   const {
     register,
@@ -118,24 +215,21 @@ const BlogCreate: React.FC = () => {
 
   const watchedValues = watch();
 
-  // ✅ SEO Helper Functions
+  // SEO Helper Functions
   const generateSEOSuggestions = (content: string, title: string) => {
     const suggestions = [];
 
     if (title.length < 30) {
       suggestions.push("💡 Tiêu đề nên dài 30-60 ký tự để tối ưu SEO");
     }
-
     if (title.length > 60) {
       suggestions.push("⚠️ Tiêu đề quá dài, nên rút gọn xuống dưới 60 ký tự");
     }
-
     if (content.length < 300) {
       suggestions.push(
         "📝 Nội dung nên có ít nhất 300 từ để Google đánh giá cao",
       );
     }
-
     if (!content.toLowerCase().includes(title.toLowerCase().split(" ")[0])) {
       suggestions.push("🎯 Nên sử dụng từ khóa chính trong nội dung");
     }
@@ -155,7 +249,6 @@ const BlogCreate: React.FC = () => {
     if (metaDesc.length < 120) {
       suggestions.push("📄 Meta description nên dài 120-160 ký tự");
     }
-
     if (metaDesc.length > 160) {
       suggestions.push(
         "📄 Meta description quá dài, nên rút gọn xuống dưới 160 ký tự",
@@ -170,7 +263,6 @@ const BlogCreate: React.FC = () => {
     const wordCount = words.length;
     const frequency: Record<string, number> = {};
 
-    // Loại bỏ stop words tiếng Việt
     const stopWords = [
       "và",
       "của",
@@ -192,19 +284,6 @@ const BlogCreate: React.FC = () => {
       "sẽ",
       "đã",
       "hay",
-      "hoặc",
-      "nhưng",
-      "nếu",
-      "thì",
-      "bởi",
-      "vì",
-      "do",
-      "theo",
-      "trên",
-      "dưới",
-      "giữa",
-      "sau",
-      "trước",
     ];
 
     words.forEach((word) => {
@@ -232,13 +311,11 @@ const BlogCreate: React.FC = () => {
     const words = (content.match(/\b\w+\b/g) || []).length;
     const avgWordsPerSentence = words / sentences;
 
-    // Simple readability score (0-100)
     let score = 100;
     if (avgWordsPerSentence > 25) score -= 30;
     else if (avgWordsPerSentence > 20) score -= 20;
     else if (avgWordsPerSentence > 15) score -= 10;
 
-    // Bonus for good structure
     const headings = (content.match(/#{1,6}\s/g) || []).length;
     if (headings >= 3) score += 5;
 
@@ -254,19 +331,18 @@ const BlogCreate: React.FC = () => {
       .split(/\n\s*\n/)
       .filter((p) => p.trim().length > 0).length;
     const headings = (content.match(/#{1,6}\s/g) || []).length;
-    const readingTime = Math.ceil(words / 200); // 200 words per minute
+    const readingTime = Math.ceil(words / 200);
 
     return { words, sentences, paragraphs, headings, readingTime };
   };
 
-  // ✅ AI Content Generation
+  // AI Content Generation
   const generateContentWithAI = async (
     prompt: string,
     type: "title" | "content" | "excerpt" | "meta",
   ) => {
     setIsGeneratingContent(true);
     try {
-      // Simulate AI API call
       await new Promise((resolve) => setTimeout(resolve, 2000));
 
       const suggestions = {
@@ -278,39 +354,36 @@ const BlogCreate: React.FC = () => {
           "Top 15 Tools SEO Miễn Phí Tốt Nhất Cho Blogger Việt Nam",
         ],
         content: [
-          "## Giới thiệu\n\nTrong thời đại số hóa hiện nay, việc tối ưu SEO đã trở thành yếu tố then chốt quyết định sự thành công của bất kỳ website nào. Với hàng triệu trang web cạnh tranh để xuất hiện trên trang đầu Google, việc hiểu và áp dụng đúng các kỹ thuật SEO không chỉ là lựa chọn mà đã trở thành điều bắt buộc.\n\n## Tại sao SEO quan trọng?\n\nSEO (Search Engine Optimization) không chỉ giúp website của bạn xuất hiện cao hơn trong kết quả tìm kiếm, mà còn:\n\n- Tăng lưu lượng truy cập tự nhiên\n- Cải thiện trải nghiệm người dùng\n- Xây dựng uy tín thương hiệu\n- Tăng tỷ lệ chuyển đổi\n\n## Các bước thực hiện\n\n### 1. Nghiên cứu từ khóa\nViệc nghiên cứu từ khóa là bước đầu tiên và quan trọng nhất...",
-          "## Xu hướng công nghệ 2025\n\nNăm 2025 đánh dấu một bước ngoặt quan trọng trong ngành công nghệ với sự bùng nổ của AI và Machine Learning. Các xu hướng chính bao gồm:\n\n### Artificial Intelligence (AI)\nAI không còn là khái niệm xa vời mà đã trở thành công cụ thiết yếu trong mọi lĩnh vực...\n\n### Web3 và Blockchain\nCông nghệ blockchain tiếp tục phát triển mạnh mẽ...",
-          "## Hướng dẫn sử dụng React Hooks\n\nReact Hooks đã thay đổi hoàn toàn cách chúng ta viết components trong React. Từ khi ra mắt, Hooks đã trở thành standard cho việc quản lý state và side effects.\n\n### useState Hook\n``````\n\n### useEffect Hook\nQuản lý side effects một cách hiệu quả...",
+          "## Giới thiệu\n\nTrong thời đại số hóa hiện nay, việc tối ưu SEO đã trở thành yếu tố then chốt quyết định sự thành công của bất kỳ website nào...",
+          "## Xu hướng công nghệ 2025\n\nNăm 2025 đánh dấu một bước ngoặt quan trọng trong ngành công nghệ với sự bùng nổ của AI và Machine Learning...",
+          "## Hướng dẫn sử dụng React Hooks\n\nReact Hooks đã thay đổi hoàn toàn cách chúng ta viết components trong React...",
         ],
         excerpt: [
           "Khám phá những bí quyết viết content chuẩn SEO giúp website của bạn đạt top Google một cách hiệu quả và bền vững trong năm 2025.",
           "Hướng dẫn từng bước để tối ưu hóa nội dung blog, tăng traffic tự nhiên và cải thiện thứ hạng tìm kiếm với các kỹ thuật SEO mới nhất.",
           "Bộ sưu tập templates React chuyên nghiệp, giúp developers tiết kiệm thời gian và tạo ra sản phẩm chất lượng cao với performance tối ưu.",
-          "Tìm hiểu các xu hướng công nghệ hot nhất 2025 và cách áp dụng chúng vào dự án thực tế để tạo ra sản phẩm đột phá.",
-          "Hướng dẫn chi tiết cách sử dụng React Hooks hiệu quả, từ cơ bản đến nâng cao với nhiều ví dụ thực tế.",
         ],
         meta: [
           "SEO 2025, viết content chuẩn SEO, tối ưu Google, bí quyết SEO, hướng dẫn SEO",
           "React templates, templates chuyên nghiệp, UI components, React TypeScript, frontend development",
           "xu hướng công nghệ 2025, AI machine learning, web3 blockchain, công nghệ mới",
-          "React Hooks, useState, useEffect, React development, JavaScript ES6",
         ],
       };
 
       return suggestions[type];
     } catch (error) {
-      toast({
-        title: "❌ Lỗi AI",
-        description: "Không thể tạo nội dung. Vui lòng thử lại.",
-        variant: "destructive",
-      });
+      showToast(
+        "error",
+        "❌ Lỗi AI",
+        "Không thể tạo nội dung. Vui lòng thử lại.",
+      );
       return [];
     } finally {
       setIsGeneratingContent(false);
     }
   };
 
-  // ✅ Watch content changes for SEO analysis
+  // Watch content changes for SEO analysis
   useEffect(() => {
     if (watchedValues.content) {
       const suggestions = generateSEOSuggestions(
@@ -363,19 +436,19 @@ const BlogCreate: React.FC = () => {
       id: "content",
       label: "Nội dung",
       icon: FileText,
-      color: "from-blue-500 to-cyan-500",
+      color: "from-orange-500 to-amber-500",
     },
     {
-      id: "seo-tools", // ✅ New SEO Tools tab
+      id: "seo-tools",
       label: "SEO Tools",
       icon: Wand2,
-      color: "from-orange-500 to-red-500",
+      color: "from-purple-500 to-pink-500",
     },
     {
       id: "media",
       label: "Hình ảnh",
       icon: Image,
-      color: "from-purple-500 to-pink-500",
+      color: "from-blue-500 to-cyan-500",
     },
     {
       id: "seo",
@@ -410,7 +483,6 @@ const BlogCreate: React.FC = () => {
 
     setIsUploading(true);
     try {
-      // Simulate upload
       await new Promise((resolve) => setTimeout(resolve, 2000));
 
       const newImages = Array.from(files).map(
@@ -419,17 +491,17 @@ const BlogCreate: React.FC = () => {
       );
 
       setUploadedImages((prev) => [...prev, ...newImages]);
-
-      toast({
-        title: "✅ Upload thành công",
-        description: `Đã upload ${files.length} hình ảnh.`,
-      });
+      showToast(
+        "success",
+        "✅ Upload thành công",
+        `Đã upload ${files.length} hình ảnh.`,
+      );
     } catch (error) {
-      toast({
-        title: "❌ Upload thất bại",
-        description: "Có lỗi xảy ra khi upload hình ảnh.",
-        variant: "destructive",
-      });
+      showToast(
+        "error",
+        "❌ Upload thất bại",
+        "Có lỗi xảy ra khi upload hình ảnh.",
+      );
     } finally {
       setIsUploading(false);
     }
@@ -439,81 +511,188 @@ const BlogCreate: React.FC = () => {
   const onSubmit = async (data: BlogFormData) => {
     setIsSubmitting(true);
     try {
-      // Simulate API call
       await new Promise((resolve) => setTimeout(resolve, 2000));
 
       console.log("Blog data:", data);
 
-      toast({
-        title: isEditing
-          ? "✅ Cập nhật thành công"
-          : "✅ Tạo bài viết thành công",
-        description: isEditing
-          ? "Bài viết đã được cập nhật."
-          : "Bài viết mới đã được tạo.",
-      });
+      showToast(
+        "success",
+        isEditing ? "✅ Cập nhật thành công" : "✅ Tạo bài viết thành công",
+        isEditing ? "Bài viết đã được cập nhật." : "Bài viết mới đã được tạo.",
+      );
 
       navigate("/admin/blog");
     } catch (error) {
-      toast({
-        title: "❌ Có lỗi xảy ra",
-        description: "Không thể lưu bài viết. Vui lòng thử lại.",
-        variant: "destructive",
-      });
+      showToast(
+        "error",
+        "❌ Có lỗi xảy ra",
+        "Không thể lưu bài viết. Vui lòng thử lại.",
+      );
     } finally {
       setIsSubmitting(false);
     }
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-50 via-blue-50 to-indigo-50 dark:from-slate-900 dark:via-blue-900 dark:to-purple-900">
-      <div className="container px-4 py-8 mx-auto">
+    <div className="min-h-screen bg-gradient-to-br from-orange-50 via-amber-50 to-pink-50">
+      {/* Floating Elements */}
+      <div className="fixed inset-0 overflow-hidden pointer-events-none">
+        <motion.div
+          className="absolute top-1/4 left-1/4"
+          animate={{ y: [0, -20, 0], rotate: [0, 10, 0] }}
+          transition={{ duration: 6, repeat: Infinity, ease: "easeInOut" }}
+        >
+          <FileText className="w-8 h-8 text-orange-400 opacity-20" />
+        </motion.div>
+        <motion.div
+          className="absolute top-1/3 right-1/4"
+          animate={{ y: [0, -15, 0], rotate: [0, -10, 0] }}
+          transition={{
+            duration: 5,
+            repeat: Infinity,
+            ease: "easeInOut",
+            delay: 1,
+          }}
+        >
+          <Palette className="w-6 h-6 text-pink-400 opacity-20" />
+        </motion.div>
+        <motion.div
+          className="absolute bottom-1/4 left-1/3"
+          animate={{ y: [0, -25, 0], rotate: [0, 15, 0] }}
+          transition={{
+            duration: 7,
+            repeat: Infinity,
+            ease: "easeInOut",
+            delay: 2,
+          }}
+        >
+          <Coffee className="text-amber-400 w-7 h-7 opacity-20" />
+        </motion.div>
+        <motion.div
+          className="absolute top-2/3 right-1/3"
+          animate={{ y: [0, -18, 0], scale: [1, 1.1, 1] }}
+          transition={{
+            duration: 4,
+            repeat: Infinity,
+            ease: "easeInOut",
+            delay: 3,
+          }}
+        >
+          <Heart className="w-5 h-5 text-pink-300 opacity-20" />
+        </motion.div>
+        <motion.div
+          className="absolute top-1/6 right-1/6"
+          animate={{ y: [0, -12, 0], rotate: [0, -5, 0] }}
+          transition={{
+            duration: 8,
+            repeat: Infinity,
+            ease: "easeInOut",
+            delay: 1.5,
+          }}
+        >
+          <Sparkles className="w-4 h-4 text-yellow-400 opacity-20" />
+        </motion.div>
+      </div>
+
+      {/* Toast Container */}
+      <div className="fixed top-0 right-0 z-50 p-4 space-y-3">
+        <AnimatePresence>
+          {toasts.map((toast) => (
+            <FloatingToast
+              key={toast.id}
+              type={toast.type}
+              title={toast.title}
+              description={toast.description}
+              onClose={() => removeToast(toast.id)}
+            />
+          ))}
+        </AnimatePresence>
+      </div>
+
+      <div className="container px-4 py-8 mx-auto relative z-10">
         {/* Header */}
         <motion.div
           initial={{ opacity: 0, y: -20 }}
           animate={{ opacity: 1, y: 0 }}
           className="mb-8"
         >
-          <div className="flex items-center justify-between">
+          <div className="flex items-center justify-between p-6 bg-gradient-to-r from-white/90 via-orange-50/90 to-pink-50/90 backdrop-blur-xl border border-orange-200/50 rounded-3xl shadow-lg">
             <div className="flex items-center space-x-4">
-              <Button
-                variant="outline"
-                size="sm"
-                onClick={() => navigate("/admin/blog")}
-                className="group"
+              <motion.div
+                whileHover={{ scale: 1.05 }}
+                whileTap={{ scale: 0.95 }}
               >
-                <ArrowLeft className="w-4 h-4 mr-2 transition-transform group-hover:-translate-x-1" />
-                Quay lại
-              </Button>
-              <div>
-                <h1 className="text-3xl font-bold text-transparent bg-gradient-to-r from-blue-600 via-purple-600 to-pink-600 bg-clip-text">
-                  {isEditing ? "Chỉnh sửa bài viết" : "Tạo bài viết mới"}
-                </h1>
-                <p className="text-muted-foreground">
-                  {isEditing
-                    ? "Cập nhật nội dung bài viết"
-                    : "Viết và xuất bản bài viết mới"}
-                </p>
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  onClick={() => navigate("/admin/blog")}
+                  className="group bg-white/60 hover:bg-white/80 rounded-2xl shadow-md"
+                >
+                  <ArrowLeft className="w-4 h-4 mr-2 transition-transform group-hover:-translate-x-1 text-orange-600" />
+                  <span className="font-semibold text-orange-800">
+                    Quay lại
+                  </span>
+                </Button>
+              </motion.div>
+              <div className="flex items-center space-x-4">
+                <motion.div
+                  whileHover={{ scale: 1.1, rotate: 5 }}
+                  className="flex items-center justify-center w-16 h-16 shadow-xl rounded-3xl bg-gradient-to-r from-orange-500 via-amber-500 to-pink-600"
+                >
+                  <FileText className="w-8 h-8 text-white" />
+                </motion.div>
+                <div>
+                  <h1 className="text-4xl font-bold text-transparent bg-gradient-to-r from-orange-600 via-amber-600 to-pink-600 bg-clip-text">
+                    {isEditing ? "Chỉnh sửa bài viết" : "Tạo bài viết mới"}
+                  </h1>
+                  <p className="text-orange-700/80 mt-1 flex items-center space-x-2">
+                    <Sparkles className="w-4 h-4" />
+                    <span>
+                      {isEditing
+                        ? "Cập nhật nội dung bài viết"
+                        : "Viết và xuất bản bài viết mới"}
+                    </span>
+                  </p>
+                </div>
               </div>
             </div>
 
             <div className="flex items-center space-x-3">
-              <Button variant="outline" size="sm">
-                <Eye className="w-4 h-4 mr-2" />
-                Xem trước
-              </Button>
-              <Button
-                onClick={handleSubmit(onSubmit)}
-                disabled={isSubmitting}
-                className="bg-gradient-to-r from-blue-500 to-purple-600 hover:from-blue-600 hover:to-purple-700"
+              <motion.div
+                whileHover={{ scale: 1.05 }}
+                whileTap={{ scale: 0.95 }}
               >
-                {isSubmitting ? (
-                  <Loader2 className="w-4 h-4 mr-2 animate-spin" />
-                ) : (
-                  <Save className="w-4 h-4 mr-2" />
-                )}
-                {isEditing ? "Cập nhật" : "Xuất bản"}
-              </Button>
+                <Button
+                  variant="outline"
+                  size="sm"
+                  className="bg-white/80 hover:bg-white border-orange-200/50 hover:border-orange-300 rounded-2xl shadow-md"
+                >
+                  <Eye className="w-4 h-4 mr-2 text-orange-600" />
+                  <span className="font-semibold text-orange-800">
+                    Xem trước
+                  </span>
+                </Button>
+              </motion.div>
+              <motion.div
+                whileHover={{ scale: 1.05 }}
+                whileTap={{ scale: 0.95 }}
+              >
+                <Button
+                  onClick={handleSubmit(onSubmit)}
+                  disabled={isSubmitting}
+                  className="transition-all duration-300 shadow-lg bg-gradient-to-r from-orange-500 via-amber-500 to-pink-600 hover:from-orange-600 hover:to-pink-700 rounded-2xl"
+                >
+                  {isSubmitting ? (
+                    <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+                  ) : (
+                    <Save className="w-4 h-4 mr-2" />
+                  )}
+                  <span className="font-semibold">
+                    {isEditing ? "Cập nhật" : "Xuất bản"}
+                  </span>
+                  <Sparkles className="w-4 h-4 ml-1" />
+                </Button>
+              </motion.div>
             </div>
           </div>
         </motion.div>
@@ -528,15 +707,17 @@ const BlogCreate: React.FC = () => {
               className="space-y-6"
             >
               {/* Tab Navigation */}
-              <TabsList className="grid w-full h-auto grid-cols-4 p-1 bg-white/50 dark:bg-slate-800/50 backdrop-blur-sm">
+              <TabsList className="grid w-full h-auto grid-cols-4 p-1 bg-white/50 backdrop-blur-sm rounded-2xl shadow-lg border border-orange-200/30">
                 {tabsConfig.map((tab) => (
                   <TabsTrigger
                     key={tab.id}
                     value={tab.id}
-                    className="flex items-center space-x-2 py-3 px-4 data-[state=active]:bg-white dark:data-[state=active]:bg-slate-700"
+                    className="flex items-center space-x-2 py-3 px-4 data-[state=active]:bg-gradient-to-r data-[state=active]:from-orange-500 data-[state=active]:to-pink-600 data-[state=active]:text-white rounded-xl transition-all duration-300"
                   >
                     <tab.icon className="w-4 h-4" />
-                    <span className="hidden sm:inline">{tab.label}</span>
+                    <span className="hidden sm:inline font-medium">
+                      {tab.label}
+                    </span>
                   </TabsTrigger>
                 ))}
               </TabsList>
@@ -550,17 +731,17 @@ const BlogCreate: React.FC = () => {
                   exit={{ opacity: 0, y: -20 }}
                   transition={{ duration: 0.3 }}
                 >
-                  <Card className="border-0 shadow-lg bg-gradient-to-br from-white to-blue-50 dark:from-slate-800 dark:to-blue-900">
+                  <Card className="border-0 shadow-xl bg-gradient-to-br from-white/95 via-orange-50/80 to-pink-50/80 backdrop-blur-xl rounded-3xl">
                     <CardHeader>
                       <CardTitle className="flex items-center space-x-3">
-                        <div className="flex items-center justify-center w-10 h-10 rounded-xl bg-gradient-to-r from-blue-500 to-cyan-500">
-                          <FileText className="w-5 h-5 text-white" />
+                        <div className="flex items-center justify-center w-12 h-12 rounded-2xl bg-gradient-to-r from-orange-500 to-amber-500 shadow-lg">
+                          <FileText className="w-6 h-6 text-white" />
                         </div>
                         <div>
-                          <span className="text-xl text-transparent bg-gradient-to-r from-blue-600 to-cyan-600 bg-clip-text">
+                          <span className="text-2xl text-transparent bg-gradient-to-r from-orange-600 to-amber-600 bg-clip-text font-bold">
                             Nội dung bài viết
                           </span>
-                          <p className="mt-1 text-sm text-muted-foreground">
+                          <p className="text-sm text-orange-700/80 mt-1">
                             Viết nội dung chính của bài viết
                           </p>
                         </div>
@@ -569,14 +750,17 @@ const BlogCreate: React.FC = () => {
                     <CardContent className="space-y-6">
                       {/* Title */}
                       <div className="space-y-2">
-                        <Label htmlFor="title" className="text-sm font-medium">
+                        <Label
+                          htmlFor="title"
+                          className="text-sm font-semibold text-orange-800"
+                        >
                           Tiêu đề bài viết
                         </Label>
                         <Input
                           id="title"
                           placeholder="Nhập tiêu đề hấp dẫn..."
                           {...register("title")}
-                          className={`h-12 text-lg ${errors.title ? "border-red-500" : ""}`}
+                          className={`h-12 text-lg bg-white/80 border-orange-200/50 rounded-2xl shadow-md focus:ring-2 focus:ring-orange-400/20 ${errors.title ? "border-red-500" : ""}`}
                         />
                         {errors.title && (
                           <p className="text-sm text-red-500">
@@ -584,7 +768,7 @@ const BlogCreate: React.FC = () => {
                           </p>
                         )}
                         {watchedValues.title && (
-                          <div className="flex items-center space-x-2 text-xs text-muted-foreground">
+                          <div className="flex items-center space-x-2 text-xs text-orange-600/80">
                             <span>
                               Độ dài: {watchedValues.title.length} ký tự
                             </span>
@@ -594,6 +778,12 @@ const BlogCreate: React.FC = () => {
                                 watchedValues.title.length <= 60
                                   ? "default"
                                   : "secondary"
+                              }
+                              className={
+                                watchedValues.title.length >= 30 &&
+                                watchedValues.title.length <= 60
+                                  ? "bg-green-100 text-green-800"
+                                  : "bg-yellow-100 text-yellow-800"
                               }
                             >
                               {watchedValues.title.length >= 30 &&
@@ -607,14 +797,17 @@ const BlogCreate: React.FC = () => {
 
                       {/* Slug */}
                       <div className="space-y-2">
-                        <Label htmlFor="slug" className="text-sm font-medium">
+                        <Label
+                          htmlFor="slug"
+                          className="text-sm font-semibold text-orange-800"
+                        >
                           URL Slug
                         </Label>
                         <Input
                           id="slug"
                           placeholder="url-slug-bai-viet"
                           {...register("slug")}
-                          className={errors.slug ? "border-red-500" : ""}
+                          className={`bg-white/80 border-orange-200/50 rounded-2xl shadow-md ${errors.slug ? "border-red-500" : ""}`}
                         />
                         {errors.slug && (
                           <p className="text-sm text-red-500">
@@ -627,7 +820,7 @@ const BlogCreate: React.FC = () => {
                       <div className="space-y-2">
                         <Label
                           htmlFor="excerpt"
-                          className="text-sm font-medium"
+                          className="text-sm font-semibold text-orange-800"
                         >
                           Tóm tắt bài viết
                         </Label>
@@ -635,7 +828,7 @@ const BlogCreate: React.FC = () => {
                           id="excerpt"
                           placeholder="Viết tóm tắt ngắn gọn về bài viết..."
                           {...register("excerpt")}
-                          className={`min-h-[100px] ${errors.excerpt ? "border-red-500" : ""}`}
+                          className={`min-h-[100px] bg-white/80 border-orange-200/50 rounded-2xl shadow-md ${errors.excerpt ? "border-red-500" : ""}`}
                         />
                         {errors.excerpt && (
                           <p className="text-sm text-red-500">
@@ -644,23 +837,22 @@ const BlogCreate: React.FC = () => {
                         )}
                       </div>
 
-                      {/* Content */}
-                      {/* Content - SỬ DỤNG TinyMCEEditor */}
+                      {/* Content Editor */}
                       <div className="space-y-2">
                         <Label
                           htmlFor="content"
-                          className="text-sm font-medium"
+                          className="text-sm font-semibold text-orange-800"
                         >
                           Nội dung chi tiết
                         </Label>
-
-                        <TinyMCEEditor
-                          value={watchedValues.content || ""}
-                          onChange={(content) => setValue("content", content)}
-                          placeholder="Viết nội dung chi tiết của bài viết với rich text editor..."
-                          height={500}
-                        />
-
+                        <div className="rounded-2xl overflow-hidden shadow-lg">
+                          <TinyMCEEditor
+                            value={watchedValues.content || ""}
+                            onChange={(content) => setValue("content", content)}
+                            placeholder="Viết nội dung chi tiết của bài viết với rich text editor..."
+                            height={500}
+                          />
+                        </div>
                         {errors.content && (
                           <p className="text-sm text-red-500">
                             {errors.content.message}
@@ -669,11 +861,19 @@ const BlogCreate: React.FC = () => {
 
                         {/* Content Stats */}
                         {watchedValues.content && (
-                          <div className="flex items-center space-x-4 text-xs text-muted-foreground">
-                            <span>{contentStats.words} từ</span>
-                            <span>{contentStats.sentences} câu</span>
-                            <span>{contentStats.paragraphs} đoạn</span>
-                            <span>{contentStats.readingTime} phút đọc</span>
+                          <div className="flex items-center space-x-4 text-xs text-orange-600/80 bg-orange-50/50 p-3 rounded-xl">
+                            <span className="font-medium">
+                              {contentStats.words} từ
+                            </span>
+                            <span className="font-medium">
+                              {contentStats.sentences} câu
+                            </span>
+                            <span className="font-medium">
+                              {contentStats.paragraphs} đoạn
+                            </span>
+                            <span className="font-medium">
+                              {contentStats.readingTime} phút đọc
+                            </span>
                           </div>
                         )}
                       </div>
@@ -682,7 +882,7 @@ const BlogCreate: React.FC = () => {
                 </motion.div>
               </TabsContent>
 
-              {/* ✅ SEO Tools Tab */}
+              {/* SEO Tools Tab */}
               <TabsContent value="seo-tools" className="space-y-6">
                 <motion.div
                   key="seo-tools-tab"
@@ -691,29 +891,29 @@ const BlogCreate: React.FC = () => {
                   exit={{ opacity: 0, y: -20 }}
                   transition={{ duration: 0.3 }}
                 >
-                  <Card className="border-0 shadow-lg bg-gradient-to-br from-white to-orange-50 dark:from-slate-800 dark:to-orange-900">
+                  <Card className="border-0 shadow-xl bg-gradient-to-br from-white/95 via-purple-50/80 to-pink-50/80 backdrop-blur-xl rounded-3xl">
                     <CardHeader>
                       <CardTitle className="flex items-center space-x-3">
-                        <div className="flex items-center justify-center w-10 h-10 rounded-xl bg-gradient-to-r from-orange-500 to-red-500">
-                          <Wand2 className="w-5 h-5 text-white" />
+                        <div className="flex items-center justify-center w-12 h-12 rounded-2xl bg-gradient-to-r from-purple-500 to-pink-500 shadow-lg">
+                          <Wand2 className="w-6 h-6 text-white" />
                         </div>
                         <div>
-                          <span className="text-xl text-transparent bg-gradient-to-r from-orange-600 to-red-600 bg-clip-text">
+                          <span className="text-2xl text-transparent bg-gradient-to-r from-purple-600 to-pink-600 bg-clip-text font-bold">
                             Công cụ SEO thông minh
                           </span>
-                          <p className="mt-1 text-sm text-muted-foreground">
+                          <p className="text-sm text-purple-700/80 mt-1">
                             AI hỗ trợ viết content chuẩn SEO
                           </p>
                         </div>
                       </CardTitle>
                     </CardHeader>
                     <CardContent className="space-y-6">
-                      {/* ✅ AI Content Generator */}
+                      {/* AI Content Generator */}
                       <div className="grid grid-cols-1 gap-4 md:grid-cols-4">
                         <motion.div whileHover={{ scale: 1.02 }}>
                           <Button
                             variant="outline"
-                            className="flex-col w-full h-20 space-y-2 group"
+                            className="flex-col w-full h-20 space-y-2 group bg-white/80 border-purple-200/50 hover:border-purple-300 rounded-2xl shadow-md hover:shadow-lg"
                             onClick={async () => {
                               const suggestions = await generateContentWithAI(
                                 "",
@@ -728,10 +928,11 @@ const BlogCreate: React.FC = () => {
                                     )
                                   ],
                                 );
-                                toast({
-                                  title: "✨ AI đã tạo tiêu đề",
-                                  description: "Tiêu đề mới đã được áp dụng!",
-                                });
+                                showToast(
+                                  "success",
+                                  "✨ AI đã tạo tiêu đề",
+                                  "Tiêu đề mới đã được áp dụng!",
+                                );
                               }
                             }}
                             disabled={isGeneratingContent}
@@ -739,16 +940,18 @@ const BlogCreate: React.FC = () => {
                             {isGeneratingContent ? (
                               <Loader2 className="w-5 h-5 animate-spin" />
                             ) : (
-                              <Brain className="w-5 h-5 group-hover:text-blue-500" />
+                              <Brain className="w-5 h-5 group-hover:text-purple-500" />
                             )}
-                            <span className="text-sm">Tạo tiêu đề AI</span>
+                            <span className="text-sm font-medium">
+                              Tạo tiêu đề AI
+                            </span>
                           </Button>
                         </motion.div>
 
                         <motion.div whileHover={{ scale: 1.02 }}>
                           <Button
                             variant="outline"
-                            className="flex-col w-full h-20 space-y-2 group"
+                            className="flex-col w-full h-20 space-y-2 group bg-white/80 border-purple-200/50 hover:border-purple-300 rounded-2xl shadow-md hover:shadow-lg"
                             onClick={async () => {
                               const suggestions = await generateContentWithAI(
                                 "",
@@ -763,10 +966,11 @@ const BlogCreate: React.FC = () => {
                                     )
                                   ],
                                 );
-                                toast({
-                                  title: "✨ AI đã tạo tóm tắt",
-                                  description: "Tóm tắt mới đã được áp dụng!",
-                                });
+                                showToast(
+                                  "success",
+                                  "✨ AI đã tạo tóm tắt",
+                                  "Tóm tắt mới đã được áp dụng!",
+                                );
                               }
                             }}
                             disabled={isGeneratingContent}
@@ -776,14 +980,16 @@ const BlogCreate: React.FC = () => {
                             ) : (
                               <PenTool className="w-5 h-5 group-hover:text-green-500" />
                             )}
-                            <span className="text-sm">Tạo tóm tắt AI</span>
+                            <span className="text-sm font-medium">
+                              Tạo tóm tắt AI
+                            </span>
                           </Button>
                         </motion.div>
 
                         <motion.div whileHover={{ scale: 1.02 }}>
                           <Button
                             variant="outline"
-                            className="flex-col w-full h-20 space-y-2 group"
+                            className="flex-col w-full h-20 space-y-2 group bg-white/80 border-purple-200/50 hover:border-purple-300 rounded-2xl shadow-md hover:shadow-lg"
                             onClick={async () => {
                               const suggestions = await generateContentWithAI(
                                 "",
@@ -802,11 +1008,11 @@ const BlogCreate: React.FC = () => {
                                       )
                                     ],
                                 );
-                                toast({
-                                  title: "✨ AI đã thêm nội dung",
-                                  description:
-                                    "Nội dung mới đã được thêm vào bài viết!",
-                                });
+                                showToast(
+                                  "success",
+                                  "✨ AI đã thêm nội dung",
+                                  "Nội dung mới đã được thêm vào bài viết!",
+                                );
                               }
                             }}
                             disabled={isGeneratingContent}
@@ -816,14 +1022,16 @@ const BlogCreate: React.FC = () => {
                             ) : (
                               <Sparkles className="w-5 h-5 group-hover:text-purple-500" />
                             )}
-                            <span className="text-sm">Mở rộng nội dung</span>
+                            <span className="text-sm font-medium">
+                              Mở rộng nội dung
+                            </span>
                           </Button>
                         </motion.div>
 
                         <motion.div whileHover={{ scale: 1.02 }}>
                           <Button
                             variant="outline"
-                            className="flex-col w-full h-20 space-y-2 group"
+                            className="flex-col w-full h-20 space-y-2 group bg-white/80 border-purple-200/50 hover:border-purple-300 rounded-2xl shadow-md hover:shadow-lg"
                             onClick={async () => {
                               const suggestions = await generateContentWithAI(
                                 "",
@@ -838,11 +1046,11 @@ const BlogCreate: React.FC = () => {
                                     )
                                   ],
                                 );
-                                toast({
-                                  title: "✨ AI đã tạo meta keywords",
-                                  description:
-                                    "Meta keywords mới đã được áp dụng!",
-                                });
+                                showToast(
+                                  "success",
+                                  "✨ AI đã tạo meta keywords",
+                                  "Meta keywords mới đã được áp dụng!",
+                                );
                               }
                             }}
                             disabled={isGeneratingContent}
@@ -852,19 +1060,23 @@ const BlogCreate: React.FC = () => {
                             ) : (
                               <Target className="w-5 h-5 group-hover:text-orange-500" />
                             )}
-                            <span className="text-sm">Tạo keywords</span>
+                            <span className="text-sm font-medium">
+                              Tạo keywords
+                            </span>
                           </Button>
                         </motion.div>
                       </div>
 
-                      {/* ✅ SEO Analysis Dashboard */}
+                      {/* SEO Analysis Dashboard */}
                       <div className="grid grid-cols-1 gap-6 md:grid-cols-2">
                         {/* Readability Score */}
-                        <Card className="p-4 border-0 bg-gradient-to-br from-blue-50 to-cyan-50 dark:from-blue-900/20 dark:to-cyan-900/20">
+                        <Card className="p-4 border-0 bg-gradient-to-br from-blue-50/80 to-cyan-50/80 backdrop-blur-sm rounded-2xl shadow-md">
                           <div className="flex items-center justify-between mb-3">
                             <div className="flex items-center space-x-2">
                               <BookOpen className="w-4 h-4 text-blue-600" />
-                              <span className="font-medium">Độ dễ đọc</span>
+                              <span className="font-semibold text-blue-800">
+                                Độ dễ đọc
+                              </span>
                             </div>
                             <Badge
                               className={`${
@@ -873,28 +1085,28 @@ const BlogCreate: React.FC = () => {
                                   : readabilityScore >= 60
                                     ? "bg-yellow-100 text-yellow-800"
                                     : "bg-red-100 text-red-800"
-                              }`}
+                              } font-semibold`}
                             >
                               {readabilityScore}/100
                             </Badge>
                           </div>
-                          <div className="w-full h-2 bg-gray-200 rounded-full">
+                          <div className="w-full h-3 bg-gray-200 rounded-full overflow-hidden">
                             <motion.div
-                              className={`h-2 rounded-full ${
+                              className={`h-3 rounded-full ${
                                 readabilityScore >= 80
-                                  ? "bg-green-500"
+                                  ? "bg-gradient-to-r from-green-400 to-green-600"
                                   : readabilityScore >= 60
-                                    ? "bg-yellow-500"
-                                    : "bg-red-500"
+                                    ? "bg-gradient-to-r from-yellow-400 to-yellow-600"
+                                    : "bg-gradient-to-r from-red-400 to-red-600"
                               }`}
                               initial={{ width: 0 }}
                               animate={{ width: `${readabilityScore}%` }}
                               transition={{ duration: 1 }}
                             />
                           </div>
-                          <p className="mt-2 text-xs text-muted-foreground">
+                          <p className="mt-2 text-xs text-blue-700/80 font-medium">
                             {readabilityScore >= 80
-                              ? "Rất dễ đọc"
+                              ? "Rất dễ đọc và hiểu"
                               : readabilityScore >= 60
                                 ? "Khá dễ đọc"
                                 : "Khó đọc, nên cải thiện"}
@@ -902,51 +1114,47 @@ const BlogCreate: React.FC = () => {
                         </Card>
 
                         {/* Content Stats */}
-                        <Card className="p-4 border-0 bg-gradient-to-br from-purple-50 to-pink-50 dark:from-purple-900/20 dark:to-pink-900/20">
+                        <Card className="p-4 border-0 bg-gradient-to-br from-purple-50/80 to-pink-50/80 backdrop-blur-sm rounded-2xl shadow-md">
                           <div className="flex items-center mb-3 space-x-2">
                             <BarChart className="w-4 h-4 text-purple-600" />
-                            <span className="font-medium">
+                            <span className="font-semibold text-purple-800">
                               Thống kê nội dung
                             </span>
                           </div>
                           <div className="grid grid-cols-2 gap-2 text-sm">
-                            <div className="flex justify-between">
-                              <span className="text-muted-foreground">Từ:</span>
-                              <span className="font-medium">
+                            <div className="flex justify-between p-2 bg-white/50 rounded-lg">
+                              <span className="text-purple-700/80">Từ:</span>
+                              <span className="font-semibold text-purple-800">
                                 {contentStats.words}
                               </span>
                             </div>
-                            <div className="flex justify-between">
-                              <span className="text-muted-foreground">
-                                Câu:
-                              </span>
-                              <span className="font-medium">
+                            <div className="flex justify-between p-2 bg-white/50 rounded-lg">
+                              <span className="text-purple-700/80">Câu:</span>
+                              <span className="font-semibold text-purple-800">
                                 {contentStats.sentences}
                               </span>
                             </div>
-                            <div className="flex justify-between">
-                              <span className="text-muted-foreground">
-                                Đoạn:
-                              </span>
-                              <span className="font-medium">
+                            <div className="flex justify-between p-2 bg-white/50 rounded-lg">
+                              <span className="text-purple-700/80">Đoạn:</span>
+                              <span className="font-semibold text-purple-800">
                                 {contentStats.paragraphs}
                               </span>
                             </div>
-                            <div className="flex justify-between">
-                              <span className="text-muted-foreground">
+                            <div className="flex justify-between p-2 bg-white/50 rounded-lg">
+                              <span className="text-purple-700/80">
                                 Heading:
                               </span>
-                              <span className="font-medium">
+                              <span className="font-semibold text-purple-800">
                                 {contentStats.headings}
                               </span>
                             </div>
                           </div>
-                          <div className="pt-2 mt-2 border-t">
-                            <div className="flex justify-between text-sm">
-                              <span className="text-muted-foreground">
+                          <div className="pt-2 mt-2 border-t border-purple-200/50">
+                            <div className="flex justify-between text-sm p-2 bg-white/50 rounded-lg">
+                              <span className="text-purple-700/80">
                                 Thời gian đọc:
                               </span>
-                              <span className="font-medium">
+                              <span className="font-semibold text-purple-800">
                                 {contentStats.readingTime} phút
                               </span>
                             </div>
@@ -954,12 +1162,12 @@ const BlogCreate: React.FC = () => {
                         </Card>
                       </div>
 
-                      {/* ✅ SEO Suggestions */}
+                      {/* SEO Suggestions */}
                       {seoSuggestions.length > 0 && (
-                        <Card className="p-4 border-0 bg-gradient-to-br from-yellow-50 to-orange-50 dark:from-yellow-900/20 dark:to-orange-900/20">
+                        <Card className="p-4 border-0 bg-gradient-to-br from-yellow-50/80 to-orange-50/80 backdrop-blur-sm rounded-2xl shadow-md">
                           <div className="flex items-center mb-3 space-x-2">
                             <Lightbulb className="w-4 h-4 text-yellow-600" />
-                            <span className="font-medium">
+                            <span className="font-semibold text-yellow-800">
                               Gợi ý SEO ({seoSuggestions.length})
                             </span>
                           </div>
@@ -970,41 +1178,45 @@ const BlogCreate: React.FC = () => {
                                 initial={{ opacity: 0, x: -10 }}
                                 animate={{ opacity: 1, x: 0 }}
                                 transition={{ delay: index * 0.1 }}
-                                className="flex items-start p-3 space-x-2 transition-colors rounded-lg bg-white/50 dark:bg-slate-800/50 hover:bg-white dark:hover:bg-slate-800"
+                                className="flex items-start p-3 space-x-2 transition-colors rounded-xl bg-white/60 hover:bg-white/80"
                               >
                                 <Target className="w-3 h-3 text-yellow-600 mt-0.5 flex-shrink-0" />
-                                <span className="text-sm">{suggestion}</span>
+                                <span className="text-sm font-medium text-yellow-800">
+                                  {suggestion}
+                                </span>
                               </motion.div>
                             ))}
                           </div>
                         </Card>
                       )}
 
-                      {/* ✅ Keyword Density */}
+                      {/* Keyword Density */}
                       {Object.keys(keywordDensity).length > 0 && (
-                        <Card className="p-4 border-0 bg-gradient-to-br from-green-50 to-emerald-50 dark:from-green-900/20 dark:to-emerald-900/20">
+                        <Card className="p-4 border-0 bg-gradient-to-br from-green-50/80 to-emerald-50/80 backdrop-blur-sm rounded-2xl shadow-md">
                           <div className="flex items-center mb-3 space-x-2">
                             <TrendingUp className="w-4 h-4 text-green-600" />
-                            <span className="font-medium">Mật độ từ khóa</span>
+                            <span className="font-semibold text-green-800">
+                              Mật độ từ khóa
+                            </span>
                           </div>
                           <div className="grid grid-cols-2 gap-2">
                             {Object.entries(keywordDensity).map(
                               ([word, density]) => (
                                 <div
                                   key={word}
-                                  className="flex items-center justify-between p-2 rounded bg-white/50 dark:bg-slate-800/50"
+                                  className="flex items-center justify-between p-3 rounded-xl bg-white/60"
                                 >
-                                  <span className="text-sm font-medium">
+                                  <span className="text-sm font-semibold text-green-800">
                                     {word}
                                   </span>
                                   <Badge
                                     variant="outline"
-                                    className={`text-xs ${
+                                    className={`text-xs font-semibold ${
                                       density > 3
-                                        ? "border-red-500 text-red-600"
+                                        ? "border-red-500 text-red-600 bg-red-50"
                                         : density > 1
-                                          ? "border-green-500 text-green-600"
-                                          : "border-gray-500 text-gray-600"
+                                          ? "border-green-500 text-green-600 bg-green-50"
+                                          : "border-gray-500 text-gray-600 bg-gray-50"
                                     }`}
                                   >
                                     {density}%
@@ -1013,18 +1225,18 @@ const BlogCreate: React.FC = () => {
                               ),
                             )}
                           </div>
-                          <p className="mt-2 text-xs text-muted-foreground">
+                          <p className="mt-2 text-xs text-green-700/80 font-medium">
                             💡 Mật độ từ khóa lý tưởng: 1-3%. Tránh spam từ
                             khóa.
                           </p>
                         </Card>
                       )}
 
-                      {/* ✅ SEO Tools Links */}
-                      <Card className="p-4 border-0 bg-gradient-to-br from-indigo-50 to-blue-50 dark:from-indigo-900/20 dark:to-blue-900/20">
+                      {/* SEO Tools Links */}
+                      <Card className="p-4 border-0 bg-gradient-to-br from-indigo-50/80 to-blue-50/80 backdrop-blur-sm rounded-2xl shadow-md">
                         <div className="flex items-center mb-3 space-x-2">
                           <Cpu className="w-4 h-4 text-indigo-600" />
-                          <span className="font-medium">
+                          <span className="font-semibold text-indigo-800">
                             Công cụ SEO khuyên dùng
                           </span>
                         </div>
@@ -1033,10 +1245,10 @@ const BlogCreate: React.FC = () => {
                             href="https://aiktp.com/vi"
                             target="_blank"
                             rel="noopener noreferrer"
-                            className="flex items-center p-3 space-x-2 transition-colors rounded-lg bg-white/50 dark:bg-slate-800/50 hover:bg-white dark:hover:bg-slate-800 group"
+                            className="flex items-center p-3 space-x-2 transition-colors rounded-xl bg-white/60 hover:bg-white/80 group"
                           >
                             <Zap className="w-4 h-4 text-blue-600 transition-transform group-hover:scale-110" />
-                            <span className="text-sm">
+                            <span className="text-sm font-medium">
                               AIKTP - AI viết content
                             </span>
                           </a>
@@ -1044,10 +1256,10 @@ const BlogCreate: React.FC = () => {
                             href="https://laho.vn"
                             target="_blank"
                             rel="noopener noreferrer"
-                            className="flex items-center p-3 space-x-2 transition-colors rounded-lg bg-white/50 dark:bg-slate-800/50 hover:bg-white dark:hover:bg-slate-800 group"
+                            className="flex items-center p-3 space-x-2 transition-colors rounded-xl bg-white/60 hover:bg-white/80 group"
                           >
                             <Brain className="w-4 h-4 text-green-600 transition-transform group-hover:scale-110" />
-                            <span className="text-sm">
+                            <span className="text-sm font-medium">
                               Laho.vn - SEO Việt Nam
                             </span>
                           </a>
@@ -1055,10 +1267,10 @@ const BlogCreate: React.FC = () => {
                             href="https://grammarly.com"
                             target="_blank"
                             rel="noopener noreferrer"
-                            className="flex items-center p-3 space-x-2 transition-colors rounded-lg bg-white/50 dark:bg-slate-800/50 hover:bg-white dark:hover:bg-slate-800 group"
+                            className="flex items-center p-3 space-x-2 transition-colors rounded-xl bg-white/60 hover:bg-white/80 group"
                           >
                             <PenTool className="w-4 h-4 text-purple-600 transition-transform group-hover:scale-110" />
-                            <span className="text-sm">
+                            <span className="text-sm font-medium">
                               Grammarly - Kiểm tra ngữ pháp
                             </span>
                           </a>
@@ -1066,10 +1278,12 @@ const BlogCreate: React.FC = () => {
                             href="https://smallseotools.com"
                             target="_blank"
                             rel="noopener noreferrer"
-                            className="flex items-center p-3 space-x-2 transition-colors rounded-lg bg-white/50 dark:bg-slate-800/50 hover:bg-white dark:hover:bg-slate-800 group"
+                            className="flex items-center p-3 space-x-2 transition-colors rounded-xl bg-white/60 hover:bg-white/80 group"
                           >
                             <Search className="w-4 h-4 text-orange-600 transition-transform group-hover:scale-110" />
-                            <span className="text-sm">Small SEO Tools</span>
+                            <span className="text-sm font-medium">
+                              Small SEO Tools
+                            </span>
                           </a>
                         </div>
                       </Card>
@@ -1087,17 +1301,17 @@ const BlogCreate: React.FC = () => {
                   exit={{ opacity: 0, y: -20 }}
                   transition={{ duration: 0.3 }}
                 >
-                  <Card className="border-0 shadow-lg bg-gradient-to-br from-white to-purple-50 dark:from-slate-800 dark:to-purple-900">
+                  <Card className="border-0 shadow-xl bg-gradient-to-br from-white/95 via-blue-50/80 to-cyan-50/80 backdrop-blur-xl rounded-3xl">
                     <CardHeader>
                       <CardTitle className="flex items-center space-x-3">
-                        <div className="flex items-center justify-center w-10 h-10 rounded-xl bg-gradient-to-r from-purple-500 to-pink-500">
-                          <Image className="w-5 h-5 text-white" />
+                        <div className="flex items-center justify-center w-12 h-12 rounded-2xl bg-gradient-to-r from-blue-500 to-cyan-500 shadow-lg">
+                          <Image className="w-6 h-6 text-white" />
                         </div>
                         <div>
-                          <span className="text-xl text-transparent bg-gradient-to-r from-purple-600 to-pink-600 bg-clip-text">
+                          <span className="text-2xl text-transparent bg-gradient-to-r from-blue-600 to-cyan-600 bg-clip-text font-bold">
                             Quản lý hình ảnh
                           </span>
-                          <p className="mt-1 text-sm text-muted-foreground">
+                          <p className="text-sm text-blue-700/80 mt-1">
                             Upload và quản lý hình ảnh cho bài viết
                           </p>
                         </div>
@@ -1106,21 +1320,22 @@ const BlogCreate: React.FC = () => {
                     <CardContent className="space-y-6">
                       {/* Featured Image */}
                       <div className="space-y-2">
-                        <Label className="text-sm font-medium">
+                        <Label className="text-sm font-semibold text-blue-800">
                           Hình ảnh đại diện
                         </Label>
                         <Input
                           placeholder="URL hình ảnh đại diện"
                           {...register("featuredImage")}
+                          className="bg-white/80 border-blue-200/50 rounded-2xl shadow-md"
                         />
                       </div>
 
                       {/* Image Upload */}
                       <div className="space-y-4">
-                        <Label className="text-sm font-medium">
+                        <Label className="text-sm font-semibold text-blue-800">
                           Upload hình ảnh
                         </Label>
-                        <div className="p-8 text-center border-2 border-gray-300 border-dashed rounded-lg dark:border-gray-600">
+                        <div className="p-8 text-center border-2 border-blue-300/50 border-dashed rounded-2xl bg-blue-50/30">
                           <input
                             type="file"
                             multiple
@@ -1134,16 +1349,16 @@ const BlogCreate: React.FC = () => {
                             className="flex flex-col items-center space-y-2 cursor-pointer"
                           >
                             {isUploading ? (
-                              <Loader2 className="w-8 h-8 text-purple-500 animate-spin" />
+                              <Loader2 className="w-8 h-8 text-blue-500 animate-spin" />
                             ) : (
-                              <Upload className="w-8 h-8 text-purple-500" />
+                              <Upload className="w-8 h-8 text-blue-500" />
                             )}
-                            <span className="text-sm font-medium">
+                            <span className="text-sm font-semibold text-blue-800">
                               {isUploading
                                 ? "Đang upload..."
                                 : "Click để upload hình ảnh"}
                             </span>
-                            <span className="text-xs text-muted-foreground">
+                            <span className="text-xs text-blue-600/80">
                               PNG, JPG, GIF up to 10MB
                             </span>
                           </label>
@@ -1153,7 +1368,7 @@ const BlogCreate: React.FC = () => {
                       {/* Uploaded Images */}
                       {uploadedImages.length > 0 && (
                         <div className="space-y-4">
-                          <Label className="text-sm font-medium">
+                          <Label className="text-sm font-semibold text-blue-800">
                             Hình ảnh đã upload ({uploadedImages.length})
                           </Label>
                           <div className="grid grid-cols-2 gap-4 md:grid-cols-3">
@@ -1162,7 +1377,7 @@ const BlogCreate: React.FC = () => {
                                 <img
                                   src={image}
                                   alt={`Upload ${index + 1}`}
-                                  className="object-cover w-full h-24 rounded-lg"
+                                  className="object-cover w-full h-24 rounded-xl shadow-md"
                                 />
                                 <button
                                   onClick={() =>
@@ -1193,17 +1408,17 @@ const BlogCreate: React.FC = () => {
                   exit={{ opacity: 0, y: -20 }}
                   transition={{ duration: 0.3 }}
                 >
-                  <Card className="border-0 shadow-lg bg-gradient-to-br from-white to-green-50 dark:from-slate-800 dark:to-green-900">
+                  <Card className="border-0 shadow-xl bg-gradient-to-br from-white/95 via-green-50/80 to-emerald-50/80 backdrop-blur-xl rounded-3xl">
                     <CardHeader>
                       <CardTitle className="flex items-center space-x-3">
-                        <div className="flex items-center justify-center w-10 h-10 rounded-xl bg-gradient-to-r from-green-500 to-emerald-500">
-                          <Globe className="w-5 h-5 text-white" />
+                        <div className="flex items-center justify-center w-12 h-12 rounded-2xl bg-gradient-to-r from-green-500 to-emerald-500 shadow-lg">
+                          <Globe className="w-6 h-6 text-white" />
                         </div>
                         <div>
-                          <span className="text-xl text-transparent bg-gradient-to-r from-green-600 to-emerald-600 bg-clip-text">
+                          <span className="text-2xl text-transparent bg-gradient-to-r from-green-600 to-emerald-600 bg-clip-text font-bold">
                             SEO Meta Tags
                           </span>
-                          <p className="mt-1 text-sm text-muted-foreground">
+                          <p className="text-sm text-green-700/80 mt-1">
                             Tối ưu hóa cho công cụ tìm kiếm
                           </p>
                         </div>
@@ -1214,7 +1429,7 @@ const BlogCreate: React.FC = () => {
                       <div className="space-y-2">
                         <Label
                           htmlFor="metaTitle"
-                          className="text-sm font-medium"
+                          className="text-sm font-semibold text-green-800"
                         >
                           Meta Title
                         </Label>
@@ -1222,9 +1437,10 @@ const BlogCreate: React.FC = () => {
                           id="metaTitle"
                           placeholder="Tiêu đề SEO (khuyến nghị 50-60 ký tự)"
                           {...register("metaTitle")}
+                          className="bg-white/80 border-green-200/50 rounded-2xl shadow-md"
                         />
                         {watchedValues.metaTitle && (
-                          <div className="flex items-center space-x-2 text-xs text-muted-foreground">
+                          <div className="flex items-center space-x-2 text-xs text-green-600/80">
                             <span>
                               Độ dài: {watchedValues.metaTitle.length} ký tự
                             </span>
@@ -1234,6 +1450,12 @@ const BlogCreate: React.FC = () => {
                                 watchedValues.metaTitle.length <= 60
                                   ? "default"
                                   : "secondary"
+                              }
+                              className={
+                                watchedValues.metaTitle.length >= 50 &&
+                                watchedValues.metaTitle.length <= 60
+                                  ? "bg-green-100 text-green-800"
+                                  : "bg-yellow-100 text-yellow-800"
                               }
                             >
                               {watchedValues.metaTitle.length >= 50 &&
@@ -1249,7 +1471,7 @@ const BlogCreate: React.FC = () => {
                       <div className="space-y-2">
                         <Label
                           htmlFor="metaDescription"
-                          className="text-sm font-medium"
+                          className="text-sm font-semibold text-green-800"
                         >
                           Meta Description
                         </Label>
@@ -1257,10 +1479,10 @@ const BlogCreate: React.FC = () => {
                           id="metaDescription"
                           placeholder="Mô tả SEO (khuyến nghị 120-160 ký tự)"
                           {...register("metaDescription")}
-                          className="min-h-[80px]"
+                          className="min-h-[80px] bg-white/80 border-green-200/50 rounded-2xl shadow-md"
                         />
                         {watchedValues.metaDescription && (
-                          <div className="flex items-center space-x-2 text-xs text-muted-foreground">
+                          <div className="flex items-center space-x-2 text-xs text-green-600/80">
                             <span>
                               Độ dài: {watchedValues.metaDescription.length} ký
                               tự
@@ -1271,6 +1493,12 @@ const BlogCreate: React.FC = () => {
                                 watchedValues.metaDescription.length <= 160
                                   ? "default"
                                   : "secondary"
+                              }
+                              className={
+                                watchedValues.metaDescription.length >= 120 &&
+                                watchedValues.metaDescription.length <= 160
+                                  ? "bg-green-100 text-green-800"
+                                  : "bg-yellow-100 text-yellow-800"
                               }
                             >
                               {watchedValues.metaDescription.length >= 120 &&
@@ -1286,7 +1514,7 @@ const BlogCreate: React.FC = () => {
                       <div className="space-y-2">
                         <Label
                           htmlFor="metaKeywords"
-                          className="text-sm font-medium"
+                          className="text-sm font-semibold text-green-800"
                         >
                           Meta Keywords
                         </Label>
@@ -1294,8 +1522,9 @@ const BlogCreate: React.FC = () => {
                           id="metaKeywords"
                           placeholder="từ khóa 1, từ khóa 2, từ khóa 3"
                           {...register("metaKeywords")}
+                          className="bg-white/80 border-green-200/50 rounded-2xl shadow-md"
                         />
-                        <p className="text-xs text-muted-foreground">
+                        <p className="text-xs text-green-600/80 font-medium">
                           Phân cách bằng dấu phẩy. Khuyến nghị 3-5 từ khóa
                           chính.
                         </p>
@@ -1303,10 +1532,10 @@ const BlogCreate: React.FC = () => {
 
                       {/* SEO Preview */}
                       <div className="space-y-2">
-                        <Label className="text-sm font-medium">
+                        <Label className="text-sm font-semibold text-green-800">
                           Preview Google Search
                         </Label>
-                        <div className="p-4 bg-white border rounded-lg dark:bg-slate-800">
+                        <div className="p-4 bg-white border border-green-200/50 rounded-2xl shadow-md">
                           <div className="space-y-1">
                             <div className="text-lg font-medium text-blue-600 cursor-pointer hover:underline">
                               {watchedValues.metaTitle ||
@@ -1335,24 +1564,26 @@ const BlogCreate: React.FC = () => {
           {/* Sidebar */}
           <div className="space-y-6">
             {/* Publish Settings */}
-            <Card className="border-0 shadow-lg">
+            <Card className="border-0 shadow-lg bg-gradient-to-br from-white/95 to-orange-50/80 backdrop-blur-sm rounded-2xl">
               <CardHeader>
                 <CardTitle className="flex items-center space-x-2">
-                  <Calendar className="w-5 h-5" />
-                  <span>Xuất bản</span>
+                  <Calendar className="w-5 h-5 text-orange-600" />
+                  <span className="text-orange-800">Xuất bản</span>
                 </CardTitle>
               </CardHeader>
               <CardContent className="space-y-4">
                 {/* Status */}
                 <div className="space-y-2">
-                  <Label className="text-sm font-medium">Trạng thái</Label>
+                  <Label className="text-sm font-semibold text-orange-800">
+                    Trạng thái
+                  </Label>
                   <Select
                     value={watchedValues.status}
                     onValueChange={(value) =>
                       setValue("status", value as "draft" | "published")
                     }
                   >
-                    <SelectTrigger>
+                    <SelectTrigger className="bg-white/80 border-orange-200/50 rounded-xl shadow-md">
                       <SelectValue />
                     </SelectTrigger>
                     <SelectContent>
@@ -1374,12 +1605,14 @@ const BlogCreate: React.FC = () => {
 
                 {/* Category */}
                 <div className="space-y-2">
-                  <Label className="text-sm font-medium">Danh mục</Label>
+                  <Label className="text-sm font-semibold text-orange-800">
+                    Danh mục
+                  </Label>
                   <Select
                     value={watchedValues.category}
                     onValueChange={(value) => setValue("category", value)}
                   >
-                    <SelectTrigger>
+                    <SelectTrigger className="bg-white/80 border-orange-200/50 rounded-xl shadow-md">
                       <SelectValue placeholder="Chọn danh mục" />
                     </SelectTrigger>
                     <SelectContent>
@@ -1399,7 +1632,9 @@ const BlogCreate: React.FC = () => {
 
                 {/* Tags */}
                 <div className="space-y-2">
-                  <Label className="text-sm font-medium">Tags</Label>
+                  <Label className="text-sm font-semibold text-orange-800">
+                    Tags
+                  </Label>
                   <div className="flex space-x-2">
                     <Input
                       placeholder="Nhập tag"
@@ -1408,15 +1643,25 @@ const BlogCreate: React.FC = () => {
                       onKeyPress={(e) =>
                         e.key === "Enter" && (e.preventDefault(), addTag())
                       }
+                      className="bg-white/80 border-orange-200/50 rounded-xl shadow-md"
                     />
-                    <Button type="button" size="sm" onClick={addTag}>
+                    <Button
+                      type="button"
+                      size="sm"
+                      onClick={addTag}
+                      className="bg-gradient-to-r from-orange-500 to-amber-500 rounded-xl shadow-md"
+                    >
                       <Plus className="w-4 h-4" />
                     </Button>
                   </div>
                   {selectedTags.length > 0 && (
                     <div className="flex flex-wrap gap-2">
                       {selectedTags.map((tag) => (
-                        <Badge key={tag} variant="secondary" className="group">
+                        <Badge
+                          key={tag}
+                          variant="secondary"
+                          className="group bg-orange-100 text-orange-800 rounded-xl"
+                        >
                           <Tag className="w-3 h-3 mr-1" />
                           {tag}
                           <button
@@ -1435,49 +1680,53 @@ const BlogCreate: React.FC = () => {
             </Card>
 
             {/* Quick Stats */}
-            <Card className="border-0 shadow-lg">
+            <Card className="border-0 shadow-lg bg-gradient-to-br from-white/95 to-purple-50/80 backdrop-blur-sm rounded-2xl">
               <CardHeader>
                 <CardTitle className="flex items-center space-x-2">
-                  <BarChart className="w-5 h-5" />
-                  <span>Thống kê nhanh</span>
+                  <BarChart className="w-5 h-5 text-purple-600" />
+                  <span className="text-purple-800">Thống kê nhanh</span>
                 </CardTitle>
               </CardHeader>
               <CardContent className="space-y-4">
                 <div className="grid grid-cols-2 gap-4">
-                  <div className="p-3 text-center rounded-lg bg-blue-50 dark:bg-blue-900/20">
+                  <div className="p-3 text-center rounded-xl bg-gradient-to-br from-blue-50 to-blue-100">
                     <div className="text-2xl font-bold text-blue-600">
                       {contentStats.words}
                     </div>
-                    <div className="text-xs text-muted-foreground">Từ</div>
+                    <div className="text-xs font-medium text-blue-700">Từ</div>
                   </div>
-                  <div className="p-3 text-center rounded-lg bg-green-50 dark:bg-green-900/20">
+                  <div className="p-3 text-center rounded-xl bg-gradient-to-br from-green-50 to-green-100">
                     <div className="text-2xl font-bold text-green-600">
                       {contentStats.readingTime}
                     </div>
-                    <div className="text-xs text-muted-foreground">
+                    <div className="text-xs font-medium text-green-700">
                       Phút đọc
                     </div>
                   </div>
-                  <div className="p-3 text-center rounded-lg bg-purple-50 dark:bg-purple-900/20">
+                  <div className="p-3 text-center rounded-xl bg-gradient-to-br from-purple-50 to-purple-100">
                     <div className="text-2xl font-bold text-purple-600">
                       {readabilityScore}
                     </div>
-                    <div className="text-xs text-muted-foreground">
+                    <div className="text-xs font-medium text-purple-700">
                       Điểm SEO
                     </div>
                   </div>
-                  <div className="p-3 text-center rounded-lg bg-orange-50 dark:bg-orange-900/20">
+                  <div className="p-3 text-center rounded-xl bg-gradient-to-br from-orange-50 to-orange-100">
                     <div className="text-2xl font-bold text-orange-600">
                       {seoSuggestions.length}
                     </div>
-                    <div className="text-xs text-muted-foreground">Gợi ý</div>
+                    <div className="text-xs font-medium text-orange-700">
+                      Gợi ý
+                    </div>
                   </div>
                 </div>
 
                 {/* SEO Score */}
                 <div className="space-y-2">
                   <div className="flex items-center justify-between">
-                    <span className="text-sm font-medium">SEO Score</span>
+                    <span className="text-sm font-semibold text-purple-800">
+                      SEO Score
+                    </span>
                     <Badge
                       className={`${
                         readabilityScore >= 80
@@ -1485,7 +1734,7 @@ const BlogCreate: React.FC = () => {
                           : readabilityScore >= 60
                             ? "bg-yellow-100 text-yellow-800"
                             : "bg-red-100 text-red-800"
-                      }`}
+                      } font-semibold`}
                     >
                       {readabilityScore >= 80
                         ? "Tuyệt vời"
@@ -1494,16 +1743,18 @@ const BlogCreate: React.FC = () => {
                           : "Cần cải thiện"}
                     </Badge>
                   </div>
-                  <div className="w-full h-2 bg-gray-200 rounded-full">
-                    <div
-                      className={`h-2 rounded-full transition-all duration-500 ${
+                  <div className="w-full h-3 bg-gray-200 rounded-full overflow-hidden">
+                    <motion.div
+                      className={`h-3 rounded-full transition-all duration-500 ${
                         readabilityScore >= 80
-                          ? "bg-green-500"
+                          ? "bg-gradient-to-r from-green-400 to-green-600"
                           : readabilityScore >= 60
-                            ? "bg-yellow-500"
-                            : "bg-red-500"
+                            ? "bg-gradient-to-r from-yellow-400 to-yellow-600"
+                            : "bg-gradient-to-r from-red-400 to-red-600"
                       }`}
-                      style={{ width: `${readabilityScore}%` }}
+                      initial={{ width: 0 }}
+                      animate={{ width: `${readabilityScore}%` }}
+                      transition={{ duration: 1 }}
                     />
                   </div>
                 </div>
@@ -1511,21 +1762,23 @@ const BlogCreate: React.FC = () => {
             </Card>
 
             {/* Author Info */}
-            <Card className="border-0 shadow-lg">
+            <Card className="border-0 shadow-lg bg-gradient-to-br from-white/95 to-blue-50/80 backdrop-blur-sm rounded-2xl">
               <CardHeader>
                 <CardTitle className="flex items-center space-x-2">
-                  <User className="w-5 h-5" />
-                  <span>Tác giả</span>
+                  <User className="w-5 h-5 text-blue-600" />
+                  <span className="text-blue-800">Tác giả</span>
                 </CardTitle>
               </CardHeader>
               <CardContent>
                 <div className="flex items-center space-x-3">
-                  <div className="flex items-center justify-center w-10 h-10 rounded-full bg-gradient-to-r from-blue-500 to-purple-600">
-                    <User className="w-5 h-5 text-white" />
+                  <div className="flex items-center justify-center w-12 h-12 rounded-full bg-gradient-to-r from-orange-500 to-pink-600 shadow-lg">
+                    <User className="w-6 h-6 text-white" />
                   </div>
                   <div>
-                    <div className="font-medium">Admin User</div>
-                    <div className="text-sm text-muted-foreground">
+                    <div className="font-semibold text-orange-800">
+                      Admin User
+                    </div>
+                    <div className="text-sm text-orange-600/80">
                       {new Date().toLocaleDateString("vi-VN")}
                     </div>
                   </div>
@@ -1534,9 +1787,9 @@ const BlogCreate: React.FC = () => {
             </Card>
 
             {/* Quick Actions */}
-            <Card className="border-0 shadow-lg">
+            <Card className="border-0 shadow-lg bg-gradient-to-br from-white/95 to-amber-50/80 backdrop-blur-sm rounded-2xl">
               <CardHeader>
-                <CardTitle className="text-sm font-medium">
+                <CardTitle className="text-sm font-semibold text-amber-800">
                   Thao tác nhanh
                 </CardTitle>
               </CardHeader>
@@ -1544,46 +1797,54 @@ const BlogCreate: React.FC = () => {
                 <Button
                   variant="outline"
                   size="sm"
-                  className="justify-start w-full"
+                  className="justify-start w-full bg-white/80 border-amber-200/50 hover:border-amber-300 rounded-xl shadow-md"
                   onClick={() => {
                     const content = watchedValues.content || "";
                     navigator.clipboard.writeText(content);
-                    toast({
-                      title: "📋 Đã copy",
-                      description: "Nội dung đã được copy vào clipboard.",
-                    });
+                    showToast(
+                      "success",
+                      "📋 Đã copy",
+                      "Nội dung đã được copy vào clipboard.",
+                    );
                   }}
                 >
-                  <FileText className="w-4 h-4 mr-2" />
-                  Copy nội dung
+                  <FileText className="w-4 h-4 mr-2 text-amber-600" />
+                  <span className="font-medium text-amber-800">
+                    Copy nội dung
+                  </span>
                 </Button>
 
                 <Button
                   variant="outline"
                   size="sm"
-                  className="justify-start w-full"
+                  className="justify-start w-full bg-white/80 border-amber-200/50 hover:border-amber-300 rounded-xl shadow-md"
                   onClick={() => {
                     const wordCount = (
                       watchedValues.content?.match(/\b\w+\b/g) || []
                     ).length;
-                    toast({
-                      title: "📊 Thống kê",
-                      description: `Bài viết có ${wordCount} từ, ${contentStats.readingTime} phút đọc.`,
-                    });
+                    showToast(
+                      "info",
+                      "📊 Thống kê",
+                      `Bài viết có ${wordCount} từ, ${contentStats.readingTime} phút đọc.`,
+                    );
                   }}
                 >
-                  <BarChart className="w-4 h-4 mr-2" />
-                  Xem thống kê
+                  <BarChart className="w-4 h-4 mr-2 text-amber-600" />
+                  <span className="font-medium text-amber-800">
+                    Xem thống kê
+                  </span>
                 </Button>
 
                 <Button
                   variant="outline"
                   size="sm"
-                  className="justify-start w-full"
+                  className="justify-start w-full bg-white/80 border-amber-200/50 hover:border-amber-300 rounded-xl shadow-md"
                   onClick={() => setActiveTab("seo-tools")}
                 >
-                  <Wand2 className="w-4 h-4 mr-2" />
-                  Mở SEO Tools
+                  <Wand2 className="w-4 h-4 mr-2 text-amber-600" />
+                  <span className="font-medium text-amber-800">
+                    Mở SEO Tools
+                  </span>
                 </Button>
               </CardContent>
             </Card>
@@ -1595,7 +1856,7 @@ const BlogCreate: React.FC = () => {
           <motion.div whileHover={{ scale: 1.1 }} whileTap={{ scale: 0.9 }}>
             <Button
               size="lg"
-              className="rounded-full shadow-lg bg-gradient-to-r from-blue-500 to-purple-600 hover:from-blue-600 hover:to-purple-700"
+              className="rounded-full shadow-xl bg-gradient-to-r from-orange-500 via-amber-500 to-pink-600 hover:from-orange-600 hover:to-pink-700"
               onClick={handleSubmit(onSubmit)}
               disabled={isSubmitting}
             >
@@ -1611,16 +1872,16 @@ const BlogCreate: React.FC = () => {
             <Button
               size="lg"
               variant="outline"
-              className="rounded-full shadow-lg"
+              className="rounded-full shadow-xl bg-white/80 hover:bg-white border-orange-200/50 hover:border-orange-300"
               onClick={() => {
-                // Preview functionality
-                toast({
-                  title: "👁️ Xem trước",
-                  description: "Tính năng xem trước đang được phát triển.",
-                });
+                showToast(
+                  "info",
+                  "👁️ Xem trước",
+                  "Tính năng xem trước đang được phát triển.",
+                );
               }}
             >
-              <Eye className="w-5 h-5" />
+              <Eye className="w-5 h-5 text-orange-600" />
             </Button>
           </motion.div>
         </div>
@@ -1632,18 +1893,27 @@ const BlogCreate: React.FC = () => {
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
               exit={{ opacity: 0 }}
-              className="fixed inset-0 z-50 flex items-center justify-center bg-black/50"
+              className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-sm"
             >
-              <Card className="p-6">
+              <Card className="p-6 border-0 shadow-2xl bg-gradient-to-br from-white to-orange-50 rounded-3xl">
                 <CardContent className="flex items-center space-x-4">
-                  <Loader2 className="w-6 h-6 animate-spin" />
+                  <motion.div
+                    animate={{ rotate: 360 }}
+                    transition={{
+                      duration: 1,
+                      repeat: Infinity,
+                      ease: "linear",
+                    }}
+                  >
+                    <Loader2 className="w-8 h-8 text-orange-600" />
+                  </motion.div>
                   <div>
-                    <div className="font-medium">
+                    <div className="font-semibold text-orange-800">
                       {isEditing
                         ? "Đang cập nhật bài viết..."
                         : "Đang tạo bài viết..."}
                     </div>
-                    <div className="text-sm text-muted-foreground">
+                    <div className="text-sm text-orange-600/80">
                       Vui lòng đợi trong giây lát
                     </div>
                   </div>

@@ -34,6 +34,12 @@ import {
   Contact,
   Store,
   BookLock,
+  HelpCircle,
+  MessageSquare,
+  Lock,
+  FileText,
+  CreditCard,
+  Code,
 } from "lucide-react";
 import { FcAbout } from "react-icons/fc";
 
@@ -100,12 +106,12 @@ const Footer: React.FC = () => {
   ];
 
   const supportLinks = [
-    { to: "/help", label: "Trung tâm trợ giúp", icon: "❓" },
-    { to: "/faq", label: "Câu hỏi thường gặp", icon: "💬" },
-    { to: "/privacy", label: "Chính sách bảo mật", icon: "🔒" },
-    { to: "/terms", label: "Điều khoản sử dụng", icon: "📋" },
-    { to: "/refund", label: "Chính sách hoàn tiền", icon: "💰" },
-    { to: "/api", label: "API Documentation", icon: "⚡" },
+    { to: "/help", label: "Trung tâm trợ giúp", icon: HelpCircle },
+    { to: "/faq", label: "Câu hỏi thường gặp", icon: MessageSquare },
+    { to: "/privacy", label: "Chính sách bảo mật", icon: Lock },
+    { to: "/terms", label: "Điều khoản sử dụng", icon: FileText },
+    { to: "/refund", label: "Chính sách hoàn tiền", icon: CreditCard },
+    { to: "/api", label: "API Documentation", icon: Code },
   ];
 
   const categories = [
@@ -179,7 +185,7 @@ const Footer: React.FC = () => {
               <p className="leading-relaxed text-muted-foreground">
                 Nền tảng hàng đầu cung cấp templates và e-books chất lượng cao
                 cho developers và designers. Được tin tưởng bởi hơn 50,000 khách
-                hàng trên toàn thế giới.
+                hàng trên toàn thế gi��i.
               </p>
 
               <div className="space-y-3">
@@ -264,8 +270,8 @@ const Footer: React.FC = () => {
                     to={link.to}
                     className="flex items-center space-x-2 text-sm transition-all duration-300 text-muted-foreground hover:text-primary hover:translate-x-1 group"
                   >
-                    <span className="text-base group-hover:animate-bounce">
-                      {link.icon}
+                    <span className="p-1 text-sm group-hover:animate-bounce text-primary">
+                      <link.icon className="w-4 h-4" />
                     </span>
                     <span>{link.label}</span>
                   </Link>
