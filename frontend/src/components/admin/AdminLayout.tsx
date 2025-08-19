@@ -37,7 +37,6 @@ import {
   Star,
   Image,
   Shield,
-  Database,
   LogOut,
   User,
   Crown,
@@ -177,13 +176,6 @@ const AdminLayout: React.FC = () => {
       title: "Nhật ký hệ thống",
       icon: FileText,
       href: "/admin/logs",
-      count: null,
-    },
-    // **🔄 NEW: Backup & Restore**
-    {
-      title: "Sao lưu",
-      icon: Database,
-      href: "/admin/backup",
       count: null,
     },
     {
@@ -575,7 +567,7 @@ const AdminLayout: React.FC = () => {
                 whileHover={{ scale: 1.05 }}
                 whileTap={{ scale: 0.95 }}
               >
-                <div className="p-3 bg-gradient-to-r from-white/90 to-orange-50/90 hover:from-white hover:to-orange-100/90 shadow-lg hover:shadow-xl transition-all rounded-2xl border border-orange-200/50">
+                <div className="p-1 bg-gradient-to-r from-white/90 to-orange-50/90 hover:from-white hover:to-orange-100/90 shadow-lg hover:shadow-xl transition-all rounded-2xl border border-orange-200/50">
                   <ThemeToggle />
                 </div>
               </motion.div>

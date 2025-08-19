@@ -1,4 +1,3 @@
-// components/PageTransition.tsx - Enhanced với loading sync
 import React, { useEffect } from "react";
 import { motion } from "framer-motion";
 import { useLoading } from "@/contexts/LoadingContext";

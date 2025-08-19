@@ -1,4 +1,3 @@
-// components/GlobalLoading.tsx - Enhanced version
 import React from "react";
 import { useLoading } from "@/contexts/LoadingContext";
 import { motion, AnimatePresence } from "framer-motion";

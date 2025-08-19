@@ -74,6 +74,10 @@ const ProductCreate = React.lazy(() => import("./pages/admin/ProductCreate"));
 const OrderManagement = React.lazy(
   () => import("./pages/admin/OrderManagement"),
 );
+const DiscountCreate = React.lazy(() => import("./pages/admin/DiscountCreate"));
+const DiscountManagement = React.lazy(
+  () => import("./pages/admin/DiscountManagement"),
+);
 const UserManagement = React.lazy(() => import("./pages/admin/UserManagement"));
 const BlogManagement = React.lazy(() => import("./pages/admin/BlogManagement"));
 const BlogCreate = React.lazy(() => import("./pages/admin/BlogCreate"));
@@ -83,7 +87,13 @@ const Reports = React.lazy(() => import("./pages/admin/Reports"));
 const NotificationsManagement = React.lazy(
   () => import("./pages/admin/NotificationsManagement"),
 );
+const PaymentManagement = React.lazy(
+  () => import("./pages/admin/PaymentManagement "),
+);
 const EmailMarketing = React.lazy(() => import("./pages/admin/EmailMarketing"));
+const SystemLogsManagement = React.lazy(
+  () => import("./pages/admin/SystemLogsManagement"),
+);
 const AdminSettings = React.lazy(() => import("./pages/admin/Settings"));
 const NotFound = React.lazy(() => import("./pages/NotFound"));
 
@@ -638,6 +648,36 @@ const AppRoutes = () => {
             }
           />
           <Route
+            path="discounts/create"
+            element={
+              <Suspense fallback={<SuspenseFallback />}>
+                <PageTransition>
+                  <DiscountCreate />
+                </PageTransition>
+              </Suspense>
+            }
+          />
+          <Route
+            path="discounts/edit/:id"
+            element={
+              <Suspense fallback={<SuspenseFallback />}>
+                <PageTransition>
+                  <DiscountCreate />
+                </PageTransition>
+              </Suspense>
+            }
+          />
+          <Route
+            path="discounts"
+            element={
+              <Suspense fallback={<SuspenseFallback />}>
+                <PageTransition>
+                  <DiscountManagement />
+                </PageTransition>
+              </Suspense>
+            }
+          />
+          <Route
             path="chat"
             element={
               <Suspense fallback={<SuspenseFallback />}>
@@ -733,6 +773,26 @@ const AppRoutes = () => {
               <Suspense fallback={<SuspenseFallback />}>
                 <PageTransition>
                   <NotificationsManagement />
+                </PageTransition>
+              </Suspense>
+            }
+          />
+          <Route
+            path="logs"
+            element={
+              <Suspense fallback={<SystemLogsManagement />}>
+                <PageTransition>
+                  <NotificationsManagement />
+                </PageTransition>
+              </Suspense>
+            }
+          />
+          <Route
+            path="payments"
+            element={
+              <Suspense fallback={<SystemLogsManagement />}>
+                <PageTransition>
+                  <PaymentManagement />
                 </PageTransition>
               </Suspense>
             }
