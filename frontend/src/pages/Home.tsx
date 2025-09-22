@@ -9,8 +9,12 @@ import { Input } from "@/components/ui/input";
 import ProductCard from "@/components/ProductCard";
 import { getFeaturedProducts } from "@/lib/products";
 import { Product } from "@/types";
-import { BlogPost } from "@/types/blog";
-import { motion } from "framer-motion";
+import {
+  motion,
+  AnimatePresence,
+  useScroll,
+  useTransform,
+} from "framer-motion";
 import {
   ArrowRight,
   Star,
@@ -20,43 +24,85 @@ import {
   Shield,
   Award,
   Users,
-  Globe,
-  Eye,
   Download,
   Code,
-  Palette,
-  Coffee,
   Sparkles,
   Heart,
   Rocket,
   Quote,
-  MapPin,
-  Calendar,
-  Building,
   CheckCircle,
   Gift,
-  ExternalLink,
   Mail,
-  MessageSquare,
   Search,
-  Settings,
   Database,
   Target,
   Lightbulb,
-  Menu,
-  X,
+  Crown,
+  Smartphone,
+  BarChart3,
+  Briefcase,
+  Send,
+  ChevronRight,
+  ChevronLeft,
+  Compass,
+  Percent,
+  Zap,
 } from "lucide-react";
 import { toast } from "@/hooks/use-toast";
 
 const Home: React.FC = () => {
+  // ✨ Section Background Colors - Tương tự footer nhưng nhạt hơn
+  const sectionBackgrounds = {
+    // Hero Section - Trắng với chút pink nhạt
+    hero: "from-white via-pink-25 to-rose-25",
+
+    // Stats Section - Pink gradient nhẹ
+    stats: "from-pink-25 via-rose-25 to-red-25",
+
+    // Categories Section - Rose gradient nhẹ
+    categories: "from-rose-25 via-pink-25 to-white",
+
+    // Features Section - Gradient ngược
+    features: "from-red-25 via-rose-25 to-pink-25",
+
+    // Process Section - Pink nhạt hơn
+    process: "from-pink-50 via-rose-50 to-red-50",
+
+    // Products Section - Rose nhạt
+    products: "from-rose-50 via-pink-50 to-white",
+
+    // Testimonials Section - Red nhạt
+    testimonials: "from-red-50 via-rose-50 to-pink-50",
+
+    // Newsletter Section - Pink đậm nhất để nổi bật
+    newsletter: "from-pink-75 via-rose-75 to-red-75",
+  };
+
+  // ✨ UNIFIED Color Scheme - Cùng màu với Header nhưng nhạt hơn
+  const unifiedColorScheme = {
+    // Buttons - Nhạt hơn header
+    button: "from-pink-300 via-rose-300 to-red-300",
+    buttonHover: "from-pink-400 via-rose-400 to-red-400",
+    // Text gradients - Soft pink
+    textMain: "from-pink-400 via-rose-400 to-red-400",
+    textSecondary: "from-pink-500 via-rose-500 to-red-500",
+    // Icons - Very light pink
+    iconBg: "from-pink-25 to-rose-50",
+    iconText: "text-pink-400",
+    // Cards with subtle backgrounds
+    cardBg: "from-white/95 via-pink-50/80 to-rose-50/85",
+  };
+
   const [featuredProducts, setFeaturedProducts] = useState<Product[]>([]);
   const [isLoadingProducts, setIsLoadingProducts] = useState(true);
   const [currentTestimonial, setCurrentTestimonial] = useState(0);
   const [isVisible, setIsVisible] = useState<Record<string, boolean>>({});
   const [newsletterEmail, setNewsletterEmail] = useState("");
-  const [blogPosts, setBlogPosts] = useState<BlogPost[]>([]);
-  const [isLoadingBlog, setIsLoadingBlog] = useState(true);
-  const [searchQuery, setSearchQuery] = useState("");
+  const [currentSlide, setCurrentSlide] = useState(0);
+  const { scrollY } = useScroll();
+
+  // Parallax effects
+  const parallaxY = useTransform(scrollY, [0, 1000], [0, -100]);
 
   useEffect(() => {
     const fetchFeaturedProducts = async () => {
@@ -65,6 +111,87 @@ const Home: React.FC = () => {
         setFeaturedProducts(products);
       } catch (error) {
         console.error("Error fetching featured products:", error);
+        // ✅ FIXED Fallback data - Match exact Product interface
+        setFeaturedProducts([
+          {
+            id: "1",
+            title: "Pastel Dashboard Pro", // ✅ CHANGED: name → title
+            description: "Modern admin dashboard với pastel design system",
+            price: 49,
+            originalPrice: 79,
+            category: "template", // ✅ FIXED: Use valid category
+            tags: ["React", "Dashboard", "Pastel", "TypeScript"],
+            image: "/templates/dashboard-1.jpg", // ✅ ADDED: Required single image
+            images: [
+              "/templates/dashboard-1.jpg",
+              "/templates/dashboard-2.jpg",
+            ], // ✅ Keep images array
+            downloadUrl: "/download/dashboard-pro", // ✅ ADDED: Optional field
+            previewUrl: "/preview/dashboard-pro", // ✅ ADDED: Optional field
+            rating: 4.9,
+            reviewCount: 156,
+            isFeatured: true, // ✅ CHANGED: featured → isFeatured
+            isActive: true, // ✅ ADDED: Required field
+            createdAt: new Date().toISOString(),
+            updatedAt: new Date().toISOString(),
+            author: "Template Market Team", // ✅ ADDED: Required field
+            difficulty: "Intermediate", // ✅ ADDED: Optional field
+            technologies: ["React", "TypeScript", "Tailwind CSS", "Next.js"], // ✅ ADDED: Optional field
+            fileSize: "2.5 MB", // ✅ ADDED: Optional field
+            format: "ZIP", // ✅ ADDED: Optional field
+          },
+          {
+            id: "2",
+            title: "E-commerce Pastel Store", // ✅ CHANGED: name → title
+            description: "Complete e-commerce solution với beautiful UI",
+            price: 69,
+            originalPrice: 99,
+            category: "template", // ✅ FIXED: Use valid category
+            tags: ["Vue", "E-commerce", "Stripe", "Responsive"],
+            image: "/templates/ecommerce-1.jpg", // ✅ ADDED: Required single image
+            images: [
+              "/templates/ecommerce-1.jpg",
+              "/templates/ecommerce-2.jpg",
+            ],
+            downloadUrl: "/download/ecommerce-store",
+            previewUrl: "/preview/ecommerce-store",
+            rating: 4.8,
+            reviewCount: 89,
+            isFeatured: true, // ✅ CHANGED: featured → isFeatured
+            isActive: true, // ✅ ADDED: Required field
+            createdAt: new Date().toISOString(),
+            updatedAt: new Date().toISOString(),
+            author: "Vue Commerce Team", // ✅ ADDED: Required field
+            difficulty: "Advanced", // ✅ ADDED: Optional field
+            technologies: ["Vue.js", "Nuxt.js", "Stripe", "Pinia"],
+            fileSize: "3.2 MB",
+            format: "ZIP",
+          },
+          {
+            id: "3",
+            title: "SaaS Landing Page Kit", // ✅ CHANGED: name → title
+            description: "Professional landing pages for SaaS products",
+            price: 39,
+            originalPrice: 59,
+            category: "template", // ✅ FIXED: Use valid category
+            tags: ["Next.js", "SaaS", "Conversion", "SEO"],
+            image: "/templates/saas-1.jpg", // ✅ ADDED: Required single image
+            images: ["/templates/saas-1.jpg", "/templates/saas-2.jpg"],
+            downloadUrl: "/download/saas-kit",
+            previewUrl: "/preview/saas-kit",
+            rating: 4.9,
+            reviewCount: 234,
+            isFeatured: true, // ✅ CHANGED: featured → isFeatured
+            isActive: true, // ✅ ADDED: Required field
+            createdAt: new Date().toISOString(),
+            updatedAt: new Date().toISOString(),
+            author: "SaaS Design Studio", // ✅ ADDED: Required field
+            difficulty: "Beginner", // ✅ ADDED: Optional field
+            technologies: ["Next.js", "React", "Tailwind CSS", "Framer Motion"],
+            fileSize: "1.8 MB",
+            format: "ZIP",
+          },
+        ]);
       } finally {
         setIsLoadingProducts(false);
       }
@@ -72,6 +199,7 @@ const Home: React.FC = () => {
 
     fetchFeaturedProducts();
 
+    // Intersection Observer
     const observer = new IntersectionObserver(
       (entries) => {
         entries.forEach((entry) => {
@@ -83,7 +211,7 @@ const Home: React.FC = () => {
           }
         });
       },
-      { threshold: 0.1 },
+      { threshold: 0.1, rootMargin: "-10% 0px -10% 0px" },
     );
 
     const sections = document.querySelectorAll("[data-animate]");
@@ -95,10 +223,18 @@ const Home: React.FC = () => {
   useEffect(() => {
     const interval = setInterval(() => {
       setCurrentTestimonial((prev) => (prev + 1) % testimonials.length);
-    }, 5000);
+    }, 6000);
     return () => clearInterval(interval);
   }, []);
 
+  useEffect(() => {
+    const interval = setInterval(() => {
+      setCurrentSlide((prev) => (prev + 1) % features.length);
+    }, 4000);
+    return () => clearInterval(interval);
+  }, []);
+
+  // Data Arrays (keeping same as before)
   const testimonials = [
     {
       name: "Nguyễn Quang Anh",
@@ -106,50 +242,50 @@ const Home: React.FC = () => {
       company: "FPT Software",
       location: "Hồ Chí Minh, Việt Nam",
       content:
-        "Code được viết rất sạch sẽ, folder structure hợp lý, và không có những đoạn code thừa. Mình đã dùng để build website bán hàng cho khách, feedback rất tích cực về UI/UX!",
+        "Template Market đã thay đổi hoàn toàn workflow của team mình. Code quality tuyệt vời, documentation chi tiết, và support team luôn responsive. Đặc biệt impressed với pastel design system - rất hiện đại và professional!",
       avatar:
         "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=150&h=150&fit=crop&crop=face",
       rating: 5,
       date: "2 tuần trước",
       verified: true,
-      projectType: "Website Bán Hàng Online",
+      projectType: "Enterprise E-commerce Platform",
       flag: "🇻🇳",
-      revenue: "+300% doanh thu",
+      revenue: "+300% conversion rate",
       timeFrame: "Trong 3 tháng",
     },
     {
       name: "Nguyễn Thị Hoài Ngọc",
-      role: "UI/UX Designer",
+      role: "UI/UX Design Lead",
       company: "Vingroup Technology",
       location: "Hà Nội, Việt Nam",
       content:
-        "E-book về React này viết rất dễ hiểu, phần về component design patterns giúp mình hiểu được tại sao dev team structure code như vậy. Collaboration với team smooth hơn nhiều.",
+        "Là một designer, tôi rất khó tính về aesthetics và user experience. Nhưng templates từ Template Market truly exceed my expectations. Color theory được apply một cách tinh tế, typography hoàn hảo, và micro-interactions rất smooth.",
       avatar:
         "https://images.unsplash.com/photo-1494790108755-2616b95eeb3e?w=150&h=150&fit=crop&crop=face",
       rating: 5,
       date: "1 tuần trước",
       verified: true,
-      projectType: "E-book React Patterns",
+      projectType: "Design System & Component Library",
       flag: "🇻🇳",
-      revenue: "+50% efficiency",
+      revenue: "+150% design efficiency",
       timeFrame: "Ngay lập tức",
     },
     {
       name: "Bùi Huy Đức",
-      role: "Fullstack Developer",
+      role: "Tech Lead & Full Stack Developer",
       company: "Tiki Corporation",
       location: "Hồ Chí Minh, Việt Nam",
       content:
-        "Authentication flow được implement chuẩn, role management linh hoạt, charts/tables render rất mượt. Chỉ cần focus vào business logic thay vì fix bug cơ bản.",
+        "Sau 8 năm experience trong industry, tôi có thể confirm rằng Template Market provides the best templates trong market. Architecture solid, performance optimized, security best practices được implement correctly. Highly recommend!",
       avatar:
         "https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?w=150&h=150&fit=crop&crop=face",
       rating: 5,
       date: "3 ngày trước",
       verified: true,
-      projectType: "Admin Dashboard Template",
+      projectType: "Microservices Dashboard Platform",
       flag: "🇻🇳",
-      revenue: "-80% development time",
-      timeFrame: "So với tự code",
+      revenue: "-60% development time",
+      timeFrame: "So với tự build from scratch",
     },
   ];
 
@@ -158,219 +294,234 @@ const Home: React.FC = () => {
       number: "50K+",
       label: "Khách hàng hài lòng",
       icon: Users,
-      gradient: "from-blue-600 to-cyan-500",
-      color: "text-blue-600",
-      description: "Trên toàn thế giới",
+      color: unifiedColorScheme.iconBg,
+      textColor: "text-pink-500",
+      description: "Trên 120 quốc gia",
+      growth: "+23% tháng này",
+    },
+    {
+      number: "2.5K+",
+      label: "Templates premium",
+      icon: Package,
+      color: unifiedColorScheme.iconBg,
+      textColor: "text-rose-500",
+      description: "Cập nhật hàng tuần",
+      growth: "+156 templates mới",
     },
     {
       number: "1.2K+",
-      label: "Templates chất lượng",
-      icon: Package,
-      gradient: "from-pink-600 to-orange-500",
-      color: "text-pink-600",
-      description: "Được cập nhật hàng tuần",
-    },
-    {
-      number: "800+",
-      label: "E-books hữu ích",
+      label: "E-books chuyên sâu",
       icon: BookOpen,
-      gradient: "from-purple-600 to-blue-500",
-      color: "text-purple-600",
-      description: "Từ các chuyên gia",
+      color: unifiedColorScheme.iconBg,
+      textColor: "text-red-500",
+      description: "Từ industry experts",
+      growth: "+45 e-books tháng này",
     },
     {
       number: "4.9/5",
       label: "Đánh giá trung bình",
       icon: Star,
-      gradient: "from-yellow-500 to-orange-500",
-      color: "text-yellow-600",
-      description: "Từ 25K+ reviews",
+      color: unifiedColorScheme.iconBg,
+      textColor: "text-pink-500",
+      description: "Từ 50K+ reviews",
+      growth: "99.2% satisfaction",
     },
   ];
 
   const categories = [
     {
-      title: "React Templates",
+      title: "React & Next.js",
       description:
-        "Templates React modern với TypeScript, Tailwind CSS và best practices",
+        "Modern React templates với Next.js, TypeScript, Tailwind CSS và latest best practices. Server components, app router, optimized performance.",
       icon: Code,
       count: "450+",
-      href: "/templates?category=react",
-      gradient: "from-blue-600 to-cyan-500",
-      bgColor: "bg-blue-50 dark:bg-blue-900/20",
-      iconColor: "text-blue-600",
-      features: ["TypeScript", "Tailwind CSS", "Responsive", "SEO Ready"],
+      gradient: "from-pink-400 to-rose-500",
+      bgGradient: unifiedColorScheme.cardBg,
+      route: "/templates?category=react",
+      tags: ["TypeScript", "Next.js 14", "App Router", "Server Components"],
+      popular: true,
+      trend: "+12% this month",
     },
     {
-      title: "Vue Templates",
+      title: "Vue.js & Nuxt",
       description:
-        "Templates Vue.js với Composition API và Pinia state management",
-      icon: Palette,
-      count: "320+",
-      href: "/templates?category=vue",
-      gradient: "from-green-600 to-emerald-500",
-      bgColor: "bg-green-50 dark:bg-green-900/20",
-      iconColor: "text-green-600",
-      features: ["Vue 3", "Composition API", "Pinia", "Vite"],
-    },
-    {
-      title: "Angular Templates",
-      description: "Templates Angular với Material Design và RxJS patterns",
-      icon: Target,
+        "Vue.js 3 templates với Composition API, Nuxt 3, Pinia state management, Vite build tool. Performance-first approach.",
+      icon: Zap,
       count: "280+",
-      href: "/templates?category=angular",
-      gradient: "from-red-600 to-orange-500",
-      bgColor: "bg-red-50 dark:bg-red-900/20",
-      iconColor: "text-red-600",
-      features: ["Angular 17", "Material", "RxJS", "SSR"],
+      gradient: "from-rose-400 to-red-500",
+      bgGradient: unifiedColorScheme.cardBg,
+      route: "/templates?category=vue",
+      tags: ["Vue 3", "Nuxt 3", "Pinia", "Vite"],
+      popular: false,
+      trend: "+8% this month",
     },
     {
-      title: "Next.js Templates",
-      description: "Templates Next.js với App Router và Server Components",
-      icon: Rocket,
-      count: "200+",
-      href: "/templates?category=nextjs",
-      gradient: "from-purple-600 to-pink-500",
-      bgColor: "bg-purple-50 dark:bg-purple-900/20",
-      iconColor: "text-purple-600",
-      features: ["App Router", "Server Components", "API Routes", "Middleware"],
+      title: "Mobile & PWA",
+      description:
+        "React Native, Flutter, và Progressive Web Apps với offline support, push notifications, native performance.",
+      icon: Smartphone,
+      count: "180+",
+      gradient: "from-red-400 to-pink-500",
+      bgGradient: unifiedColorScheme.cardBg,
+      route: "/templates?category=mobile",
+      tags: ["React Native", "Flutter", "PWA", "Offline-first"],
+      popular: true,
+      trend: "+25% this month",
     },
     {
-      title: "E-books Frontend",
-      description: "Sách điện tử về HTML, CSS, JavaScript và frameworks",
-      icon: BookOpen,
-      count: "150+",
-      href: "/ebooks?category=frontend",
-      gradient: "from-indigo-600 to-purple-500",
-      bgColor: "bg-indigo-50 dark:bg-indigo-900/20",
-      iconColor: "text-indigo-600",
-      features: ["HTML5", "CSS3", "JavaScript ES6+", "Web APIs"],
+      title: "Admin & Dashboards",
+      description:
+        "Professional admin panels với advanced charts, tables, authentication, role management, real-time data visualization.",
+      icon: BarChart3,
+      count: "320+",
+      gradient: "from-pink-500 to-rose-400",
+      bgGradient: unifiedColorScheme.cardBg,
+      route: "/templates?category=admin",
+      tags: ["Charts", "Tables", "Auth", "Real-time", "RBAC"],
+      popular: true,
+      trend: "+15% this month",
     },
     {
-      title: "E-books Backend",
-      description: "Sách về Node.js, Python, databases và cloud services",
+      title: "E-commerce & Retail",
+      description:
+        "Complete e-commerce solutions với cart, checkout, payment integration, inventory management, multi-vendor support.",
       icon: Database,
-      count: "120+",
-      href: "/ebooks?category=backend",
-      gradient: "from-amber-600 to-orange-500",
-      bgColor: "bg-amber-50 dark:bg-amber-900/20",
-      iconColor: "text-amber-600",
-      features: ["Node.js", "Python", "Databases", "Cloud"],
+      count: "220+",
+      gradient: "from-rose-500 to-pink-500",
+      bgGradient: unifiedColorScheme.cardBg,
+      route: "/templates?category=ecommerce",
+      tags: ["Stripe", "PayPal", "Multi-vendor", "Inventory", "SEO"],
+      popular: false,
+      trend: "+18% this month",
+    },
+    {
+      title: "SaaS & Startups",
+      description:
+        "SaaS landing pages, pricing pages, authentication flows, subscription management, customer dashboards.",
+      icon: Rocket,
+      count: "190+",
+      gradient: "from-red-500 to-pink-400",
+      bgGradient: unifiedColorScheme.cardBg,
+      route: "/templates?category=saas",
+      tags: ["Landing Pages", "Pricing", "Subscriptions", "Onboarding"],
+      popular: true,
+      trend: "+22% this month",
     },
   ];
 
   const features = [
     {
       icon: Shield,
-      title: "Chất lượng đảm bảo",
+      title: "Enterprise-Grade Security",
       description:
-        "Mọi template và e-book đều được kiểm tra kỹ lưỡng bởi team chuyên gia với hơn 10 năm kinh nghiệm",
-      gradient: "from-green-600 to-emerald-500",
-      iconColor: "text-green-600",
-      stats: "99.8% uptime",
+        "Security best practices, OWASP compliance, vulnerability scanning",
+      color: "from-pink-300 to-rose-400",
+      bgColor: "from-pink-25 to-rose-25",
+      details: [
+        "OWASP Top 10 Protected",
+        "Automated Security Scans",
+        "SSL/TLS Encryption",
+        "GDPR Compliant",
+      ],
     },
     {
-      icon: Download,
-      title: "Download ngay lập tức",
-      description:
-        "Tải về ngay sau khi thanh toán thành công, không cần chờ đợi hay xác nhận email",
-      gradient: "from-blue-600 to-cyan-500",
-      iconColor: "text-blue-600",
-      stats: "< 30 giây",
+      icon: Smartphone,
+      title: "Mobile-First Responsive",
+      description: "Perfect on all devices, progressive enhancement approach",
+      color: "from-rose-300 to-red-400",
+      bgColor: "from-rose-25 to-red-25",
+      details: [
+        "iOS & Android Optimized",
+        "Touch-friendly Interfaces",
+        "Offline Support",
+        "App-like Experience",
+      ],
+    },
+    {
+      icon: TrendingUp,
+      title: "Performance Optimized",
+      description: "99+ PageSpeed scores, lazy loading, code splitting, CDN",
+      color: "from-red-300 to-pink-400",
+      bgColor: "from-red-25 to-pink-25",
+      details: [
+        "Core Web Vitals Optimized",
+        "Image Optimization",
+        "Code Splitting",
+        "CDN Integration",
+      ],
     },
     {
       icon: Award,
-      title: "Hỗ trợ 24/7",
+      title: "24/7 Premium Support",
       description:
-        "Đội ngũ support luôn sẵn sàng hỗ trợ qua chat, email và phone mọi lúc trong tuần",
-      gradient: "from-purple-600 to-pink-500",
-      iconColor: "text-purple-600",
-      stats: "Response < 1h",
-    },
-    {
-      icon: Rocket,
-      title: "Cập nhật liên tục",
-      description:
-        "Templates được cập nhật theo latest trends và technologies, luôn đi đầu xu hướng",
-      gradient: "from-orange-600 to-amber-500",
-      iconColor: "text-orange-600",
-      stats: "Weekly updates",
-    },
-    {
-      icon: Users,
-      title: "Cộng đồng active",
-      description:
-        "Tham gia cộng đồng 50K+ developers để chia sẻ kinh nghiệm và học hỏi lẫn nhau",
-      gradient: "from-pink-600 to-rose-500",
-      iconColor: "text-pink-600",
-      stats: "50K+ thành viên",
-    },
-    {
-      icon: Globe,
-      title: "Tương thích global",
-      description:
-        "Templates hỗ trợ đa ngôn ngữ, multiple timezone và international payment methods",
-      gradient: "from-cyan-600 to-blue-500",
-      iconColor: "text-cyan-600",
-      stats: "195+ countries",
+        "Dedicated support team, live chat, video calls, priority queue",
+      color: "from-pink-400 to-rose-300",
+      bgColor: "from-pink-25 to-rose-25",
+      details: [
+        "Live Chat Support",
+        "Video Call Assistance",
+        "Priority Queue",
+        "Custom Development",
+      ],
     },
   ];
 
   const processSteps = [
     {
       step: "01",
-      title: "Khám phá & Tìm kiếm",
+      title: "Browse & Discover",
       description:
-        "Browse qua hàng nghìn templates và e-books được phân loại chi tiết theo technology stack",
+        "Explore our curated collection of 2500+ premium templates and 1200+ professional e-books",
       icon: Search,
-      gradient: "from-blue-600 to-cyan-500",
-      iconColor: "text-blue-600",
+      color: "from-pink-300 to-rose-400",
     },
     {
       step: "02",
-      title: "Preview & Demo",
+      title: "Preview & Customize",
       description:
-        "Xem preview trực tiếp, demo live và đọc documentation chi tiết trước khi quyết định",
-      icon: Eye,
-      gradient: "from-purple-600 to-pink-500",
-      iconColor: "text-purple-600",
+        "Live preview, inspect code, customize colors, fonts, and layouts to match your brand",
+      icon: Target,
+      color: "from-rose-300 to-red-400",
     },
     {
       step: "03",
-      title: "Purchase & Download",
+      title: "Download & Deploy",
       description:
-        "Thanh toán secure qua multiple payment methods và download ngay lập tức",
+        "Instant download, complete documentation, deploy to Vercel/Netlify with one click",
       icon: Download,
-      gradient: "from-green-600 to-emerald-500",
-      iconColor: "text-green-600",
+      color: "from-red-300 to-pink-400",
     },
     {
       step: "04",
-      title: "Customize & Deploy",
+      title: "Launch & Scale",
       description:
-        "Customize theo nhu cầu với detailed docs và deploy lên hosting favorites",
-      icon: Settings,
-      gradient: "from-orange-600 to-amber-500",
-      iconColor: "text-orange-600",
+        "Go live with confidence, ongoing updates, performance monitoring, and growth support",
+      icon: Rocket,
+      color: "from-pink-400 to-rose-300",
     },
   ];
 
-  const handleNewsletterSubmit = (e: React.FormEvent) => {
+  const handleNewsletterSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (newsletterEmail) {
+    if (!newsletterEmail) return;
+
+    try {
+      // Simulate API call
+      await new Promise((resolve) => setTimeout(resolve, 1000));
+
       toast({
-        title: "🎉 Đăng ký thành công!",
+        title: "🎉 Welcome to Template Market!",
         description:
-          "Chúng tôi sẽ gửi những template và e-book mới nhất đến email của bạn.",
+          "Check your email for exclusive templates và development tips!",
       });
       setNewsletterEmail("");
-    }
-  };
-
-  const handleSearch = (e: React.FormEvent) => {
-    e.preventDefault();
-    if (searchQuery.trim()) {
-      window.location.href = `/search?q=${encodeURIComponent(searchQuery)}`;
+    } catch (error) {
+      toast({
+        title: "Oops! Something went wrong",
+        description:
+          "Please try again or contact support if the issue persists.",
+        variant: "destructive",
+      });
     }
   };
 
@@ -378,327 +529,752 @@ const Home: React.FC = () => {
     <>
       <Helmet>
         <title>
-          Template Market - Premium Templates & E-books cho Developers
+          Template Market - Premium Templates & E-books for Modern Developers
         </title>
         <meta
           name="description"
-          content="Khám phá hàng nghìn template React, Vue, Angular và e-books chất lượng cao. Download ngay templates admin dashboard, landing page, e-commerce với giá tốt nhất."
+          content="Discover 2500+ premium templates and 1200+ professional e-books. Trusted by 50K+ developers worldwide. Modern, responsive, and production-ready solutions."
         />
         <meta
           name="keywords"
-          content="template react, vue template, angular template, admin dashboard, landing page, e-commerce template, ui kit, ebook web design, template việt nam"
+          content="premium templates, react templates, vue templates, nextjs, e-books, ui components, dashboard templates, saas templates"
         />
-        <meta
-          property="og:title"
-          content="Template Market - Premium Templates & E-books"
-        />
-        <meta
-          property="og:description"
-          content="Khám phá hàng nghìn template React, Vue, Angular và e-books chất lượng cao cho developers Việt Nam."
-        />
-        <meta property="og:image" content="/og-image.jpg" />
-        <meta property="og:url" content="https://templatemarket.vn" />
-        <link rel="canonical" href="https://templatemarket.vn" />
+        <link rel="canonical" href="https://templatemarket.com" />
       </Helmet>
 
-      <style>
-        {`
-          @keyframes gentleGlow {
-            0%,100% {
-              text-shadow: 0 0 10px rgba(245,158,66,0.3),0 0 20px rgba(244,114,182,0.2);
-              opacity:1;
-            }
-            50% {
-              text-shadow: 0 0 15px rgba(245,158,66,0.4),0 0 25px rgba(244,114,182,0.3);
-              opacity:0.95;
-            }
-          }
-          .animate-gentle-glow { animation: gentleGlow 3s infinite ease-in-out; }
+      {/* Ultra Light Pink Floating Background Elements */}
+      <div className="fixed inset-0 overflow-hidden pointer-events-none z-0">
+        {[
+          {
+            emoji: "🌸",
+            color: "from-pink-50 to-rose-100",
+            position: "top-10 right-20",
+          },
+          {
+            emoji: "💖",
+            color: "from-rose-50 to-red-100",
+            position: "top-32 left-10",
+          },
+          {
+            emoji: "✨",
+            color: "from-red-50 to-pink-100",
+            position: "bottom-20 right-10",
+          },
+          {
+            emoji: "🎀",
+            color: "from-pink-100 to-rose-50",
+            position: "bottom-32 left-20",
+          },
+          {
+            emoji: "💝",
+            color: "from-rose-100 to-pink-50",
+            position: "top-1/2 right-1/4",
+          },
+          {
+            emoji: "🌺",
+            color: "from-red-50 to-rose-100",
+            position: "top-1/3 left-1/3",
+          },
+        ].map((item, i) => (
+          <motion.div
+            key={i}
+            className={`absolute ${item.position} text-4xl opacity-5`}
+            animate={{
+              y: [0, -30, 0],
+              rotate: [0, 15, -15, 0],
+              scale: [1, 1.3, 1],
+            }}
+            transition={{
+              duration: 10 + i * 3,
+              repeat: Infinity,
+              ease: "easeInOut",
+              delay: i * 0.5,
+            }}
+          >
+            <motion.div
+              className={`p-4 rounded-full bg-gradient-to-r ${item.color} backdrop-blur-sm shadow-lg`}
+              whileHover={{ scale: 1.5, rotate: 30 }}
+            >
+              <span>{item.emoji}</span>
+            </motion.div>
+          </motion.div>
+        ))}
+      </div>
 
-          @keyframes softPulse {
-            0%,100% { opacity:1; transform:scale(1); }
-            50% { opacity:0.85; transform:scale(1.02);}
-          }
-          .animate-soft-pulse { animation: softPulse 2s infinite ease-in-out; }
-
-          @keyframes subtleShimmer {
-            0% { background-position: -200px 0; }
-            100% { background-position: calc(200px + 100%) 0; }
-          }
-          .animate-subtle-shimmer {
-            background: linear-gradient(90deg,transparent,rgba(255,255,255,0.2),transparent);
-            background-size: 200px 100%;
-            animation: subtleShimmer 3s infinite;
-          }
-
-          @keyframes colorShift {
-            0% { background-position:0% 50%; }
-            50% { background-position:100% 50%; }
-            100% { background-position:0% 50%; }
-          }
-          .animate-color-shift {
-            background: linear-gradient(45deg,#ff6b9d,#c44bd4,#6c5ce7,#74b9ff,#0984e3);
-            background-size: 300% 300%;
-            animation: colorShift 4s ease infinite;
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
-          }
-        `}
-      </style>
-
-      <div className="min-h-screen">
-        {/* ✅ 1. PROMO BANNER - Responsive */}
-        <motion.section
-          initial={{ y: -100 }}
-          animate={{ y: 0 }}
-          className="relative overflow-hidden bg-gradient-to-r from-orange-600 via-amber-600 to-yellow-500 text-white"
+      <main className="relative z-10">
+        {/* ===== HERO SECTION ===== */}
+        <section
+          className={`relative px-4 py-8 sm:py-16 lg:py-16 bg-gradient-to-br ${sectionBackgrounds.hero} overflow-hidden min-h-screen flex items-center`}
+          id="hero"
+          data-animate
+          style={{
+            backgroundImage: `radial-gradient(circle at 20% 80%, rgba(236, 72, 153, 0.03) 0%, transparent 50%),
+                             radial-gradient(circle at 80% 20%, rgba(244, 63, 94, 0.03) 0%, transparent 50%),
+                             radial-gradient(circle at 40% 40%, rgba(220, 38, 127, 0.02) 0%, transparent 50%)`,
+          }}
         >
-          <div className="absolute inset-0 bg-black/10"></div>
-          <div className="container relative z-10 mx-auto px-4 py-3">
-            <div className="flex flex-col sm:flex-row items-center justify-between gap-3">
-              <div className="flex flex-col sm:flex-row items-center gap-2 sm:gap-3 text-center sm:text-left">
-                <div className="flex items-center gap-2">
+          <div className="container relative z-10 mx-auto">
+            <div className="grid lg:grid-cols-2 gap-12 lg:gap-20 items-center">
+              {/* Left Column - Enhanced Text Content */}
+              <motion.div
+                initial={{ opacity: 0, x: -60 }}
+                animate={{ opacity: 1, x: 0 }}
+                transition={{ duration: 1 }}
+                className="space-y-8"
+              >
+                {/* Enhanced Badge */}
+                <motion.div
+                  initial={{ opacity: 0, y: 30 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ duration: 0.8, delay: 0.2 }}
+                >
+                  <Badge
+                    className={`bg-gradient-to-r ${unifiedColorScheme.button} text-white px-5 py-2 text-sm font-semibold shadow-xl inline-flex items-center gap-2 rounded-full`}
+                  >
+                    <Sparkles className="w-4 h-4" />
+                    Chào mừng trở lại sự sáng tạo! 🎨
+                    <div className="w-2 h-2 bg-white rounded-full animate-pulse" />
+                  </Badge>
+                </motion.div>
+
+                {/* Enhanced Main Title */}
+                <motion.div
+                  initial={{ opacity: 0, y: 40 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ duration: 1, delay: 0.4 }}
+                  className="space-y-6"
+                >
+                  <h1
+                    className={`text-4xl sm:text-5xl lg:text-6xl xl:text-7xl font-bold bg-gradient-to-r ${unifiedColorScheme.textMain} bg-clip-text text-transparent leading-[1.1]`}
+                  >
+                    Template
+                    <br />
+                    <span className="relative">
+                      Market
+                      <motion.div
+                        className="absolute -inset-2 bg-gradient-to-r from-pink-100/10 to-rose-100/10 rounded-lg -z-10"
+                        animate={{ scale: [1, 1.05, 1], rotate: [0, 1, 0] }}
+                        transition={{ duration: 4, repeat: Infinity }}
+                      />
+                    </span>
+                  </h1>
+
+                  {/* Enhanced subtitle with stats */}
+                  <div className="space-y-4">
+                    <p className="text-lg sm:text-xl lg:text-2xl text-slate-600 font-medium leading-relaxed">
+                      Tiếp tục hành trình sáng tạo với{" "}
+                      <span
+                        className={`font-bold bg-gradient-to-r ${unifiedColorScheme.textSecondary} bg-clip-text text-transparent relative`}
+                      >
+                        2,500+ templates
+                        <motion.div
+                          className="absolute -bottom-1 left-0 right-0 h-1 bg-gradient-to-r from-pink-200 to-rose-200 rounded-full"
+                          animate={{ scaleX: [0, 1] }}
+                          transition={{ duration: 2, delay: 1 }}
+                        />
+                      </span>{" "}
+                      và{" "}
+                      <span
+                        className={`font-bold bg-gradient-to-r ${unifiedColorScheme.textSecondary} bg-clip-text text-transparent relative`}
+                      >
+                        1,200+ e-books
+                        <motion.div
+                          className="absolute -bottom-1 left-0 right-0 h-1 bg-gradient-to-r from-rose-200 to-red-200 rounded-full"
+                          animate={{ scaleX: [0, 1] }}
+                          transition={{ duration: 2, delay: 1.5 }}
+                        />
+                      </span>
+                    </p>
+
+                    {/* Trust indicators */}
+                    <div className="flex flex-wrap items-center gap-4 text-sm text-slate-500">
+                      <div className="flex items-center gap-2">
+                        <Users className="w-4 h-4 text-pink-400" />
+                        <span>50K+ developers trust us</span>
+                      </div>
+                      <div className="flex items-center gap-2">
+                        <Star className="w-4 h-4 fill-yellow-400 text-yellow-400" />
+                        <span>4.9/5 rating (25K+ reviews)</span>
+                      </div>
+                      <div className="flex items-center gap-2">
+                        <Shield className="w-4 h-4 text-pink-400" />
+                        <span>Enterprise security</span>
+                      </div>
+                    </div>
+                  </div>
+                </motion.div>
+
+                {/* Enhanced CTA Buttons */}
+                <motion.div
+                  initial={{ opacity: 0, y: 30 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ duration: 0.8, delay: 0.8 }}
+                  className="flex flex-col sm:flex-row gap-4"
+                >
                   <motion.div
-                    animate={{ rotate: [0, 360] }}
+                    whileHover={{ scale: 1.05 }}
+                    whileTap={{ scale: 0.98 }}
+                  >
+                    <Button
+                      size="lg"
+                      className={`bg-gradient-to-r ${unifiedColorScheme.button} hover:${unifiedColorScheme.buttonHover} text-white font-bold px-8 py-4 text-base shadow-2xl hover:shadow-3xl transition-all duration-300 rounded-2xl`}
+                      asChild
+                    >
+                      <Link to="/templates">
+                        <Package className="w-5 h-5 mr-2" />
+                        Khám phá Templates
+                        <ArrowRight className="w-5 h-5 ml-2" />
+                      </Link>
+                    </Button>
+                  </motion.div>
+
+                  <motion.div
+                    whileHover={{ scale: 1.05 }}
+                    whileTap={{ scale: 0.98 }}
+                  >
+                    <Button
+                      size="lg"
+                      variant="outline"
+                      className="border-2 border-pink-200 text-pink-600 hover:bg-pink-25 font-bold px-8 py-4 text-base rounded-2xl backdrop-blur-sm"
+                      asChild
+                    >
+                      <Link to="/ebooks">
+                        <BookOpen className="w-5 h-5 mr-2" />
+                        Đọc E-books
+                      </Link>
+                    </Button>
+                  </motion.div>
+                </motion.div>
+
+                {/* Enhanced Features Preview */}
+                <motion.div
+                  initial={{ opacity: 0, y: 20 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ duration: 0.8, delay: 1 }}
+                  className="grid grid-cols-2 lg:grid-cols-4 gap-4 pt-6"
+                >
+                  {features.map((feature, index) => (
+                    <motion.div
+                      key={index}
+                      whileHover={{ scale: 1.05, y: -5 }}
+                      className="text-center group cursor-pointer"
+                    >
+                      <div
+                        className={`w-14 h-14 mx-auto mb-3 rounded-2xl bg-gradient-to-r ${feature.color} flex items-center justify-center shadow-xl group-hover:shadow-2xl transition-all duration-300`}
+                      >
+                        <feature.icon className="w-7 h-7 text-white" />
+                      </div>
+                      <div className="space-y-1">
+                        <div
+                          className={`text-xs font-bold bg-gradient-to-r ${unifiedColorScheme.textSecondary} bg-clip-text text-transparent`}
+                        >
+                          {feature.title}
+                        </div>
+                        <div className="text-xs text-slate-500 leading-tight">
+                          {feature.description.split(",")[0]}
+                        </div>
+                      </div>
+                    </motion.div>
+                  ))}
+                </motion.div>
+              </motion.div>
+
+              {/* Right Column - Enhanced Template Preview */}
+              <motion.div
+                initial={{ opacity: 0, x: 60 }}
+                animate={{ opacity: 1, x: 0 }}
+                transition={{ duration: 1, delay: 0.6 }}
+                className="relative lg:justify-self-end"
+              >
+                <div className="relative max-w-md">
+                  {/* Main Enhanced Template Card */}
+                  <motion.div
+                    whileHover={{ scale: 1.02, rotate: 1 }}
+                    className="relative"
+                  >
+                    <Card
+                      className={`relative overflow-hidden border-0 shadow-3xl bg-gradient-to-br ${unifiedColorScheme.cardBg} backdrop-blur-lg rounded-3xl`}
+                    >
+                      <CardContent className="p-6">
+                        {/* Enhanced Header */}
+                        <div className="flex items-center justify-between mb-6">
+                          <div className="flex items-center space-x-3">
+                            <div
+                              className={`w-12 h-12 rounded-2xl bg-gradient-to-r ${unifiedColorScheme.iconBg} flex items-center justify-center shadow-xl`}
+                            >
+                              <Crown className="w-6 h-6 text-pink-500" />
+                            </div>
+                            <div>
+                              <h3 className="text-lg font-bold text-slate-800">
+                                Pastel Dashboard Pro
+                              </h3>
+                              <p className="text-sm text-slate-600">
+                                Premium Template
+                              </p>
+                              <div className="flex items-center gap-2 mt-1">
+                                <Badge className="bg-pink-50 text-pink-600 text-xs px-2 py-0.5">
+                                  React 19
+                                </Badge>
+                                <Badge className="bg-rose-50 text-rose-600 text-xs px-2 py-0.5">
+                                  TypeScript
+                                </Badge>
+                              </div>
+                            </div>
+                          </div>
+                          <Badge className="bg-gradient-to-r from-rose-300 to-pink-400 text-white px-3 py-1 text-xs font-bold shadow-lg">
+                            Hot 🔥
+                          </Badge>
+                        </div>
+
+                        {/* Enhanced Progress Visualization */}
+                        <div className="space-y-3 mb-6">
+                          <div className="flex justify-between text-sm text-slate-600 mb-2">
+                            <span>Development Progress</span>
+                            <span>85% Complete</span>
+                          </div>
+                          {[85, 65, 90, 78].map((progress, index) => (
+                            <div key={index} className="relative">
+                              <div className="h-2 bg-gradient-to-r from-pink-50 to-rose-50 rounded-full overflow-hidden">
+                                <motion.div
+                                  className={`h-full bg-gradient-to-r ${
+                                    index % 2 === 0
+                                      ? "from-pink-300 to-rose-300"
+                                      : "from-rose-300 to-red-300"
+                                  } rounded-full`}
+                                  initial={{ width: 0 }}
+                                  animate={{ width: `${progress}%` }}
+                                  transition={{
+                                    duration: 2,
+                                    delay: 1 + index * 0.2,
+                                  }}
+                                />
+                              </div>
+                              {index === 0 && (
+                                <div className="absolute -top-5 right-0 text-xs text-slate-500">
+                                  Components: {progress}%
+                                </div>
+                              )}
+                            </div>
+                          ))}
+                        </div>
+
+                        {/* Enhanced Footer */}
+                        <div className="flex items-center justify-between">
+                          <div className="space-y-1">
+                            <div className="flex items-center space-x-1">
+                              {[...Array(5)].map((_, i) => (
+                                <Star
+                                  key={i}
+                                  className="w-4 h-4 fill-yellow-400 text-yellow-400"
+                                />
+                              ))}
+                              <span className="text-sm text-slate-600 ml-2">
+                                4.9 (156)
+                              </span>
+                            </div>
+                            <div className="flex items-center gap-3 text-xs text-slate-500">
+                              <span>📁 1.2K downloads</span>
+                              <span>⚡ Updated 2 days ago</span>
+                            </div>
+                          </div>
+                          <div className="text-right space-y-1">
+                            <div
+                              className={`text-2xl font-bold bg-gradient-to-r ${unifiedColorScheme.textSecondary} bg-clip-text text-transparent`}
+                            >
+                              $49
+                            </div>
+                            <div className="text-sm text-slate-500 line-through">
+                              $79
+                            </div>
+                            <div className="text-xs text-green-600 font-semibold">
+                              38% OFF
+                            </div>
+                          </div>
+                        </div>
+                      </CardContent>
+
+                      {/* Enhanced Floating Action */}
+                      <motion.div
+                        className="absolute bottom-4 left-4 w-12 h-12 bg-gradient-to-r from-rose-300 to-pink-400 rounded-full flex items-center justify-center shadow-2xl cursor-pointer"
+                        whileHover={{ scale: 1.2, rotate: 10 }}
+                        whileTap={{ scale: 0.95 }}
+                      >
+                        <Heart className="w-6 h-6 text-white" />
+                      </motion.div>
+                    </Card>
+                  </motion.div>
+
+                  {/* Enhanced Floating Decorations */}
+                  <motion.div
+                    className="absolute -top-6 -right-6 w-12 h-12 bg-gradient-to-r from-pink-300 to-rose-400 rounded-full flex items-center justify-center shadow-2xl"
+                    animate={{
+                      rotate: 360,
+                      scale: [1, 1.2, 1],
+                      y: [0, -10, 0],
+                    }}
                     transition={{
-                      duration: 4,
+                      duration: 8,
                       repeat: Infinity,
                       ease: "linear",
                     }}
                   >
-                    <Gift className="w-4 h-4 sm:w-5 sm:h-5 text-white" />
+                    <Sparkles className="w-6 h-6 text-white" />
                   </motion.div>
-                  <span className="font-semibold text-sm sm:text-base">
-                    🔥 Flash Sale: Giảm 50% tất cả templates với mã
-                  </span>
-                </div>
-                <div className="flex items-center gap-2">
-                  <Badge
-                    className="bg-white text-orange-600 font-bold hover:bg-orange-50 cursor-pointer transition-all duration-300 text-xs sm:text-sm"
-                    onClick={() => {
-                      navigator.clipboard.writeText("FLASH50");
-                      toast({
-                        title: "📋 Đã sao chép!",
-                        description: "Mã FLASH50 đã được copy vào clipboard",
-                      });
+
+                  <motion.div
+                    className="absolute -bottom-6 -left-6 w-10 h-10 bg-gradient-to-r from-red-300 to-pink-400 rounded-full flex items-center justify-center shadow-2xl"
+                    animate={{
+                      y: [0, -20, 0],
+                      rotate: [0, 180, 360],
+                      scale: [1, 1.1, 1],
                     }}
+                    transition={{ duration: 6, repeat: Infinity }}
                   >
-                    FLASH50
-                  </Badge>
-                  <span className="hidden sm:inline text-sm">
-                    - Chỉ còn 2 ngày!
-                  </span>
+                    <Rocket className="w-5 h-5 text-white" />
+                  </motion.div>
                 </div>
-              </div>
-              <Button
-                size="sm"
-                variant="secondary"
-                className="bg-white/20 hover:bg-white/30 text-white border-white/30 text-xs sm:text-sm"
-                asChild
-              >
-                <Link to="/templates">
-                  <ExternalLink className="w-3 h-3 mr-1" />
-                  Shop Now
-                </Link>
-              </Button>
+              </motion.div>
             </div>
           </div>
-        </motion.section>
+        </section>
 
-        {/* ✅ 2. HERO SECTION - Full Responsive */}
-        <section className="relative px-4 py-12 sm:py-16 lg:py-20 overflow-hidden bg-gradient-to-br from-orange-100  via-purple-100 to-blue-100 dark:via-purple-900/30 dark:to-blue-900/30">
-          {/* Floating elements - Hidden on mobile */}
-          <div className="absolute inset-0 overflow-hidden pointer-events-none hidden lg:block">
-            {[
-              { icon: "🍪", position: "top-10 right-20", delay: 0 },
-              { icon: "💖", position: "top-32 right-10", delay: 1 },
-              { icon: "🚀", position: "bottom-20 left-10", delay: 2 },
-            ].map((item, i) => (
-              <motion.div
-                key={i}
-                className={`absolute ${item.position} text-4xl lg:text-6xl opacity-20`}
-                animate={{
-                  y: [0, -20, 0],
-                  rotate: [0, 10, -10, 0],
-                }}
-                transition={{
-                  duration: 6,
-                  repeat: Infinity,
-                  ease: "easeInOut",
-                  delay: item.delay,
-                }}
+        {/* ===== STATS SECTION ===== */}
+        <section
+          className={`relative px-4 py-14 sm:py-16 lg:py-20 bg-gradient-to-br ${sectionBackgrounds.stats}`}
+          id="stats"
+          data-animate
+          style={{
+            backgroundImage: `radial-gradient(circle at 20% 80%, rgba(236, 72, 153, 0.05) 0%, transparent 50%),
+                             radial-gradient(circle at 80% 20%, rgba(244, 63, 94, 0.05) 0%, transparent 50%),
+                             radial-gradient(circle at 40% 40%, rgba(220, 38, 127, 0.03) 0%, transparent 50%)`,
+          }}
+        >
+          <div className="container relative z-10 mx-auto">
+            <motion.div
+              initial={{ opacity: 0, y: 30 }}
+              animate={isVisible.stats ? { opacity: 1, y: 0 } : {}}
+              className="text-center mb-12"
+            >
+              <Badge
+                className={`mb-4 bg-gradient-to-r ${unifiedColorScheme.button} text-white px-5 py-2 text-sm font-semibold shadow-xl`}
               >
-                {item.icon}
-              </motion.div>
-            ))}
+                <TrendingUp className="w-4 h-4 mr-2" />
+                Trusted by Industry Leaders
+              </Badge>
+              <h2
+                className={`text-3xl sm:text-4xl lg:text-5xl font-bold bg-gradient-to-r ${unifiedColorScheme.textMain} bg-clip-text text-transparent mb-4`}
+              >
+                Powering Innovation Worldwide
+              </h2>
+              <p className="text-lg text-slate-600 max-w-3xl mx-auto leading-relaxed">
+                Join thousands of successful developers, designers, and
+                companies who've accelerated their projects
+              </p>
+            </motion.div>
+
+            <div className="grid gap-6 grid-cols-1 sm:grid-cols-2 lg:grid-cols-4">
+              {stats.map((stat, index) => (
+                <motion.div
+                  key={index}
+                  initial={{ opacity: 0, y: 60 }}
+                  animate={isVisible.stats ? { opacity: 1, y: 0 } : {}}
+                  transition={{ duration: 0.8, delay: index * 0.2 }}
+                  whileHover={{ scale: 1.05, y: -10 }}
+                  className="group"
+                >
+                  <Card
+                    className={`border-0 shadow-xl hover:shadow-3xl bg-gradient-to-br ${unifiedColorScheme.cardBg} backdrop-blur-lg rounded-3xl transition-all duration-500 overflow-hidden relative`}
+                  >
+                    <CardContent className="p-6 text-center relative z-10">
+                      <motion.div
+                        className={`w-16 h-16 mx-auto mb-4 rounded-3xl bg-gradient-to-r ${stat.color} flex items-center justify-center shadow-2xl group-hover:scale-110 transition-all duration-300`}
+                        whileHover={{ rotate: 360 }}
+                        transition={{ duration: 1 }}
+                      >
+                        <stat.icon className={`w-8 h-8 ${stat.textColor}`} />
+                      </motion.div>
+
+                      <div
+                        className={`text-3xl lg:text-4xl font-bold ${stat.textColor} mb-2`}
+                      >
+                        {stat.number}
+                      </div>
+                      <div className="text-lg font-bold text-slate-800 mb-1">
+                        {stat.label}
+                      </div>
+                      <div className="text-sm text-slate-600 mb-3">
+                        {stat.description}
+                      </div>
+                      <Badge
+                        variant="outline"
+                        className="border-pink-200 text-pink-700 bg-pink-50 text-xs"
+                      >
+                        {stat.growth}
+                      </Badge>
+                    </CardContent>
+                  </Card>
+                </motion.div>
+              ))}
+            </div>
           </div>
+        </section>
 
-          <div className="container relative z-10 mx-auto text-center">
-            <div className="max-w-6xl mx-auto space-y-6 sm:space-y-8">
-              {/* Main Heading - Responsive */}
-              <motion.div
-                initial={{ opacity: 0, y: 30 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ duration: 0.8 }}
-                className="space-y-4"
+        {/* ===== CATEGORIES SECTION ===== */}
+        <section
+          className={`relative px-4 py-14 sm:py-16 lg:py-20 bg-gradient-to-br ${sectionBackgrounds.categories}`}
+          id="categories"
+          data-animate
+          style={{
+            backgroundImage: `radial-gradient(circle at 20% 80%, rgba(244, 63, 94, 0.05) 0%, transparent 50%),
+                             radial-gradient(circle at 80% 20%, rgba(236, 72, 153, 0.05) 0%, transparent 50%),
+                             radial-gradient(circle at 40% 40%, rgba(220, 38, 127, 0.03) 0%, transparent 50%)`,
+          }}
+        >
+          <div className="container relative z-10 mx-auto">
+            <motion.div
+              initial={{ opacity: 0, y: 30 }}
+              animate={isVisible.categories ? { opacity: 1, y: 0 } : {}}
+              className="text-center mb-16"
+            >
+              <Badge
+                className={`mb-4 bg-gradient-to-r ${unifiedColorScheme.button} text-white px-5 py-2 text-sm font-semibold shadow-xl`}
               >
-                <h1 className="text-4xl sm:text-5xl md:text-6xl lg:text-7xl xl:text-8xl font-bold leading-tight">
-                  <span className="text-slate-800 dark:text-slate-200">
-                    Templates
-                  </span>{" "}
-                  <span className="text-transparent bg-gradient-to-r from-pink-600 via-purple-600 to-blue-600 bg-clip-text animate-color-shift">
-                    &
-                  </span>{" "}
-                  <span className="text-transparent bg-gradient-to-r from-purple-600 via-blue-600 to-indigo-600 bg-clip-text animate-color-shift">
-                    E-books
-                  </span>
-                </h1>
-
-                {/* Subtitle - Responsive */}
-                <motion.p
-                  initial={{ opacity: 0, y: 20 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  transition={{ duration: 0.8, delay: 0.3 }}
-                  className="text-base sm:text-lg md:text-xl lg:text-2xl text-slate-700 dark:text-slate-300 max-w-4xl mx-auto leading-relaxed px-4"
-                >
-                  Khám phá bộ sưu tập{" "}
-                  <span className="font-semibold text-transparent bg-gradient-to-r from-pink-600 to-purple-600 bg-clip-text">
-                    1,200+ templates chuyên nghiệp
-                  </span>{" "}
-                  và{" "}
-                  <span className="font-semibold text-transparent bg-gradient-to-r from-purple-600 to-blue-600 bg-clip-text">
-                    800+ e-books chất lượng cao
-                  </span>{" "}
-                  được thiết kế bởi các chuyên gia hàng đầu thế giới
-                </motion.p>
-              </motion.div>
-
-              {/* CTA Buttons - Responsive */}
-              <motion.div
-                initial={{ opacity: 0, y: 30 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ duration: 0.8, delay: 0.6 }}
-                className="flex flex-col sm:flex-row items-center justify-center gap-3 sm:gap-4"
+                <Package className="w-4 h-4 mr-2" />
+                2500+ Premium Templates
+              </Badge>
+              <h2
+                className={`text-3xl sm:text-4xl lg:text-5xl font-bold bg-gradient-to-r ${unifiedColorScheme.textMain} bg-clip-text text-transparent mb-4`}
               >
+                Choose Your Technology Stack
+              </h2>
+              <p className="text-lg text-slate-600 max-w-3xl mx-auto leading-relaxed">
+                From cutting-edge React and Vue.js to mobile apps and enterprise
+                dashboards
+              </p>
+            </motion.div>
+
+            <div className="grid gap-6 grid-cols-1 md:grid-cols-2 xl:grid-cols-3">
+              {categories.map((category, index) => (
                 <motion.div
-                  whileHover={{ scale: 1.05 }}
-                  whileTap={{ scale: 0.95 }}
+                  key={index}
+                  initial={{ opacity: 0, y: 60 }}
+                  animate={isVisible.categories ? { opacity: 1, y: 0 } : {}}
+                  transition={{ duration: 0.8, delay: index * 0.15 }}
+                  whileHover={{ scale: 1.03, y: -8 }}
+                  className="group h-full"
                 >
-                  <Button
-                    size="lg"
-                    asChild
-                    className="w-full sm:w-auto bg-gradient-to-r from-pink-600 via-purple-600 to-orange-600 hover:from-pink-700 hover:via-purple-700 hover:to-orange-700 text-white font-semibold px-6 sm:px-8 py-3 rounded-full shadow-lg border-0"
+                  <Card
+                    className={`relative overflow-hidden border-0 shadow-xl hover:shadow-3xl bg-gradient-to-br ${category.bgGradient} backdrop-blur-lg rounded-3xl transition-all duration-500 h-full flex flex-col`}
                   >
-                    <Link to="/templates">
-                      <Package className="w-4 h-4 sm:w-5 sm:h-5 mr-2" />
-                      Khám phá Templates
-                      <ArrowRight className="w-4 h-4 sm:w-5 sm:h-5 ml-2" />
-                    </Link>
-                  </Button>
-                </motion.div>
+                    {category.popular && (
+                      <div className="absolute top-4 right-4 z-10">
+                        <Badge className="bg-gradient-to-r from-yellow-400 to-orange-500 text-white font-bold shadow-xl text-xs">
+                          <Crown className="w-3 h-3 mr-1" />
+                          Popular
+                        </Badge>
+                      </div>
+                    )}
 
-                <motion.div
-                  whileHover={{ scale: 1.05 }}
-                  whileTap={{ scale: 0.95 }}
-                >
-                  <Button
-                    size="lg"
-                    variant="outline"
-                    className="w-full sm:w-auto border-2 border-purple-400 text-purple-700 hover:bg-purple-50 dark:text-purple-300 dark:border-purple-300 dark:hover:bg-purple-900/20 font-semibold px-6 sm:px-8 py-3 rounded-full bg-white/80 backdrop-blur"
-                    asChild
-                  >
-                    <Link to="/ebooks">
-                      <BookOpen className="w-4 h-4 sm:w-5 sm:h-5 mr-2" />
-                      Xem E-books
-                    </Link>
-                  </Button>
-                </motion.div>
-              </motion.div>
+                    <CardContent className="p-6 lg:p-8 flex flex-col h-full relative z-10">
+                      <div className="flex items-start justify-between mb-6">
+                        <motion.div
+                          className={`w-14 h-14 rounded-3xl bg-gradient-to-br ${category.gradient} flex items-center justify-center shadow-2xl group-hover:scale-110 transition-all duration-300`}
+                          whileHover={{ rotate: 12 }}
+                        >
+                          <category.icon className="w-7 h-7 text-white" />
+                        </motion.div>
 
-              {/* Trust Indicators - Responsive Grid */}
-              <motion.div
-                initial={{ opacity: 0, y: 30 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ duration: 0.8, delay: 0.8 }}
-                className="grid grid-cols-2 sm:flex sm:flex-wrap items-center justify-center gap-3 sm:gap-6"
+                        <div className="text-right">
+                          <Badge
+                            className={`bg-gradient-to-r ${unifiedColorScheme.button} text-white font-bold px-3 py-1 rounded-full shadow-lg text-sm`}
+                          >
+                            {category.count}
+                          </Badge>
+                          <div className="text-sm text-pink-600 font-semibold mt-1">
+                            {category.trend}
+                          </div>
+                        </div>
+                      </div>
+
+                      <div className="flex-1 flex flex-col">
+                        <h3 className="text-xl lg:text-2xl font-bold text-slate-900 mb-3 group-hover:text-pink-700 transition-colors">
+                          {category.title}
+                        </h3>
+
+                        <p className="text-slate-700 mb-4 flex-1 leading-relaxed">
+                          {category.description}
+                        </p>
+
+                        <div className="flex flex-wrap gap-2 mb-4">
+                          {category.tags.slice(0, 3).map((tag, tagIndex) => (
+                            <Badge
+                              key={tagIndex}
+                              variant="outline"
+                              className="border-pink-200 text-pink-700 bg-pink-50 text-xs"
+                            >
+                              {tag}
+                            </Badge>
+                          ))}
+                        </div>
+
+                        <Button
+                          className={`bg-gradient-to-r ${unifiedColorScheme.button} hover:${unifiedColorScheme.buttonHover} text-white font-bold py-3 shadow-xl hover:shadow-2xl transition-all duration-300 rounded-2xl`}
+                          asChild
+                        >
+                          <Link to={category.route}>
+                            Explore {category.title.split(" ")[0]}
+                            <ArrowRight className="w-4 h-4 ml-2" />
+                          </Link>
+                        </Button>
+                      </div>
+                    </CardContent>
+                  </Card>
+                </motion.div>
+              ))}
+            </div>
+          </div>
+        </section>
+
+        {/* ===== FEATURES SHOWCASE ===== */}
+        <section
+          className={`relative px-4 py-14 sm:py-16 lg:py-20 bg-gradient-to-br ${sectionBackgrounds.features}`}
+          id="features"
+          data-animate
+          style={{
+            backgroundImage: `radial-gradient(circle at 20% 80%, rgba(220, 38, 127, 0.05) 0%, transparent 50%),
+                             radial-gradient(circle at 80% 20%, rgba(244, 63, 94, 0.05) 0%, transparent 50%),
+                             radial-gradient(circle at 40% 40%, rgba(236, 72, 153, 0.03) 0%, transparent 50%)`,
+          }}
+        >
+          <div className="container relative z-10 mx-auto">
+            <motion.div
+              initial={{ opacity: 0, y: 30 }}
+              animate={isVisible.features ? { opacity: 1, y: 0 } : {}}
+              className="text-center mb-16"
+            >
+              <Badge
+                className={`mb-4 bg-gradient-to-r ${unifiedColorScheme.button} text-white px-5 py-2 text-sm font-semibold shadow-xl`}
               >
-                {[
-                  {
-                    icon: CheckCircle,
-                    text: "100% Chất lượng",
-                    color: "text-green-600",
-                  },
-                  {
-                    icon: Download,
-                    text: "Download ngay",
-                    color: "text-blue-600",
-                  },
-                  {
-                    icon: Award,
-                    text: "Hỗ trợ 24/7",
-                    color: "text-purple-600",
-                  },
-                  { icon: Users, text: "50K+ Users", color: "text-pink-600" },
-                ].map((item, i) => (
+                <Award className="w-4 h-4 mr-2" />
+                Why Choose Template Market
+              </Badge>
+              <h2
+                className={`text-3xl sm:text-4xl lg:text-5xl font-bold bg-gradient-to-r ${unifiedColorScheme.textMain} bg-clip-text text-transparent mb-4`}
+              >
+                Enterprise-Grade Quality
+              </h2>
+              <p className="text-lg text-slate-600 max-w-3xl mx-auto leading-relaxed">
+                Every template is crafted with production-ready code and
+                security best practices
+              </p>
+            </motion.div>
+
+            <div className="grid gap-10 lg:grid-cols-2 items-center">
+              {/* Features Slider */}
+              <div className="relative">
+                <AnimatePresence mode="wait">
                   <motion.div
-                    key={i}
-                    className="flex items-center justify-center space-x-2 px-3 sm:px-4 py-2 rounded-full bg-white/70 backdrop-blur border border-white/30 shadow-sm"
-                    whileHover={{ scale: 1.05 }}
+                    key={currentSlide}
+                    initial={{ opacity: 0, x: 50 }}
+                    animate={{ opacity: 1, x: 0 }}
+                    exit={{ opacity: 0, x: -50 }}
+                    transition={{ duration: 0.8 }}
                   >
-                    <item.icon
-                      className={`w-3 h-3 sm:w-4 sm:h-4 ${item.color}`}
-                    />
-                    <span className="text-xs sm:text-sm font-medium text-slate-700 dark:text-slate-300">
-                      {item.text}
-                    </span>
+                    <Card
+                      className={`border-0 shadow-2xl bg-gradient-to-br ${features[currentSlide].bgColor} backdrop-blur-lg rounded-3xl overflow-hidden`}
+                    >
+                      <CardContent className="p-8">
+                        <div className="flex items-start space-x-4 mb-6">
+                          <div
+                            className={`w-14 h-14 rounded-2xl bg-gradient-to-r ${features[currentSlide].color} flex items-center justify-center shadow-xl flex-shrink-0`}
+                          >
+                            {React.createElement(features[currentSlide].icon, {
+                              className: "w-7 h-7 text-white",
+                            })}
+                          </div>
+                          <div>
+                            <h3 className="text-xl font-bold text-slate-900 mb-2">
+                              {features[currentSlide].title}
+                            </h3>
+                            <p className="text-slate-700 leading-relaxed">
+                              {features[currentSlide].description}
+                            </p>
+                          </div>
+                        </div>
+
+                        <div className="space-y-3">
+                          {features[currentSlide].details.map(
+                            (detail, index) => (
+                              <motion.div
+                                key={index}
+                                initial={{ opacity: 0, x: 20 }}
+                                animate={{ opacity: 1, x: 0 }}
+                                transition={{ delay: 0.2 + index * 0.1 }}
+                                className="flex items-center space-x-3"
+                              >
+                                <CheckCircle className="w-4 h-4 text-green-500 flex-shrink-0" />
+                                <span className="text-slate-700 font-medium text-sm">
+                                  {detail}
+                                </span>
+                              </motion.div>
+                            ),
+                          )}
+                        </div>
+                      </CardContent>
+                    </Card>
                   </motion.div>
-                ))}
-              </motion.div>
+                </AnimatePresence>
 
-              {/* Search Bar - Fully Responsive */}
-              <motion.div
-                initial={{ opacity: 0, y: 30 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ duration: 0.8, delay: 1.0 }}
-                className="max-w-4xl mx-auto px-4"
-              >
-                <form onSubmit={handleSearch} className="relative">
-                  <div className="relative group">
-                    <Search className="absolute left-3 sm:left-4 top-1/2 transform -translate-y-1/2 w-4 h-4 sm:w-5 sm:h-5 text-slate-400 group-hover:text-purple-600 transition-colors" />
-                    <Input
-                      placeholder="Tìm kiếm templates, e-books..."
-                      value={searchQuery}
-                      onChange={(e) => setSearchQuery(e.target.value)}
-                      className="pl-10 sm:pl-12 pr-20 sm:pr-32 py-3 sm:py-4 text-sm sm:text-lg bg-white/90 backdrop-blur border-2 border-purple-200/50 focus:border-purple-400 rounded-xl sm:rounded-2xl shadow-lg focus:shadow-xl transition-all duration-300"
+                <div className="flex justify-center space-x-2 mt-6">
+                  {features.map((_, index) => (
+                    <button
+                      key={index}
+                      onClick={() => setCurrentSlide(index)}
+                      className={`w-2 h-2 rounded-full transition-all duration-300 ${
+                        index === currentSlide
+                          ? `bg-gradient-to-r ${unifiedColorScheme.button} scale-125`
+                          : "bg-pink-200 hover:bg-pink-300"
+                      }`}
                     />
-                    <Button
-                      type="submit"
-                      className="absolute right-1 sm:right-2 top-1/2 transform -translate-y-1/2 bg-gradient-to-r from-orange-600 to-pink-600 hover:from-orange-700 hover:to-pink-700 text-white rounded-lg sm:rounded-xl px-3 sm:px-6 py-1 sm:py-2 text-xs sm:text-sm transition-all duration-300"
-                    >
-                      <Search className="w-3 h-3 sm:w-4 sm:h-4 sm:mr-2" />
-                      <span className="hidden sm:inline">Tìm kiếm</span>
-                    </Button>
-                  </div>
-                </form>
+                  ))}
+                </div>
+              </div>
 
-                {/* Trending tags - Responsive */}
-                <div className="flex flex-wrap items-center justify-center gap-2 mt-4">
-                  <span className="text-xs sm:text-sm text-slate-600 dark:text-slate-400">
-                    Trending:
-                  </span>
-                  {[
-                    "React Dashboard",
-                    "Vue E-commerce",
-                    "Next.js Blog",
-                    "Angular CRM",
-                  ].map((term, i) => (
-                    <Badge
-                      key={i}
-                      variant="secondary"
-                      className="cursor-pointer hover:bg-purple-100 hover:text-purple-700 dark:hover:bg-purple-900/20 transition-colors bg-white/70 backdrop-blur border border-purple-200/50 text-xs"
+              {/* Features Visual */}
+              <motion.div
+                initial={{ opacity: 0, x: 50 }}
+                animate={isVisible.features ? { opacity: 1, x: 0 } : {}}
+                transition={{ duration: 1 }}
+                className="relative"
+              >
+                <div className="grid grid-cols-2 gap-4">
+                  {features.map((feature, index) => (
+                    <motion.div
+                      key={index}
+                      whileHover={{ scale: 1.05, y: -5 }}
+                      className="group cursor-pointer"
+                      onClick={() => setCurrentSlide(index)}
                     >
-                      {term}
-                    </Badge>
+                      <Card
+                        className={`border-0 shadow-lg hover:shadow-xl transition-all duration-300 rounded-2xl overflow-hidden ${
+                          index === currentSlide ? "ring-2 ring-pink-300" : ""
+                        }`}
+                      >
+                        <CardContent className="p-4 text-center">
+                          <div
+                            className={`w-10 h-10 mx-auto mb-3 rounded-2xl bg-gradient-to-r ${feature.color} flex items-center justify-center shadow-lg`}
+                          >
+                            <feature.icon className="w-5 h-5 text-white" />
+                          </div>
+                          <h4 className="font-bold text-slate-800 text-sm mb-1">
+                            {feature.title}
+                          </h4>
+                          <p className="text-xs text-slate-600">
+                            {feature.description.split(",")[0]}
+                          </p>
+                        </CardContent>
+                      </Card>
+                    </motion.div>
                   ))}
                 </div>
               </motion.div>
@@ -706,125 +1282,77 @@ const Home: React.FC = () => {
           </div>
         </section>
 
-        {/* ✅ 3. STATS SECTION - Responsive Grid */}
+        {/* ===== HOW IT WORKS ===== */}
         <section
-          className="relative px-4 py-12 sm:py-16 lg:py-20 bg-gradient-to-r from-slate-100 via-purple-100 to-pink-100 dark:from-slate-800 dark:via-purple-900/30 dark:to-pink-900/30"
-          id="stats"
+          className={`relative px-4 py-14 sm:py-16 lg:py-20 bg-gradient-to-br ${sectionBackgrounds.process}`}
+          id="process"
           data-animate
+          style={{
+            backgroundImage: `radial-gradient(circle at 20% 80%, rgba(236, 72, 153, 0.07) 0%, transparent 50%),
+                             radial-gradient(circle at 80% 20%, rgba(244, 63, 94, 0.07) 0%, transparent 50%),
+                             radial-gradient(circle at 40% 40%, rgba(220, 38, 127, 0.04) 0%, transparent 50%)`,
+          }}
         >
           <div className="container relative z-10 mx-auto">
             <motion.div
               initial={{ opacity: 0, y: 30 }}
-              animate={{ opacity: 1, y: 0 }}
-              className="text-center mb-8 sm:mb-12"
+              animate={isVisible.process ? { opacity: 1, y: 0 } : {}}
+              className="text-center mb-16"
             >
-              <Badge className="mb-4 bg-gradient-to-r from-purple-600 to-pink-600 text-white text-xs sm:text-sm">
-                <TrendingUp className="w-3 h-3 sm:w-4 sm:h-4 mr-2" />
-                Được tin tướng bởi hàng nghìn developers
+              <Badge
+                className={`mb-4 bg-gradient-to-r ${unifiedColorScheme.button} text-white px-5 py-2 text-sm font-semibold shadow-xl`}
+              >
+                <Compass className="w-4 h-4 mr-2" />
+                Simple 4-Step Process
               </Badge>
-              <h2 className="text-3xl sm:text-4xl lg:text-5xl font-bold text-transparent bg-gradient-to-r from-purple-700 to-pink-700 bg-clip-text mb-4">
-                Con số ấn tượng
+              <h2
+                className={`text-3xl sm:text-4xl lg:text-5xl font-bold bg-gradient-to-r ${unifiedColorScheme.textMain} bg-clip-text text-transparent mb-4`}
+              >
+                From Idea to Launch in Minutes
               </h2>
-              <p className="text-base sm:text-lg lg:text-xl text-slate-700 dark:text-slate-300 max-w-2xl mx-auto px-4">
-                Template Market đã trở thành lựa chọn hàng đầu của developers và
-                designers trên toàn thế giới
+              <p className="text-lg text-slate-600 max-w-3xl mx-auto leading-relaxed">
+                Our streamlined process gets you from concept to
+                production-ready application
               </p>
             </motion.div>
 
-            <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-6 lg:gap-8">
-              {stats.map((stat, index) => (
-                <motion.div
-                  key={index}
-                  initial={{ opacity: 0, y: 50, scale: 0.9 }}
-                  animate={{ opacity: 1, y: 0, scale: 1 }}
-                  transition={{ duration: 0.6, delay: index * 0.1 }}
-                  whileHover={{ scale: 1.05, y: -10 }}
-                  className="text-center transition-all duration-500 group"
-                >
-                  <Card className="p-4 sm:p-6 border-0 shadow-lg bg-white/90 dark:bg-slate-800/90 backdrop-blur rounded-xl sm:rounded-2xl group-hover:shadow-xl transition-all duration-300">
-                    <motion.div
-                      className={`flex items-center justify-center w-12 h-12 sm:w-16 sm:h-16 mx-auto mb-3 sm:mb-4 rounded-lg sm:rounded-xl shadow-lg bg-gradient-to-r ${stat.gradient} group-hover:scale-110 transition-transform duration-300`}
-                      whileHover={{ rotate: 12 }}
-                    >
-                      <stat.icon className="w-6 h-6 sm:w-8 sm:h-8 text-white" />
-                    </motion.div>
-                    <div className="mb-2 text-2xl sm:text-3xl font-bold text-transparent bg-gradient-to-r from-purple-700 to-pink-700 bg-clip-text">
-                      {stat.number}
-                    </div>
-                    <div className="text-sm sm:text-base lg:text-lg font-medium text-slate-700 dark:text-slate-300 mb-1">
-                      {stat.label}
-                    </div>
-                    <div className="text-xs sm:text-sm text-slate-500 dark:text-slate-400">
-                      {stat.description}
-                    </div>
-                  </Card>
-                </motion.div>
-              ))}
-            </div>
-          </div>
-        </section>
-
-        {/* ✅ 4. HOW IT WORKS - Responsive Process */}
-        <section
-          className="relative px-4 py-12 sm:py-16 lg:py-20 bg-gradient-to-br from-blue-100 via-indigo-100 to-purple-100 dark:from-blue-900/30 dark:via-indigo-900/30 dark:to-purple-900/30"
-          id="how-it-works"
-          data-animate
-        >
-          <div className="container relative z-10 mx-auto">
-            <motion.div
-              initial={{ opacity: 0, y: 30 }}
-              animate={{ opacity: 1, y: 0 }}
-              className="text-center mb-12 sm:mb-16"
-            >
-              <Badge className="mb-4 bg-gradient-to-r from-blue-600 to-purple-600 text-white text-xs sm:text-sm">
-                <Rocket className="w-3 h-3 sm:w-4 sm:h-4 mr-2" />
-                Quá trình làm việc
-              </Badge>
-              <h2 className="text-3xl sm:text-4xl lg:text-5xl font-bold text-transparent bg-gradient-to-r from-blue-700 via-indigo-700 to-purple-700 bg-clip-text mb-4">
-                Cách thức hoạt động
-              </h2>
-              <p className="text-base sm:text-lg lg:text-xl text-slate-700 dark:text-slate-300 max-w-3xl mx-auto px-4">
-                Chỉ với 4 bước đơn giản, bạn đã có thể sở hữu templates và
-                e-books chất lượng cao
-              </p>
-            </motion.div>
-
-            <div className="grid gap-6 sm:gap-8 md:grid-cols-2 lg:grid-cols-4">
+            <div className="grid gap-6 lg:gap-8 grid-cols-1 md:grid-cols-2 lg:grid-cols-4">
               {processSteps.map((step, index) => (
                 <motion.div
                   key={index}
-                  initial={{ opacity: 0, y: 50 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  transition={{ duration: 0.6, delay: index * 0.2 }}
+                  initial={{ opacity: 0, y: 60 }}
+                  animate={isVisible.process ? { opacity: 1, y: 0 } : {}}
+                  transition={{ duration: 0.8, delay: index * 0.3 }}
                   whileHover={{ scale: 1.05, y: -10 }}
                   className="relative group"
                 >
-                  <Card className="p-6 sm:p-8 border-0 shadow-lg bg-white/90 dark:bg-slate-800/90 backdrop-blur rounded-xl sm:rounded-2xl group-hover:shadow-xl transition-all duration-300 h-full">
-                    <div
-                      className={`absolute -top-3 -left-3 w-8 h-8 sm:w-10 sm:h-10 rounded-full bg-gradient-to-r ${step.gradient} flex items-center justify-center shadow-lg`}
-                    >
-                      <span className="text-white font-bold text-xs sm:text-sm">
-                        {step.step}
-                      </span>
-                    </div>
+                  <Card
+                    className={`border-0 shadow-xl hover:shadow-2xl bg-gradient-to-br ${unifiedColorScheme.cardBg} backdrop-blur-lg rounded-3xl transition-all duration-500 overflow-hidden`}
+                  >
+                    <CardContent className="p-6 text-center relative">
+                      <div
+                        className={`absolute -top-3 left-1/2 transform -translate-x-1/2 w-8 h-8 bg-gradient-to-r ${step.color} rounded-full flex items-center justify-center shadow-xl z-10`}
+                      >
+                        <span className="text-white font-bold text-sm">
+                          {step.step}
+                        </span>
+                      </div>
 
-                    <motion.div
-                      className={`w-12 h-12 sm:w-14 sm:h-14 mx-auto mb-4 sm:mb-6 rounded-lg sm:rounded-xl bg-gradient-to-r ${step.gradient} flex items-center justify-center group-hover:scale-110 transition-transform duration-300`}
-                      whileHover={{ rotate: 15 }}
-                    >
-                      <step.icon className="w-6 h-6 sm:w-7 sm:h-7 text-white" />
-                    </motion.div>
+                      <motion.div
+                        className={`w-12 h-12 mx-auto mt-6 mb-4 rounded-2xl bg-gradient-to-r ${step.color} flex items-center justify-center shadow-xl group-hover:scale-110 transition-transform duration-300`}
+                        whileHover={{ rotate: 360 }}
+                        transition={{ duration: 1 }}
+                      >
+                        <step.icon className="w-6 h-6 text-white" />
+                      </motion.div>
 
-                    <h3 className="text-base sm:text-lg font-bold text-slate-900 dark:text-slate-100 mb-3 text-center">
-                      {step.title}
-                    </h3>
-                    <p className="text-slate-600 dark:text-slate-400 text-center leading-relaxed text-xs sm:text-sm">
-                      {step.description}
-                    </p>
-
-                    {index < processSteps.length - 1 && (
-                      <div className="hidden lg:block absolute top-1/2 -right-4 w-8 h-0.5 bg-gradient-to-r from-slate-300 to-transparent transform -translate-y-1/2"></div>
-                    )}
+                      <h3 className="text-lg font-bold text-slate-900 mb-3 group-hover:text-pink-700 transition-colors">
+                        {step.title}
+                      </h3>
+                      <p className="text-slate-700 leading-relaxed text-sm">
+                        {step.description}
+                      </p>
+                    </CardContent>
                   </Card>
                 </motion.div>
               ))}
@@ -832,560 +1360,497 @@ const Home: React.FC = () => {
 
             <motion.div
               initial={{ opacity: 0, y: 30 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ delay: 1.0 }}
-              className="text-center mt-12 sm:mt-16"
+              animate={isVisible.process ? { opacity: 1, y: 0 } : {}}
+              transition={{ delay: 1.5 }}
+              className="text-center mt-12"
             >
               <Button
                 size="lg"
-                className="bg-gradient-to-r from-blue-600 via-indigo-600 to-purple-600 hover:from-blue-700 hover:via-indigo-700 hover:to-purple-700 text-white px-6 sm:px-8 py-3 sm:py-4 rounded-xl sm:rounded-2xl shadow-lg text-sm sm:text-base"
+                className={`bg-gradient-to-r ${unifiedColorScheme.button} hover:${unifiedColorScheme.buttonHover} text-white font-bold px-10 py-4 text-lg shadow-2xl hover:shadow-3xl transition-all duration-300 rounded-2xl`}
                 asChild
               >
                 <Link to="/templates">
-                  <Rocket className="w-4 h-4 sm:w-5 sm:h-5 mr-2" />
-                  Bắt đầu ngay bây giờ
-                  <ArrowRight className="w-4 h-4 sm:w-5 sm:h-5 ml-2" />
+                  Start Building Now
+                  <Rocket className="w-5 h-5 ml-2" />
                 </Link>
               </Button>
             </motion.div>
           </div>
         </section>
 
-        {/* ✅ 5. CATEGORIES - Responsive Cards */}
+        {/* ===== PRODUCTS SHOWCASE ===== */}
         <section
-          className="relative px-4 py-12 sm:py-16 lg:py-20 bg-gradient-to-br from-purple-100 via-pink-100 to-orange-100 dark:from-purple-900/30 dark:via-pink-900/30 dark:to-orange-900/30"
-          id="categories"
+          className={`relative px-4 py-14 sm:py-16 lg:py-20 bg-gradient-to-br ${sectionBackgrounds.products}`}
+          id="products"
           data-animate
+          style={{
+            backgroundImage: `radial-gradient(circle at 20% 80%, rgba(244, 63, 94, 0.07) 0%, transparent 50%),
+                             radial-gradient(circle at 80% 20%, rgba(236, 72, 153, 0.07) 0%, transparent 50%),
+                             radial-gradient(circle at 40% 40%, rgba(220, 38, 127, 0.04) 0%, transparent 50%)`,
+          }}
         >
           <div className="container relative z-10 mx-auto">
             <motion.div
               initial={{ opacity: 0, y: 30 }}
-              animate={{ opacity: 1, y: 0 }}
-              className="text-center mb-12 sm:mb-16"
+              animate={isVisible.products ? { opacity: 1, y: 0 } : {}}
+              className="text-center mb-16"
             >
-              <Badge className="mb-4 bg-gradient-to-r from-purple-600 to-pink-600 text-white text-xs sm:text-sm">
-                <Package className="w-3 h-3 sm:w-4 sm:h-4 mr-2" />
-                Danh mục phong phú
+              <Badge
+                className={`mb-4 bg-gradient-to-r ${unifiedColorScheme.button} text-white px-5 py-2 text-sm font-semibold shadow-xl`}
+              >
+                <Crown className="w-4 h-4 mr-2" />
+                Featured Templates
               </Badge>
-              <h2 className="text-3xl sm:text-4xl lg:text-5xl font-bold text-transparent bg-gradient-to-r from-purple-700 via-pink-700 to-orange-700 bg-clip-text mb-4">
-                Khám phá danh mục
+              <h2
+                className={`text-3xl sm:text-4xl lg:text-5xl font-bold bg-gradient-to-r ${unifiedColorScheme.textMain} bg-clip-text text-transparent mb-4`}
+              >
+                Best-Selling Templates
               </h2>
-              <p className="text-base sm:text-lg lg:text-xl text-slate-700 dark:text-slate-300 max-w-3xl mx-auto px-4">
-                Từ React, Vue, Angular đến Next.js - chúng tôi có mọi thứ bạn
-                cần để xây dựng ứng dụng hiện đại
+              <p className="text-lg text-slate-600 max-w-3xl mx-auto leading-relaxed">
+                Handpicked templates that have helped thousands of developers
+                launch successful projects
               </p>
             </motion.div>
 
-            <div className="grid gap-4 sm:gap-6 lg:gap-8 grid-cols-1 sm:grid-cols-2 xl:grid-cols-3">
-              {categories.map((category, index) => (
-                <motion.div
-                  key={index}
-                  initial={{ opacity: 0, y: 50 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  transition={{ duration: 0.6, delay: index * 0.1 }}
-                  whileHover={{ scale: 1.02, y: -5 }}
-                  className="group h-full"
-                >
+            {isLoadingProducts ? (
+              <div className="grid gap-6 grid-cols-1 md:grid-cols-2 lg:grid-cols-3">
+                {[...Array(6)].map((_, index) => (
                   <Card
-                    className={`
-        relative overflow-hidden border-0 shadow-lg hover:shadow-2xl
-        ${category.bgColor} 
-        backdrop-blur-sm rounded-2xl lg:rounded-3xl 
-        transition-all duration-500 ease-out
-        h-full flex flex-col
-        group-hover:scale-[1.02]
-        transform-gpu
-      `}
+                    key={index}
+                    className={`overflow-hidden border-0 shadow-xl bg-gradient-to-br ${unifiedColorScheme.cardBg} backdrop-blur-lg rounded-3xl`}
                   >
-                    {/* Decorative Background Elements */}
-                    <div className="absolute top-0 right-0 w-32 h-32 opacity-10">
-                      <div
-                        className={`w-full h-full rounded-full bg-gradient-to-br ${category.gradient} transform translate-x-6 -translate-y-6`}
-                      ></div>
-                    </div>
-
-                    <CardContent className="p-6 lg:p-8 flex flex-col h-full relative z-10">
-                      {/* Header với Icon và Count */}
-                      <div className="flex items-start justify-between mb-6">
-                        <motion.div
-                          className={`
-                w-14 h-14 lg:w-16 lg:h-16 
-                rounded-2xl bg-gradient-to-br ${category.gradient} 
-                flex items-center justify-center shadow-xl
-                group-hover:shadow-2xl group-hover:scale-110 
-                transition-all duration-300
-              `}
-                          whileHover={{ rotate: 8 }}
-                          whileTap={{ scale: 0.95 }}
-                        >
-                          <category.icon className="w-7 h-7 lg:w-8 lg:h-8 text-white" />
-                        </motion.div>
-
-                        <Badge
-                          className={`
-                bg-gradient-to-r ${category.gradient} 
-                text-white text-sm font-semibold
-                px-3 py-1 rounded-full shadow-lg
-                group-hover:scale-105 transition-transform duration-300
-              `}
-                        >
-                          {category.count}
-                        </Badge>
-                      </div>
-
-                      {/* Content */}
-                      <div className="flex-1 flex flex-col">
-                        <h3
-                          className="
-              text-xl lg:text-2xl font-bold 
-              text-slate-900 dark:text-slate-100 
-              mb-3 lg:mb-4
-              group-hover:text-purple-700 dark:group-hover:text-purple-300 
-              transition-colors duration-300
-              line-clamp-2
-            "
-                        >
-                          {category.title}
-                        </h3>
-
-                        <p
-                          className="
-              text-slate-600 dark:text-slate-400 
-              mb-6 leading-relaxed text-sm lg:text-base
-              flex-1
-              line-clamp-3
-            "
-                        >
-                          {category.description}
-                        </p>
-
-                        {/* Features Tags */}
-                        <div className="flex flex-wrap gap-2 mb-6">
-                          {category.features.map((feature, i) => (
-                            <Badge
-                              key={i}
-                              variant="secondary"
-                              className="
-                    text-xs bg-white/70 dark:bg-slate-700/70 
-                    text-slate-700 dark:text-slate-300
-                    border-0 shadow-sm
-                    hover:bg-white/90 dark:hover:bg-slate-700/90
-                    transition-colors duration-200
-                  "
-                            >
-                              {feature}
-                            </Badge>
-                          ))}
+                    <CardContent className="p-6">
+                      <div className="animate-pulse space-y-4">
+                        <div className="h-40 bg-slate-200 rounded-2xl" />
+                        <div className="space-y-2">
+                          <div className="h-4 bg-slate-200 rounded w-3/4" />
+                          <div className="h-3 bg-slate-200 rounded w-1/2" />
                         </div>
-
-                        {/* CTA Button */}
-                        <Button
-                          asChild
-                          className={`
-                w-full h-12 bg-gradient-to-r ${category.gradient} 
-                hover:shadow-xl hover:shadow-purple-500/25
-                border-0 rounded-xl lg:rounded-2xl 
-                text-white font-semibold
-                transition-all duration-300
-                group-hover:translate-y-[-2px]
-                relative overflow-hidden
-              `}
-                        >
-                          <Link
-                            to={category.href}
-                            className="flex items-center justify-center"
-                          >
-                            {/* Button Shimmer Effect */}
-                            <div
-                              className="
-                  absolute inset-0 
-                  bg-gradient-to-r from-transparent via-white/20 to-transparent
-                  transform -skew-x-12 -translate-x-full
-                  group-hover:translate-x-full
-                  transition-transform duration-700
-                "
-                            ></div>
-
-                            <Eye className="w-4 h-4 mr-2 group-hover:scale-110 transition-transform duration-300" />
-                            <span className="truncate">
-                              Khám phá {category.title.split(" ")[0]}
-                            </span>
-                            <ArrowRight
-                              className="
-                  w-4 h-4 ml-2 
-                  group-hover:translate-x-1 group-hover:scale-110
-                  transition-all duration-300
-                "
-                            />
-                          </Link>
-                        </Button>
                       </div>
                     </CardContent>
-
-                    {/* Hover Glow Effect */}
-                    <div
-                      className={`
-          absolute inset-0 opacity-0 group-hover:opacity-100
-          bg-gradient-to-r ${category.gradient}
-          rounded-2xl lg:rounded-3xl blur-xl scale-105
-          transition-opacity duration-500 -z-10
-        `}
-                    ></div>
                   </Card>
-                </motion.div>
-              ))}
-            </div>
-          </div>
-        </section>
-
-        {/* ✅ 6. FEATURED PRODUCTS - Responsive */}
-        <section
-          className="relative px-4 py-12 sm:py-16 lg:py-20 bg-gradient-to-br from-emerald-100 via-teal-100 to-cyan-100 dark:from-emerald-900/30 dark:via-teal-900/30 dark:to-cyan-900/30"
-          id="featured-products"
-          data-animate
-        >
-          <div className="container relative z-10 mx-auto">
-            <motion.div
-              initial={{ opacity: 0, y: 30 }}
-              animate={{ opacity: 1, y: 0 }}
-              className="text-center mb-12 sm:mb-16"
-            >
-              <Badge className="mb-4 bg-gradient-to-r from-emerald-600 to-teal-600 text-white text-xs sm:text-sm">
-                <Star className="w-3 h-3 sm:w-4 sm:h-4 mr-2" />
-                Sản phẩm nổi bật
-              </Badge>
-              <h2 className="text-3xl sm:text-4xl lg:text-5xl font-bold text-transparent bg-gradient-to-r from-emerald-700 via-teal-700 to-cyan-700 bg-clip-text mb-4">
-                Được yêu thích nhất
-              </h2>
-              <p className="text-base sm:text-lg lg:text-xl text-slate-700 dark:text-slate-300 max-w-3xl mx-auto px-4">
-                Những templates và e-books được đánh giá cao nhất bởi cộng đồng
-                developers và designers
-              </p>
-            </motion.div>
-
-            <div className="grid gap-6 sm:gap-8 md:grid-cols-2 lg:grid-cols-3">
-              {isLoadingProducts ? (
-                Array.from({ length: 6 }).map((_, i) => (
-                  <div key={i} className="animate-pulse">
-                    <Card className="border-0 shadow-lg rounded-xl sm:rounded-2xl overflow-hidden">
-                      <div className="h-40 sm:h-48 bg-slate-200 dark:bg-slate-700"></div>
-                      <CardContent className="p-4 sm:p-6">
-                        <div className="h-3 sm:h-4 bg-slate-200 dark:bg-slate-700 rounded mb-2"></div>
-                        <div className="h-3 sm:h-4 bg-slate-200 dark:bg-slate-700 rounded w-2/3 mb-4"></div>
-                        <div className="h-6 sm:h-8 bg-slate-200 dark:bg-slate-700 rounded"></div>
-                      </CardContent>
-                    </Card>
-                  </div>
-                ))
-              ) : featuredProducts.length > 0 ? (
-                featuredProducts.map((product, index) => (
+                ))}
+              </div>
+            ) : (
+              <div className="grid gap-6 grid-cols-1 md:grid-cols-2 lg:grid-cols-3">
+                {featuredProducts.map((product, index) => (
                   <motion.div
                     key={product.id}
-                    initial={{ opacity: 0, y: 50 }}
-                    animate={{ opacity: 1, y: 0 }}
-                    transition={{ duration: 0.6, delay: index * 0.1 }}
-                    whileHover={{ scale: 1.05, y: -10 }}
+                    initial={{ opacity: 0, y: 60 }}
+                    animate={isVisible.products ? { opacity: 1, y: 0 } : {}}
+                    transition={{ duration: 0.8, delay: index * 0.2 }}
+                    whileHover={{ scale: 1.03, y: -5 }}
                     className="group"
                   >
-                    <div className="border-0 shadow-lg bg-white/90 dark:bg-slate-800/90 backdrop-blur rounded-xl sm:rounded-2xl group-hover:shadow-xl transition-all duration-300">
-                      <ProductCard
-                        product={product}
-                        onAddToCart={() => {
-                          toast({
-                            title: "🛒 Đã thêm vào giỏ hàng",
-                            description: `${product.title} đã được thêm vào giỏ hàng.`,
-                          });
-                        }}
-                      />
-                    </div>
-                  </motion.div>
-                ))
-              ) : (
-                <div className="py-16 sm:py-20 text-center lg:col-span-3">
-                  <motion.div
-                    className="flex items-center justify-center w-16 h-16 sm:w-20 sm:h-20 mx-auto mb-6 rounded-full bg-gradient-to-r from-emerald-600 to-teal-600"
-                    animate={{ scale: [1, 1.1, 1] }}
-                    transition={{ duration: 2, repeat: Infinity }}
-                  >
-                    <Package className="w-8 h-8 sm:w-10 sm:h-10 text-white" />
-                  </motion.div>
-                  <p className="mb-4 text-lg sm:text-xl font-medium text-slate-700 dark:text-slate-300">
-                    Đang cập nhật sản phẩm mới...
-                  </p>
-                  <Button
-                    asChild
-                    className="bg-gradient-to-r from-emerald-600 to-teal-700 hover:from-emerald-700 hover:to-teal-800"
-                  >
-                    <Link to="/templates">Xem tất cả sản phẩm</Link>
-                  </Button>
-                </div>
-              )}
-            </div>
-
-            <motion.div
-              initial={{ opacity: 0, y: 30 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ delay: 0.8 }}
-              className="text-center mt-12 sm:mt-16"
-            >
-              <div className="flex flex-col sm:flex-row items-center justify-center gap-3 sm:gap-4">
-                <Button
-                  size="lg"
-                  asChild
-                  className="w-full sm:w-auto bg-gradient-to-r from-emerald-600 via-teal-600 to-cyan-600 hover:from-emerald-700 hover:via-teal-700 hover:to-cyan-700 text-white px-6 sm:px-8 py-3 sm:py-4 rounded-xl sm:rounded-2xl shadow-lg text-sm sm:text-base"
-                >
-                  <Link to="/templates">
-                    <Eye className="w-4 h-4 sm:w-5 sm:h-5 mr-2" />
-                    Xem tất cả Templates
-                    <ArrowRight className="w-4 h-4 sm:w-5 sm:h-5 ml-2" />
-                  </Link>
-                </Button>
-                <Button
-                  size="lg"
-                  variant="outline"
-                  asChild
-                  className="w-full sm:w-auto border-2 border-emerald-400 hover:bg-emerald-50 dark:border-emerald-300 dark:hover:bg-emerald-900/20 px-6 sm:px-8 py-3 sm:py-4 rounded-xl sm:rounded-2xl text-sm sm:text-base"
-                >
-                  <Link to="/ebooks">
-                    <BookOpen className="w-4 h-4 sm:w-5 sm:h-5 mr-2" />
-                    Khám phá E-books
-                  </Link>
-                </Button>
-              </div>
-            </motion.div>
-          </div>
-        </section>
-
-        {/* Continue with remaining sections... Newsletter and Final CTA would follow the same responsive pattern */}
-
-        {/* ✅ 10. NEWSLETTER - Responsive */}
-        <section
-          className="relative px-4 py-12 sm:py-16 lg:py-20 overflow-hidden bg-gradient-to-br from-indigo-700 via-purple-700 to-pink-700"
-          id="newsletter"
-        >
-          <div className="absolute inset-0">
-            <div className="absolute inset-0 bg-black/20"></div>
-            {Array.from({ length: 6 }).map((_, i) => (
-              <motion.div
-                key={i}
-                className="absolute w-24 h-24 sm:w-32 sm:h-32 rounded-full bg-white/10 blur-xl"
-                style={{
-                  left: `${15 + i * 12}%`,
-                  top: `${8 + (i % 3) * 30}%`,
-                }}
-                animate={{
-                  scale: [1, 1.2, 1],
-                  rotate: [0, 180, 360],
-                }}
-                transition={{
-                  duration: 8 + i * 2,
-                  repeat: Infinity,
-                  ease: "linear",
-                }}
-              />
-            ))}
-          </div>
-
-          <div className="container relative z-10 mx-auto text-center">
-            <motion.div
-              initial={{ opacity: 0, y: 30 }}
-              animate={{ opacity: 1, y: 0 }}
-              className="max-w-3xl mx-auto text-white"
-            >
-              <Badge className="mb-4 sm:mb-6 bg-white/20 text-white border-white/30 text-xs sm:text-sm">
-                <Mail className="w-3 h-3 sm:w-4 sm:h-4 mr-2" />
-                Đăng ký nhận tin
-              </Badge>
-
-              <h2 className="text-3xl sm:text-4xl lg:text-5xl font-bold mb-4 sm:mb-6">
-                Nhận template mới mỗi tuần
-              </h2>
-
-              <p className="text-base sm:text-lg lg:text-xl mb-6 sm:mb-8 opacity-90 px-4">
-                Đăng ký để nhận template miễn phí, tutorial và xu hướng thiết kế
-                mới nhất từ hệ thống của chúng tôi
-              </p>
-
-              <form
-                onSubmit={handleNewsletterSubmit}
-                className="max-w-md mx-auto px-4"
-              >
-                <div className="flex flex-col sm:flex-row gap-3 sm:gap-4">
-                  <Input
-                    type="email"
-                    placeholder="Nhập email của bạn"
-                    value={newsletterEmail}
-                    onChange={(e) => setNewsletterEmail(e.target.value)}
-                    required
-                    className="flex-1 h-10 sm:h-12 bg-white/20 border-white/30 text-white placeholder-white/70 backdrop-blur rounded-lg sm:rounded-xl text-sm sm:text-base"
-                  />
-                  <Button
-                    type="submit"
-                    className="h-10 sm:h-12 bg-white text-indigo-700 hover:bg-white/90 rounded-lg sm:rounded-xl font-semibold px-4 sm:px-6 text-sm sm:text-base whitespace-nowrap"
-                  >
-                    <Mail className="w-3 h-3 sm:w-4 sm:h-4 mr-2" />
-                    Đăng ký
-                  </Button>
-                </div>
-              </form>
-
-              <p className="text-xs sm:text-sm mt-3 sm:mt-4 opacity-70 px-4">
-                Miễn phí, không spam. Hủy đăng ký bất cứ lúc nào.
-              </p>
-
-              {/* Newsletter benefits - Responsive */}
-              <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 sm:gap-6 mt-8 sm:mt-12 px-4">
-                {[
-                  { icon: Gift, title: "Template miễn phí", desc: "Mỗi tuần" },
-                  {
-                    icon: Lightbulb,
-                    title: "Tutorial độc quyền",
-                    desc: "Từ experts",
-                  },
-                  {
-                    icon: TrendingUp,
-                    title: "Xu hướng mới nhất",
-                    desc: "Trước tiên",
-                  },
-                ].map((item, i) => (
-                  <motion.div
-                    key={i}
-                    initial={{ opacity: 0, y: 20 }}
-                    animate={{ opacity: 1, y: 0 }}
-                    transition={{ delay: 0.8 + i * 0.2 }}
-                    className="text-center"
-                  >
-                    <div className="w-10 h-10 sm:w-12 sm:h-12 mx-auto mb-2 sm:mb-3 rounded-full bg-white/20 flex items-center justify-center">
-                      <item.icon className="w-5 h-5 sm:w-6 sm:h-6 text-white" />
-                    </div>
-                    <h4 className="font-semibold text-white mb-1 text-sm sm:text-base">
-                      {item.title}
-                    </h4>
-                    <p className="text-white/70 text-xs sm:text-sm">
-                      {item.desc}
-                    </p>
+                    <ProductCard product={product} />
                   </motion.div>
                 ))}
               </div>
+            )}
+
+            <motion.div
+              initial={{ opacity: 0, y: 30 }}
+              animate={isVisible.products ? { opacity: 1, y: 0 } : {}}
+              transition={{ delay: 1.2 }}
+              className="text-center mt-12"
+            >
+              <Button
+                size="lg"
+                className={`bg-gradient-to-r ${unifiedColorScheme.button} hover:${unifiedColorScheme.buttonHover} text-white font-bold px-10 py-4 text-lg shadow-2xl hover:shadow-3xl transition-all duration-300 rounded-2xl`}
+                asChild
+              >
+                <Link to="/templates">
+                  View All Templates
+                  <Package className="w-5 h-5 ml-2" />
+                </Link>
+              </Button>
             </motion.div>
           </div>
         </section>
 
-        {/* ✅ 11. FINAL CTA SECTION - Responsive */}
-        <section className="relative px-4 py-12 sm:py-16 lg:py-20 overflow-hidden bg-gradient-to-br from-orange-700 via-amber-700 to-yellow-600">
-          <div className="absolute inset-0">
-            <div className="absolute inset-0 bg-black/10"></div>
-            {Array.from({ length: 8 }).map((_, i) => (
-              <motion.div
-                key={i}
-                className="absolute w-32 h-32 sm:w-40 sm:h-40 rounded-full bg-white/10 blur-xl"
-                style={{
-                  left: `${15 + i * 12}%`,
-                  top: `${10 + (i % 4) * 25}%`,
-                }}
-                animate={{
-                  scale: [1, 1.3, 1],
-                  rotate: [0, 180, 360],
-                  x: [0, 30, 0],
-                }}
-                transition={{
-                  duration: 15 + i * 3,
-                  repeat: Infinity,
-                  ease: "linear",
-                }}
-              />
-            ))}
-          </div>
-
-          <div className="container relative z-10 mx-auto text-center">
+        {/* ===== TESTIMONIALS ===== */}
+        <section
+          className={`relative px-4 py-14 sm:py-16 lg:py-20 bg-gradient-to-br ${sectionBackgrounds.testimonials}`}
+          id="testimonials"
+          data-animate
+          style={{
+            backgroundImage: `radial-gradient(circle at 20% 80%, rgba(220, 38, 127, 0.07) 0%, transparent 50%),
+                             radial-gradient(circle at 80% 20%, rgba(244, 63, 94, 0.07) 0%, transparent 50%),
+                             radial-gradient(circle at 40% 40%, rgba(236, 72, 153, 0.04) 0%, transparent 50%)`,
+          }}
+        >
+          <div className="container relative z-10 mx-auto">
             <motion.div
               initial={{ opacity: 0, y: 30 }}
-              animate={{ opacity: 1, y: 0 }}
-              className="max-w-4xl mx-auto text-white space-y-6 sm:space-y-8"
+              animate={isVisible.testimonials ? { opacity: 1, y: 0 } : {}}
+              className="text-center mb-16"
             >
-              <Badge className="mb-4 sm:mb-6 bg-white/20 text-white border-white/30 text-xs sm:text-sm">
-                <Rocket className="w-3 h-3 sm:w-4 sm:h-4 mr-2" />
-                Sẵn sàng bắt đầu?
+              <Badge
+                className={`mb-4 bg-gradient-to-r ${unifiedColorScheme.button} text-white px-5 py-2 text-sm font-semibold shadow-xl`}
+              >
+                <Quote className="w-4 h-4 mr-2" />
+                Customer Success Stories
+              </Badge>
+              <h2
+                className={`text-3xl sm:text-4xl lg:text-5xl font-bold bg-gradient-to-r ${unifiedColorScheme.textMain} bg-clip-text text-transparent mb-4`}
+              >
+                Loved by Developers Worldwide
+              </h2>
+              <p className="text-lg text-slate-600 max-w-3xl mx-auto leading-relaxed">
+                Real stories from real developers who've accelerated their
+                careers with our templates
+              </p>
+            </motion.div>
+
+            <div className="max-w-5xl mx-auto">
+              <AnimatePresence mode="wait">
+                <motion.div
+                  key={currentTestimonial}
+                  initial={{ opacity: 0, x: 100 }}
+                  animate={{ opacity: 1, x: 0 }}
+                  exit={{ opacity: 0, x: -100 }}
+                  transition={{ duration: 0.8 }}
+                >
+                  <Card
+                    className={`border-0 shadow-3xl bg-gradient-to-br ${unifiedColorScheme.cardBg} backdrop-blur-lg rounded-3xl overflow-hidden`}
+                  >
+                    <CardContent className="p-8 lg:p-12">
+                      <div className="grid lg:grid-cols-3 gap-8 items-center">
+                        <div className="text-center lg:text-left space-y-4">
+                          <div className="relative mx-auto lg:mx-0 w-fit">
+                            <img
+                              src={testimonials[currentTestimonial].avatar}
+                              alt={testimonials[currentTestimonial].name}
+                              className="w-20 h-20 rounded-full shadow-2xl"
+                            />
+                            {testimonials[currentTestimonial].verified && (
+                              <div className="absolute -bottom-1 -right-1 w-8 h-8 bg-gradient-to-r from-green-400 to-emerald-500 rounded-full flex items-center justify-center shadow-xl">
+                                <CheckCircle className="w-5 h-5 text-white" />
+                              </div>
+                            )}
+                          </div>
+
+                          <div>
+                            <div className="flex items-center justify-center lg:justify-start gap-2 mb-1">
+                              <h3 className="text-lg font-bold text-slate-900">
+                                {testimonials[currentTestimonial].name}
+                              </h3>
+                              <span className="text-xl">
+                                {testimonials[currentTestimonial].flag}
+                              </span>
+                            </div>
+                            <p className="text-pink-600 font-semibold">
+                              {testimonials[currentTestimonial].role}
+                            </p>
+                            <p className="text-slate-600 text-sm">
+                              {testimonials[currentTestimonial].company}
+                            </p>
+                          </div>
+                        </div>
+
+                        <div className="lg:col-span-2 space-y-6">
+                          <div className="flex items-center justify-center lg:justify-start gap-2">
+                            {[
+                              ...Array(testimonials[currentTestimonial].rating),
+                            ].map((_, i) => (
+                              <Star
+                                key={i}
+                                className="w-5 h-5 fill-yellow-400 text-yellow-400"
+                              />
+                            ))}
+                            <span className="text-slate-600 ml-2 font-medium text-sm">
+                              {testimonials[currentTestimonial].date}
+                            </span>
+                          </div>
+
+                          <blockquote className="text-lg lg:text-xl text-slate-800 leading-relaxed font-medium italic text-center lg:text-left">
+                            "{testimonials[currentTestimonial].content}"
+                          </blockquote>
+
+                          <div className="grid sm:grid-cols-2 gap-4">
+                            <div
+                              className={`p-4 rounded-2xl bg-gradient-to-r ${unifiedColorScheme.iconBg} border border-pink-200/50`}
+                            >
+                              <div className="flex items-center gap-2 mb-2">
+                                <Briefcase className="w-4 h-4 text-pink-600" />
+                                <span className="text-sm font-semibold text-pink-700">
+                                  Project
+                                </span>
+                              </div>
+                              <p className="text-slate-700 font-medium text-sm">
+                                {testimonials[currentTestimonial].projectType}
+                              </p>
+                            </div>
+
+                            <div
+                              className={`p-4 rounded-2xl bg-gradient-to-r ${unifiedColorScheme.iconBg} border border-pink-200/50`}
+                            >
+                              <div className="flex items-center gap-2 mb-2">
+                                <TrendingUp className="w-4 h-4 text-pink-600" />
+                                <span className="text-sm font-semibold text-pink-700">
+                                  Impact
+                                </span>
+                              </div>
+                              <p className="text-slate-700 font-bold">
+                                {testimonials[currentTestimonial].revenue}
+                              </p>
+                              <p className="text-slate-500 text-sm">
+                                {testimonials[currentTestimonial].timeFrame}
+                              </p>
+                            </div>
+                          </div>
+                        </div>
+                      </div>
+                    </CardContent>
+                  </Card>
+                </motion.div>
+              </AnimatePresence>
+
+              <div className="flex justify-center items-center mt-8 gap-6">
+                <button
+                  onClick={() =>
+                    setCurrentTestimonial(Math.max(0, currentTestimonial - 1))
+                  }
+                  className={`w-10 h-10 rounded-full bg-gradient-to-r ${unifiedColorScheme.button} text-white shadow-xl hover:shadow-2xl transition-all duration-300 flex items-center justify-center disabled:opacity-50`}
+                  disabled={currentTestimonial === 0}
+                >
+                  <ChevronLeft className="w-5 h-5" />
+                </button>
+
+                <div className="flex gap-2">
+                  {testimonials.map((_, index) => (
+                    <button
+                      key={index}
+                      onClick={() => setCurrentTestimonial(index)}
+                      className={`w-3 h-3 rounded-full transition-all duration-300 ${
+                        index === currentTestimonial
+                          ? `bg-gradient-to-r ${unifiedColorScheme.button} scale-125`
+                          : "bg-pink-200 hover:bg-pink-300"
+                      }`}
+                    />
+                  ))}
+                </div>
+
+                <button
+                  onClick={() =>
+                    setCurrentTestimonial(
+                      Math.min(testimonials.length - 1, currentTestimonial + 1),
+                    )
+                  }
+                  className={`w-10 h-10 rounded-full bg-gradient-to-r ${unifiedColorScheme.button} text-white shadow-xl hover:shadow-2xl transition-all duration-300 flex items-center justify-center disabled:opacity-50`}
+                  disabled={currentTestimonial === testimonials.length - 1}
+                >
+                  <ChevronRight className="w-5 h-5" />
+                </button>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        {/* ===== NEWSLETTER SECTION ===== */}
+        <section
+          className={`relative px-4 py-16 sm:py-20 lg:py-24 bg-gradient-to-br ${sectionBackgrounds.newsletter} overflow-hidden`}
+          id="newsletter"
+          data-animate
+          style={{
+            backgroundImage: `radial-gradient(circle at 20% 80%, rgba(236, 72, 153, 0.1) 0%, transparent 50%),
+                             radial-gradient(circle at 80% 20%, rgba(244, 63, 94, 0.1) 0%, transparent 50%),
+                             radial-gradient(circle at 40% 40%, rgba(220, 38, 127, 0.05) 0%, transparent 50%)`,
+          }}
+        >
+          <div className="container relative z-10 mx-auto">
+            <motion.div
+              initial={{ opacity: 0, y: 50 }}
+              animate={isVisible.newsletter ? { opacity: 1, y: 0 } : {}}
+              transition={{ duration: 1 }}
+              className="text-center mb-12"
+            >
+              <Badge
+                className={`mb-6 bg-gradient-to-r ${unifiedColorScheme.button} text-white px-6 py-3 text-base font-bold shadow-2xl`}
+              >
+                <Rocket className="w-5 h-5 mr-2" />
+                Join 50,000+ Developers Today! 🚀
               </Badge>
 
-              <h2 className="text-4xl sm:text-5xl lg:text-6xl xl:text-7xl font-bold leading-tight">
-                <span className="block">Xây dựng dự án</span>
-                <span className="block text-transparent bg-gradient-to-r from-white to-yellow-200 bg-clip-text">
-                  mơ ước của bạn
-                </span>
+              <h2
+                className={`text-4xl sm:text-5xl lg:text-6xl font-bold bg-gradient-to-r ${unifiedColorScheme.textMain} bg-clip-text text-transparent mb-6 leading-[1.1]`}
+              >
+                Ready to Build
+                <br />
+                Something Amazing?
               </h2>
 
-              <p className="text-base sm:text-lg lg:text-xl xl:text-2xl opacity-90 max-w-3xl mx-auto px-4">
-                Với hơn <span className="font-bold">1,200+ templates</span> và{" "}
-                <span className="font-bold">800+ e-books</span> chất lượng cao,
-                bạn sẽ có tất cả những gì cần thiết để tạo ra sản phẩm đẳng cấp
-                thế giới.
+              <p className="text-xl lg:text-2xl text-slate-600 font-medium leading-relaxed max-w-4xl mx-auto mb-10">
+                Tham gia cộng đồng hơn{" "}
+                <span className="font-bold text-pink-700">
+                  50,000 developers
+                </span>{" "}
+                đang tin tưởng Template Market để{" "}
+                <span className="font-bold text-rose-700">
+                  accelerate their projects
+                </span>
               </p>
 
-              <div className="flex flex-col sm:flex-row items-center justify-center gap-4 sm:gap-6 px-4">
+              <div className="flex flex-col sm:flex-row gap-4 justify-center mb-16">
                 <motion.div
-                  whileHover={{ scale: 1.05, y: -3 }}
-                  whileTap={{ scale: 0.95 }}
+                  whileHover={{ scale: 1.05 }}
+                  whileTap={{ scale: 0.98 }}
                 >
                   <Button
                     size="lg"
-                    className="w-full sm:w-auto bg-white text-orange-700 hover:bg-white/90 font-bold px-6 sm:px-10 py-3 sm:py-5 rounded-xl sm:rounded-2xl shadow-2xl text-base sm:text-lg"
+                    className={`bg-gradient-to-r ${unifiedColorScheme.button} hover:${unifiedColorScheme.buttonHover} text-white font-bold px-10 py-5 text-xl shadow-3xl hover:shadow-4xl transition-all duration-300 rounded-3xl`}
                     asChild
                   >
                     <Link to="/templates">
-                      <Package className="w-5 h-5 sm:w-6 sm:h-6 mr-2 sm:mr-3" />
-                      Khám phá Templates
-                      <ArrowRight className="w-5 h-5 sm:w-6 sm:h-6 ml-2 sm:ml-3" />
+                      <Package className="w-6 h-6 mr-3" />
+                      Browse 2500+ Templates
+                      <ArrowRight className="w-6 h-6 ml-3" />
                     </Link>
                   </Button>
                 </motion.div>
 
                 <motion.div
-                  whileHover={{ scale: 1.05, y: -3 }}
-                  whileTap={{ scale: 0.95 }}
+                  whileHover={{ scale: 1.05 }}
+                  whileTap={{ scale: 0.98 }}
                 >
                   <Button
                     size="lg"
                     variant="outline"
-                    className="w-full sm:w-auto border-2 border-white/50 text-white hover:bg-white/10 font-bold px-6 sm:px-10 py-3 sm:py-5 rounded-xl sm:rounded-2xl backdrop-blur text-base sm:text-lg"
+                    className="border-2 border-pink-300 text-pink-700 hover:bg-pink-50 font-bold px-10 py-5 text-xl shadow-2xl hover:shadow-3xl transition-all duration-300 rounded-3xl backdrop-blur-sm"
                     asChild
                   >
-                    <Link to="/contact">
-                      <MessageSquare className="w-5 h-5 sm:w-6 sm:h-6 mr-2 sm:mr-3" />
-                      Liên hệ tư vấn
+                    <Link to="/ebooks">
+                      <BookOpen className="w-6 h-6 mr-3" />
+                      Read 1200+ E-books
                     </Link>
                   </Button>
                 </motion.div>
               </div>
+            </motion.div>
 
-              {/* Final stats - Responsive Grid */}
-              <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-6 mt-12 sm:mt-16 pt-8 sm:pt-16 border-t border-white/20">
-                {[
-                  { number: "50K+", label: "Khách hàng" },
-                  { number: "1.2K+", label: "Templates" },
-                  { number: "4.9★", label: "Rating" },
-                  { number: "24/7", label: "Support" },
-                ].map((stat, i) => (
-                  <motion.div
-                    key={i}
-                    initial={{ opacity: 0, y: 20 }}
-                    animate={{ opacity: 1, y: 0 }}
-                    transition={{ delay: 1.2 + i * 0.1 }}
-                    className="text-center"
-                  >
-                    <div className="text-2xl sm:text-3xl lg:text-4xl font-bold mb-1 sm:mb-2">
-                      {stat.number}
+            <motion.div
+              initial={{ opacity: 0, y: 50 }}
+              animate={isVisible.newsletter ? { opacity: 1, y: 0 } : {}}
+              transition={{ duration: 1, delay: 0.3 }}
+              className="max-w-3xl mx-auto"
+            >
+              <Card
+                className={`border-0 shadow-3xl bg-gradient-to-br ${unifiedColorScheme.cardBg} backdrop-blur-xl rounded-3xl overflow-hidden`}
+              >
+                <CardContent className="p-8 lg:p-12 text-center">
+                  <div className="mb-8">
+                    <motion.div
+                      className={`w-16 h-16 mx-auto mb-6 rounded-3xl bg-gradient-to-r ${unifiedColorScheme.button} flex items-center justify-center shadow-2xl`}
+                      animate={{ rotate: [0, 10, -10, 0] }}
+                      transition={{ duration: 4, repeat: Infinity }}
+                    >
+                      <Mail className="w-8 h-8 text-white" />
+                    </motion.div>
+
+                    <h3
+                      className={`text-2xl lg:text-3xl font-bold bg-gradient-to-r ${unifiedColorScheme.textMain} bg-clip-text text-transparent mb-3`}
+                    >
+                      Nhận tin tức mới nhất
+                    </h3>
+
+                    <p className="text-lg text-slate-600 leading-relaxed max-w-xl mx-auto">
+                      Weekly updates về latest templates, exclusive discounts,
+                      development tips - straight to your inbox!
+                    </p>
+                  </div>
+
+                  <div className="grid md:grid-cols-3 gap-4 mb-8">
+                    {[
+                      {
+                        icon: Gift,
+                        title: "Exclusive Templates",
+                        description: "Early access to new releases",
+                      },
+                      {
+                        icon: Percent,
+                        title: "Special Discounts",
+                        description: "Up to 50% OFF for subscribers",
+                      },
+                      {
+                        icon: Lightbulb,
+                        title: "Pro Tips & Tutorials",
+                        description: "Weekly development insights",
+                      },
+                    ].map((benefit, index) => (
+                      <motion.div
+                        key={index}
+                        initial={{ opacity: 0, y: 20 }}
+                        animate={
+                          isVisible.newsletter ? { opacity: 1, y: 0 } : {}
+                        }
+                        transition={{ delay: 0.5 + index * 0.1 }}
+                        className="text-center"
+                      >
+                        <div
+                          className={`w-12 h-12 mx-auto mb-3 rounded-2xl bg-gradient-to-r ${unifiedColorScheme.iconBg} flex items-center justify-center shadow-lg`}
+                        >
+                          <benefit.icon className="w-6 h-6 text-pink-600" />
+                        </div>
+                        <h4 className="font-bold text-slate-800 mb-1 text-sm">
+                          {benefit.title}
+                        </h4>
+                        <p className="text-xs text-slate-600">
+                          {benefit.description}
+                        </p>
+                      </motion.div>
+                    ))}
+                  </div>
+
+                  <form onSubmit={handleNewsletterSubmit} className="space-y-4">
+                    <div className="relative max-w-md mx-auto">
+                      <Input
+                        type="email"
+                        placeholder="Enter your email address..."
+                        value={newsletterEmail}
+                        onChange={(e) => setNewsletterEmail(e.target.value)}
+                        className="h-12 pl-4 pr-28 border-2 border-pink-200 focus:border-pink-400 rounded-2xl bg-white/90 backdrop-blur-sm shadow-lg"
+                        required
+                      />
+                      <Button
+                        type="submit"
+                        className={`absolute right-1 top-1 bottom-1 bg-gradient-to-r ${unifiedColorScheme.button} hover:${unifiedColorScheme.buttonHover} text-white font-bold px-4 shadow-xl hover:shadow-2xl transition-all duration-300 rounded-xl`}
+                      >
+                        <Send className="w-4 h-4 mr-1" />
+                        Subscribe
+                      </Button>
                     </div>
-                    <div className="text-white/80 text-sm sm:text-base">
-                      {stat.label}
-                    </div>
-                  </motion.div>
-                ))}
-              </div>
+
+                    <p className="text-xs text-slate-500 max-w-sm mx-auto">
+                      🔒 No spam, unsubscribe anytime. We respect your privacy.
+                    </p>
+                  </form>
+                </CardContent>
+              </Card>
+            </motion.div>
+
+            <motion.div
+              initial={{ opacity: 0, y: 30 }}
+              animate={isVisible.newsletter ? { opacity: 1, y: 0 } : {}}
+              transition={{ delay: 1 }}
+              className="text-center mt-16"
+            >
+              <p className="text-xl text-slate-600 font-medium mb-6">
+                Ready to accelerate your development journey? 🚀
+              </p>
+              <Button
+                size="lg"
+                className={`bg-gradient-to-r ${unifiedColorScheme.button} hover:${unifiedColorScheme.buttonHover} text-white font-bold px-12 py-4 text-lg shadow-3xl hover:shadow-4xl transition-all duration-300 rounded-3xl`}
+                asChild
+              >
+                <Link to="/templates">
+                  Get Started Free
+                  <Sparkles className="w-5 h-5 ml-2" />
+                </Link>
+              </Button>
             </motion.div>
           </div>
         </section>
-      </div>
+      </main>
     </>
   );
 };

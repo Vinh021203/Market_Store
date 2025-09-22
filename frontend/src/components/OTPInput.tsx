@@ -27,7 +27,7 @@ const OTPInput: React.FC<OTPInputProps> = ({
   error = false,
   success = false,
   autoFocus = true,
-  placeholder = "○",
+  placeholder = "●",
 }) => {
   const inputRef = useRef<HTMLInputElement[]>(Array(length).fill(null));
   const [OTP, setOTP] = useState<string[]>(Array(length).fill(""));
@@ -35,22 +35,24 @@ const OTPInput: React.FC<OTPInputProps> = ({
 
   // Auto focus first input on mount
   useEffect(() => {
-    if (autoFocus && inputRef.current[0]) {
+    if (autoFocus && inputRef.current[0] && !disabled) {
       inputRef.current[0].focus();
+      setFocusedIndex(0);
     }
-  }, [autoFocus]);
+  }, [autoFocus, disabled]);
 
   const handleTextChange = (input: string, index: number) => {
     // Only allow numeric input
-    if (input && !/^\d$/.test(input)) return;
+    const digit = input.replace(/[^0-9]/g, "").slice(-1);
 
     const newPin = [...OTP];
-    newPin[index] = input;
+    newPin[index] = digit;
     setOTP(newPin);
 
     // Auto focus next input
-    if (input.length === 1 && index < length - 1) {
+    if (digit && index < length - 1) {
       inputRef.current[index + 1]?.focus();
+      setFocusedIndex(index + 1);
     }
 
     // Call onComplete when all fields are filled
@@ -64,6 +66,7 @@ const OTPInput: React.FC<OTPInputProps> = ({
       if (!OTP[index] && index > 0) {
         // Move to previous input if current is empty
         inputRef.current[index - 1]?.focus();
+        setFocusedIndex(index - 1);
       } else {
         // Clear current input
         const newPin = [...OTP];
@@ -72,8 +75,10 @@ const OTPInput: React.FC<OTPInputProps> = ({
       }
     } else if (e.key === "ArrowLeft" && index > 0) {
       inputRef.current[index - 1]?.focus();
+      setFocusedIndex(index - 1);
     } else if (e.key === "ArrowRight" && index < length - 1) {
       inputRef.current[index + 1]?.focus();
+      setFocusedIndex(index + 1);
     }
   };
 
@@ -91,10 +96,11 @@ const OTPInput: React.FC<OTPInputProps> = ({
 
     setOTP(newOTP);
 
-    // Focus last filled input or first empty
-    const lastFilledIndex = Math.min(pastedData.length - 1, length - 1);
-    if (inputRef.current[lastFilledIndex]) {
-      inputRef.current[lastFilledIndex].focus();
+    // Focus next empty input or last input
+    const nextIndex = Math.min(pastedData.length, length - 1);
+    if (inputRef.current[nextIndex]) {
+      inputRef.current[nextIndex].focus();
+      setFocusedIndex(nextIndex);
     }
 
     if (newOTP.every((digit) => digit !== "")) {
@@ -111,16 +117,17 @@ const OTPInput: React.FC<OTPInputProps> = ({
   };
 
   return (
-    <div className="space-y-4">
-      <div className="flex justify-center space-x-3">
+    <div className="space-y-3">
+      {/* Compact sizing - Mobile nhỏ, Desktop cũng compact */}
+      <div className="flex justify-center gap-2 sm:gap-2.5">
         {Array.from({ length }, (_, index) => (
           <motion.div
             key={index}
             initial={{ scale: 0.8, opacity: 0 }}
             animate={{ scale: 1, opacity: 1 }}
-            transition={{ delay: index * 0.1 }}
-            whileHover={{ scale: 1.05 }}
-            whileFocus={{ scale: 1.05 }}
+            transition={{ delay: index * 0.08, type: "spring", stiffness: 300 }}
+            whileHover={{ scale: disabled ? 1 : 1.05 }}
+            whileFocus={{ scale: disabled ? 1 : 1.05 }}
           >
             <Input
               ref={(el) => (inputRef.current[index] = el!)}
@@ -138,25 +145,62 @@ const OTPInput: React.FC<OTPInputProps> = ({
               onFocus={() => handleFocus(index)}
               onBlur={handleBlur}
               disabled={disabled}
+              autoComplete={index === 0 ? "one-time-code" : "off"}
               className={cn(
-                "w-14 h-14 text-center text-xl font-bold transition-all duration-200",
-                "border-2 rounded-xl",
+                // Compact sizes: Mobile 48px, Desktop max 52px
+                "w-12 h-12 sm:w-13 sm:h-13 text-center font-bold transition-all duration-300",
+                // Compact text sizes: mobile 18px, desktop max 20px
+                "text-lg sm:text-lg",
+                "border-2 rounded-xl focus:outline-none focus:ring-0 shadow-sm",
                 // Default state
-                "border-gray-300 dark:border-gray-600",
-                "focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20",
+                !error &&
+                  !success &&
+                  !OTP[index] &&
+                  focusedIndex !== index &&
+                  "border-slate-300 bg-white/80 text-slate-600 hover:border-slate-400 hover:bg-white hover:shadow-md",
+                // Focused state
+                !error &&
+                  !success &&
+                  focusedIndex === index &&
+                  "border-pink-400 bg-white shadow-lg text-slate-800",
+                // Filled state (not focused)
+                !error &&
+                  !success &&
+                  OTP[index] &&
+                  focusedIndex !== index &&
+                  "border-slate-400 bg-white shadow-md text-slate-800",
                 // Error state
                 error &&
-                  "border-red-500 focus:border-red-500 focus:ring-red-500/20 bg-red-50 dark:bg-red-900/10",
+                  "border-red-400 bg-red-50 text-red-700 focus:border-red-500",
                 // Success state
                 success &&
-                  "border-green-500 focus:border-green-500 focus:ring-green-500/20 bg-green-50 dark:bg-green-900/10",
+                  "border-emerald-400 bg-emerald-50 text-emerald-700 focus:border-emerald-500",
                 // Disabled state
-                disabled && "opacity-50 cursor-not-allowed",
-                // Focused state
-                focusedIndex === index && "scale-105 shadow-lg",
-                // Filled state
-                OTP[index] && "bg-blue-50 dark:bg-blue-900/10 border-blue-400",
+                disabled && "opacity-50 cursor-not-allowed bg-slate-100",
               )}
+              style={{
+                // Focus gradient effect
+                background:
+                  focusedIndex === index && !error && !success
+                    ? `linear-gradient(135deg, 
+                      rgba(255,255,255,1) 0%, 
+                      rgba(252, 231, 243, 0.9) 100%)`
+                    : undefined,
+                boxShadow:
+                  focusedIndex === index && !error && !success
+                    ? "0 0 0 3px rgba(244, 114, 182, 0.15), 0 6px 20px rgba(244, 114, 182, 0.25)"
+                    : OTP[index] && !error && !success && focusedIndex !== index
+                      ? "0 3px 10px rgba(0, 0, 0, 0.1)"
+                      : error
+                        ? "0 0 0 3px rgba(248, 113, 113, 0.15)"
+                        : success
+                          ? "0 0 0 3px rgba(52, 211, 153, 0.15)"
+                          : undefined,
+                transform:
+                  focusedIndex === index && !disabled
+                    ? "scale(1.05)"
+                    : "scale(1)",
+              }}
             />
           </motion.div>
         ))}
@@ -169,7 +213,7 @@ const OTPInput: React.FC<OTPInputProps> = ({
             initial={{ opacity: 0, y: 10 }}
             animate={{ opacity: 1, y: 0 }}
             exit={{ opacity: 0, y: -10 }}
-            className="flex items-center justify-center space-x-2 text-green-600"
+            className="flex items-center justify-center space-x-2 text-emerald-600"
           >
             <CheckCircle className="w-4 h-4" />
             <span className="text-sm font-medium">Mã OTP hợp lệ!</span>
@@ -188,13 +232,6 @@ const OTPInput: React.FC<OTPInputProps> = ({
           </motion.div>
         )}
       </AnimatePresence>
-
-      {/* Helper text */}
-      <div className="text-center">
-        <p className="text-xs text-gray-500">
-          Nhập {length} chữ số được gửi về email của bạn
-        </p>
-      </div>
     </div>
   );
 };

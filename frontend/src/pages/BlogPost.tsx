@@ -1,15 +1,12 @@
-import React from "react";
+import React, { useState, useEffect, useRef } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import { Helmet } from "react-helmet-async";
 import { getPostBySlug } from "@/lib/blog";
-import { getCommentsByPostId, addComment } from "@/lib/comments";
+import { getCommentsByPostId } from "@/lib/comments";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Card, CardContent } from "@/components/ui/card";
 import { Separator } from "@/components/ui/separator";
-import { Input } from "@/components/ui/input";
-import { Textarea } from "@/components/ui/textarea";
-import { Progress } from "@/components/ui/progress";
 import { supabase } from "@/lib/supabase";
 import { motion, AnimatePresence } from "framer-motion";
 import {
@@ -26,37 +23,28 @@ import {
   MessageSquare,
   Copy,
   BookOpen,
-  Send,
   ThumbsUp,
-  Reply,
   MoreHorizontal,
-  Quote,
-  Sparkles,
-  Award,
-  Coffee,
-  Code,
-  Palette,
   ChevronUp,
   Bookmark,
-  Download,
   Printer,
   Search,
-  Filter,
   TrendingUp,
   Star,
   Zap,
   Target,
   Globe,
-  Shield,
-  Layers,
+  Award,
   Hash,
   ExternalLink,
   Lightbulb,
-  HeadphonesIcon,
-  PlayCircle,
+  Code,
+  Palette,
+  Coffee,
 } from "lucide-react";
 import { toast } from "@/hooks/use-toast";
 
+// Interfaces
 interface Comment {
   id: string;
   author_name: string;
@@ -73,44 +61,81 @@ interface Heading {
   level: number;
 }
 
-// Enhanced Reading Progress Component
-const ReadingProgress: React.FC = () => {
-  const [progress, setProgress] = React.useState(0);
-  const [isScrollingUp, setIsScrollingUp] = React.useState(false);
-  const [lastScrollY, setLastScrollY] = React.useState(0);
+interface BlogPostData {
+  id: string;
+  title: string;
+  excerpt?: string;
+  content: string;
+  slug: string;
+  featured_image?: string;
+  published_at?: string;
+  created_at: string;
+  updated_at?: string;
+  views?: number;
+  likes?: number;
+  tags?: string[];
+  author_name?: string;
+  author_avatar?: string;
+  meta_description?: string;
+  category_id?: string;
+  blog_categories?: {
+    name: string;
+    color: string;
+  };
+}
 
-  React.useEffect(() => {
+// ✅ Color scheme constants
+const sectionBackgrounds = {
+  hero: "from-white via-pink-25 to-rose-25",
+  stats: "from-pink-25 via-rose-25 to-red-25",
+  categories: "from-rose-25 via-pink-25 to-white",
+  features: "from-red-25 via-rose-25 to-pink-25",
+  process: "from-pink-50 via-rose-50 to-red-50",
+  products: "from-rose-50 via-pink-50 to-white",
+  testimonials: "from-red-50 via-rose-50 to-pink-50",
+  newsletter: "from-pink-75 via-rose-75 to-red-75",
+};
+
+const unifiedColorScheme = {
+  button: "from-pink-300 via-rose-300 to-red-300",
+  buttonHover: "from-pink-400 via-rose-400 to-red-400",
+  textMain: "from-pink-400 via-rose-400 to-red-400",
+  textSecondary: "from-pink-500 via-rose-500 to-red-500",
+  iconBg: "from-pink-25 to-rose-50",
+  iconText: "text-pink-400",
+  cardBg: "from-white/95 via-pink-50/80 to-rose-50/85",
+};
+
+// Reading Progress Component
+const ReadingProgress: React.FC = () => {
+  const [progress, setProgress] = useState(0);
+
+  useEffect(() => {
     const updateProgress = () => {
-      const currentScrollY = window.scrollY;
-      const scrollTop = currentScrollY;
+      const scrollTop = window.scrollY;
       const docHeight =
         document.documentElement.scrollHeight - window.innerHeight;
       const progressValue = Math.min((scrollTop / docHeight) * 100, 100);
-
       setProgress(progressValue);
-      setIsScrollingUp(currentScrollY < lastScrollY);
-      setLastScrollY(currentScrollY);
     };
 
     window.addEventListener("scroll", updateProgress);
     updateProgress();
     return () => window.removeEventListener("scroll", updateProgress);
-  }, [lastScrollY]);
+  }, []);
 
   return (
     <>
-      {/* Main progress bar */}
       <motion.div
-        className="fixed top-0 left-0 z-50 h-1 shadow-2xl bg-gradient-to-r from-blue-500 via-purple-500 to-pink-500"
+        className={`fixed top-0 left-0 z-50 h-1 shadow-2xl bg-gradient-to-r ${unifiedColorScheme.button}`}
         style={{ width: `${progress}%` }}
         initial={{ width: 0 }}
         animate={{ width: `${progress}%` }}
         transition={{ duration: 0.1 }}
       />
 
-      {/* Floating progress indicator */}
       <motion.div
-        className="fixed top-6 right-6 z-50 flex items-center gap-2 px-4 py-2 bg-white/90 dark:bg-slate-900/90 backdrop-blur-lg rounded-full shadow-xl border border-white/20"
+        className="fixed top-6 right-6 z-50 flex items-center gap-2 px-4 py-2 bg-white/90 backdrop-blur-lg rounded-full shadow-xl border border-white/20"
         initial={{ opacity: 0, scale: 0.8 }}
         animate={{
           opacity: progress > 5 ? 1 : 0,
@@ -126,7 +151,7 @@ const ReadingProgress: React.FC = () => {
               fill="none"
               stroke="currentColor"
               strokeWidth="2"
-              className="text-gray-200 dark:text-gray-700"
+              className="text-gray-200"
             />
             <circle
               cx="16"
@@ -137,35 +162,33 @@ const ReadingProgress: React.FC = () => {
               strokeWidth="2"
               strokeDasharray={`${2 * Math.PI * 14}`}
               strokeDashoffset={`${2 * Math.PI * 14 * (1 - progress / 100)}`}
-              className="text-blue-500 transition-all duration-300"
+              className="text-pink-500 transition-all duration-300"
               strokeLinecap="round"
             />
           </svg>
           <div className="absolute inset-0 flex items-center justify-center">
-            <span className="text-xs font-semibold text-blue-600">
+            <span className="text-xs font-semibold text-pink-600">
               {Math.round(progress)}%
             </span>
           </div>
         </div>
-        <span className="text-sm font-medium text-gray-700 dark:text-gray-300">
-          Đã đọc
-        </span>
+        <span className="text-sm font-medium text-gray-700">Đã đọc</span>
       </motion.div>
     </>
   );
 };
 
-// Enhanced Table of Contents Component
+// Table of Contents Component
 const TableOfContents: React.FC<{ content: string }> = ({ content }) => {
-  const [headings, setHeadings] = React.useState<Heading[]>([]);
-  const [activeId, setActiveId] = React.useState<string>("");
-  const [isExpanded, setIsExpanded] = React.useState(true);
+  const [headings, setHeadings] = useState<Heading[]>([]);
+  const [activeId, setActiveId] = useState<string>("");
+  const [isExpanded, setIsExpanded] = useState(true);
 
-  React.useEffect(() => {
+  useEffect(() => {
     const extractedHeadings: Heading[] = [];
     const lines = content.split("\n");
 
-    lines.forEach((line, index) => {
+    lines.forEach((line) => {
       const h1Match = line.match(/^#{1}\s(.+)/);
       const h2Match = line.match(/^#{2}\s(.+)/);
       const h3Match = line.match(/^#{3}\s(.+)/);
@@ -184,7 +207,7 @@ const TableOfContents: React.FC<{ content: string }> = ({ content }) => {
     setHeadings(extractedHeadings);
   }, [content]);
 
-  React.useEffect(() => {
+  useEffect(() => {
     const observer = new IntersectionObserver(
       (entries) => {
         entries.forEach((entry) => {
@@ -212,15 +235,21 @@ const TableOfContents: React.FC<{ content: string }> = ({ content }) => {
       animate={{ opacity: 1, x: 0 }}
       className="sticky top-24 max-h-96 overflow-y-auto"
     >
-      <Card className="border-0 shadow-2xl bg-gradient-to-br from-white/95 via-blue-50/90 to-purple-50/85 dark:from-slate-800/95 dark:via-blue-900/90 dark:to-purple-900/85 backdrop-blur-xl">
+      <Card
+        className={`border-0 shadow-2xl bg-gradient-to-br ${unifiedColorScheme.cardBg} backdrop-blur-xl`}
+      >
         <div className="p-6">
           <div className="flex items-center justify-between mb-6">
             <div className="flex items-center space-x-3">
-              <div className="flex items-center justify-center w-10 h-10 rounded-xl bg-gradient-to-r from-blue-500 to-purple-600 shadow-lg">
+              <div
+                className={`flex items-center justify-center w-10 h-10 rounded-xl bg-gradient-to-r ${unifiedColorScheme.button} shadow-lg`}
+              >
                 <BookOpen className="w-5 h-5 text-white" />
               </div>
               <div>
-                <h3 className="font-bold text-lg text-transparent bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text">
+                <h3
+                  className={`font-bold text-lg text-transparent bg-gradient-to-r ${unifiedColorScheme.textMain} bg-clip-text`}
+                >
                   Mục lục
                 </h3>
                 <p className="text-xs text-muted-foreground">
@@ -268,15 +297,15 @@ const TableOfContents: React.FC<{ content: string }> = ({ content }) => {
                           : "ml-8 font-medium"
                     } ${
                       activeId === heading.id
-                        ? "text-blue-600 dark:text-blue-400"
-                        : "text-gray-600 dark:text-gray-400 hover:text-blue-600 dark:hover:text-blue-400"
+                        ? "text-pink-600"
+                        : "text-gray-600 hover:text-pink-600"
                     }`}
                   >
                     <div
                       className={`absolute left-0 w-1 rounded-full transition-all duration-300 ${
                         activeId === heading.id
-                          ? "h-full bg-gradient-to-b from-blue-500 to-purple-600"
-                          : "h-0 bg-gray-300 group-hover:h-full group-hover:bg-blue-400"
+                          ? `h-full bg-gradient-to-b ${unifiedColorScheme.button}`
+                          : "h-0 bg-gray-300 group-hover:h-full group-hover:bg-pink-400"
                       }`}
                     />
                     <span
@@ -295,18 +324,18 @@ const TableOfContents: React.FC<{ content: string }> = ({ content }) => {
   );
 };
 
-// Enhanced Lazy Image Component
+// Lazy Image Component
 const LazyImage: React.FC<{
   src: string;
   alt: string;
   className?: string;
 }> = ({ src, alt, className }) => {
-  const [isLoaded, setIsLoaded] = React.useState(false);
-  const [isInView, setIsInView] = React.useState(false);
-  const [hasError, setHasError] = React.useState(false);
-  const imgRef = React.useRef<HTMLDivElement>(null);
+  const [isLoaded, setIsLoaded] = useState(false);
+  const [isInView, setIsInView] = useState(false);
+  const [hasError, setHasError] = useState(false);
+  const imgRef = useRef<HTMLDivElement>(null);
 
-  React.useEffect(() => {
+  useEffect(() => {
     const observer = new IntersectionObserver(
       ([entry]) => {
         if (entry.isIntersecting) {
@@ -329,12 +358,14 @@ const LazyImage: React.FC<{
       {isInView && (
         <>
           {!isLoaded && !hasError && (
-            <div className="absolute inset-0 bg-gradient-to-r from-gray-200 via-gray-300 to-gray-200 animate-pulse rounded-lg" />
+            <div
+              className={`absolute inset-0 bg-gradient-to-r ${unifiedColorScheme.iconBg} animate-pulse rounded-lg`}
+            />
           )}
           {hasError ? (
-            <div className="absolute inset-0 flex items-center justify-center bg-gray-100 dark:bg-gray-800 rounded-lg">
+            <div className="absolute inset-0 flex items-center justify-center bg-gray-100 rounded-lg">
               <div className="text-center">
-                <div className="w-16 h-16 mx-auto mb-4 bg-gray-300 dark:bg-gray-600 rounded-full flex items-center justify-center">
+                <div className="w-16 h-16 mx-auto mb-4 bg-gray-300 rounded-full flex items-center justify-center">
                   <ExternalLink className="w-8 h-8 text-gray-500" />
                 </div>
                 <p className="text-sm text-gray-500">Không thể tải ảnh</p>
@@ -348,7 +379,7 @@ const LazyImage: React.FC<{
               onError={() => setHasError(true)}
               className={`transition-all duration-700 ${
                 isLoaded ? "opacity-100 scale-100" : "opacity-0 scale-105"
-              } ${className}`}
+              } ${className || ""}`}
               initial={{ scale: 1.1, opacity: 0 }}
               animate={{ scale: 1, opacity: isLoaded ? 1 : 0 }}
               transition={{ duration: 0.6 }}
@@ -360,20 +391,13 @@ const LazyImage: React.FC<{
   );
 };
 
-// Enhanced Scroll to Top Button
+// ✅ MOBILE-OPTIMIZED Scroll to Top Component - CHATBOT AWARE
 const ScrollToTop: React.FC = () => {
-  const [isVisible, setIsVisible] = React.useState(false);
-  const [scrollPercentage, setScrollPercentage] = React.useState(0);
+  const [isVisible, setIsVisible] = useState(false);
 
-  React.useEffect(() => {
+  useEffect(() => {
     const toggleVisibility = () => {
-      const scrollTop = window.scrollY;
-      const docHeight =
-        document.documentElement.scrollHeight - window.innerHeight;
-      const percentage = (scrollTop / docHeight) * 100;
-
-      setIsVisible(scrollTop > 300);
-      setScrollPercentage(percentage);
+      setIsVisible(window.scrollY > 300);
     };
 
     window.addEventListener("scroll", toggleVisibility);
@@ -392,60 +416,58 @@ const ScrollToTop: React.FC = () => {
           animate={{ opacity: 1, scale: 1, y: 0 }}
           exit={{ opacity: 0, scale: 0.8, y: 20 }}
           onClick={scrollToTop}
-          className="fixed z-50 bottom-8 left-8 p-4 text-white transition-all duration-300 rounded-full shadow-2xl bg-gradient-to-r from-blue-500 to-purple-600 hover:from-blue-600 hover:to-purple-700 hover:shadow-3xl group"
+          className={`
+            fixed z-40 transition-all duration-300 rounded-full shadow-2xl
+            bg-gradient-to-r ${unifiedColorScheme.button} hover:${unifiedColorScheme.buttonHover}
+            text-white hover:shadow-3xl group
+            
+            /* 🎯 CHATBOT-AWARE POSITIONING */
+            /* Mobile: Higher up để tránh chatbot */
+            bottom-20 right-4 p-3
+            
+            /* Tablet: Cao hơn nữa */  
+            sm:bottom-24 sm:right-6 sm:p-3.5
+            
+            /* Desktop: Rất cao để tránh chatbot */
+            md:bottom-32 md:right-8 md:p-4
+          `}
           whileHover={{ scale: 1.1 }}
           whileTap={{ scale: 0.9 }}
         >
-          <div className="relative">
-            <ChevronUp className="w-6 h-6 group-hover:animate-bounce" />
-            <div
-              className="absolute inset-0 rounded-full bg-white/20 animate-ping"
-              style={{ animationDelay: "1s" }}
-            />
-          </div>
+          <ChevronUp className="w-5 h-5 md:w-6 md:h-6 group-hover:animate-bounce" />
         </motion.button>
       )}
     </AnimatePresence>
   );
 };
 
-// Main BlogPost Component với enhanced design
+// Main BlogPost Component
 const BlogPost: React.FC = () => {
   const { slug } = useParams<{ slug: string }>();
   const navigate = useNavigate();
-  const [post, setPost] = React.useState<any | null>(null);
-  const [loading, setLoading] = React.useState(true);
-  const [comments, setComments] = React.useState<Comment[]>([]);
-  const [relatedPosts, setRelatedPosts] = React.useState<any[]>([]);
-  const [loadingRelated, setLoadingRelated] = React.useState(false);
-
-  // Comment form states
-  const [commentName, setCommentName] = React.useState("");
-  const [commentAvatar, setCommentAvatar] = React.useState("");
-  const [commentContent, setCommentContent] = React.useState("");
-  const [commentLoading, setCommentLoading] = React.useState(false);
-  const [showCommentForm, setShowCommentForm] = React.useState(false);
-  const [likedComments, setLikedComments] = React.useState<Set<string>>(
-    new Set(),
-  );
+  const [post, setPost] = useState<BlogPostData | null>(null);
+  const [loading, setLoading] = useState(true);
+  const [comments, setComments] = useState<Comment[]>([]);
+  const [relatedPosts, setRelatedPosts] = useState<BlogPostData[]>([]);
 
   // Additional states
-  const [isBookmarked, setIsBookmarked] = React.useState(false);
-  const [isLiked, setIsLiked] = React.useState(false);
-  const [readingTime, setReadingTime] = React.useState(0);
-  const [estimatedWordsRead, setEstimatedWordsRead] = React.useState(0);
+  const [isBookmarked, setIsBookmarked] = useState(false);
+  const [isLiked, setIsLiked] = useState(false);
+  const [readingTime, setReadingTime] = useState(0);
+  const [estimatedWordsRead, setEstimatedWordsRead] = useState(0);
+  const [likedComments, setLikedComments] = useState<Set<string>>(new Set());
 
   // Calculate reading time and progress
-  React.useEffect(() => {
+  useEffect(() => {
     if (post?.content) {
       const words = post.content.split(/\s+/).length;
-      const time = Math.ceil(words / 200); // Average reading speed
+      const time = Math.ceil(words / 200);
       setReadingTime(time);
     }
   }, [post]);
 
   // Enhanced scroll tracking for reading progress
-  React.useEffect(() => {
+  useEffect(() => {
     const updateReadingProgress = () => {
       const scrollTop = window.scrollY;
       const docHeight =
@@ -463,22 +485,21 @@ const BlogPost: React.FC = () => {
     return () => window.removeEventListener("scroll", updateReadingProgress);
   }, [post]);
 
-  // Fetch comments
-  React.useEffect(() => {
+  // Fetch comments (READ ONLY - no form)
+  useEffect(() => {
     if (!post?.id) return;
     getCommentsByPostId(post.id).then(setComments);
   }, [post]);
 
   // Fetch related posts
-  React.useEffect(() => {
+  useEffect(() => {
     const fetchRelatedPosts = async () => {
       if (!post?.category_id) return;
 
-      setLoadingRelated(true);
       try {
         const { data, error } = await supabase
           .from("blog_posts")
-          .select(`*, blog_categories(name, color)`)
+          .select("*, blog_categories(name, color)")
           .eq("category_id", post.category_id)
           .eq("is_published", true)
           .neq("id", post.id)
@@ -488,29 +509,43 @@ const BlogPost: React.FC = () => {
         setRelatedPosts(data || []);
       } catch (error) {
         console.error("Error fetching related posts:", error);
-      } finally {
-        setLoadingRelated(false);
       }
     };
 
     fetchRelatedPosts();
   }, [post]);
 
-  // Load main post
-  React.useEffect(() => {
+  // ✅ FIXED Load main post - Handle missing created_at
+  useEffect(() => {
     const loadPost = async () => {
       if (!slug) return;
       setLoading(true);
       try {
         const result = await getPostBySlug(slug);
-        setPost(result);
 
-        // Update view count
-        if (result?.id) {
-          await supabase
-            .from("blog_posts")
-            .update({ views: (result.views || 0) + 1 })
-            .eq("id", result.id);
+        if (result) {
+          // ✅ Transform to ensure created_at exists - FIX TypeScript issues
+          const transformedPost: BlogPostData = {
+            ...result,
+            created_at:
+              (result as any).created_at ||
+              (result as any).published_at ||
+              new Date().toISOString(),
+            id: result.id || Math.random().toString(),
+            title: result.title || "Untitled",
+            content: result.content || "",
+            slug: result.slug || slug,
+          };
+
+          setPost(transformedPost);
+
+          // Update view count
+          if (transformedPost.id) {
+            await supabase
+              .from("blog_posts")
+              .update({ views: (transformedPost.views || 0) + 1 })
+              .eq("id", transformedPost.id);
+          }
         }
       } catch (error) {
         console.error("Error loading post:", error);
@@ -522,49 +557,7 @@ const BlogPost: React.FC = () => {
     loadPost();
   }, [slug]);
 
-  // Handle comment submission
-  const handleCommentSubmit = async () => {
-    if (!commentName || !commentContent) {
-      toast({
-        title: "⚠️ Thiếu thông tin",
-        description: "Hãy nhập tên và nội dung bình luận.",
-        variant: "destructive",
-      });
-      return;
-    }
-
-    setCommentLoading(true);
-    try {
-      await addComment({
-        postId: post.id,
-        author_name: commentName,
-        author_avatar:
-          commentAvatar || `https://i.pravatar.cc/100?u=${commentName}`,
-        content: commentContent,
-      });
-
-      toast({
-        title: "🎉 Bình luận đã gửi!",
-        description: "Cảm ơn bạn đã chia sẻ ý kiến!",
-      });
-
-      setCommentName("");
-      setCommentAvatar("");
-      setCommentContent("");
-      setShowCommentForm(false);
-      getCommentsByPostId(post.id).then(setComments);
-    } catch (err) {
-      toast({
-        title: "❌ Lỗi",
-        description: "Không gửi được bình luận. Vui lòng thử lại.",
-        variant: "destructive",
-      });
-    } finally {
-      setCommentLoading(false);
-    }
-  };
-
-  // Handle comment like
+  // Handle comment like (READ ONLY)
   const handleCommentLike = (commentId: string) => {
     setLikedComments((prev) => {
       const newSet = new Set(prev);
@@ -596,25 +589,29 @@ const BlogPost: React.FC = () => {
   // Handle share
   const handleShare = async (platform?: string) => {
     const url = window.location.href;
-    const title = post.title;
+    const title = post?.title || "";
 
     if (platform === "copy") {
-      navigator.clipboard.writeText(url);
-      toast({
-        title: "📋 Đã sao chép",
-        description: "Link bài viết đã được sao chép.",
-      });
+      try {
+        await navigator.clipboard.writeText(url);
+        toast({
+          title: "📋 Đã sao chép",
+          description: "Link bài viết đã được sao chép.",
+        });
+      } catch (error) {
+        console.error("Copy failed:", error);
+      }
       return;
     }
 
-    const shareUrls = {
+    const shareUrls: Record<string, string> = {
       facebook: `https://www.facebook.com/sharer/sharer.php?u=${encodeURIComponent(url)}`,
       twitter: `https://twitter.com/intent/tweet?url=${encodeURIComponent(url)}&text=${encodeURIComponent(title)}`,
       linkedin: `https://www.linkedin.com/sharing/share-offsite/?url=${encodeURIComponent(url)}`,
     };
 
-    if (platform && shareUrls[platform as keyof typeof shareUrls]) {
-      window.open(shareUrls[platform as keyof typeof shareUrls], "_blank");
+    if (platform && shareUrls[platform]) {
+      window.open(shareUrls[platform], "_blank");
     }
   };
 
@@ -639,63 +636,73 @@ const BlogPost: React.FC = () => {
           .toLowerCase()
           .replace(/[^a-z0-9]+/g, "-")
           .replace(/^-|-$/g, "");
-        return `<h3 id="${id}" class="scroll-mt-24 text-2xl font-bold mb-6 mt-12 text-gray-900 dark:text-gray-100 border-l-4 border-blue-500 pl-4 bg-gradient-to-r from-blue-50 to-transparent dark:from-blue-900/20 py-3 rounded-r-lg">${title}</h3>`;
+        return `<h3 id="${id}" class="scroll-mt-24 text-2xl font-bold mb-6 mt-12 text-gray-900 border-l-4 border-pink-500 pl-4 bg-gradient-to-r from-pink-50 to-transparent py-3 rounded-r-lg">${title}</h3>`;
       })
       .replace(/#{2}\s(.+)/g, (match, title) => {
         const id = title
           .toLowerCase()
           .replace(/[^a-z0-9]+/g, "-")
           .replace(/^-|-$/g, "");
-        return `<h2 id="${id}" class="scroll-mt-24 text-3xl font-bold mb-8 mt-16 text-gray-900 dark:text-gray-100 border-l-4 border-purple-500 pl-4 bg-gradient-to-r from-purple-50 to-transparent dark:from-purple-900/20 py-4 rounded-r-lg">${title}</h2>`;
+        return `<h2 id="${id}" class="scroll-mt-24 text-3xl font-bold mb-8 mt-16 text-gray-900 border-l-4 border-rose-500 pl-4 bg-gradient-to-r from-rose-50 to-transparent py-4 rounded-r-lg">${title}</h2>`;
       })
       .replace(/#{1}\s(.+)/g, (match, title) => {
         const id = title
           .toLowerCase()
           .replace(/[^a-z0-9]+/g, "-")
           .replace(/^-|-$/g, "");
-        return `<h1 id="${id}" class="scroll-mt-24 text-4xl font-bold mb-10 mt-20 text-gray-900 dark:text-gray-100 border-l-4 border-pink-500 pl-4 bg-gradient-to-r from-pink-50 to-transparent dark:from-pink-900/20 py-5 rounded-r-lg">${title}</h1>`;
+        return `<h1 id="${id}" class="scroll-mt-24 text-4xl font-bold mb-10 mt-20 text-gray-900 border-l-4 border-red-500 pl-4 bg-gradient-to-r from-red-50 to-transparent py-5 rounded-r-lg">${title}</h1>`;
       })
       .replace(
         /``````/g,
-        '<div class="relative my-8 group"><pre class="bg-gradient-to-br from-gray-900 via-gray-800 to-gray-900 text-gray-100 p-6 rounded-xl overflow-x-auto border border-gray-700 shadow-2xl"><code class="language-$1 text-sm leading-relaxed">$2</code></pre><div class="absolute top-4 right-4 opacity-0 group-hover:opacity-100 transition-opacity"><button class="px-3 py-1 bg-gray-700 hover:bg-gray-600 text-gray-300 text-xs rounded-md transition-colors">Copy</button></div></div>',
+        '<div class="relative my-8 group"><pre class="bg-gradient-to-br from-gray-900 via-gray-800 to-gray-900 text-gray-100 p-6 rounded-xl overflow-x-auto border border-gray-700 shadow-2xl"><code class="language-$1 text-sm leading-relaxed">$2</code></pre></div>',
       )
       .replace(
         /`([^`]+)`/g,
-        '<code class="bg-gradient-to-r from-gray-100 to-gray-200 dark:from-gray-800 dark:to-gray-700 px-3 py-1 rounded-lg text-sm font-mono text-pink-600 dark:text-pink-400 border border-gray-200 dark:border-gray-600">$1</code>',
+        '<code class="bg-gradient-to-r from-pink-100 to-rose-200 px-3 py-1 rounded-lg text-sm font-mono text-pink-600 border border-pink-200">$1</code>',
       )
       .replace(
         /\*\*(.+?)\*\*/g,
-        '<strong class="font-bold text-gray-900 dark:text-gray-100 bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent">$1</strong>',
+        '<strong class="font-bold text-gray-900 bg-gradient-to-r from-pink-600 to-rose-600 bg-clip-text text-transparent">$1</strong>',
       )
       .replace(
         /\*(.+?)\*/g,
-        '<em class="italic text-gray-700 dark:text-gray-300 font-medium">$1</em>',
+        '<em class="italic text-gray-700 font-medium">$1</em>',
       )
       .replace(
         /\[([^\]]+)\]\(([^)]+)\)/g,
-        '<a href="$2" target="_blank" rel="noopener noreferrer" class="text-blue-600 hover:text-blue-800 dark:text-blue-400 dark:hover:text-blue-300 underline decoration-2 underline-offset-4 transition-all duration-300 font-medium hover:decoration-4 hover:decoration-blue-400">$1 <span class="inline-block ml-1 text-xs">↗</span></a>',
+        '<a href="$2" target="_blank" rel="noopener noreferrer" class="text-pink-600 hover:text-pink-800 underline decoration-2 underline-offset-4 transition-all duration-300 font-medium hover:decoration-4 hover:decoration-pink-400">$1 <span class="inline-block ml-1 text-xs">↗</span></a>',
       )
       .replace(
         /^\* (.+)$/gm,
-        "<li class=\"mb-3 text-gray-700 dark:text-gray-300 pl-2 relative before:content-['▸'] before:absolute before:left-0 before:text-blue-500 before:font-bold\">$1</li>",
-      )
-      .replace(
-        /(\<li.*\<\/li\>)/s,
-        '<ul class="space-y-2 my-6 pl-6 bg-gradient-to-r from-blue-50/50 to-transparent dark:from-blue-900/20 py-4 rounded-lg border-l-2 border-blue-200 dark:border-blue-700">$1</ul>',
+        "<li class=\"mb-3 text-gray-700 pl-2 relative before:content-['▸'] before:absolute before:left-0 before:text-pink-500 before:font-bold\">$1</li>",
       )
       .replace(
         /^> (.+)$/gm,
-        '<blockquote class="border-l-4 border-gradient-to-b  pl-6 italic text-gray-600 dark:text-gray-400 my-8 bg-gradient-to-r from-blue-50 via-purple-50 to-pink-50 dark:from-blue-900/20 dark:via-purple-900/20 dark:to-pink-900/20 p-6 rounded-r-xl shadow-lg">$1</blockquote>',
+        '<blockquote class="border-l-4 border-gradient-to-b pl-6 italic text-gray-600 my-8 bg-gradient-to-r from-pink-50 via-rose-50 to-red-50 p-6 rounded-r-xl shadow-lg">$1</blockquote>',
       )
       .replace(
         /\n\n/g,
-        '</p><p class="mb-6 leading-relaxed text-gray-700 dark:text-gray-300 text-lg">',
+        '</p><p class="mb-6 leading-relaxed text-gray-700 text-lg">',
       )
-      .replace(
-        /^/,
-        '<p class="mb-6 leading-relaxed text-gray-700 dark:text-gray-300 text-lg">',
-      )
+      .replace(/^/, '<p class="mb-6 leading-relaxed text-gray-700 text-lg">')
       .replace(/$/, "</p>");
+  };
+
+  // Helper function
+  const getCategoryColor = (color: string) => {
+    const colors: Record<string, string> = {
+      blue: "#3b82f6",
+      purple: "#8b5cf6",
+      green: "#10b981",
+      orange: "#f59e0b",
+      red: "#ef4444",
+      pink: "#ec4899",
+      teal: "#14b8a6",
+      indigo: "#6366f1",
+      cyan: "#06b6d4",
+      yellow: "#eab308",
+    };
+    return colors[color] || colors.pink;
   };
 
   // Structured data for SEO
@@ -712,7 +719,7 @@ const BlogPost: React.FC = () => {
         },
         publisher: {
           "@type": "Organization",
-          name: "Your Blog Name",
+          name: "Template Market Blog",
           logo: {
             "@type": "ImageObject",
             url: "/logo.png",
@@ -727,24 +734,28 @@ const BlogPost: React.FC = () => {
       }
     : null;
 
-  // Loading state với enhanced design
+  // Loading state
   if (loading) {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-slate-50 via-blue-50 to-indigo-50 dark:from-slate-900 dark:via-purple-900 dark:to-slate-900">
+      <div
+        className={`min-h-screen bg-gradient-to-br ${sectionBackgrounds.hero}`}
+      >
         <div className="container px-4 py-8 mx-auto">
           <div className="flex items-center justify-center py-20">
             <motion.div className="text-center space-y-6">
               <motion.div
                 animate={{ rotate: 360 }}
                 transition={{ duration: 2, repeat: Infinity, ease: "linear" }}
-                className="w-16 h-16 mx-auto border-4 rounded-full border-gradient-to-r from-blue-500 to-purple-600 border-t-transparent"
+                className="w-16 h-16 mx-auto border-4 rounded-full border-pink-400 border-t-transparent"
               />
               <motion.div
                 initial={{ opacity: 0, y: 20 }}
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ delay: 0.3 }}
               >
-                <h2 className="text-2xl font-bold text-transparent bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text">
+                <h2
+                  className={`text-2xl font-bold text-transparent bg-gradient-to-r ${unifiedColorScheme.textMain} bg-clip-text`}
+                >
                   Đang tải bài viết...
                 </h2>
                 <p className="text-muted-foreground mt-2">
@@ -758,17 +769,21 @@ const BlogPost: React.FC = () => {
     );
   }
 
-  // Post not found với enhanced design
+  // Post not found
   if (!post) {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-slate-50 via-blue-50 to-indigo-50 dark:from-slate-900 dark:via-purple-900 dark:to-slate-900">
+      <div
+        className={`min-h-screen bg-gradient-to-br ${sectionBackgrounds.hero}`}
+      >
         <div className="container px-4 py-8 mx-auto">
           <motion.div
             initial={{ opacity: 0, scale: 0.8 }}
             animate={{ opacity: 1, scale: 1 }}
             className="max-w-lg mx-auto mt-20"
           >
-            <Card className="py-16 text-center border-0 shadow-2xl bg-gradient-to-br from-white via-gray-50 to-blue-50 dark:from-slate-800 dark:via-slate-900 dark:to-blue-950">
+            <Card
+              className={`py-16 text-center border-0 shadow-2xl bg-gradient-to-br ${unifiedColorScheme.cardBg}`}
+            >
               <CardContent>
                 <motion.div
                   initial={{ scale: 0 }}
@@ -776,7 +791,7 @@ const BlogPost: React.FC = () => {
                   transition={{ delay: 0.2, type: "spring", stiffness: 200 }}
                   className="mb-8"
                 >
-                  <div className="w-24 h-24 mx-auto bg-gradient-to-r from-gray-200 to-gray-300 dark:from-gray-700 dark:to-gray-600 rounded-full flex items-center justify-center">
+                  <div className="w-24 h-24 mx-auto bg-gradient-to-r from-gray-200 to-gray-300 rounded-full flex items-center justify-center">
                     <Search className="w-12 h-12 text-gray-500" />
                   </div>
                 </motion.div>
@@ -788,7 +803,7 @@ const BlogPost: React.FC = () => {
                 </p>
                 <Button
                   onClick={() => navigate("/blog")}
-                  className="group bg-gradient-to-r from-blue-500 to-purple-600 hover:from-blue-600 hover:to-purple-700 shadow-xl hover:shadow-2xl"
+                  className={`group bg-gradient-to-r ${unifiedColorScheme.button} hover:${unifiedColorScheme.buttonHover} shadow-xl hover:shadow-2xl text-white`}
                   size="lg"
                 >
                   <ArrowLeft className="w-5 h-5 mr-3 transition-transform group-hover:-translate-x-1" />
@@ -804,9 +819,8 @@ const BlogPost: React.FC = () => {
 
   return (
     <>
-      {/* SEO Head */}
       <Helmet>
-        <title>{post.title} | Your Blog Name</title>
+        <title>{post.title} | Template Market Blog</title>
         <meta
           name="description"
           content={post.excerpt || post.meta_description}
@@ -828,12 +842,73 @@ const BlogPost: React.FC = () => {
         )}
       </Helmet>
 
-      <div className="min-h-screen bg-gradient-to-br from-slate-50 via-blue-50 to-indigo-50 dark:from-slate-900 dark:via-purple-900 dark:to-slate-900">
+      <div
+        className={`min-h-screen bg-gradient-to-br ${sectionBackgrounds.hero}`}
+      >
         <ReadingProgress />
         <ScrollToTop />
 
-        {/* Enhanced Floating Elements */}
-        <div className="fixed inset-0 overflow-hidden pointer-events-none">
+        {/* Floating Background Elements */}
+        <div className="fixed inset-0 overflow-hidden pointer-events-none z-0">
+          {[
+            {
+              emoji: "📖",
+              color: "from-pink-50 to-rose-100",
+              position: "top-10 right-20",
+            },
+            {
+              emoji: "✍️",
+              color: "from-rose-50 to-red-100",
+              position: "top-32 left-10",
+            },
+            {
+              emoji: "💭",
+              color: "from-red-50 to-pink-100",
+              position: "bottom-20 right-10",
+            },
+            {
+              emoji: "💡",
+              color: "from-pink-100 to-rose-50",
+              position: "bottom-32 left-20",
+            },
+            {
+              emoji: "⭐",
+              color: "from-rose-100 to-pink-50",
+              position: "top-1/2 right-1/4",
+            },
+            {
+              emoji: "🎯",
+              color: "from-red-50 to-rose-100",
+              position: "top-1/3 left-1/3",
+            },
+          ].map((item, i) => (
+            <motion.div
+              key={i}
+              className={`absolute ${item.position} text-4xl opacity-5`}
+              animate={{
+                y: [0, -30, 0],
+                rotate: [0, 15, -15, 0],
+                scale: [1, 1.3, 1],
+              }}
+              transition={{
+                duration: 10 + i * 3,
+                repeat: Infinity,
+                ease: "easeInOut",
+                delay: i * 0.5,
+              }}
+            >
+              <motion.div
+                className={`p-4 rounded-full bg-gradient-to-r ${item.color} backdrop-blur-sm shadow-lg`}
+                whileHover={{ scale: 1.5, rotate: 30 }}
+              >
+                <span>{item.emoji}</span>
+              </motion.div>
+            </motion.div>
+          ))}
+        </div>
+
+        {/* Floating Tech Icons */}
+        <div className="absolute inset-0 overflow-hidden pointer-events-none">
           {[Code, Palette, Coffee, Zap, Target, Lightbulb, Star, Award].map(
             (Icon, i) => (
               <motion.div
@@ -856,14 +931,14 @@ const BlogPost: React.FC = () => {
                   ease: "easeInOut",
                 }}
               >
-                <Icon className="w-6 h-6 text-blue-500/20" />
+                <Icon className="w-6 h-6 text-pink-500/20" />
               </motion.div>
             ),
           )}
         </div>
 
         <div className="container relative z-10 px-4 py-8 mx-auto">
-          {/* Enhanced Back Button */}
+          {/* Back Button */}
           <motion.div
             initial={{ opacity: 0, x: -30 }}
             animate={{ opacity: 1, x: 0 }}
@@ -872,14 +947,11 @@ const BlogPost: React.FC = () => {
             <Button
               variant="ghost"
               onClick={() => navigate("/blog")}
-              className="group hover:bg-white/60 dark:hover:bg-slate-800/60 backdrop-blur-sm shadow-lg border border-white/20"
+              className="group hover:bg-white/60 backdrop-blur-sm shadow-lg border border-white/20"
               size="lg"
             >
               <ArrowLeft className="w-5 h-5 mr-3 transition-transform group-hover:-translate-x-2" />
               Quay lại blog
-              <div className="ml-2 opacity-0 group-hover:opacity-100 transition-opacity">
-                →
-              </div>
             </Button>
           </motion.div>
 
@@ -892,7 +964,7 @@ const BlogPost: React.FC = () => {
                 transition={{ duration: 0.8 }}
                 className="space-y-12"
               >
-                {/* Enhanced Featured Image */}
+                {/* Featured Image */}
                 {post.featured_image && (
                   <motion.div
                     className="relative overflow-hidden shadow-2xl rounded-3xl group"
@@ -906,7 +978,7 @@ const BlogPost: React.FC = () => {
                     />
                     <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-black/20 to-transparent" />
 
-                    {/* Floating Category Badge */}
+                    {/* Category Badge */}
                     <motion.div
                       className="absolute top-6 left-6"
                       initial={{ opacity: 0, y: 20 }}
@@ -917,7 +989,7 @@ const BlogPost: React.FC = () => {
                         className="font-semibold text-white shadow-xl backdrop-blur-sm border border-white/20"
                         style={{
                           backgroundColor: getCategoryColor(
-                            post.blog_categories?.color || "blue",
+                            post.blog_categories?.color || "pink",
                           ),
                         }}
                       >
@@ -926,7 +998,7 @@ const BlogPost: React.FC = () => {
                       </Badge>
                     </motion.div>
 
-                    {/* Reading Stats Overlay */}
+                    {/* Reading Stats */}
                     <motion.div
                       className="absolute bottom-6 right-6 bg-black/50 backdrop-blur-md rounded-2xl p-4 text-white"
                       initial={{ opacity: 0, scale: 0.8 }}
@@ -949,14 +1021,16 @@ const BlogPost: React.FC = () => {
                   </motion.div>
                 )}
 
-                {/* Enhanced Article Header */}
+                {/* Article Header */}
                 <motion.div
                   className="space-y-8"
                   initial={{ opacity: 0, y: 30 }}
                   animate={{ opacity: 1, y: 0 }}
                   transition={{ delay: 0.3, duration: 0.8 }}
                 >
-                  <h1 className="text-4xl font-extrabold leading-tight text-transparent md:text-6xl bg-gradient-to-r from-blue-600 via-purple-600 to-pink-600 bg-clip-text">
+                  <h1
+                    className={`text-4xl font-extrabold leading-tight md:text-6xl text-transparent bg-gradient-to-r ${unifiedColorScheme.textMain} bg-clip-text`}
+                  >
                     {post.title}
                   </h1>
 
@@ -971,15 +1045,17 @@ const BlogPost: React.FC = () => {
                     </motion.p>
                   )}
 
-                  {/* Enhanced Article Meta */}
+                  {/* Article Meta */}
                   <motion.div
-                    className="flex flex-wrap items-center gap-8 p-6 bg-gradient-to-r from-white/80 to-blue-50/80 dark:from-slate-800/80 dark:to-blue-900/80 backdrop-blur-sm rounded-2xl border border-white/20 shadow-xl"
+                    className={`flex flex-wrap items-center gap-8 p-6 bg-gradient-to-r ${unifiedColorScheme.cardBg} backdrop-blur-sm rounded-2xl border border-white/20 shadow-xl`}
                     initial={{ opacity: 0, y: 20 }}
                     animate={{ opacity: 1, y: 0 }}
                     transition={{ delay: 0.6 }}
                   >
                     <div className="flex items-center space-x-4">
-                      <div className="flex items-center justify-center w-12 h-12 rounded-full bg-gradient-to-r from-blue-500 to-purple-600 shadow-lg">
+                      <div
+                        className={`flex items-center justify-center w-12 h-12 rounded-full bg-gradient-to-r ${unifiedColorScheme.button} shadow-lg`}
+                      >
                         <User className="w-6 h-6 text-white" />
                       </div>
                       <div>
@@ -1023,7 +1099,7 @@ const BlogPost: React.FC = () => {
                     </div>
                   </motion.div>
 
-                  {/* Enhanced Tags */}
+                  {/* Tags */}
                   {post.tags && post.tags.length > 0 && (
                     <motion.div
                       className="flex flex-wrap gap-3"
@@ -1041,7 +1117,7 @@ const BlogPost: React.FC = () => {
                         >
                           <Badge
                             variant="outline"
-                            className="px-4 py-2 text-sm font-medium transition-all duration-300 hover:bg-gradient-to-r hover:from-blue-500 hover:to-purple-600 hover:text-white hover:shadow-lg hover:border-transparent"
+                            className={`px-4 py-2 text-sm font-medium transition-all duration-300 hover:bg-gradient-to-r hover:${unifiedColorScheme.button} hover:text-white hover:shadow-lg hover:border-transparent`}
                           >
                             <Hash className="w-3 h-3 mr-1" />
                             {tag}
@@ -1051,9 +1127,9 @@ const BlogPost: React.FC = () => {
                     </motion.div>
                   )}
 
-                  {/* Enhanced Action Buttons */}
+                  {/* Action Buttons */}
                   <motion.div
-                    className="flex flex-wrap items-center gap-6 p-6 bg-gradient-to-r from-gray-50 to-blue-50 dark:from-slate-800 dark:to-blue-900 rounded-2xl border border-gray-200 dark:border-gray-700"
+                    className={`flex flex-wrap items-center gap-6 p-6 bg-gradient-to-r ${sectionBackgrounds.stats} rounded-2xl border border-pink-200`}
                     initial={{ opacity: 0, y: 20 }}
                     animate={{ opacity: 1, y: 0 }}
                     transition={{ delay: 1 }}
@@ -1158,9 +1234,9 @@ const BlogPost: React.FC = () => {
 
                 <Separator className="my-12" />
 
-                {/* Enhanced Article Content */}
+                {/* Article Content */}
                 <motion.div
-                  className="prose prose-xl dark:prose-invert max-w-none"
+                  className="prose prose-xl max-w-none"
                   initial={{ opacity: 0, y: 40 }}
                   animate={{ opacity: 1, y: 0 }}
                   transition={{ delay: 0.4, duration: 0.8 }}
@@ -1175,7 +1251,7 @@ const BlogPost: React.FC = () => {
 
                 <Separator className="my-16" />
 
-                {/* Enhanced Comments Section */}
+                {/* Comments Section - READ ONLY */}
                 <motion.section
                   initial={{ opacity: 0, y: 40 }}
                   animate={{ opacity: 1, y: 0 }}
@@ -1184,147 +1260,25 @@ const BlogPost: React.FC = () => {
                 >
                   <div className="flex items-center justify-between mb-12">
                     <div className="flex items-center space-x-4">
-                      <div className="flex items-center justify-center w-12 h-12 rounded-xl bg-gradient-to-r from-green-500 to-blue-500 shadow-lg">
+                      <div
+                        className={`flex items-center justify-center w-12 h-12 rounded-xl bg-gradient-to-r ${unifiedColorScheme.button} shadow-lg`}
+                      >
                         <MessageSquare className="w-6 h-6 text-white" />
                       </div>
                       <div>
-                        <h2 className="text-3xl font-bold text-transparent bg-gradient-to-r from-green-600 to-blue-600 bg-clip-text">
+                        <h2
+                          className={`text-3xl font-bold text-transparent bg-gradient-to-r ${unifiedColorScheme.textMain} bg-clip-text`}
+                        >
                           Bình luận
                         </h2>
                         <p className="text-muted-foreground mt-1">
-                          {comments.length} bình luận • Tham gia thảo luận
+                          {comments.length} bình luận từ độc giả
                         </p>
                       </div>
                     </div>
-
-                    <Button
-                      onClick={() => setShowCommentForm(!showCommentForm)}
-                      className="shadow-xl group bg-gradient-to-r from-blue-500 to-purple-600 hover:from-blue-600 hover:to-purple-700"
-                      size="lg"
-                    >
-                      <MessageSquare className="w-5 h-5 mr-3 group-hover:animate-bounce" />
-                      {showCommentForm ? "Ẩn form bình luận" : "Viết bình luận"}
-                    </Button>
                   </div>
 
-                  {/* Enhanced Comment Form */}
-                  <AnimatePresence>
-                    {showCommentForm && (
-                      <motion.div
-                        initial={{ opacity: 0, height: 0 }}
-                        animate={{ opacity: 1, height: "auto" }}
-                        exit={{ opacity: 0, height: 0 }}
-                        transition={{ duration: 0.5 }}
-                        className="mb-12"
-                      >
-                        <Card className="border-0 shadow-2xl bg-gradient-to-br from-white via-blue-50 to-purple-50 dark:from-slate-800 dark:via-blue-900 dark:to-purple-900">
-                          <div className="p-8">
-                            <div className="flex items-center mb-8 space-x-4">
-                              <div className="flex items-center justify-center w-10 h-10 rounded-xl bg-gradient-to-r from-purple-500 to-pink-500 shadow-lg">
-                                <Quote className="w-5 h-5 text-white" />
-                              </div>
-                              <div>
-                                <h3 className="text-2xl font-bold">
-                                  Để lại bình luận của bạn
-                                </h3>
-                                <p className="text-muted-foreground">
-                                  Chia sẻ suy nghĩ và góp ý của bạn về bài viết
-                                </p>
-                              </div>
-                            </div>
-
-                            <div className="space-y-6">
-                              <div className="grid grid-cols-1 gap-6 md:grid-cols-2">
-                                <motion.div whileFocus={{ scale: 1.02 }}>
-                                  <label className="block text-sm font-medium mb-2">
-                                    Tên của bạn *
-                                  </label>
-                                  <Input
-                                    placeholder="Nhập tên của bạn"
-                                    value={commentName}
-                                    onChange={(e) =>
-                                      setCommentName(e.target.value)
-                                    }
-                                    className="h-12 transition-all duration-300 focus:ring-2 focus:ring-primary/20 border-2"
-                                  />
-                                </motion.div>
-                                <motion.div whileFocus={{ scale: 1.02 }}>
-                                  <label className="block text-sm font-medium mb-2">
-                                    URL ảnh đại diện
-                                  </label>
-                                  <Input
-                                    placeholder="https://... (tùy chọn)"
-                                    value={commentAvatar}
-                                    onChange={(e) =>
-                                      setCommentAvatar(e.target.value)
-                                    }
-                                    className="h-12 transition-all duration-300 focus:ring-2 focus:ring-primary/20 border-2"
-                                  />
-                                </motion.div>
-                              </div>
-
-                              <motion.div whileFocus={{ scale: 1.01 }}>
-                                <label className="block text-sm font-medium mb-2">
-                                  Nội dung bình luận *
-                                </label>
-                                <Textarea
-                                  placeholder="Chia sẻ suy nghĩ của bạn về bài viết này..."
-                                  value={commentContent}
-                                  onChange={(e) =>
-                                    setCommentContent(e.target.value)
-                                  }
-                                  rows={6}
-                                  className="transition-all duration-300 resize-none focus:ring-2 focus:ring-primary/20 border-2"
-                                />
-                              </motion.div>
-
-                              <div className="flex items-center justify-between pt-4 border-t">
-                                <div className="text-sm text-muted-foreground">
-                                  <span className="text-red-500 font-bold">
-                                    *
-                                  </span>{" "}
-                                  Các trường bắt buộc
-                                </div>
-                                <motion.div
-                                  whileHover={{ scale: 1.05 }}
-                                  whileTap={{ scale: 0.95 }}
-                                >
-                                  <Button
-                                    onClick={handleCommentSubmit}
-                                    disabled={commentLoading}
-                                    className="shadow-xl bg-gradient-to-r from-green-500 to-blue-600 hover:from-green-600 hover:to-blue-700"
-                                    size="lg"
-                                  >
-                                    {commentLoading ? (
-                                      <>
-                                        <motion.div
-                                          animate={{ rotate: 360 }}
-                                          transition={{
-                                            duration: 1,
-                                            repeat: Infinity,
-                                            ease: "linear",
-                                          }}
-                                          className="w-5 h-5 mr-3 border-2 border-white rounded-full border-t-transparent"
-                                        />
-                                        Đang gửi bình luận...
-                                      </>
-                                    ) : (
-                                      <>
-                                        <Send className="w-5 h-5 mr-3" />
-                                        Gửi bình luận
-                                      </>
-                                    )}
-                                  </Button>
-                                </motion.div>
-                              </div>
-                            </div>
-                          </div>
-                        </Card>
-                      </motion.div>
-                    )}
-                  </AnimatePresence>
-
-                  {/* Enhanced Comments List */}
+                  {/* Comments List */}
                   <div className="space-y-8">
                     <AnimatePresence>
                       {comments.length > 0 ? (
@@ -1337,7 +1291,9 @@ const BlogPost: React.FC = () => {
                             whileHover={{ scale: 1.01, y: -2 }}
                             className="group"
                           >
-                            <Card className="transition-all duration-500 border-0 shadow-xl bg-gradient-to-r from-white via-gray-50 to-blue-50 dark:from-slate-800 dark:via-slate-900 dark:to-blue-950 hover:shadow-2xl">
+                            <Card
+                              className={`transition-all duration-500 border-0 shadow-xl bg-gradient-to-r ${unifiedColorScheme.cardBg} hover:shadow-2xl`}
+                            >
                               <div className="p-8">
                                 <div className="flex items-start space-x-6">
                                   <motion.img
@@ -1346,7 +1302,7 @@ const BlogPost: React.FC = () => {
                                       `https://i.pravatar.cc/100?u=${comment.author_name}`
                                     }
                                     alt={comment.author_name}
-                                    className="object-cover w-16 h-16 rounded-full ring-4 ring-primary/20 shadow-lg"
+                                    className="object-cover w-16 h-16 rounded-full ring-4 ring-pink-200 shadow-lg"
                                     whileHover={{ scale: 1.1, rotate: 5 }}
                                   />
                                   <div className="flex-1">
@@ -1386,8 +1342,8 @@ const BlogPost: React.FC = () => {
                                         }
                                         className={`group/like transition-all duration-300 ${
                                           likedComments.has(comment.id)
-                                            ? "text-red-500 bg-red-50 dark:bg-red-900/20"
-                                            : "hover:text-red-500 hover:bg-red-50 dark:hover:bg-red-900/20"
+                                            ? "text-red-500 bg-red-50"
+                                            : "hover:text-red-500 hover:bg-red-50"
                                         }`}
                                       >
                                         <motion.div
@@ -1413,16 +1369,7 @@ const BlogPost: React.FC = () => {
                                       <Button
                                         variant="ghost"
                                         size="sm"
-                                        className="transition-colors hover:text-blue-500 hover:bg-blue-50 dark:hover:bg-blue-900/20"
-                                      >
-                                        <Reply className="w-5 h-5 mr-2" />
-                                        Trả lời
-                                      </Button>
-
-                                      <Button
-                                        variant="ghost"
-                                        size="sm"
-                                        className="transition-colors hover:text-purple-500 hover:bg-purple-50 dark:hover:bg-purple-900/20"
+                                        className="transition-colors hover:text-pink-500 hover:bg-pink-50"
                                       >
                                         <Share2 className="w-5 h-5 mr-2" />
                                         Chia sẻ
@@ -1439,7 +1386,9 @@ const BlogPost: React.FC = () => {
                           initial={{ opacity: 0, scale: 0.8 }}
                           animate={{ opacity: 1, scale: 1 }}
                         >
-                          <Card className="py-20 text-center border-0 shadow-2xl bg-gradient-to-br from-white via-gray-50 to-blue-50 dark:from-slate-800 dark:via-slate-900 dark:to-blue-950">
+                          <Card
+                            className={`py-20 text-center border-0 shadow-2xl bg-gradient-to-br ${unifiedColorScheme.cardBg}`}
+                          >
                             <CardContent>
                               <motion.div
                                 initial={{ scale: 0 }}
@@ -1451,25 +1400,18 @@ const BlogPost: React.FC = () => {
                                 }}
                                 className="mb-8"
                               >
-                                <div className="w-24 h-24 mx-auto bg-gradient-to-r from-gray-200 to-gray-300 dark:from-gray-700 dark:to-gray-600 rounded-full flex items-center justify-center">
-                                  <MessageSquare className="w-12 h-12 text-gray-500" />
+                                <div
+                                  className={`w-24 h-24 mx-auto bg-gradient-to-r ${unifiedColorScheme.iconBg} rounded-full flex items-center justify-center`}
+                                >
+                                  <MessageSquare className="w-12 h-12 text-pink-500" />
                                 </div>
                               </motion.div>
                               <h3 className="mb-4 text-2xl font-bold">
                                 Chưa có bình luận nào
                               </h3>
-                              <p className="mb-8 text-lg text-muted-foreground">
-                                Hãy là người đầu tiên chia sẻ suy nghĩ về bài
-                                viết này!
+                              <p className="text-lg text-muted-foreground">
+                                Bài viết này chưa có bình luận từ độc giả.
                               </p>
-                              <Button
-                                onClick={() => setShowCommentForm(true)}
-                                className="bg-gradient-to-r from-blue-500 to-purple-600 hover:from-blue-600 hover:to-purple-700 shadow-xl"
-                                size="lg"
-                              >
-                                <MessageSquare className="w-5 h-5 mr-3" />
-                                Viết bình luận đầu tiên
-                              </Button>
                             </CardContent>
                           </Card>
                         </motion.div>
@@ -1478,49 +1420,68 @@ const BlogPost: React.FC = () => {
                   </div>
                 </motion.section>
 
-                {/* Enhanced Author Info */}
+                {/* ✅ MOBILE-OPTIMIZED Author Info */}
                 <motion.div
                   initial={{ opacity: 0, y: 40 }}
                   animate={{ opacity: 1, y: 0 }}
                   transition={{ delay: 0.6, duration: 0.8 }}
-                  className="mt-20"
+                  className="mt-8 sm:mt-16 md:mt-20"
                 >
-                  <Card className="border-0 shadow-2xl bg-gradient-to-br from-white via-purple-50 to-blue-50 dark:from-slate-800 dark:via-purple-900 dark:to-blue-950">
-                    <CardContent className="p-8">
-                      <div className="flex items-start space-x-6">
-                        <div className="flex items-center justify-center w-20 h-20 rounded-full shadow-xl bg-gradient-to-r from-blue-500 to-purple-600">
-                          <User className="w-10 h-10 text-white" />
+                  <Card
+                    className={`border-0 shadow-lg sm:shadow-xl md:shadow-2xl bg-gradient-to-br ${unifiedColorScheme.cardBg}`}
+                  >
+                    <CardContent className="p-4 sm:p-6 md:p-8">
+                      <div className="flex items-center space-x-3 sm:space-x-4">
+                        {/* Responsive Avatar */}
+                        <div
+                          className={`flex items-center justify-center w-12 h-12 sm:w-16 sm:h-16 md:w-20 md:h-20 rounded-full shadow-lg bg-gradient-to-r ${unifiedColorScheme.button} flex-shrink-0`}
+                        >
+                          <User className="w-5 h-5 sm:w-7 sm:h-7 md:w-10 md:h-10 text-white" />
                         </div>
-                        <div className="flex-1">
-                          <div className="flex items-center mb-4 space-x-3">
-                            <h3 className="text-2xl font-bold">
-                              {post.author_name || "Admin"}
-                            </h3>
-                            <Badge className="text-yellow-800 bg-yellow-100 border-yellow-300">
-                              <Award className="w-4 h-4 mr-2" />
-                              Tác giả
-                            </Badge>
-                          </div>
-                          <p className="mb-6 text-lg text-muted-foreground leading-relaxed">
-                            Tác giả của bài viết này. Chuyên gia trong lĩnh vực
-                            công nghệ và thiết kế với nhiều năm kinh nghiệm.
-                          </p>
-                          <div className="flex space-x-4">
+
+                        {/* Responsive Content */}
+                        <div className="flex-1 min-w-0">
+                          <div className="flex items-start justify-between">
+                            <div className="flex-1 min-w-0 pr-2">
+                              <div className="flex items-center space-x-2 mb-1">
+                                <h3 className="text-base sm:text-lg md:text-2xl font-bold truncate">
+                                  {post.author_name || "Admin"}
+                                </h3>
+                                <Badge className="text-xs bg-yellow-100 text-yellow-800 border-yellow-300">
+                                  <Award className="w-2.5 h-2.5 sm:w-3 sm:h-3 md:w-4 md:h-4 mr-1" />
+                                  <span className="hidden sm:inline">
+                                    Tác giả
+                                  </span>
+                                  <span className="sm:hidden">Author</span>
+                                </Badge>
+                              </div>
+
+                              <p className="text-xs sm:text-sm md:text-lg text-muted-foreground">
+                                <span className="block sm:hidden">
+                                  Chuyên gia công nghệ
+                                </span>
+                                <span className="hidden sm:block md:hidden">
+                                  Chuyên gia công nghệ và thiết kế
+                                </span>
+                                <span className="hidden md:block">
+                                  Tác giả của bài viết này. Chuyên gia trong
+                                  lĩnh vực công nghệ và thiết kế với nhiều năm
+                                  kinh nghiệm.
+                                </span>
+                              </p>
+                            </div>
+
+                            {/* Single Action Button */}
                             <Button
                               variant="outline"
-                              size="lg"
-                              className="group"
+                              size="sm"
+                              className="text-xs sm:text-sm px-2 py-1 sm:px-3 sm:py-2 flex-shrink-0"
                             >
-                              <User className="w-5 h-5 mr-3 group-hover:animate-pulse" />
-                              Xem profile
-                            </Button>
-                            <Button
-                              variant="outline"
-                              size="lg"
-                              className="group"
-                            >
-                              <MessageSquare className="w-5 h-5 mr-3 group-hover:animate-bounce" />
-                              Liên hệ tác giả
+                              <User className="w-3 h-3 sm:w-4 sm:h-4 mr-1 sm:mr-2" />
+                              <span className="hidden sm:inline">
+                                Xem profile
+                              </span>
+                              <span className="sm:hidden">View</span>
                             </Button>
                           </div>
                         </div>
@@ -1531,20 +1492,26 @@ const BlogPost: React.FC = () => {
               </motion.article>
             </div>
 
-            {/* Enhanced Sidebar */}
+            {/* Sidebar */}
             <div className="lg:col-span-1">
               <div className="space-y-8 sticky top-24">
                 <TableOfContents content={post?.content || ""} />
 
-                {/* Enhanced Quick Actions */}
-                <Card className="border-0 shadow-2xl bg-gradient-to-br from-white via-green-50 to-blue-50 dark:from-slate-800 dark:via-green-900 dark:to-blue-900">
+                {/* Quick Actions */}
+                <Card
+                  className={`border-0 shadow-2xl bg-gradient-to-br ${unifiedColorScheme.cardBg}`}
+                >
                   <div className="p-6">
                     <div className="flex items-center mb-6 space-x-3">
-                      <div className="flex items-center justify-center w-10 h-10 rounded-xl bg-gradient-to-r from-green-500 to-blue-600 shadow-lg">
+                      <div
+                        className={`flex items-center justify-center w-10 h-10 rounded-xl bg-gradient-to-r ${unifiedColorScheme.button} shadow-lg`}
+                      >
                         <Zap className="w-5 h-5 text-white" />
                       </div>
                       <div>
-                        <h3 className="font-bold text-lg text-transparent bg-gradient-to-r from-green-600 to-blue-600 bg-clip-text">
+                        <h3
+                          className={`font-bold text-lg text-transparent bg-gradient-to-r ${unifiedColorScheme.textMain} bg-clip-text`}
+                        >
                           Thao tác nhanh
                         </h3>
                         <p className="text-xs text-muted-foreground">
@@ -1567,7 +1534,7 @@ const BlogPost: React.FC = () => {
                       <Button
                         variant="outline"
                         size="lg"
-                        className="justify-start w-full group hover:bg-blue-50 hover:border-blue-300"
+                        className="justify-start w-full group hover:bg-pink-50 hover:border-pink-300"
                         onClick={() => handleShare("copy")}
                       >
                         <Share2 className="w-5 h-5 mr-3 group-hover:animate-pulse" />
@@ -1586,15 +1553,15 @@ const BlogPost: React.FC = () => {
                   </div>
                 </Card>
 
-                {/* Enhanced Reading Stats */}
-                <Card className="border-0 shadow-2xl bg-gradient-to-br from-white via-orange-50 to-red-50 dark:from-slate-800 dark:via-orange-900 dark:to-red-900">
+                {/* Reading Stats */}
+                <Card className="border-0 shadow-2xl bg-gradient-to-br from-white via-pink-50 to-rose-50">
                   <div className="p-6">
                     <div className="flex items-center mb-6 space-x-3">
-                      <div className="flex items-center justify-center w-10 h-10 rounded-xl bg-gradient-to-r from-orange-500 to-red-600 shadow-lg">
+                      <div className="flex items-center justify-center w-10 h-10 rounded-xl bg-gradient-to-r from-pink-400 to-rose-500 shadow-lg">
                         <TrendingUp className="w-5 h-5 text-white" />
                       </div>
                       <div>
-                        <h3 className="font-bold text-lg text-transparent bg-gradient-to-r from-orange-600 to-red-600 bg-clip-text">
+                        <h3 className="font-bold text-lg text-transparent bg-gradient-to-r from-pink-600 to-rose-600 bg-clip-text">
                           Thống kê bài viết
                         </h3>
                         <p className="text-xs text-muted-foreground">
@@ -1632,9 +1599,6 @@ const BlogPost: React.FC = () => {
                     </div>
                   </div>
                 </Card>
-
-                {/* Related Posts: có thể thêm vào đây nếu muốn nâng cấp */}
-                {/* ... */}
               </div>
             </div>
           </div>
@@ -1642,23 +1606,6 @@ const BlogPost: React.FC = () => {
       </div>
     </>
   );
-};
-
-// Helper function
-const getCategoryColor = (color: string) => {
-  const colors: Record<string, string> = {
-    blue: "#3b82f6",
-    purple: "#8b5cf6",
-    green: "#10b981",
-    orange: "#f59e0b",
-    red: "#ef4444",
-    pink: "#ec4899",
-    teal: "#14b8a6",
-    indigo: "#6366f1",
-    cyan: "#06b6d4",
-    yellow: "#eab308",
-  };
-  return colors[color] || colors.blue;
 };
 
 export default BlogPost;

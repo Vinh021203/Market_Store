@@ -184,7 +184,6 @@ html {
 }
 
 /* Animations & Keyframes */
-
 @keyframes gentle-float {
   0%, 100% { transform: translate3d(0, 0, 0);}
   50% { transform: translate3d(0,-8px,0);}
@@ -205,6 +204,7 @@ html {
   0%,100% { box-shadow: 0 0 0 0 hsl(var(--primary) / 0.4);}
   50%     { box-shadow: 0 0 0 8px hsl(var(--primary) / 0);}
 }
+
 /* Enhanced flicker + pulse animations, hiệu ứng nhẹ */
 @keyframes fadeFlicker {
   0%,100% { opacity: 1; text-shadow: 0 0 10px #F59E42; }
@@ -228,6 +228,127 @@ html {
   50% { box-shadow: 0 0 30px #F472B6; }
 }
 .animate-glow { animation: glow 1.5s infinite; }
+
+/* ===== LOGIN COMPONENT SPECIFIC ANIMATIONS ===== */
+@keyframes gentleGlow {
+  0%, 100% {
+    text-shadow:
+      0 0 10px rgba(244, 114, 182, 0.3),
+      0 0 20px rgba(251, 191, 36, 0.2);
+    opacity: 1;
+  }
+  50% {
+    text-shadow:
+      0 0 15px rgba(244, 114, 182, 0.4),
+      0 0 25px rgba(251, 191, 36, 0.3);
+    opacity: 0.95;
+  }
+}
+.animate-gentle-glow {
+  animation: gentleGlow 3s infinite ease-in-out;
+}
+
+@keyframes softPulse {
+  0%, 100% {
+    opacity: 1;
+    transform: scale(1);
+  }
+  50% {
+    opacity: 0.85;
+    transform: scale(1.02);
+  }
+}
+.animate-soft-pulse {
+  animation: softPulse 2s infinite ease-in-out;
+}
+
+@keyframes subtleShimmer {
+  0% {
+    background-position: -200px 0;
+  }
+  100% {
+    background-position: calc(200px + 100%) 0;
+  }
+}
+.animate-subtle-shimmer {
+  background: linear-gradient(
+    90deg,
+    transparent,
+    rgba(255, 192, 203, 0.2),
+    transparent
+  );
+  background-size: 200px 100%;
+  animation: subtleShimmer 3s infinite;
+}
+
+@keyframes pastelColorShift {
+  0% {
+    background-position: 0% 50%;
+  }
+  50% {
+    background-position: 100% 50%;
+  }
+  100% {
+    background-position: 0% 50%;
+  }
+}
+.animate-pastel-shift {
+  background: linear-gradient(
+    45deg,
+    #ff9a9e,
+    #fecfef,
+    #fecfef,
+    #a8e6cf,
+    #88d8c0
+  );
+  background-size: 300% 300%;
+  animation: pastelColorShift 4s ease infinite;
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+}
+
+.pastel-bg-pattern {
+  background-image:
+    radial-gradient(
+      circle at 20% 80%,
+      rgba(244, 114, 182, 0.1) 0%,
+      transparent 50%
+    ),
+    radial-gradient(
+      circle at 80% 20%,
+      rgba(251, 191, 36, 0.1) 0%,
+      transparent 50%
+    ),
+    radial-gradient(
+      circle at 40% 40%,
+      rgba(139, 92, 246, 0.1) 0%,
+      transparent 50%
+    );
+}
+
+@keyframes floatUpDown {
+  0%, 100% {
+    transform: translateY(0px) rotate(0deg);
+  }
+  50% {
+    transform: translateY(-10px) rotate(2deg);
+  }
+}
+.animate-float {
+  animation: floatUpDown 3s ease-in-out infinite;
+}
+
+@keyframes morphShape {
+  0%, 100% {
+    border-radius: 60% 40% 30% 70% / 60% 30% 70% 40%;
+  }
+  50% {
+    border-radius: 30% 60% 70% 40% / 50% 60% 30% 60%;
+  }
+}
+.animate-morph {
+  animation: morphShape 8s ease-in-out infinite;
+}
 
 /* ==== Utility Classes ==== */
 .glass {

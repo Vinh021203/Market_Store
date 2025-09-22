@@ -68,8 +68,76 @@ import {
   ArrowUp,
   ChevronDown,
   ChevronUp,
+  Crown,
+  Diamond,
+  BookMarked,
+  Library,
+  Feather,
+  Layers,
 } from "lucide-react";
 import { toast } from "@/hooks/use-toast";
+
+// ✅ SOFT PINK THEME - SAME AS OTHER PAGES
+const softPinkTheme = {
+  // 🌸 PINK BACKGROUND TONES
+  pageBackground: "from-pink-50/70 via-rose-50/60 to-red-50/50",
+  sectionBackground: "from-white/95 via-pink-25/30 to-rose-25/20",
+
+  // 💗 GLASS & CARDS
+  glassCard: "from-white/95 via-pink-25/20 to-rose-25/10 backdrop-blur-xl",
+  neoCard: "bg-gradient-to-br from-white via-pink-25/30 to-rose-25/20",
+  floatingCard: "from-white/90 via-pink-50/60 to-rose-50/40",
+
+  // 🌹 GRADIENT COLORS - PINK THEME
+  primaryGradient: "from-pink-500 via-rose-500 to-red-500",
+  secondaryGradient: "from-pink-400 via-rose-500 to-pink-600",
+  accentGradient: "from-rose-400 via-pink-500 to-red-400",
+  successGradient: "from-pink-300 via-rose-400 to-pink-500",
+
+  // 💕 TEXT COLORS
+  heroText: "from-pink-700 via-rose-600 to-red-600",
+  primaryText: "from-slate-700 via-pink-700 to-rose-700",
+  accentText: "from-rose-600 via-pink-600 to-red-600",
+
+  // ✨ EFFECTS
+  glow: "shadow-pink-200/60 shadow-2xl",
+  neonGlow: "shadow-rose-300/50 shadow-xl",
+  softGlow: "shadow-pink-200/40 shadow-lg",
+
+  // 🎨 DYNAMIC COLORS - PINK VARIATIONS
+  dynamicColors: [
+    {
+      bg: "from-pink-400 to-rose-500",
+      text: "text-pink-50",
+      glow: "shadow-pink-400/30",
+    },
+    {
+      bg: "from-rose-400 to-red-500",
+      text: "text-rose-50",
+      glow: "shadow-rose-400/30",
+    },
+    {
+      bg: "from-pink-500 to-rose-600",
+      text: "text-pink-50",
+      glow: "shadow-pink-500/30",
+    },
+    {
+      bg: "from-red-400 to-pink-500",
+      text: "text-red-50",
+      glow: "shadow-red-400/30",
+    },
+    {
+      bg: "from-rose-500 to-pink-600",
+      text: "text-rose-50",
+      glow: "shadow-rose-500/30",
+    },
+    {
+      bg: "from-pink-600 to-red-500",
+      text: "text-pink-50",
+      glow: "shadow-pink-600/30",
+    },
+  ],
+};
 
 // Enhanced Schema with advanced validation
 const applicationSchema = z.object({
@@ -131,30 +199,6 @@ const Careers: React.FC = () => {
     resolver: zodResolver(applicationSchema),
   });
 
-  // ✅ Enhanced Color Schemes
-  const colorSchemes = {
-    primary: {
-      gradient: "from-cyan-500 via-blue-500 to-indigo-500",
-      bg: "from-cyan-50/80 to-blue-50/80",
-      darkBg: "from-cyan-900/30 to-blue-900/30",
-    },
-    success: {
-      gradient: "from-emerald-500 via-teal-500 to-cyan-500",
-      bg: "from-emerald-50/80 to-cyan-50/80",
-      darkBg: "from-emerald-900/30 to-cyan-900/30",
-    },
-    info: {
-      gradient: "from-indigo-500 via-purple-500 to-blue-500",
-      bg: "from-indigo-50/80 to-purple-50/80",
-      darkBg: "from-indigo-900/30 to-purple-900/30",
-    },
-    warning: {
-      gradient: "from-amber-500 via-orange-500 to-red-500",
-      bg: "from-amber-50/80 to-orange-50/80",
-      darkBg: "from-amber-900/30 to-orange-900/30",
-    },
-  };
-
   // ✅ Scroll Effects
   useEffect(() => {
     const handleScroll = () => {
@@ -170,11 +214,11 @@ const Careers: React.FC = () => {
     return () => window.removeEventListener("scroll", handleScroll);
   }, []);
 
-  // Enhanced job openings data
+  // Enhanced job openings data with PINK THEME
   const jobOpenings = [
     {
       id: 1,
-      title: "🚀 Senior Frontend Developer (React/Next.js)",
+      title: "Senior Frontend Developer (React/Next.js)",
       location: "Remote / Hạ Long, Quảng Ninh",
       type: "Full-time",
       experience: "5+ years",
@@ -204,12 +248,12 @@ const Careers: React.FC = () => {
         "Bonus theo KPI",
       ],
       tags: ["React", "Next.js", "TypeScript", "Remote"],
-      color: colorSchemes.primary.gradient,
+      color: softPinkTheme.primaryGradient,
       icon: Code,
     },
     {
       id: 2,
-      title: "⚡ Backend Developer (Node.js/Supabase)",
+      title: "Backend Developer (Node.js/Supabase)",
       location: "Hạ Long / Remote",
       type: "Full-time",
       experience: "3+ years",
@@ -238,12 +282,12 @@ const Careers: React.FC = () => {
         "Flexible working",
       ],
       tags: ["Node.js", "Supabase", "PostgreSQL", "AWS"],
-      color: colorSchemes.success.gradient,
+      color: softPinkTheme.secondaryGradient,
       icon: Zap,
     },
     {
       id: 3,
-      title: "🎨 Senior UI/UX Designer",
+      title: "Senior UI/UX Designer",
       location: "Hạ Long",
       type: "Full-time",
       experience: "4+ years",
@@ -272,12 +316,12 @@ const Careers: React.FC = () => {
         "Flexible hours",
       ],
       tags: ["Figma", "UI/UX", "Design System", "Research"],
-      color: colorSchemes.info.gradient,
+      color: softPinkTheme.accentGradient,
       icon: Palette,
     },
     {
       id: 4,
-      title: "📊 Product Marketing Manager",
+      title: "Product Marketing Manager",
       location: "Remote / Hạ Long",
       type: "Full-time",
       experience: "3+ years",
@@ -306,7 +350,7 @@ const Careers: React.FC = () => {
         "Performance bonus",
       ],
       tags: ["Marketing", "SEO", "Analytics", "Content"],
-      color: colorSchemes.warning.gradient,
+      color: softPinkTheme.successGradient,
       icon: Megaphone,
     },
   ];
@@ -340,64 +384,64 @@ const Careers: React.FC = () => {
   const benefits = [
     {
       icon: DollarSign,
-      title: "💰 Lương thưởng cạnh tranh",
+      title: "Lương thưởng cạnh tranh",
       description: "Mức lương hấp dẫn + bonus performance + raise hàng năm",
-      color: colorSchemes.success.gradient,
+      color: softPinkTheme.primaryGradient,
     },
     {
       icon: Laptop,
-      title: "💻 Remote-first culture",
+      title: "Remote-first culture",
       description: "Làm việc từ xa linh hoạt + flexible working hours",
-      color: colorSchemes.primary.gradient,
+      color: softPinkTheme.secondaryGradient,
     },
     {
       icon: GraduationCap,
-      title: "📚 Learning & Development",
+      title: "Learning & Development",
       description: "Budget $500/năm cho khóa học + conference tickets",
-      color: colorSchemes.info.gradient,
+      color: softPinkTheme.accentGradient,
     },
     {
       icon: Shield,
-      title: "🛡️ Bảo hiểm toàn diện",
+      title: "Bảo hiểm toàn diện",
       description: "Bảo hiểm sức khỏe 100% + bảo hiểm tai nạn",
-      color: colorSchemes.warning.gradient,
+      color: softPinkTheme.successGradient,
     },
     {
       icon: Coffee,
-      title: "☕ Free coffee & snacks",
+      title: "Free coffee & snacks",
       description: "Đồ uống và snacks miễn phí tại office",
-      color: colorSchemes.success.gradient,
+      color: softPinkTheme.primaryGradient,
     },
     {
       icon: Plane,
-      title: "✈️ Company trips",
+      title: "Company trips",
       description: "Du lịch công ty hàng năm + team building",
-      color: colorSchemes.primary.gradient,
+      color: softPinkTheme.secondaryGradient,
     },
     {
       icon: Car,
-      title: "🚗 Parking miễn phí",
+      title: "Parking miễn phí",
       description: "Chỗ đậu xe miễn phí tại office",
-      color: colorSchemes.info.gradient,
+      color: softPinkTheme.accentGradient,
     },
     {
       icon: Heart,
-      title: "❤️ Work-life balance",
+      title: "Work-life balance",
       description: "Chính sách nghỉ phép linh hoạt + mental health support",
-      color: colorSchemes.warning.gradient,
+      color: softPinkTheme.successGradient,
     },
   ];
 
   const companyStats = [
-    { label: "Nhân viên", value: "50+", icon: Users, color: "text-cyan-600" },
+    { label: "Nhân viên", value: "50+", icon: Users, color: "text-pink-600" },
     {
       label: "Khách hàng",
       value: "10K+",
       icon: Heart,
-      color: "text-emerald-600",
+      color: "text-rose-600",
     },
-    { label: "Dự án", value: "200+", icon: Rocket, color: "text-indigo-600" },
-    { label: "Quốc gia", value: "25+", icon: Globe, color: "text-blue-600" },
+    { label: "Dự án", value: "200+", icon: Rocket, color: "text-red-600" },
+    { label: "Quốc gia", value: "25+", icon: Globe, color: "text-pink-700" },
   ];
 
   // Event handlers
@@ -447,7 +491,7 @@ const Careers: React.FC = () => {
   const ReadingProgress: React.FC = () => (
     <div className="fixed top-0 left-0 w-full h-1 bg-gray-200 dark:bg-gray-700 z-50">
       <motion.div
-        className="h-full bg-gradient-to-r from-cyan-500 to-indigo-500"
+        className={`h-full bg-gradient-to-r ${softPinkTheme.primaryGradient}`}
         style={{ width: `${scrollProgress}%` }}
         initial={{ width: 0 }}
         animate={{ width: `${scrollProgress}%` }}
@@ -466,7 +510,9 @@ const Careers: React.FC = () => {
           exit={{ opacity: 0, y: 20 }}
           className="fixed bottom-6 right-6 z-40"
         >
-          <Card className="bg-white/95 dark:bg-gray-800/95 backdrop-blur-lg border-0 shadow-2xl">
+          <Card
+            className={`bg-gradient-to-r ${softPinkTheme.glassCard} backdrop-blur-lg border-0 ${softPinkTheme.softGlow}`}
+          >
             <CardContent className="p-4">
               <div className="flex items-center space-x-3">
                 <Button
@@ -475,7 +521,7 @@ const Careers: React.FC = () => {
                   onClick={() =>
                     window.scrollTo({ top: 0, behavior: "smooth" })
                   }
-                  className="bg-gradient-to-r from-cyan-500 to-blue-500 text-white border-0 hover:from-cyan-600 hover:to-blue-600"
+                  className={`bg-gradient-to-r ${softPinkTheme.primaryGradient} text-white border-0 hover:scale-105 transition-all`}
                 >
                   <ArrowUp className="w-4 h-4" />
                 </Button>
@@ -509,12 +555,60 @@ const Careers: React.FC = () => {
       <ReadingProgress />
       <FloatingNav />
 
-      <div className="min-h-screen bg-gradient-to-br from-cyan-50 via-blue-50 to-indigo-100 dark:from-slate-900 dark:via-cyan-900/20 dark:to-indigo-900/30">
-        {/* ✅ Enhanced Hero Section */}
+      <div
+        className={`min-h-screen bg-gradient-to-br ${softPinkTheme.pageBackground}`}
+      >
+        {/* ✅ Enhanced Hero Section - PINK THEME */}
         <motion.section
           className="relative px-4 py-20 lg:py-32 overflow-hidden"
           style={{ y: headerY, opacity: headerOpacity }}
         >
+          {/* Floating background icons */}
+          <div className="absolute inset-0 pointer-events-none">
+            {[
+              Code,
+              Users,
+              Palette,
+              Rocket,
+              Heart,
+              Star,
+              Globe,
+              Zap,
+              Target,
+              Crown,
+              Briefcase,
+              Award,
+              Sparkles,
+              Building,
+              Lightbulb,
+              Coffee,
+              Diamond,
+              BookMarked,
+            ].map((Icon, i) => (
+              <motion.div
+                key={i}
+                className="absolute"
+                style={{
+                  top: `${10 + (i % 3) * 30}%`,
+                  left: `${5 + (i % 4) * 25}%`,
+                }}
+                animate={{
+                  y: [0, -30, 0],
+                  rotate: [0, 15, -15, 0],
+                  opacity: [0.1, 0.3, 0.1],
+                }}
+                transition={{
+                  duration: 8 + i * 2,
+                  repeat: Infinity,
+                  delay: i * 0.8,
+                  ease: "easeInOut",
+                }}
+              >
+                <Icon className="w-8 h-8 text-pink-300/20" />
+              </motion.div>
+            ))}
+          </div>
+
           <div className="container relative z-10 mx-auto text-center">
             <motion.div
               initial={{ opacity: 0, y: 40 }}
@@ -529,7 +623,9 @@ const Careers: React.FC = () => {
                 transition={{ delay: 0.2 }}
                 whileHover={{ scale: 1.05 }}
               >
-                <Badge className="px-6 py-3 text-lg bg-gradient-to-r from-cyan-500 to-indigo-600 text-white border-0 shadow-xl">
+                <Badge
+                  className={`px-6 py-3 text-lg bg-gradient-to-r ${softPinkTheme.primaryGradient} text-white border-0 ${softPinkTheme.glow}`}
+                >
                   <Briefcase className="w-5 h-5 mr-2" />
                   We're Hiring! Join Our Team
                   <Sparkles className="w-5 h-5 ml-2 animate-pulse" />
@@ -538,7 +634,9 @@ const Careers: React.FC = () => {
 
               {/* Title */}
               <h1 className="text-5xl font-bold leading-tight lg:text-7xl">
-                <span className="text-transparent bg-gradient-to-r from-cyan-600 via-blue-600 to-indigo-600 bg-clip-text">
+                <span
+                  className={`text-transparent bg-gradient-to-r ${softPinkTheme.heroText} bg-clip-text`}
+                >
                   Build the Future
                 </span>
                 <br />
@@ -550,12 +648,12 @@ const Careers: React.FC = () => {
               {/* Subtitle */}
               <p className="max-w-4xl mx-auto text-xl lg:text-2xl text-gray-600 dark:text-gray-400 leading-relaxed">
                 Tham gia đội ngũ
-                <span className="font-bold text-cyan-600">
+                <span className="font-bold text-pink-600">
                   {" "}
                   50+ developers, designers & marketers{" "}
                 </span>
                 đầy tài năng để
-                <span className="font-bold text-indigo-600">
+                <span className="font-bold text-rose-600">
                   {" "}
                   tạo ra các sản phẩm công nghệ{" "}
                 </span>
@@ -573,7 +671,9 @@ const Careers: React.FC = () => {
                     whileHover={{ y: -10, scale: 1.05 }}
                     className="text-center"
                   >
-                    <div className="flex items-center justify-center w-16 h-16 mx-auto mb-4 bg-gradient-to-r from-cyan-500 to-indigo-600 rounded-2xl shadow-xl">
+                    <div
+                      className={`flex items-center justify-center w-16 h-16 mx-auto mb-4 bg-gradient-to-r ${softPinkTheme.primaryGradient} rounded-2xl ${softPinkTheme.glow}`}
+                    >
                       <stat.icon className="w-8 h-8 text-white" />
                     </div>
                     <div
@@ -592,7 +692,7 @@ const Careers: React.FC = () => {
               <div className="flex flex-col sm:flex-row items-center justify-center gap-4 pt-8">
                 <Button
                   size="lg"
-                  className="bg-gradient-to-r from-cyan-500 to-indigo-600 hover:from-cyan-600 hover:to-indigo-700 shadow-xl hover:shadow-2xl transition-all duration-300 text-white border-0"
+                  className={`bg-gradient-to-r ${softPinkTheme.primaryGradient} hover:scale-105 ${softPinkTheme.glow} text-white border-0 transition-all duration-300`}
                   onClick={() =>
                     document
                       .getElementById("open-positions")
@@ -606,7 +706,7 @@ const Careers: React.FC = () => {
                 <Button
                   size="lg"
                   variant="outline"
-                  className="border-2 hover:bg-cyan-50 dark:hover:bg-cyan-900/20"
+                  className="border-2 border-pink-300 hover:bg-pink-50 dark:hover:bg-pink-900/20"
                   onClick={() =>
                     document
                       .getElementById("why-join-us")
@@ -619,48 +719,11 @@ const Careers: React.FC = () => {
               </div>
             </motion.div>
           </div>
-
-          {/* Enhanced Background Elements */}
-          <div className="absolute inset-0 overflow-hidden pointer-events-none">
-            {[
-              Code,
-              Users,
-              Palette,
-              Rocket,
-              Heart,
-              Star,
-              Globe,
-              Zap,
-              Target,
-            ].map((Icon, i) => (
-              <motion.div
-                key={i}
-                className="absolute"
-                style={{
-                  top: `${10 + (i % 3) * 30}%`,
-                  left: `${5 + (i % 4) * 25}%`,
-                }}
-                animate={{
-                  y: [0, -30, 0],
-                  rotate: [0, 15, -15, 0],
-                  opacity: [0.2, 0.6, 0.2],
-                }}
-                transition={{
-                  duration: 8 + i * 2,
-                  repeat: Infinity,
-                  delay: i * 0.8,
-                  ease: "easeInOut",
-                }}
-              >
-                <Icon className="w-8 h-8 text-cyan-500/30" />
-              </motion.div>
-            ))}
-          </div>
         </motion.section>
 
-        {/* ✅ Enhanced Benefits Section */}
+        {/* ✅ Enhanced Benefits Section - CREATIVE LAYOUT */}
         <section
-          className="px-4 py-20 bg-white/60 dark:bg-slate-800/20 backdrop-blur-sm"
+          className={`px-4 py-20 bg-gradient-to-r ${softPinkTheme.sectionBackground} backdrop-blur-sm`}
           id="why-join-us"
         >
           <div className="container mx-auto">
@@ -670,8 +733,10 @@ const Careers: React.FC = () => {
               viewport={{ once: true }}
               className="text-center mb-16"
             >
-              <h2 className="text-4xl font-bold mb-6 text-transparent bg-gradient-to-r from-emerald-600 to-cyan-600 bg-clip-text">
-                🌟 Tại sao nên tham gia Template Market?
+              <h2
+                className={`text-4xl font-bold mb-6 text-transparent bg-gradient-to-r ${softPinkTheme.heroText} bg-clip-text`}
+              >
+                Tại sao nên tham gia Template Market?
               </h2>
               <p className="max-w-3xl mx-auto text-xl text-gray-600 dark:text-gray-400">
                 Chúng tôi không chỉ cung cấp một công việc, mà là một hành trình
@@ -679,40 +744,90 @@ const Careers: React.FC = () => {
               </p>
             </motion.div>
 
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
+            {/* ✅ CREATIVE ZIGZAG LAYOUT */}
+            <div className="space-y-16">
               {benefits.map((benefit, index) => (
                 <motion.div
                   key={index}
-                  initial={{ opacity: 0, y: 20 }}
-                  whileInView={{ opacity: 1, y: 0 }}
+                  initial={{ opacity: 0, x: index % 2 === 0 ? -100 : 100 }}
+                  whileInView={{ opacity: 1, x: 0 }}
                   viewport={{ once: true }}
                   transition={{ delay: index * 0.1 }}
-                  whileHover={{ y: -10, scale: 1.02 }}
-                  className="group"
+                  className={`flex items-center gap-12 ${
+                    index % 2 === 0 ? "flex-row" : "flex-row-reverse"
+                  } flex-col lg:flex-row`}
                 >
-                  <Card className="h-full p-6 text-center border-0 shadow-lg bg-white/90 dark:bg-slate-800/90 backdrop-blur-sm hover:shadow-2xl transition-all duration-300">
-                    <CardContent className="space-y-4">
-                      <motion.div
-                        whileHover={{ scale: 1.1, rotate: 5 }}
-                        className={`w-16 h-16 mx-auto rounded-2xl bg-gradient-to-r ${benefit.color} flex items-center justify-center shadow-lg`}
-                      >
-                        <benefit.icon className="w-8 h-8 text-white" />
-                      </motion.div>
-                      <h3 className="text-lg font-bold text-gray-800 dark:text-gray-100">
-                        {benefit.title}
-                      </h3>
-                      <p className="text-sm text-gray-600 dark:text-gray-400 leading-relaxed">
-                        {benefit.description}
-                      </p>
-                    </CardContent>
-                  </Card>
+                  {/* Icon side */}
+                  <div className="flex-shrink-0">
+                    <motion.div
+                      whileHover={{ scale: 1.1, rotate: 10 }}
+                      className={`w-32 h-32 rounded-full bg-gradient-to-r ${benefit.color} flex items-center justify-center ${softPinkTheme.glow} relative overflow-hidden`}
+                    >
+                      <benefit.icon className="w-16 h-16 text-white relative z-10" />
+
+                      {/* Orbiting particles */}
+                      {[...Array(3)].map((_, i) => (
+                        <motion.div
+                          key={i}
+                          animate={{ rotate: 360 }}
+                          transition={{
+                            duration: 8 + i * 2,
+                            repeat: Infinity,
+                            ease: "linear",
+                          }}
+                          className="absolute"
+                          style={{
+                            top: "50%",
+                            left: "50%",
+                            transformOrigin: "0 0",
+                          }}
+                        >
+                          <div
+                            className={`w-2 h-2 bg-white/30 rounded-full -translate-x-16 -translate-y-1`}
+                          />
+                        </motion.div>
+                      ))}
+                    </motion.div>
+                  </div>
+
+                  {/* Content side */}
+                  <div className="flex-1 text-center lg:text-left">
+                    <Card
+                      className={`bg-gradient-to-br ${softPinkTheme.neoCard} border-0 ${softPinkTheme.softGlow} backdrop-blur-xl hover:${softPinkTheme.glow} transition-all duration-500`}
+                    >
+                      <CardContent className="p-8">
+                        <h3 className="text-2xl font-bold text-gray-800 dark:text-gray-100 mb-4">
+                          {benefit.title}
+                        </h3>
+                        <p className="text-gray-700 dark:text-gray-300 leading-relaxed text-lg">
+                          {benefit.description}
+                        </p>
+
+                        {/* Decorative elements */}
+                        <div className="flex items-center justify-center lg:justify-start mt-6 gap-2">
+                          {[...Array(5)].map((_, i) => (
+                            <motion.div
+                              key={i}
+                              animate={{ scale: [1, 1.2, 1] }}
+                              transition={{
+                                duration: 2,
+                                repeat: Infinity,
+                                delay: i * 0.2,
+                              }}
+                              className="w-2 h-2 bg-pink-400 rounded-full"
+                            />
+                          ))}
+                        </div>
+                      </CardContent>
+                    </Card>
+                  </div>
                 </motion.div>
               ))}
             </div>
           </div>
         </section>
 
-        {/* ✅ Enhanced Job Listings */}
+        {/* ✅ Enhanced Job Listings - MASONRY LAYOUT */}
         <section className="px-4 py-20" id="open-positions">
           <div className="container mx-auto">
             <motion.div
@@ -721,197 +836,205 @@ const Careers: React.FC = () => {
               viewport={{ once: true }}
               className="text-center mb-16"
             >
-              <h2 className="text-4xl font-bold mb-6 text-transparent bg-gradient-to-r from-indigo-600 to-purple-600 bg-clip-text">
-                🚀 Các vị trí đang tuyển dụng
+              <h2
+                className={`text-4xl font-bold mb-6 text-transparent bg-gradient-to-r ${softPinkTheme.heroText} bg-clip-text`}
+              >
+                Các vị trí đang tuyển dụng
               </h2>
               <p className="max-w-3xl mx-auto text-xl text-gray-600 dark:text-gray-400">
                 Tìm kiếm cơ hội phù hợp với passion và skills của bạn
               </p>
             </motion.div>
 
-            <div className="max-w-5xl mx-auto space-y-8">
+            {/* ✅ CREATIVE GRID LAYOUT */}
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 max-w-7xl mx-auto">
               {jobOpenings.map((job, index) => (
                 <motion.div
                   key={job.id}
-                  initial={{ opacity: 0, x: -30 }}
-                  whileInView={{ opacity: 1, x: 0 }}
+                  initial={{ opacity: 0, y: 50, rotateY: -15 }}
+                  whileInView={{ opacity: 1, y: 0, rotateY: 0 }}
                   viewport={{ once: true }}
                   transition={{ delay: index * 0.1 }}
-                  whileHover={{ scale: 1.01 }}
+                  whileHover={{ y: -8, rotateY: 5, scale: 1.02 }}
+                  style={{ perspective: "1000px" }}
+                  className={index === 0 ? "lg:col-span-2" : ""}
                 >
                   <Card
-                    className={`overflow-hidden border-0 shadow-xl bg-white/90 dark:bg-slate-800/90 backdrop-blur-sm hover:shadow-2xl transition-all duration-300 ${job.featured ? "ring-2 ring-indigo-500" : ""}`}
+                    className={`overflow-hidden border-0 ${softPinkTheme.softGlow} bg-gradient-to-br ${softPinkTheme.neoCard} backdrop-blur-sm hover:${softPinkTheme.glow} transition-all duration-500 group relative ${
+                      job.featured ? `ring-2 ring-pink-400` : ""
+                    }`}
                   >
-                    <CardContent className="p-0">
-                      {/* Job Header */}
-                      <div className={`h-2 bg-gradient-to-r ${job.color}`} />
+                    {/* Gradient top bar */}
+                    <div className={`h-2 bg-gradient-to-r ${job.color}`} />
 
-                      <div className="p-6 lg:p-8">
-                        <div className="flex flex-col lg:flex-row items-start justify-between mb-6 gap-4">
-                          <div className="flex-1">
-                            <div className="flex flex-wrap items-center gap-2 mb-4">
-                              {job.urgent && (
-                                <Badge className="bg-red-100 text-red-800 dark:bg-red-900/30 dark:text-red-300 animate-pulse">
-                                  🔥 URGENT
-                                </Badge>
-                              )}
-                              {job.featured && (
-                                <Badge className="bg-indigo-100 text-indigo-800 dark:bg-indigo-900/30 dark:text-indigo-300">
-                                  ⭐ FEATURED
-                                </Badge>
-                              )}
-                              <Badge variant="outline">{job.type}</Badge>
+                    {/* Background decoration */}
+                    <div className="absolute top-0 right-0 w-32 h-32 bg-gradient-to-br from-pink-200/20 to-transparent rounded-full -translate-y-16 translate-x-16" />
+
+                    <CardContent className="p-8 relative z-10">
+                      <div className="flex flex-col lg:flex-row items-start justify-between mb-6 gap-4">
+                        <div className="flex-1">
+                          <div className="flex flex-wrap items-center gap-2 mb-4">
+                            {job.urgent && (
+                              <Badge className="bg-red-100 text-red-800 dark:bg-red-900/30 dark:text-red-300 animate-pulse">
+                                🔥 URGENT
+                              </Badge>
+                            )}
+                            {job.featured && (
+                              <Badge className="bg-pink-100 text-pink-800 dark:bg-pink-900/30 dark:text-pink-300">
+                                ⭐ FEATURED
+                              </Badge>
+                            )}
+                            <Badge variant="outline">{job.type}</Badge>
+                          </div>
+
+                          <h3 className="text-2xl font-bold mb-3 hover:text-pink-600 dark:hover:text-pink-400 transition-colors text-gray-800 dark:text-gray-100">
+                            {job.title}
+                          </h3>
+
+                          <div className="flex flex-wrap items-center gap-4 text-sm text-gray-600 dark:text-gray-400 mb-4">
+                            <div className="flex items-center gap-1">
+                              <MapPin className="w-4 h-4" />
+                              {job.location}
                             </div>
-
-                            <h3 className="text-2xl font-bold mb-3 hover:text-cyan-600 dark:hover:text-cyan-400 transition-colors text-gray-800 dark:text-gray-100">
-                              {job.title}
-                            </h3>
-
-                            <div className="flex flex-wrap items-center gap-4 text-sm text-gray-600 dark:text-gray-400 mb-4">
-                              <div className="flex items-center gap-1">
-                                <MapPin className="w-4 h-4" />
-                                {job.location}
-                              </div>
-                              <div className="flex items-center gap-1">
-                                <Clock className="w-4 h-4" />
-                                {job.experience}
-                              </div>
-                              <div className="flex items-center gap-1">
-                                <DollarSign className="w-4 h-4" />
-                                {job.salary}
-                              </div>
+                            <div className="flex items-center gap-1">
+                              <Clock className="w-4 h-4" />
+                              {job.experience}
                             </div>
-
-                            <div className="flex flex-wrap gap-2 mb-4">
-                              {job.tags.map((tag, idx) => (
-                                <Badge
-                                  key={idx}
-                                  variant="secondary"
-                                  className="text-xs"
-                                >
-                                  {tag}
-                                </Badge>
-                              ))}
+                            <div className="flex items-center gap-1">
+                              <DollarSign className="w-4 h-4" />
+                              {job.salary}
                             </div>
                           </div>
 
-                          <motion.div
-                            whileHover={{ scale: 1.1, rotate: 5 }}
-                            className={`w-16 h-16 rounded-2xl bg-gradient-to-r ${job.color} flex items-center justify-center shadow-lg flex-shrink-0`}
-                          >
-                            <job.icon className="w-8 h-8 text-white" />
-                          </motion.div>
+                          <div className="flex flex-wrap gap-2 mb-4">
+                            {job.tags.map((tag, idx) => (
+                              <Badge
+                                key={idx}
+                                variant="secondary"
+                                className="text-xs border-pink-200 hover:bg-pink-50"
+                              >
+                                {tag}
+                              </Badge>
+                            ))}
+                          </div>
                         </div>
 
-                        <p className="text-gray-600 dark:text-gray-400 mb-6 leading-relaxed">
-                          {job.description}
-                        </p>
-
-                        <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
-                          <Button
-                            variant="outline"
-                            onClick={() =>
-                              setExpandedJob(
-                                expandedJob === job.id ? null : job.id,
-                              )
-                            }
-                            className="flex items-center gap-2"
-                          >
-                            <Eye className="w-4 h-4" />
-                            {expandedJob === job.id
-                              ? "Ẩn chi tiết"
-                              : "Xem chi tiết"}
-                            <motion.div
-                              animate={{
-                                rotate: expandedJob === job.id ? 180 : 0,
-                              }}
-                              transition={{ duration: 0.3 }}
-                            >
-                              <ChevronDown className="w-4 h-4" />
-                            </motion.div>
-                          </Button>
-
-                          <Button
-                            className={`bg-gradient-to-r ${job.color} hover:shadow-lg transition-all duration-300 text-white border-0`}
-                            onClick={() =>
-                              document
-                                .getElementById("application-form")
-                                ?.scrollIntoView({ behavior: "smooth" })
-                            }
-                          >
-                            <Send className="w-4 h-4 mr-2" />
-                            Ứng tuyển ngay
-                          </Button>
-                        </div>
-
-                        {/* Expanded Content */}
-                        <AnimatePresence>
-                          {expandedJob === job.id && (
-                            <motion.div
-                              initial={{ height: 0, opacity: 0 }}
-                              animate={{ height: "auto", opacity: 1 }}
-                              exit={{ height: 0, opacity: 0 }}
-                              transition={{ duration: 0.3 }}
-                              className="overflow-hidden mt-8 pt-8 border-t border-gray-200 dark:border-gray-700"
-                            >
-                              <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
-                                <div>
-                                  <h4 className="font-bold text-lg mb-4 flex items-center gap-2 text-gray-800 dark:text-gray-200">
-                                    <Target className="w-5 h-5 text-cyan-500" />
-                                    Trách nhiệm công việc
-                                  </h4>
-                                  <ul className="space-y-2">
-                                    {job.responsibilities.map((item, idx) => (
-                                      <li
-                                        key={idx}
-                                        className="flex items-start gap-2 text-sm text-gray-600 dark:text-gray-400"
-                                      >
-                                        <CheckCircle className="w-4 h-4 text-emerald-500 mt-0.5 flex-shrink-0" />
-                                        <span>{item}</span>
-                                      </li>
-                                    ))}
-                                  </ul>
-                                </div>
-
-                                <div>
-                                  <h4 className="font-bold text-lg mb-4 flex items-center gap-2 text-gray-800 dark:text-gray-200">
-                                    <Shield className="w-5 h-5 text-indigo-500" />
-                                    Yêu cầu ứng viên
-                                  </h4>
-                                  <ul className="space-y-2">
-                                    {job.requirements.map((item, idx) => (
-                                      <li
-                                        key={idx}
-                                        className="flex items-start gap-2 text-sm text-gray-600 dark:text-gray-400"
-                                      >
-                                        <Star className="w-4 h-4 text-amber-500 mt-0.5 flex-shrink-0" />
-                                        <span>{item}</span>
-                                      </li>
-                                    ))}
-                                  </ul>
-                                </div>
-                              </div>
-
-                              <div className="mt-6 p-4 bg-gradient-to-r from-cyan-50/50 to-blue-50/50 dark:from-cyan-900/20 dark:to-blue-900/20 rounded-xl">
-                                <h4 className="font-bold mb-2 flex items-center gap-2 text-gray-800 dark:text-gray-200">
-                                  <Gift className="w-5 h-5 text-emerald-500" />
-                                  Quyền lợi đặc biệt
-                                </h4>
-                                <div className="flex flex-wrap gap-2">
-                                  {job.benefits.map((benefit, idx) => (
-                                    <Badge
-                                      key={idx}
-                                      className="bg-emerald-100 text-emerald-800 dark:bg-emerald-900/30 dark:text-emerald-300"
-                                    >
-                                      {benefit}
-                                    </Badge>
-                                  ))}
-                                </div>
-                              </div>
-                            </motion.div>
-                          )}
-                        </AnimatePresence>
+                        <motion.div
+                          whileHover={{ scale: 1.1, rotate: 5 }}
+                          className={`w-16 h-16 rounded-2xl bg-gradient-to-r ${job.color} flex items-center justify-center ${softPinkTheme.softGlow} flex-shrink-0`}
+                        >
+                          <job.icon className="w-8 h-8 text-white" />
+                        </motion.div>
                       </div>
+
+                      <p className="text-gray-600 dark:text-gray-400 mb-6 leading-relaxed">
+                        {job.description}
+                      </p>
+
+                      <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
+                        <Button
+                          variant="outline"
+                          onClick={() =>
+                            setExpandedJob(
+                              expandedJob === job.id ? null : job.id,
+                            )
+                          }
+                          className="flex items-center gap-2 border-pink-200 hover:bg-pink-50"
+                        >
+                          <Eye className="w-4 h-4" />
+                          {expandedJob === job.id
+                            ? "Ẩn chi tiết"
+                            : "Xem chi tiết"}
+                          <motion.div
+                            animate={{
+                              rotate: expandedJob === job.id ? 180 : 0,
+                            }}
+                            transition={{ duration: 0.3 }}
+                          >
+                            <ChevronDown className="w-4 h-4" />
+                          </motion.div>
+                        </Button>
+
+                        <Button
+                          className={`bg-gradient-to-r ${job.color} hover:scale-105 ${softPinkTheme.softGlow} transition-all duration-300 text-white border-0`}
+                          onClick={() =>
+                            document
+                              .getElementById("application-form")
+                              ?.scrollIntoView({ behavior: "smooth" })
+                          }
+                        >
+                          <Send className="w-4 h-4 mr-2" />
+                          Ứng tuyển ngay
+                        </Button>
+                      </div>
+
+                      {/* Expanded Content */}
+                      <AnimatePresence>
+                        {expandedJob === job.id && (
+                          <motion.div
+                            initial={{ height: 0, opacity: 0 }}
+                            animate={{ height: "auto", opacity: 1 }}
+                            exit={{ height: 0, opacity: 0 }}
+                            transition={{ duration: 0.3 }}
+                            className="overflow-hidden mt-8 pt-8 border-t border-pink-200 dark:border-pink-700"
+                          >
+                            <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
+                              <div>
+                                <h4 className="font-bold text-lg mb-4 flex items-center gap-2 text-gray-800 dark:text-gray-200">
+                                  <Target className="w-5 h-5 text-pink-500" />
+                                  Trách nhiệm công việc
+                                </h4>
+                                <ul className="space-y-2">
+                                  {job.responsibilities.map((item, idx) => (
+                                    <li
+                                      key={idx}
+                                      className="flex items-start gap-2 text-sm text-gray-600 dark:text-gray-400"
+                                    >
+                                      <CheckCircle className="w-4 h-4 text-emerald-500 mt-0.5 flex-shrink-0" />
+                                      <span>{item}</span>
+                                    </li>
+                                  ))}
+                                </ul>
+                              </div>
+
+                              <div>
+                                <h4 className="font-bold text-lg mb-4 flex items-center gap-2 text-gray-800 dark:text-gray-200">
+                                  <Shield className="w-5 h-5 text-pink-500" />
+                                  Yêu cầu ứng viên
+                                </h4>
+                                <ul className="space-y-2">
+                                  {job.requirements.map((item, idx) => (
+                                    <li
+                                      key={idx}
+                                      className="flex items-start gap-2 text-sm text-gray-600 dark:text-gray-400"
+                                    >
+                                      <Star className="w-4 h-4 text-amber-500 mt-0.5 flex-shrink-0" />
+                                      <span>{item}</span>
+                                    </li>
+                                  ))}
+                                </ul>
+                              </div>
+                            </div>
+
+                            <div className="mt-6 p-4 bg-gradient-to-r from-pink-50/50 to-rose-50/50 dark:from-pink-900/20 dark:to-rose-900/20 rounded-xl">
+                              <h4 className="font-bold mb-2 flex items-center gap-2 text-gray-800 dark:text-gray-200">
+                                <Gift className="w-5 h-5 text-pink-500" />
+                                Quyền lợi đặc biệt
+                              </h4>
+                              <div className="flex flex-wrap gap-2">
+                                {job.benefits.map((benefit, idx) => (
+                                  <Badge
+                                    key={idx}
+                                    className="bg-pink-100 text-pink-800 dark:bg-pink-900/30 dark:text-pink-300"
+                                  >
+                                    {benefit}
+                                  </Badge>
+                                ))}
+                              </div>
+                            </div>
+                          </motion.div>
+                        )}
+                      </AnimatePresence>
                     </CardContent>
                   </Card>
                 </motion.div>
@@ -920,9 +1043,9 @@ const Careers: React.FC = () => {
           </div>
         </section>
 
-        {/* ✅ Enhanced Application Form */}
+        {/* ✅ Enhanced Application Form - STEP BY STEP */}
         <section
-          className="px-4 py-20 bg-gradient-to-br from-cyan-50/60 via-blue-50/60 to-indigo-50/60 dark:from-cyan-900/10 dark:via-blue-900/10 dark:to-indigo-900/10"
+          className={`px-4 py-20 bg-gradient-to-br ${softPinkTheme.sectionBackground}`}
           id="application-form"
         >
           <div className="container mx-auto">
@@ -932,8 +1055,10 @@ const Careers: React.FC = () => {
               viewport={{ once: true }}
               className="text-center mb-16"
             >
-              <h2 className="text-4xl font-bold mb-6 text-transparent bg-gradient-to-r from-purple-600 to-pink-600 bg-clip-text">
-                🚀 Ứng tuyển ngay hôm nay
+              <h2
+                className={`text-4xl font-bold mb-6 text-transparent bg-gradient-to-r ${softPinkTheme.heroText} bg-clip-text`}
+              >
+                Ứng tuyển ngay hôm nay
               </h2>
               <p className="max-w-3xl mx-auto text-xl text-gray-600 dark:text-gray-400">
                 Không tìm thấy vị trí phù hợp? Gửi CV và chúng tôi sẽ liên hệ
@@ -942,11 +1067,13 @@ const Careers: React.FC = () => {
             </motion.div>
 
             <div className="max-w-4xl mx-auto">
-              <Card className="border-0 shadow-2xl bg-white/90 dark:bg-slate-800/90 backdrop-blur-sm overflow-hidden">
+              <Card
+                className={`border-0 ${softPinkTheme.softGlow} bg-gradient-to-br ${softPinkTheme.neoCard} backdrop-blur-sm overflow-hidden`}
+              >
                 {/* Progress Bar */}
                 <div className="h-2 bg-gray-100 dark:bg-gray-700">
                   <motion.div
-                    className="h-full bg-gradient-to-r from-cyan-500 to-indigo-600"
+                    className={`h-full bg-gradient-to-r ${softPinkTheme.primaryGradient}`}
                     initial={{ width: "33%" }}
                     animate={{ width: `${(currentStep / 3) * 100}%` }}
                     transition={{ duration: 0.5 }}
@@ -957,7 +1084,7 @@ const Careers: React.FC = () => {
                   <CardTitle className="flex flex-col sm:flex-row items-center justify-center gap-3 text-2xl">
                     <motion.div
                       whileHover={{ scale: 1.1, rotate: 5 }}
-                      className="w-12 h-12 bg-gradient-to-r from-cyan-500 to-indigo-600 rounded-2xl flex items-center justify-center shadow-lg"
+                      className={`w-12 h-12 bg-gradient-to-r ${softPinkTheme.primaryGradient} rounded-2xl flex items-center justify-center ${softPinkTheme.softGlow}`}
                     >
                       <Send className="w-6 h-6 text-white" />
                     </motion.div>
@@ -1031,13 +1158,13 @@ const Careers: React.FC = () => {
                             <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
                               <div className="space-y-2">
                                 <Label className="flex items-center gap-2 text-base font-semibold text-gray-700 dark:text-gray-300">
-                                  <Users className="w-5 h-5 text-cyan-500" />
+                                  <Users className="w-5 h-5 text-pink-500" />
                                   Họ và tên *
                                 </Label>
                                 <Input
                                   {...register("name")}
                                   placeholder="Nguyễn Văn A"
-                                  className={`h-12 ${errors.name ? "border-red-500" : ""} text-gray-800 dark:text-gray-200`}
+                                  className={`h-12 ${errors.name ? "border-red-500" : "border-pink-200"} text-gray-800 dark:text-gray-200 focus:ring-pink-300`}
                                 />
                                 {errors.name && (
                                   <motion.p
@@ -1052,14 +1179,14 @@ const Careers: React.FC = () => {
 
                               <div className="space-y-2">
                                 <Label className="flex items-center gap-2 text-base font-semibold text-gray-700 dark:text-gray-300">
-                                  <Mail className="w-5 h-5 text-indigo-500" />
+                                  <Mail className="w-5 h-5 text-pink-500" />
                                   Email *
                                 </Label>
                                 <Input
                                   {...register("email")}
                                   type="email"
                                   placeholder="example@email.com"
-                                  className={`h-12 ${errors.email ? "border-red-500" : ""} text-gray-800 dark:text-gray-200`}
+                                  className={`h-12 ${errors.email ? "border-red-500" : "border-pink-200"} text-gray-800 dark:text-gray-200 focus:ring-pink-300`}
                                 />
                                 {errors.email && (
                                   <motion.p
@@ -1076,13 +1203,13 @@ const Careers: React.FC = () => {
                             <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
                               <div className="space-y-2">
                                 <Label className="flex items-center gap-2 text-base font-semibold text-gray-700 dark:text-gray-300">
-                                  <Phone className="w-5 h-5 text-emerald-500" />
+                                  <Phone className="w-5 h-5 text-pink-500" />
                                   Số điện thoại
                                 </Label>
                                 <Input
                                   {...register("phone")}
                                   placeholder="+84 123 456 789"
-                                  className="h-12 text-gray-800 dark:text-gray-200"
+                                  className="h-12 border-pink-200 text-gray-800 dark:text-gray-200 focus:ring-pink-300"
                                 />
                                 {errors.phone && (
                                   <p className="text-red-500 text-sm">
@@ -1093,12 +1220,12 @@ const Careers: React.FC = () => {
 
                               <div className="space-y-2">
                                 <Label className="flex items-center gap-2 text-base font-semibold text-gray-700 dark:text-gray-300">
-                                  <Briefcase className="w-5 h-5 text-purple-500" />
+                                  <Briefcase className="w-5 h-5 text-pink-500" />
                                   Vị trí ứng tuyển *
                                 </Label>
                                 <select
                                   {...register("position")}
-                                  className={`w-full h-12 px-3 border rounded-md bg-background text-gray-800 dark:text-gray-200 ${errors.position ? "border-red-500" : ""}`}
+                                  className={`w-full h-12 px-3 border rounded-md bg-background border-pink-200 text-gray-800 dark:text-gray-200 focus:ring-pink-300 ${errors.position ? "border-red-500" : ""}`}
                                 >
                                   <option value="">Chọn vị trí...</option>
                                   {jobOpenings.map((job) => (
@@ -1119,12 +1246,12 @@ const Careers: React.FC = () => {
                             <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
                               <div className="space-y-2">
                                 <Label className="flex items-center gap-2 text-base font-semibold text-gray-700 dark:text-gray-300">
-                                  <BarChart className="w-5 h-5 text-blue-500" />
+                                  <BarChart className="w-5 h-5 text-pink-500" />
                                   Kinh nghiệm *
                                 </Label>
                                 <select
                                   {...register("experience")}
-                                  className={`w-full h-12 px-3 border rounded-md bg-background text-gray-800 dark:text-gray-200 ${errors.experience ? "border-red-500" : ""}`}
+                                  className={`w-full h-12 px-3 border rounded-md bg-background border-pink-200 text-gray-800 dark:text-gray-200 focus:ring-pink-300 ${errors.experience ? "border-red-500" : ""}`}
                                 >
                                   <option value="">
                                     Chọn mức kinh nghiệm...
@@ -1143,12 +1270,12 @@ const Careers: React.FC = () => {
 
                               <div className="space-y-2">
                                 <Label className="flex items-center gap-2 text-base font-semibold text-gray-700 dark:text-gray-300">
-                                  <Calendar className="w-5 h-5 text-amber-500" />
+                                  <Calendar className="w-5 h-5 text-pink-500" />
                                   Ngày có thể bắt đầu *
                                 </Label>
                                 <select
                                   {...register("startDate")}
-                                  className={`w-full h-12 px-3 border rounded-md bg-background text-gray-800 dark:text-gray-200 ${errors.startDate ? "border-red-500" : ""}`}
+                                  className={`w-full h-12 px-3 border rounded-md bg-background border-pink-200 text-gray-800 dark:text-gray-200 focus:ring-pink-300 ${errors.startDate ? "border-red-500" : ""}`}
                                 >
                                   <option value="">Chọn thời gian...</option>
                                   <option value="immediate">
@@ -1183,12 +1310,12 @@ const Careers: React.FC = () => {
                             <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
                               <div className="space-y-2">
                                 <Label className="flex items-center gap-2 text-base font-semibold text-gray-700 dark:text-gray-300">
-                                  <DollarSign className="w-5 h-5 text-emerald-500" />
+                                  <DollarSign className="w-5 h-5 text-pink-500" />
                                   Mức lương mong muốn
                                 </Label>
                                 <select
                                   {...register("salary")}
-                                  className="w-full h-12 px-3 border rounded-md bg-background text-gray-800 dark:text-gray-200"
+                                  className="w-full h-12 px-3 border rounded-md bg-background border-pink-200 text-gray-800 dark:text-gray-200 focus:ring-pink-300"
                                 >
                                   <option value="">Chọn mức lương...</option>
                                   <option value="500-1000">
@@ -1212,12 +1339,12 @@ const Careers: React.FC = () => {
 
                               <div className="space-y-2">
                                 <Label className="flex items-center gap-2 text-base font-semibold text-gray-700 dark:text-gray-300">
-                                  <Clock className="w-5 h-5 text-cyan-500" />
+                                  <Clock className="w-5 h-5 text-pink-500" />
                                   Hình thức làm việc *
                                 </Label>
                                 <select
                                   {...register("workType")}
-                                  className={`w-full h-12 px-3 border rounded-md bg-background text-gray-800 dark:text-gray-200 ${errors.workType ? "border-red-500" : ""}`}
+                                  className={`w-full h-12 px-3 border rounded-md bg-background border-pink-200 text-gray-800 dark:text-gray-200 focus:ring-pink-300 ${errors.workType ? "border-red-500" : ""}`}
                                 >
                                   <option value="">Chọn hình thức...</option>
                                   <option value="onsite">
@@ -1241,13 +1368,13 @@ const Careers: React.FC = () => {
                             <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
                               <div className="space-y-2">
                                 <Label className="flex items-center gap-2 text-base font-semibold text-gray-700 dark:text-gray-300">
-                                  <Globe className="w-5 h-5 text-indigo-500" />
+                                  <Globe className="w-5 h-5 text-pink-500" />
                                   Portfolio / Website
                                 </Label>
                                 <Input
                                   {...register("portfolio")}
                                   placeholder="https://yourportfolio.com"
-                                  className="h-12 text-gray-800 dark:text-gray-200"
+                                  className="h-12 border-pink-200 text-gray-800 dark:text-gray-200 focus:ring-pink-300"
                                 />
                                 {errors.portfolio && (
                                   <p className="text-red-500 text-sm">
@@ -1258,13 +1385,13 @@ const Careers: React.FC = () => {
 
                               <div className="space-y-2">
                                 <Label className="flex items-center gap-2 text-base font-semibold text-gray-700 dark:text-gray-300">
-                                  <Users className="w-5 h-5 text-blue-600" />
+                                  <Users className="w-5 h-5 text-pink-500" />
                                   LinkedIn Profile
                                 </Label>
                                 <Input
                                   {...register("linkedin")}
                                   placeholder="https://linkedin.com/in/yourprofile"
-                                  className="h-12 text-gray-800 dark:text-gray-200"
+                                  className="h-12 border-pink-200 text-gray-800 dark:text-gray-200 focus:ring-pink-300"
                                 />
                                 {errors.linkedin && (
                                   <p className="text-red-500 text-sm">
@@ -1276,7 +1403,7 @@ const Careers: React.FC = () => {
 
                             <div className="space-y-4">
                               <Label className="flex items-center gap-2 text-base font-semibold text-gray-700 dark:text-gray-300">
-                                <Code className="w-5 h-5 text-purple-500" />
+                                <Code className="w-5 h-5 text-pink-500" />
                                 Kỹ năng chuyên môn * (chọn ít nhất 1)
                               </Label>
                               <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-3">
@@ -1289,8 +1416,8 @@ const Careers: React.FC = () => {
                                     onClick={() => handleSkillToggle(skill)}
                                     className={`p-3 rounded-lg border-2 transition-all text-sm font-medium ${
                                       selectedSkills.includes(skill)
-                                        ? "border-cyan-500 bg-cyan-50 dark:bg-cyan-900/20 text-cyan-700 dark:text-cyan-300"
-                                        : "border-gray-200 dark:border-gray-700 hover:border-cyan-300 hover:bg-cyan-50 dark:hover:bg-cyan-900/10 text-gray-700 dark:text-gray-300"
+                                        ? "border-pink-500 bg-pink-50 dark:bg-pink-900/20 text-pink-700 dark:text-pink-300"
+                                        : "border-pink-200 dark:border-pink-700 hover:border-pink-300 hover:bg-pink-50 dark:hover:bg-pink-900/10 text-gray-700 dark:text-gray-300"
                                     }`}
                                   >
                                     {skill}
@@ -1317,7 +1444,7 @@ const Careers: React.FC = () => {
                           >
                             <div className="space-y-2">
                               <Label className="flex items-center gap-2 text-base font-semibold text-gray-700 dark:text-gray-300">
-                                <MessageSquare className="w-5 h-5 text-emerald-500" />
+                                <MessageSquare className="w-5 h-5 text-pink-500" />
                                 Thư xin việc (Cover Letter) *
                               </Label>
                               <p className="text-sm text-gray-600 dark:text-gray-400">
@@ -1328,7 +1455,7 @@ const Careers: React.FC = () => {
                                 {...register("coverLetter")}
                                 placeholder="Tôi là một developer đam mê với 3 năm kinh nghiệm trong React/Node.js. Tôi muốn gia nhập Template Market vì..."
                                 rows={8}
-                                className={`resize-none text-gray-800 dark:text-gray-200 ${errors.coverLetter ? "border-red-500" : ""}`}
+                                className={`resize-none border-pink-200 text-gray-800 dark:text-gray-200 focus:ring-pink-300 ${errors.coverLetter ? "border-red-500" : ""}`}
                               />
                               {errors.coverLetter && (
                                 <p className="text-red-500 text-sm">
@@ -1337,9 +1464,9 @@ const Careers: React.FC = () => {
                               )}
                             </div>
 
-                            <div className="bg-gradient-to-r from-cyan-50/50 to-blue-50/50 dark:from-cyan-900/20 dark:to-blue-900/20 p-6 rounded-xl">
+                            <div className="bg-gradient-to-r from-pink-50/50 to-rose-50/50 dark:from-pink-900/20 dark:to-rose-900/20 p-6 rounded-xl border border-pink-200 dark:border-pink-700">
                               <h4 className="font-bold mb-3 flex items-center gap-2 text-gray-800 dark:text-gray-200">
-                                <Lightbulb className="w-5 h-5 text-amber-500" />
+                                <Lightbulb className="w-5 h-5 text-pink-500" />
                                 Tips để viết cover letter tốt:
                               </h4>
                               <ul className="space-y-2 text-sm text-gray-600 dark:text-gray-400">
@@ -1353,20 +1480,20 @@ const Careers: React.FC = () => {
                                     key={idx}
                                     className="flex items-start gap-2"
                                   >
-                                    <CheckCircle className="w-4 h-4 text-emerald-500 mt-0.5 flex-shrink-0" />
+                                    <CheckCircle className="w-4 h-4 text-pink-500 mt-0.5 flex-shrink-0" />
                                     {tip}
                                   </li>
                                 ))}
                               </ul>
                             </div>
 
-                            <div className="text-center p-4 bg-amber-50 dark:bg-amber-900/20 border border-amber-200 dark:border-amber-800 rounded-xl">
-                              <p className="text-sm text-amber-800 dark:text-amber-300">
+                            <div className="text-center p-4 bg-pink-50 dark:bg-pink-900/20 border border-pink-200 dark:border-pink-800 rounded-xl">
+                              <p className="text-sm text-pink-800 dark:text-pink-300">
                                 📄 <strong>Lưu ý:</strong> Bạn có thể gửi CV qua
                                 email{" "}
                                 <a
                                   href="mailto:careers@templatemarket.vn"
-                                  className="underline font-semibold hover:text-amber-900 dark:hover:text-amber-200"
+                                  className="underline font-semibold hover:text-pink-900 dark:hover:text-pink-200"
                                 >
                                   careers@templatemarket.vn
                                 </a>{" "}
@@ -1377,13 +1504,13 @@ const Careers: React.FC = () => {
                         )}
 
                         {/* Navigation Buttons */}
-                        <div className="flex items-center justify-between pt-8 border-t border-gray-200 dark:border-gray-700">
+                        <div className="flex items-center justify-between pt-8 border-t border-pink-200 dark:border-pink-700">
                           <Button
                             type="button"
                             variant="outline"
                             onClick={prevStep}
                             disabled={currentStep === 1}
-                            className="flex items-center gap-2"
+                            className="flex items-center gap-2 border-pink-200 hover:bg-pink-50"
                           >
                             <ArrowRight className="w-4 h-4 rotate-180" />
                             Quay lại
@@ -1395,7 +1522,7 @@ const Careers: React.FC = () => {
                                 key={step}
                                 className={`w-3 h-3 rounded-full transition-all ${
                                   step === currentStep
-                                    ? "bg-cyan-500 scale-125"
+                                    ? "bg-pink-500 scale-125"
                                     : step < currentStep
                                       ? "bg-emerald-500"
                                       : "bg-gray-300 dark:bg-gray-600"
@@ -1408,7 +1535,7 @@ const Careers: React.FC = () => {
                             <Button
                               type="button"
                               onClick={nextStep}
-                              className="bg-gradient-to-r from-cyan-500 to-indigo-600 hover:from-cyan-600 hover:to-indigo-700 text-white border-0"
+                              className={`bg-gradient-to-r ${softPinkTheme.primaryGradient} hover:scale-105 text-white border-0 transition-all`}
                             >
                               Tiếp theo
                               <ArrowRight className="w-4 h-4 ml-2" />
@@ -1417,7 +1544,7 @@ const Careers: React.FC = () => {
                             <Button
                               type="submit"
                               disabled={isSubmitting}
-                              className="bg-gradient-to-r from-emerald-500 to-cyan-600 hover:from-emerald-600 hover:to-cyan-700 px-8 text-white border-0"
+                              className={`bg-gradient-to-r ${softPinkTheme.secondaryGradient} hover:scale-105 px-8 text-white border-0 transition-all`}
                             >
                               {isSubmitting ? (
                                 <>
@@ -1448,7 +1575,7 @@ const Careers: React.FC = () => {
                             Bằng cách gửi form này, bạn đồng ý với{" "}
                             <a
                               href="/privacy"
-                              className="text-cyan-600 dark:text-cyan-400 hover:underline"
+                              className="text-pink-600 dark:text-pink-400 hover:underline"
                             >
                               chính sách bảo mật
                             </a>{" "}
@@ -1464,8 +1591,10 @@ const Careers: React.FC = () => {
           </div>
         </section>
 
-        {/* ✅ Enhanced CTA Section */}
-        <section className="relative px-4 py-20 overflow-hidden bg-gradient-to-r from-cyan-600 via-blue-600 to-indigo-600">
+        {/* ✅ Enhanced CTA Section - PINK THEME */}
+        <section
+          className={`relative px-4 py-20 overflow-hidden bg-gradient-to-r ${softPinkTheme.primaryGradient}`}
+        >
           <div className="absolute inset-0">
             <div className="absolute top-0 left-0 w-full h-full bg-black/10"></div>
             {Array.from({ length: 12 }).map((_, i) => (
@@ -1498,7 +1627,7 @@ const Careers: React.FC = () => {
               className="max-w-4xl mx-auto space-y-8 text-white"
             >
               <h2 className="text-4xl font-bold lg:text-5xl">
-                🚀 Ready to build the future together?
+                Ready to build the future together?
               </h2>
               <p className="text-xl opacity-90 leading-relaxed">
                 Chúng tôi luôn tìm kiếm những tài năng xuất sắc để cùng tạo ra
@@ -1510,7 +1639,7 @@ const Careers: React.FC = () => {
                 <Button
                   size="lg"
                   variant="secondary"
-                  className="bg-white text-indigo-600 hover:bg-gray-100 shadow-xl hover:shadow-2xl transition-all duration-300 px-8 py-4"
+                  className="bg-white text-pink-600 hover:bg-gray-100 shadow-xl hover:shadow-2xl transition-all duration-300 px-8 py-4"
                   asChild
                 >
                   <a href="/contact">
@@ -1523,7 +1652,7 @@ const Careers: React.FC = () => {
                 <Button
                   size="lg"
                   variant="outline"
-                  className="text-white border-white hover:bg-white hover:text-indigo-600 shadow-xl hover:shadow-2xl transition-all duration-300 px-8 py-4"
+                  className="text-white border-white hover:bg-white hover:text-pink-600 shadow-xl hover:shadow-2xl transition-all duration-300 px-8 py-4"
                   asChild
                 >
                   <a href="mailto:careers@templatemarket.vn">

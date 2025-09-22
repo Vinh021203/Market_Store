@@ -31,6 +31,7 @@ export interface Product {
   fileSize?: string;
   format?: string;
   pages?: number;
+  views?: number;
 }
 
 export interface CartItem {

@@ -9,21 +9,20 @@ import {
   ChevronUp,
   ChevronDown,
   Clock,
-  MapPin,
-  Headphones,
-  Star,
   Heart,
   Gift,
   X,
+  Star,
 } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
+import { cn } from "@/lib/utils";
 
 const ContactWidget: React.FC = () => {
   const [isExpanded, setIsExpanded] = useState(false);
   const [hoveredMethod, setHoveredMethod] = useState<string | null>(null);
   const [isMobile, setIsMobile] = useState(false);
 
-  // ✅ Responsive detection
+  // Enhanced responsive detection
   useEffect(() => {
     const checkMobile = () => {
       setIsMobile(window.innerWidth < 768);
@@ -34,274 +33,176 @@ const ContactWidget: React.FC = () => {
     return () => window.removeEventListener("resize", checkMobile);
   }, []);
 
+  // ✅ UPDATED: Pink/Rose/Red themed contact methods
   const contactMethods = [
     {
       icon: MessageSquare,
       label: "Zalo Chat",
       value: "0971386588",
       action: () => window.open("https://zalo.me/0971386588", "_blank"),
-      gradient: "from-sky-400 to-blue-500",
-      hoverGradient: "from-sky-500 to-blue-600",
       description: "Chat nhanh nhất",
-      status: "online",
       responseTime: "< 1 phút",
+      statusColor: "bg-emerald-400",
+      bgColor: "from-emerald-500 to-green-500", // Keep green for Zalo brand consistency
     },
     {
       icon: Phone,
       label: "Hotline",
       value: "0971386588",
       action: () => window.open("tel:0971386588"),
-      gradient: "from-emerald-400 to-green-500",
-      hoverGradient: "from-emerald-500 to-green-600",
       description: "Gọi ngay",
-      status: "available",
       responseTime: "Ngay lập tức",
+      statusColor: "bg-pink-400", // ✅ UPDATED: Pink status
+      bgColor: "from-pink-500 to-rose-500", // ✅ UPDATED: Pink gradient
     },
     {
       icon: Mail,
       label: "Email",
       value: "veutong961@gmail.com",
       action: () => window.open("mailto:veutong961@gmail.com"),
-      gradient: "from-pink-400 to-rose-500",
-      hoverGradient: "from-pink-500 to-rose-600",
       description: "Hỗ trợ chi tiết",
-      status: "active",
       responseTime: "< 30 phút",
+      statusColor: "bg-rose-400", // ✅ UPDATED: Rose status
+      bgColor: "from-rose-500 to-red-500", // ✅ UPDATED: Rose gradient
     },
   ];
 
-  const getStatusColor = (status: string) => {
-    switch (status) {
-      case "online":
-        return "bg-emerald-400";
-      case "available":
-        return "bg-sky-400";
-      case "active":
-        return "bg-pink-400";
-      default:
-        return "bg-gray-400";
-    }
-  };
-
-  // ✅ Dynamic positioning và sizing với chiều cao cố định
+  // Optimized positioning - thấp như chatbot
   const getWidgetStyle = () => {
     if (isMobile) {
       return {
         bottom: "20px",
         left: "20px",
-        width: "calc(100vw - 40px)",
-        maxWidth: "340px",
-        height: "380px",
+        right: "20px",
+        width: "auto",
       };
     }
     return {
-      bottom: "24px",
-      left: "24px",
-      width: "380px",
-      height: "450px",
+      bottom: "20px",
+      left: "20px",
+      width: "320px",
     };
   };
 
   const widgetStyle = getWidgetStyle();
 
   return (
-    <div
-      className="fixed z-50"
-      style={{
-        bottom: widgetStyle.bottom,
-        left: widgetStyle.left,
-      }}
-    >
+    <div className="fixed z-40" style={widgetStyle}>
       <AnimatePresence>
         {isExpanded && (
           <motion.div
-            initial={{ opacity: 0, y: 30, scale: 0.8 }}
+            initial={{ opacity: 0, y: 20, scale: 0.95 }}
             animate={{ opacity: 1, y: 0, scale: 1 }}
-            exit={{ opacity: 0, y: 30, scale: 0.8 }}
-            transition={{
-              duration: 0.4,
-              ease: [0.23, 1, 0.32, 1],
-              staggerChildren: 0.1,
-            }}
-            className="mb-4"
-            style={{
-              width: widgetStyle.width,
-              maxWidth: widgetStyle.maxWidth,
-              height: widgetStyle.height,
-            }}
+            exit={{ opacity: 0, y: 20, scale: 0.95 }}
+            transition={{ duration: 0.25, ease: "easeOut" }}
+            className="mb-3"
           >
-            {/* ✅ Gradient Background sáng hơn */}
-            <Card
-              className="h-full border-0 shadow-2xl overflow-hidden relative"
-              style={{ height: "100%" }}
-            >
-              {/* ✅ Background Gradient sáng rực rỡ */}
-              <div className="absolute inset-0 bg-gradient-to-br from-pink-400 via-purple-400 to-cyan-300" />
-              <div className="absolute inset-0 bg-gradient-to-t from-blue-400/60 to-transparent" />
-              <div className="absolute inset-0 bg-gradient-to-r from-violet-400/40 to-pink-300/40" />
-
-              {/* ✅ Decorative circles sáng hơn */}
-              <div className="absolute top-4 right-4 w-24 h-24 bg-white/20 rounded-full blur-xl animate-pulse" />
-              <div className="absolute bottom-6 left-6 w-20 h-20 bg-yellow-300/30 rounded-full blur-lg animate-pulse" />
-              <div className="absolute top-1/2 right-8 w-16 h-16 bg-cyan-200/25 rounded-full blur-md animate-pulse" />
+            {/* ✅ UPDATED: Pink/Rose/Red Main Card */}
+            <Card className="border-0 shadow-xl overflow-hidden backdrop-blur-sm">
+              {/* ✅ UPDATED: Pink/Rose/Red gradient background */}
+              <div className="absolute inset-0 bg-gradient-to-br from-pink-400 via-rose-400 to-red-400" />
+              <div className="absolute inset-0 bg-gradient-to-t from-black/20 to-transparent" />
 
               <CardContent
-                className={`${isMobile ? "p-4" : "p-6"} h-full flex flex-col relative z-10`}
+                className={cn(
+                  "relative z-10 text-white",
+                  isMobile ? "p-4" : "p-5",
+                )}
               >
-                {/* ✅ Header với Close Button */}
-                <motion.div
-                  initial={{ opacity: 0, y: -10 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  className="flex-shrink-0 space-y-3 text-center mb-4 relative"
-                >
-                  {/* Close Button sáng hơn */}
-                  <Button
-                    onClick={() => setIsExpanded(false)}
-                    className="absolute -top-2 -right-2 w-8 h-8 rounded-full bg-white/30 hover:bg-white/40 border-0 text-white p-0 shadow-lg backdrop-blur-sm"
-                    size="icon"
-                  >
-                    <X className="w-4 h-4" />
-                  </Button>
-
-                  {/* Gift Icon & Title */}
-                  <div className="flex items-center justify-center gap-2 text-white">
-                    <div className="p-3 bg-white/25 rounded-full shadow-lg backdrop-blur-sm">
-                      <Gift className={`${isMobile ? "w-5 h-5" : "w-6 h-6"}`} />
+                {/* Header - Compact */}
+                <div className="flex items-center justify-between mb-4">
+                  <div className="flex items-center gap-3">
+                    <div className="p-2 bg-white/20 rounded-lg backdrop-blur-sm">
+                      <Gift className="w-5 h-5" strokeWidth={2.2} />
+                    </div>
+                    <div>
+                      <h3
+                        className={cn(
+                          "font-bold text-white",
+                          isMobile ? "text-base" : "text-lg",
+                        )}
+                      >
+                        Liên hệ hỗ trợ
+                      </h3>
+                      <p className="text-xs text-white/80">Hỗ trợ 24/7</p>
                     </div>
                   </div>
 
-                  <h3
-                    className={`${isMobile ? "text-lg" : "text-xl"} font-bold text-white leading-tight drop-shadow-sm`}
+                  <Button
+                    onClick={() => setIsExpanded(false)}
+                    variant="ghost"
+                    size="sm"
+                    className="w-8 h-8 p-0 rounded-full bg-white/15 hover:bg-white/25 border-0 text-white"
                   >
-                    Nhận ưu đãi & tài liệu mới
-                  </h3>
+                    <X className="w-4 h-4" />
+                  </Button>
+                </div>
 
-                  <p
-                    className={`${isMobile ? "text-sm" : "text-base"} text-white/95 leading-relaxed drop-shadow-sm`}
-                  >
-                    Đăng ký để nhận tài liệu VIP, ưu đãi mới, tips & news hot
-                    qua email mỗi tuần!
-                  </p>
-
-                  {/* Rating sáng hơn */}
-                  {!isMobile && (
-                    <div className="flex items-center justify-center gap-2">
-                      <div className="flex items-center gap-1">
-                        {[...Array(5)].map((_, i) => (
-                          <Star
-                            key={i}
-                            className="w-3 h-3 text-yellow-200 fill-current drop-shadow-sm"
-                          />
-                        ))}
-                      </div>
-                      <span className="text-xs text-white/90 drop-shadow-sm">
-                        5.0 (1,200+ đánh giá)
-                      </span>
-                    </div>
-                  )}
-                </motion.div>
-
-                {/* ✅ Scrollable Content Area */}
-                <div className="flex-1 overflow-hidden">
-                  <div className="h-full overflow-y-auto space-y-3 pr-2 custom-scrollbar">
-                    {/* ✅ Contact Methods với style sáng hơn */}
-                    <div className="space-y-3">
-                      {contactMethods.map((method, index) => (
-                        <motion.div
-                          key={method.label}
-                          initial={{ opacity: 0, x: -30 }}
-                          animate={{ opacity: 1, x: 0 }}
-                          transition={{ delay: index * 0.1 }}
-                          onHoverStart={() => setHoveredMethod(method.label)}
-                          onHoverEnd={() => setHoveredMethod(null)}
-                        >
-                          <Button
-                            onClick={method.action}
-                            className={`w-full justify-start gap-3 ${isMobile ? "p-3 h-auto" : "p-4 h-auto"} 
-                              ${
-                                hoveredMethod === method.label
-                                  ? "bg-white/35 border-white/50 shadow-xl"
-                                  : "bg-white/25 border-white/30 shadow-lg"
-                              } 
-                              text-white hover:shadow-2xl transition-all duration-300 group 
-                              border backdrop-blur-md rounded-xl hover:bg-white/35 hover:scale-[1.02]`}
-                            variant="outline"
-                          >
-                            <div className="relative">
-                              <method.icon
-                                className={`${isMobile ? "w-5 h-5" : "w-6 h-6"} transition-transform group-hover:scale-110 drop-shadow-sm`}
-                              />
-                              <div
-                                className={`absolute -top-1 -right-1 ${isMobile ? "w-2 h-2" : "w-3 h-3"} ${getStatusColor(method.status)} rounded-full animate-pulse shadow-md`}
-                              />
-                            </div>
-
-                            <div className="flex-1 space-y-1 text-left">
-                              <div className="flex items-center justify-between">
-                                <div
-                                  className={`${isMobile ? "text-sm" : "text-base"} font-semibold drop-shadow-sm`}
-                                >
-                                  {method.label}
-                                </div>
-                                <Badge
-                                  className={`${isMobile ? "text-xs px-2 py-0.5" : "text-xs px-2 py-1"} text-white border-0 bg-white/30 backdrop-blur-sm shadow-sm`}
-                                >
-                                  {method.responseTime}
-                                </Badge>
-                              </div>
-                              <div
-                                className={`${isMobile ? "text-xs" : "text-sm"} opacity-95 drop-shadow-sm`}
-                              >
-                                {method.value}
-                              </div>
-                              {!isMobile && (
-                                <div className="text-xs opacity-85 drop-shadow-sm">
-                                  {method.description}
-                                </div>
-                              )}
-                            </div>
-
-                            <motion.div
-                              animate={{
-                                x: hoveredMethod === method.label ? 4 : 0,
-                              }}
-                              transition={{ duration: 0.2 }}
-                              className="opacity-70 group-hover:opacity-100"
-                            >
-                              <ChevronUp className="w-4 h-4 rotate-90 drop-shadow-sm" />
-                            </motion.div>
-                          </Button>
-                        </motion.div>
-                      ))}
-                    </div>
-
-                    {/* ✅ Footer Information sáng hơn */}
+                {/* Contact Methods - Simplified */}
+                <div className="space-y-2">
+                  {contactMethods.map((method, index) => (
                     <motion.div
-                      initial={{ opacity: 0 }}
-                      animate={{ opacity: 1 }}
-                      transition={{ delay: 0.4 }}
-                      className="pt-4 space-y-3 border-t border-white/30 mt-4"
+                      key={method.label}
+                      initial={{ opacity: 0, x: -10 }}
+                      animate={{ opacity: 1, x: 0 }}
+                      transition={{ delay: index * 0.05 }}
+                      onHoverStart={() => setHoveredMethod(method.label)}
+                      onHoverEnd={() => setHoveredMethod(null)}
                     >
-                      <div className="text-center">
-                        <p className="text-xs text-white/90 mb-2 drop-shadow-sm">
-                          ⭐ Bảo mật thông tin 100%. Có thể hủy đăng ký bất cứ
-                          lúc nào.
-                        </p>
-                      </div>
+                      <Button
+                        onClick={method.action}
+                        variant="ghost"
+                        className={cn(
+                          "w-full justify-between p-3 h-auto rounded-lg transition-all duration-200",
+                          "bg-white/10 hover:bg-white/20 border border-white/20 hover:border-white/30",
+                          hoveredMethod === method.label &&
+                            "bg-white/20 scale-[1.02]",
+                        )}
+                      >
+                        <div className="flex items-center gap-3 flex-1 min-w-0">
+                          <div className="relative flex-shrink-0">
+                            <method.icon className="w-5 h-5" strokeWidth={2} />
+                            <div
+                              className={cn(
+                                "absolute -top-0.5 -right-0.5 w-2 h-2 rounded-full",
+                                method.statusColor,
+                              )}
+                            />
+                          </div>
 
-                      <div className="flex items-center justify-center gap-4 text-xs text-white/90">
-                        <div className="flex items-center gap-1">
-                          <Clock className="w-3 h-3 drop-shadow-sm" />
-                          <span className="drop-shadow-sm">24/7</span>
+                          <div className="text-left flex-1 min-w-0">
+                            <div className="font-semibold text-sm truncate">
+                              {method.label}
+                            </div>
+                            <div className="text-xs text-white/75 truncate">
+                              {method.value}
+                            </div>
+                          </div>
                         </div>
-                        <div className="flex items-center gap-1">
-                          <Heart className="w-3 h-3 text-red-200 fill-current drop-shadow-sm" />
-                          <span className="drop-shadow-sm">
-                            10K+ khách hàng
-                          </span>
-                        </div>
-                      </div>
+
+                        <Badge className="bg-white/20 text-white border-0 text-xs px-2 py-0.5 ml-2">
+                          {method.responseTime}
+                        </Badge>
+                      </Button>
                     </motion.div>
+                  ))}
+                </div>
+
+                {/* Footer - Minimal */}
+                <div className="mt-4 pt-3 border-t border-white/20">
+                  <div className="flex items-center justify-center gap-4 text-xs text-white/80">
+                    <div className="flex items-center gap-1">
+                      <Clock className="w-3 h-3" />
+                      <span>24/7</span>
+                    </div>
+                    <div className="flex items-center gap-1">
+                      <Star className="w-3 h-3 text-yellow-300 fill-current" />
+                      <span>5.0 (1.2K+)</span>
+                    </div>
+                    <div className="flex items-center gap-1">
+                      <Heart className="w-3 h-3 text-pink-200 fill-current" />
+                      <span>10K+ users</span>
+                    </div>
                   </div>
                 </div>
               </CardContent>
@@ -310,103 +211,97 @@ const ContactWidget: React.FC = () => {
         )}
       </AnimatePresence>
 
-      {/* ✅ Enhanced Toggle Button sáng hơn */}
+      {/* ✅ UPDATED: Pink/Rose/Red Toggle Button */}
       <motion.div
-        whileHover={{ scale: 1.1 }}
-        whileTap={{ scale: 0.9 }}
+        whileHover={{ scale: 1.05 }}
+        whileTap={{ scale: 0.95 }}
         className="relative"
       >
-        {/* Glow effect sáng hơn */}
-        <div className="absolute inset-0 rounded-full opacity-80 bg-gradient-to-r from-pink-400 to-cyan-300 blur-xl animate-pulse" />
+        {/* ✅ UPDATED: Pink glow effect */}
+        <div className="absolute inset-0 rounded-full bg-gradient-to-r from-pink-400 via-rose-400 to-red-400 opacity-20 blur-lg animate-pulse" />
 
         <Button
           onClick={() => setIsExpanded(!isExpanded)}
-          className={`relative ${isMobile ? "w-14 h-14" : "w-16 h-16"} overflow-hidden border-2 rounded-full shadow-2xl bg-gradient-to-r from-pink-400 to-cyan-300 hover:from-pink-500 hover:to-cyan-400 border-white/30 group`}
+          className={cn(
+            "relative rounded-full shadow-lg border-2 border-white/10 transition-all duration-300 group",
+            "bg-gradient-to-r from-pink-400 via-rose-400 to-red-400", // ✅ UPDATED: Pink gradient
+            "hover:from-pink-500 hover:via-rose-500 hover:to-red-500", // ✅ UPDATED: Pink hover
+            "hover:shadow-xl hover:scale-105",
+            isMobile ? "w-12 h-12" : "w-14 h-14",
+          )}
           size="icon"
         >
-          {/* Background animation sáng hơn */}
-          <div className="absolute inset-0 transition-opacity duration-300 opacity-0 bg-gradient-to-r from-violet-400 to-purple-400 group-hover:opacity-100" />
+          {/* Status indicator */}
+          <div className="absolute w-3 h-3 bg-green-400 rounded-full top-0 left-0 animate-pulse border-2 border-white shadow-sm" />
 
-          {/* Notification badge sáng hơn */}
-          <div
-            className={`absolute flex items-center justify-center ${isMobile ? "w-4 h-4" : "w-5 h-5"} bg-red-400 rounded-full -top-1 -right-1 animate-bounce shadow-xl border border-white/20`}
-          >
-            <span
-              className={`${isMobile ? "text-xs" : "text-xs"} font-bold text-white drop-shadow-sm`}
-            >
-              3
-            </span>
+          {/* ✅ UPDATED: Rose notification badge */}
+          <div className="absolute -top-1 -right-1 w-5 h-5 bg-rose-500 rounded-full flex items-center justify-center border-2 border-white animate-bounce">
+            <span className="text-xs font-bold text-white">3</span>
           </div>
 
-          {/* Status indicator sáng hơn */}
-          <div
-            className={`absolute ${isMobile ? "w-2 h-2" : "w-3 h-3"} bg-emerald-300 rounded-full top-1 left-1 animate-pulse shadow-md border border-white/20`}
-          />
-
+          {/* Icon with smooth transition */}
           <AnimatePresence mode="wait">
             {isExpanded ? (
               <motion.div
                 key="close"
-                initial={{ rotate: -180, opacity: 0, scale: 0.5 }}
-                animate={{ rotate: 0, opacity: 1, scale: 1 }}
-                exit={{ rotate: 180, opacity: 0, scale: 0.5 }}
-                transition={{ duration: 0.3, ease: "backOut" }}
-                className="relative z-10"
+                initial={{ rotate: -90, opacity: 0 }}
+                animate={{ rotate: 0, opacity: 1 }}
+                exit={{ rotate: 90, opacity: 0 }}
+                transition={{ duration: 0.2 }}
               >
                 <ChevronDown
-                  className={`${isMobile ? "w-6 h-6" : "w-7 h-7"} drop-shadow-sm`}
+                  className={cn("text-white", isMobile ? "w-5 h-5" : "w-6 h-6")}
                 />
               </motion.div>
             ) : (
               <motion.div
                 key="phone"
-                initial={{ rotate: -180, opacity: 0, scale: 0.5 }}
-                animate={{ rotate: 0, opacity: 1, scale: 1 }}
-                exit={{ rotate: 180, opacity: 0, scale: 0.5 }}
-                transition={{ duration: 0.3, ease: "backOut" }}
-                className="relative z-10"
+                initial={{ rotate: -90, opacity: 0 }}
+                animate={{ rotate: 0, opacity: 1 }}
+                exit={{ rotate: 90, opacity: 0 }}
+                transition={{ duration: 0.2 }}
               >
                 <Phone
-                  className={`${isMobile ? "w-6 h-6" : "w-7 h-7"} drop-shadow-sm`}
+                  className={cn("text-white", isMobile ? "w-5 h-5" : "w-6 h-6")}
                 />
               </motion.div>
             )}
           </AnimatePresence>
 
-          {/* Ripple effect sáng hơn */}
+          {/* Ripple effect on hover */}
           <div className="absolute inset-0 rounded-full">
-            <div className="absolute inset-0 transition-all duration-500 scale-0 rounded-full bg-white/40 group-hover:scale-100 group-hover:opacity-0" />
+            <div className="absolute inset-0 rounded-full bg-white/20 scale-0 group-hover:scale-100 group-hover:opacity-0 transition-all duration-300" />
           </div>
         </Button>
       </motion.div>
 
-      {/* ✅ Enhanced Floating particles sáng hơn */}
+      {/* ✅ UPDATED: Pink floating particles - Desktop only */}
       {!isMobile && (
         <div className="absolute inset-0 pointer-events-none">
-          {[...Array(6)].map((_, i) => (
+          {[...Array(3)].map((_, i) => (
             <motion.div
               key={i}
-              className={`absolute w-1.5 h-1.5 rounded-full ${
-                i % 3 === 0
-                  ? "bg-white/60"
-                  : i % 3 === 1
-                    ? "bg-yellow-200/50"
-                    : "bg-cyan-200/50"
-              }`}
+              className={cn(
+                "absolute w-1 h-1 rounded-full",
+                i === 0
+                  ? "bg-white/40"
+                  : i === 1
+                    ? "bg-rose-300/40" // ✅ UPDATED: Rose particle
+                    : "bg-pink-300/40", // ✅ UPDATED: Pink particle
+              )}
               animate={{
-                y: [-20, -80, -20],
-                x: [0, 20, 0],
-                opacity: [0.3, 1, 0.3],
-                scale: [0.5, 1.2, 0.5],
+                y: [-10, -40, -10],
+                x: [0, 8, 0],
+                opacity: [0.3, 0.7, 0.3],
               }}
               transition={{
-                duration: 4 + i * 0.5,
+                duration: 3 + i * 0.5,
                 repeat: Infinity,
-                delay: i * 0.6,
+                delay: i * 0.3,
               }}
               style={{
-                left: `${10 + i * 10}%`,
-                bottom: `${45 + i * 6}%`,
+                left: `${20 + i * 15}%`,
+                bottom: `${50 + i * 10}%`,
               }}
             />
           ))}

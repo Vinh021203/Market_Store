@@ -19,16 +19,12 @@ import {
   SheetTitle,
   SheetClose,
 } from "@/components/ui/sheet";
-import { Progress } from "@/components/ui/progress";
 import { Switch } from "@/components/ui/switch";
 import { Slider } from "@/components/ui/slider";
 import { Label } from "@/components/ui/label";
 import ProductCard from "@/components/ProductCard";
-import Pagination from "@/components/Pagination";
-import { filterProducts } from "@/lib/products";
-import { getProductsByCategory } from "@/lib/products";
-import { Product } from "@/types";
-import { FilterOptions } from "@/types";
+import { filterProducts, getProductsByCategory } from "@/lib/products";
+import { Product, FilterOptions } from "@/types";
 import { useCart } from "@/contexts/CartContext";
 import { useSearchParams } from "react-router-dom";
 import { motion, AnimatePresence } from "framer-motion";
@@ -43,188 +39,154 @@ import {
   ArrowUpDown,
   Star,
   TrendingUp,
-  Sparkles,
-  Code,
-  Palette,
-  Coffee,
-  Zap,
+  DollarSign,
+  Clock,
+  Layout,
+  Settings,
   Award,
   Eye,
   Heart,
   Download,
-  Clock,
-  CheckCircle,
-  AlertCircle,
-  BarChart3,
-  Layers,
-  ArrowUp,
   Crown,
+  Gift,
+  BarChart3,
+  Briefcase,
+  Code,
+  Building,
+  Server,
+  ShoppingCart,
   Rocket,
-  ChevronDown,
-  ChevronUp,
-  Bookmark,
-  Share2,
-  MessageSquare,
-  ThumbsUp,
+  ArrowUp,
+  Sparkles,
   Flame,
-  Percent,
-  Target,
-  Sun,
-  Moon,
-  Layout,
+  Zap,
+  Shield,
+  Globe,
+  Palette,
+  Users,
+  Camera,
+  Music,
+  Video,
+  Headphones,
+  Gamepad2,
+  Diamond,
+  Hexagon,
+  Triangle,
+  Square,
+  Circle,
+  Layers,
+  Paintbrush,
+  Wand2,
+  Stars,
+  Feather,
+  GraduationCap,
+  Lightbulb,
   Database,
+  FileText,
   Smartphone,
   Monitor,
-  Globe,
-  ShoppingBag,
-  FileText,
-  Image,
-  Video,
-  Music,
-  Settings,
-  Briefcase,
-  Users,
-  Calendar,
-  Mail,
-  Phone,
-  MapPin,
-  Building,
-  Home,
-  Car,
-  Plane,
-  Camera,
-  Gamepad2,
-  GraduationCap,
-  Stethoscope,
-  Utensils,
-  DollarSign,
-  CreditCard,
-  Wallet,
-  PiggyBank,
-  TrendingDown,
-  BarChart,
-  LineChart,
-  PieChart,
-  Activity,
-  Cpu,
-  HardDrive,
-  Wifi,
-  Bluetooth,
-  Battery,
-  Plug,
-  Radio,
-  Headphones,
-  Mic,
-  Volume2,
-  Play,
-  Pause,
-  SkipBack,
-  SkipForward,
-  Repeat,
-  Shuffle,
-  CloudDownload,
-  CloudUpload,
-  Cloud,
-  Server,
-  Shield,
-  Lock,
-  Unlock,
-  Key,
-  UserCheck,
-  UserPlus,
-  UserMinus,
-  Users2,
-  MessageCircleMore,
-  Send,
-  Inbox,
-  Archive,
-  Trash2,
-  Edit,
-  Copy,
-  Clipboard,
-  Link,
-  ExternalLink,
-  Maximize,
-  Minimize,
-  RotateCw,
-  RefreshCw,
-  PowerOff,
-  Wrench,
-  Hammer,
-  Scissors,
-  Ruler,
-  Compass,
+  Target,
+  BookMarked,
+  Brain,
   Calculator,
-  Thermometer,
-  Droplets,
-  Wind,
-  Snowflake,
-  CloudRain,
-  CloudSnow,
-  CloudLightning,
-  Umbrella,
-  TreePine,
-  Flower,
-  Leaf,
-  Bug,
-  Fish,
-  Bird,
-  Cat,
-  Dog,
-  Rabbit,
-  Apple,
-  Coffee as CoffeeIcon,
-  Wine,
-  ShoppingCart,
-  Package2,
-  Truck,
-  Ship,
-  Train,
-  Bus,
-  Bike,
-  Lightbulb,
-  Gift,
-  User,
+  PenTool,
+  Laptop,
+  Tablet,
+  Coffee,
+  Bookmark,
+  Library,
+  FileCheck,
 } from "lucide-react";
 import { toast } from "@/hooks/use-toast";
 
-// Enhanced Loading Component với animation mượt mà hơn
-const EnhancedLoadingSpinner = () => (
-  <div className="min-h-screen bg-gradient-to-br from-slate-50 via-green-50 to-blue-50 dark:from-slate-900 dark:via-green-900 dark:to-blue-900 relative overflow-hidden">
-    {/* Animated Background Gradients */}
+// ✅ SOFT PINK THEME FOR EBOOKS
+const softPinkTheme = {
+  // 🌸 PINK BACKGROUND TONES
+  pageBackground: "from-pink-50/70 via-rose-50/60 to-red-50/50",
+  sectionBackground: "from-white/95 via-pink-25/30 to-rose-25/20",
+
+  // 💗 GLASS & CARDS
+  glassCard: "from-white/95 via-pink-25/20 to-rose-25/10 backdrop-blur-xl",
+  neoCard: "bg-gradient-to-br from-white via-pink-25/30 to-rose-25/20",
+  floatingCard: "from-white/90 via-pink-50/60 to-rose-50/40",
+
+  // 🌹 GRADIENT COLORS - PINK THEME
+  primaryGradient: "from-pink-500 via-rose-500 to-red-500",
+  secondaryGradient: "from-pink-400 via-rose-500 to-pink-600",
+  accentGradient: "from-rose-400 via-pink-500 to-red-400",
+  successGradient: "from-pink-300 via-rose-400 to-pink-500",
+
+  // 💕 TEXT COLORS
+  heroText: "from-pink-700 via-rose-600 to-red-600",
+  primaryText: "from-slate-700 via-pink-700 to-rose-700",
+  accentText: "from-rose-600 via-pink-600 to-red-600",
+
+  // ✨ EFFECTS
+  glow: "shadow-pink-200/60 shadow-2xl",
+  neonGlow: "shadow-rose-300/50 shadow-xl",
+  softGlow: "shadow-pink-200/40 shadow-lg",
+
+  // 🎨 DYNAMIC COLORS - PINK VARIATIONS
+  dynamicColors: [
+    {
+      bg: "from-pink-400 to-rose-500",
+      text: "text-pink-50",
+      glow: "shadow-pink-400/30",
+    },
+    {
+      bg: "from-rose-400 to-red-500",
+      text: "text-rose-50",
+      glow: "shadow-rose-400/30",
+    },
+    {
+      bg: "from-pink-500 to-rose-600",
+      text: "text-pink-50",
+      glow: "shadow-pink-500/30",
+    },
+    {
+      bg: "from-red-400 to-pink-500",
+      text: "text-red-50",
+      glow: "shadow-red-400/30",
+    },
+    {
+      bg: "from-rose-500 to-pink-600",
+      text: "text-rose-50",
+      glow: "shadow-rose-500/30",
+    },
+    {
+      bg: "from-pink-600 to-red-500",
+      text: "text-pink-50",
+      glow: "shadow-pink-600/30",
+    },
+  ],
+};
+
+// ✅ LOADING SPINNER - EBOOKS THEME
+const LoadingSpinner = () => (
+  <div
+    className={`min-h-screen bg-gradient-to-br ${softPinkTheme.pageBackground} flex items-center justify-center relative overflow-hidden`}
+  >
     <div className="absolute inset-0">
       <motion.div
         animate={{
-          background: [
-            "linear-gradient(45deg, rgba(34,197,94,0.1), rgba(59,130,246,0.1))",
-            "linear-gradient(45deg, rgba(59,130,246,0.1), rgba(168,85,247,0.1))",
-            "linear-gradient(45deg, rgba(168,85,247,0.1), rgba(34,197,94,0.1))",
-          ],
+          rotate: [0, 360],
+          scale: [1, 1.2, 1],
+          opacity: [0.3, 0.6, 0.3],
         }}
         transition={{ duration: 8, repeat: Infinity, ease: "easeInOut" }}
-        className="absolute inset-0"
-      />
-      <motion.div
-        animate={{ scale: [1, 1.2, 1], opacity: [0.3, 0.6, 0.3] }}
-        transition={{ duration: 4, repeat: Infinity }}
-        className="absolute top-20 left-20 w-72 h-72 bg-green-400/20 rounded-full filter blur-3xl"
-      />
-      <motion.div
-        animate={{ scale: [1.2, 1, 1.2], opacity: [0.6, 0.3, 0.6] }}
-        transition={{ duration: 4, repeat: Infinity, delay: 2 }}
-        className="absolute bottom-20 right-20 w-72 h-72 bg-blue-400/20 rounded-full filter blur-3xl"
-      />
-    </div>
+        className="absolute top-20 left-20 w-32 h-32"
+      >
+        <div className="w-full h-full bg-gradient-to-r from-pink-400/30 to-rose-400/30 transform rotate-45 rounded-lg filter blur-xl" />
+      </motion.div>
 
-    {/* Floating E-book Icons */}
-    <div className="fixed inset-0 overflow-hidden pointer-events-none">
+      {/* Floating Ebook Icons */}
       {[
-        { icon: BookOpen, color: "text-green-500/30", delay: 0 },
-        { icon: GraduationCap, color: "text-blue-500/30", delay: 0.5 },
-        { icon: Lightbulb, color: "text-yellow-500/30", delay: 1 },
-        { icon: Code, color: "text-purple-500/30", delay: 1.5 },
-        { icon: Award, color: "text-orange-500/30", delay: 2 },
-        { icon: Star, color: "text-pink-500/30", delay: 2.5 },
+        { icon: BookOpen, color: "text-pink-500/30", delay: 0 },
+        { icon: GraduationCap, color: "text-rose-500/30", delay: 0.5 },
+        { icon: Lightbulb, color: "text-red-500/30", delay: 1 },
+        { icon: Code, color: "text-pink-600/30", delay: 1.5 },
+        { icon: Award, color: "text-rose-600/30", delay: 2 },
+        { icon: Star, color: "text-red-600/30", delay: 2.5 },
       ].map(({ icon: Icon, color, delay }, index) => (
         <motion.div
           key={index}
@@ -251,1108 +213,376 @@ const EnhancedLoadingSpinner = () => (
       ))}
     </div>
 
-    <div className="container relative z-10 px-4 py-8 mx-auto">
-      <div className="flex flex-col items-center justify-center py-20 md:py-32 space-y-10 md:space-y-16">
-        {/* Enhanced Loading Animation */}
-        <div className="relative">
-          {/* Outer Ring */}
-          <motion.div
-            animate={{ rotate: 360 }}
-            transition={{ duration: 3, repeat: Infinity, ease: "linear" }}
-            className="w-24 h-24 md:w-32 md:h-32 border-4 rounded-full"
-            style={{
-              borderImage:
-                "linear-gradient(45deg, #22c55e, #3b82f6, #a855f7, #22c55e) 1",
-              borderTopColor: "transparent",
-            }}
-          />
-
-          {/* Inner Ring */}
-          <motion.div
-            animate={{ rotate: -360 }}
-            transition={{ duration: 2, repeat: Infinity, ease: "linear" }}
-            className="absolute inset-3 md:inset-4 border-4 rounded-full border-green-300 border-r-transparent"
-          />
-
-          {/* Center Icon */}
-          <motion.div
-            animate={{ scale: [1, 1.2, 1], rotate: [0, 180, 360] }}
-            transition={{ duration: 4, repeat: Infinity }}
-            className="absolute inset-6 md:inset-8 flex items-center justify-center bg-gradient-to-r from-green-500 to-blue-600 rounded-full shadow-xl"
-          >
-            <BookOpen className="w-6 h-6 md:w-8 md:h-8 text-white" />
-          </motion.div>
-
-          {/* Orbiting Dots */}
-          {[...Array(8)].map((_, i) => (
-            <motion.div
-              key={i}
-              className="absolute w-2 h-2 bg-gradient-to-r from-green-500 to-blue-600 rounded-full"
-              style={{
-                top: "50%",
-                left: "50%",
-                transformOrigin: `${20 + Math.random() * 20}px 0`,
-              }}
-              animate={{ rotate: 360 }}
-              transition={{
-                duration: 2 + i * 0.3,
-                repeat: Infinity,
-                ease: "linear",
-                delay: i * 0.2,
-              }}
-            />
-          ))}
-        </div>
-
-        {/* Loading Content */}
-        <div className="text-center space-y-6 md:space-y-8">
-          <motion.div
-            initial={{ opacity: 0, y: 30 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: 0.5 }}
-          >
-            <h2 className="text-3xl md:text-5xl font-bold bg-gradient-to-r from-green-600 via-blue-600 to-purple-600 bg-clip-text text-transparent mb-4">
-              Đang tải E-books
-            </h2>
-            <p className="text-lg md:text-xl text-muted-foreground max-w-2xl mx-auto px-4 leading-relaxed">
-              Chúng tôi đang chuẩn bị bộ sưu tập e-books chuyên nghiệp và chất
-              lượng cao nhất về lập trình, thiết kế và công nghệ
-            </p>
-          </motion.div>
-
-          {/* Loading Steps */}
-          <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: 1 }}
-            className="space-y-4"
-          >
-            {[
-              "Đang tải danh mục e-books...",
-              "Xử lý nội dung chất lượng cao...",
-              "Chuẩn bị bộ lọc thông minh...",
-              "Tối ưu hóa trải nghiệm đọc...",
-              "Hoàn tất!",
-            ].map((step, i) => (
-              <motion.div
-                key={step}
-                initial={{ opacity: 0.3, x: -20 }}
-                animate={{ opacity: 1, x: 0 }}
-                transition={{ delay: i * 0.8, duration: 0.6 }}
-                className="flex items-center justify-center space-x-3"
-              >
-                <motion.div
-                  initial={{ scale: 0 }}
-                  animate={{ scale: 1 }}
-                  transition={{ delay: i * 0.8 + 0.3 }}
-                  className="w-2 h-2 md:w-3 md:h-3 bg-gradient-to-r from-green-500 to-blue-600 rounded-full"
-                />
-                <span className="text-sm md:text-base text-muted-foreground">
-                  {step}
-                </span>
-              </motion.div>
-            ))}
-          </motion.div>
-
-          {/* Progress Bar */}
-          <motion.div
-            initial={{ opacity: 0, scale: 0.8 }}
-            animate={{ opacity: 1, scale: 1 }}
-            transition={{ delay: 1.5 }}
-            className="w-80 md:w-96 max-w-full mx-auto"
-          >
-            <div className="h-2 md:h-3 bg-gradient-to-r from-gray-200 to-gray-300 dark:from-gray-700 dark:to-gray-600 rounded-full overflow-hidden shadow-inner">
-              <motion.div
-                className="h-full bg-gradient-to-r from-green-500 via-blue-500 to-purple-500 rounded-full shadow-lg"
-                initial={{ width: 0 }}
-                animate={{ width: "100%" }}
-                transition={{
-                  duration: 4,
-                  repeat: Infinity,
-                  ease: "easeInOut",
-                }}
-              />
-            </div>
-            <div className="flex justify-center mt-3">
-              <motion.span
-                animate={{ opacity: [0.5, 1, 0.5] }}
-                transition={{ duration: 2, repeat: Infinity }}
-                className="text-xs md:text-sm text-muted-foreground font-medium"
-              >
-                Đang xử lý...
-              </motion.span>
-            </div>
-          </motion.div>
-        </div>
-
-        {/* Tech Stack Showcase */}
-        <motion.div
-          initial={{ opacity: 0, y: 40 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ delay: 2 }}
-          className="grid grid-cols-4 md:grid-cols-6 gap-4 md:gap-8"
+    <div className="relative z-10 text-center space-y-8">
+      <motion.div
+        initial={{ scale: 0, rotateY: 0 }}
+        animate={{ scale: 1, rotateY: 360 }}
+        transition={{ duration: 1, repeat: Infinity, ease: "linear" }}
+        className="relative"
+      >
+        <div
+          className={`w-20 h-20 mx-auto bg-gradient-to-br ${softPinkTheme.primaryGradient} rounded-2xl shadow-2xl relative`}
         >
-          {[
-            {
-              icon: BookOpen,
-              label: "E-books",
-              color: "from-green-400 to-green-600",
-            },
-            {
-              icon: Code,
-              label: "Programming",
-              color: "from-blue-400 to-blue-600",
-            },
-            {
-              icon: Palette,
-              label: "Design",
-              color: "from-purple-400 to-purple-600",
-            },
-            {
-              icon: Database,
-              label: "Database",
-              color: "from-yellow-400 to-yellow-600",
-            },
-            {
-              icon: Globe,
-              label: "Web Dev",
-              color: "from-cyan-400 to-cyan-600",
-            },
-            {
-              icon: GraduationCap,
-              label: "Learning",
-              color: "from-orange-400 to-orange-600",
-            },
-          ].map(({ icon: Icon, label, color }, index) => (
-            <motion.div
-              key={label}
-              animate={{
-                scale: [1, 1.1, 1],
-                rotateY: [0, 180, 360],
-              }}
-              transition={{
-                duration: 3,
-                repeat: Infinity,
-                delay: index * 0.4,
-              }}
-              className={`p-3 md:p-4 rounded-2xl bg-gradient-to-r ${color} shadow-lg backdrop-blur-sm`}
-            >
-              <Icon className="w-6 h-6 md:w-8 md:h-8 text-white mx-auto mb-2" />
-              <div className="text-xs md:text-sm text-white font-semibold text-center">
-                {label}
-              </div>
-            </motion.div>
-          ))}
-        </motion.div>
-
-        {/* Loading Dots */}
-        <div className="flex justify-center space-x-2">
-          {[...Array(4)].map((_, i) => (
-            <motion.div
-              key={i}
-              animate={{
-                scale: [1, 1.5, 1],
-                opacity: [0.4, 1, 0.4],
-              }}
-              transition={{
-                duration: 1.5,
-                repeat: Infinity,
-                delay: i * 0.2,
-              }}
-              className="w-2 h-2 md:w-3 md:h-3 bg-gradient-to-r from-green-500 to-blue-600 rounded-full"
-            />
-          ))}
+          <div className="absolute inset-2 bg-white/20 rounded-xl backdrop-blur-sm flex items-center justify-center">
+            <BookOpen className="w-8 h-8 text-white" />
+          </div>
         </div>
-      </div>
+      </motion.div>
+
+      <motion.div
+        initial={{ opacity: 0, y: 20 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ delay: 0.3 }}
+      >
+        <h2
+          className={`text-2xl font-bold bg-gradient-to-r ${softPinkTheme.heroText} bg-clip-text text-transparent`}
+        >
+          Đang tải E-books
+        </h2>
+        <p className="text-gray-600">
+          Chuẩn bị bộ sưu tập e-books chất lượng cao...
+        </p>
+      </motion.div>
     </div>
   </div>
 );
 
-// Mobile-First Filter Sheet Component với UI chuyên nghiệp
-const MobileFilterSheet = ({
+// ✅ MOBILE-FIRST FILTER BAR - BEAUTIFUL MOBILE
+const MobileFilterBar = ({
   filters,
-  ebookTags,
-  priceRanges,
   sortOptions,
   searchInput,
   setSearchInput,
   handleSearch,
   handleSortChange,
+  clearFilters,
+  viewMode,
+  setViewMode,
+  filteredProductsLength,
+  currentPage,
+  totalPages,
+  currentProductsLength,
+  ebookTags,
   toggleTag,
   handlePriceRangeChange,
-  clearFilters,
-  products,
+  priceRanges,
 }) => {
-  const [expandedSections, setExpandedSections] = useState({
-    search: true,
-    sort: false,
-    price: false,
-    tags: false,
-    categories: false,
-    advanced: false,
-  });
-
-  const [priceRange, setPriceRange] = useState([0, 500000]);
-  const [showOnlyFree, setShowOnlyFree] = useState(false);
-  const [showOnlyPremium, setShowOnlyPremium] = useState(false);
-
-  const toggleSection = (section: string) => {
-    setExpandedSections((prev) => ({
-      ...prev,
-      [section]: !prev[section],
-    }));
-  };
-
-  const activeFiltersCount =
-    (filters.search ? 1 : 0) +
-    (filters.tags?.length || 0) +
-    (filters.priceRange ? 1 : 0);
-
-  // Category mapping với icons thật
-  const categoryIcons = {
-    Programming: Code,
-    "Web Development": Globe,
-    "Mobile Development": Smartphone,
-    "Data Science": Database,
-    Design: Palette,
-    "UI/UX": Layout,
-    "Machine Learning": Activity,
-    DevOps: Server,
-    Cybersecurity: Shield,
-    Blockchain: Link,
-    "Game Development": Gamepad2,
-    Business: Briefcase,
-    Marketing: TrendingUp,
-    Photography: Camera,
-    Writing: FileText,
-    Health: Stethoscope,
-    Finance: DollarSign,
-    Education: GraduationCap,
-    Science: Lightbulb,
-    Technology: Cpu,
-  };
-
-  // Popular categories
-  const popularCategories = [
-    "Programming",
-    "Web Development",
-    "Data Science",
-    "Design",
-    "UI/UX",
-    "Machine Learning",
-    "DevOps",
-    "Business",
-  ];
+  const [isExpanded, setIsExpanded] = useState(false);
 
   return (
-    <Sheet>
-      <SheetTrigger asChild>
-        <Button
-          variant="outline"
-          size="lg"
-          className="w-full h-14 justify-between bg-white/95 dark:bg-slate-800/95 backdrop-blur-lg border-2 border-green-200/50 hover:border-green-300 shadow-lg hover:shadow-xl transition-all duration-300"
-        >
-          <div className="flex items-center">
-            <div className="p-2 rounded-lg bg-gradient-to-r from-green-500 to-blue-600 shadow-md mr-3">
-              <SlidersHorizontal className="w-5 h-5 text-white" />
-            </div>
-            <div className="text-left">
-              <div className="font-semibold text-base">Bộ lọc E-books</div>
-              <div className="text-xs text-muted-foreground">
-                Tìm e-book hoàn hảo
-              </div>
-            </div>
-          </div>
-          {activeFiltersCount > 0 && (
-            <Badge className="bg-gradient-to-r from-green-500 to-blue-600 text-white shadow-lg">
-              {activeFiltersCount}
-            </Badge>
-          )}
-        </Button>
-      </SheetTrigger>
-      <SheetContent side="bottom" className="h-[85vh] overflow-hidden">
-        <div className="flex flex-col h-full">
-          {/* Header với gradient */}
-          <SheetHeader className="pb-6 border-b bg-gradient-to-r from-green-50 to-blue-50 dark:from-green-950/50 dark:to-blue-950/50 -mx-6 -mt-6 px-6 pt-6">
-            <SheetTitle className="flex items-center text-2xl">
-              <div className="p-2 rounded-xl bg-gradient-to-r from-green-500 to-blue-600 shadow-lg mr-3">
-                <Filter className="w-6 h-6 text-white" />
-              </div>
-              <div>
-                <div className="bg-gradient-to-r from-green-600 to-blue-600 bg-clip-text text-transparent font-bold">
-                  Bộ lọc E-books
-                </div>
-                <div className="text-sm text-muted-foreground font-normal">
-                  Powered by AI • {products.length} e-books
-                </div>
-              </div>
-            </SheetTitle>
-          </SheetHeader>
-
-          {/* Scrollable Content */}
-          <div className="flex-1 overflow-y-auto space-y-6 py-6">
-            {/* Quick Search với AI */}
-            <div className="space-y-4">
-              <Button
-                variant="ghost"
-                onClick={() => toggleSection("search")}
-                className="w-full justify-between p-0 h-auto hover:bg-green-50 dark:hover:bg-green-950/20"
+    <div className="lg:hidden space-y-4">
+      {/* Main Search Bar */}
+      <Card
+        className={`bg-gradient-to-r ${softPinkTheme.glassCard} border-0 ${softPinkTheme.softGlow} backdrop-blur-2xl border border-white/20 rounded-2xl`}
+      >
+        <CardContent className="p-4">
+          <form onSubmit={handleSearch} className="space-y-4">
+            <div className="relative group">
+              <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 w-4 h-4 text-gray-400 group-focus-within:text-pink-500 transition-colors" />
+              <Input
+                placeholder="Tìm kiếm e-books..."
+                value={searchInput}
+                onChange={(e) => setSearchInput(e.target.value)}
+                className={`h-12 pl-10 pr-10 bg-gradient-to-r ${softPinkTheme.glassCard} border border-pink-200/50 rounded-xl focus:ring-2 focus:ring-pink-300 transition-all text-sm`}
+              />
+              <motion.div
+                animate={{ rotate: [0, 360], scale: [1, 1.2, 1] }}
+                transition={{ duration: 4, repeat: Infinity }}
+                className="absolute right-3 top-1/2 transform -translate-y-1/2"
               >
-                <div className="flex items-center">
-                  <div className="p-2 rounded-lg bg-gradient-to-r from-green-500 to-cyan-500 mr-3">
-                    <Search className="w-5 h-5 text-white" />
-                  </div>
-                  <div className="text-left">
-                    <div className="font-semibold">Tìm kiếm AI</div>
-                    <div className="text-sm text-muted-foreground">
-                      Tìm e-book theo nội dung
-                    </div>
-                  </div>
-                </div>
-                <div className="flex items-center space-x-2">
-                  {filters.search && (
-                    <Badge variant="secondary" className="text-xs">
-                      Đang lọc
-                    </Badge>
-                  )}
-                  {expandedSections.search ? (
-                    <ChevronUp className="w-5 h-5" />
-                  ) : (
-                    <ChevronDown className="w-5 h-5" />
-                  )}
-                </div>
-              </Button>
-
-              <AnimatePresence>
-                {expandedSections.search && (
-                  <motion.div
-                    initial={{ opacity: 0, height: 0 }}
-                    animate={{ opacity: 1, height: "auto" }}
-                    exit={{ opacity: 0, height: 0 }}
-                    className="space-y-4"
-                  >
-                    <form onSubmit={handleSearch} className="space-y-3">
-                      <div className="relative">
-                        <Search className="absolute left-4 top-1/2 transform -translate-y-1/2 w-5 h-5 text-muted-foreground" />
-                        <Input
-                          type="search"
-                          placeholder="VD: React hooks, Machine Learning..."
-                          value={searchInput}
-                          onChange={(e) => setSearchInput(e.target.value)}
-                          className="h-14 pl-12 pr-16 text-base bg-gradient-to-r from-white to-green-50 dark:from-slate-800 dark:to-green-950 border-2 border-green-200 focus:border-green-500 rounded-xl shadow-sm"
-                        />
-                        <div className="absolute right-4 top-1/2 transform -translate-y-1/2 flex items-center space-x-2">
-                          <Badge
-                            variant="secondary"
-                            className="text-xs bg-gradient-to-r from-green-100 to-blue-100 text-green-700"
-                          >
-                            AI
-                          </Badge>
-                        </div>
-                      </div>
-                      <Button
-                        type="submit"
-                        className="w-full h-12 bg-gradient-to-r from-green-500 to-blue-600 hover:from-green-600 hover:to-blue-700 shadow-lg hover:shadow-xl transition-all duration-300"
-                      >
-                        <Search className="w-4 h-4 mr-2" />
-                        Tìm kiếm E-books
-                      </Button>
-                    </form>
-
-                    {/* Quick Search Suggestions */}
-                    <div className="space-y-2">
-                      <Label className="text-sm font-medium text-muted-foreground">
-                        Gợi ý tìm kiếm:
-                      </Label>
-                      <div className="flex flex-wrap gap-2">
-                        {[
-                          "JavaScript Advanced",
-                          "Python Machine Learning",
-                          "React Best Practices",
-                          "UI/UX Design Guide",
-                          "Data Science Handbook",
-                        ].map((suggestion) => (
-                          <Button
-                            key={suggestion}
-                            variant="outline"
-                            size="sm"
-                            onClick={() => setSearchInput(suggestion)}
-                            className="text-xs h-8 bg-gradient-to-r from-gray-50 to-green-50 hover:from-green-50 hover:to-blue-50 border-green-200 hover:border-green-300"
-                          >
-                            {suggestion}
-                          </Button>
-                        ))}
-                      </div>
-                    </div>
-                  </motion.div>
-                )}
-              </AnimatePresence>
+                <Stars className="w-4 h-4 text-pink-400" />
+              </motion.div>
             </div>
 
-            <Separator className="bg-gradient-to-r from-transparent via-gray-300 to-transparent" />
-
-            {/* Categories với icons */}
-            <div className="space-y-4">
-              <Button
-                variant="ghost"
-                onClick={() => toggleSection("categories")}
-                className="w-full justify-between p-0 h-auto hover:bg-blue-50 dark:hover:bg-blue-950/20"
-              >
-                <div className="flex items-center">
-                  <div className="p-2 rounded-lg bg-gradient-to-r from-blue-500 to-purple-500 mr-3">
-                    <Layout className="w-5 h-5 text-white" />
-                  </div>
-                  <div className="text-left">
-                    <div className="font-semibold">Danh mục</div>
-                    <div className="text-sm text-muted-foreground">
-                      Chọn theo lĩnh vực
-                    </div>
-                  </div>
-                </div>
-                <div className="flex items-center space-x-2">
-                  <Badge variant="secondary" className="text-xs">
-                    {popularCategories.length}
-                  </Badge>
-                  {expandedSections.categories ? (
-                    <ChevronUp className="w-5 h-5" />
-                  ) : (
-                    <ChevronDown className="w-5 h-5" />
-                  )}
-                </div>
-              </Button>
-
-              <AnimatePresence>
-                {expandedSections.categories && (
-                  <motion.div
-                    initial={{ opacity: 0, height: 0 }}
-                    animate={{ opacity: 1, height: "auto" }}
-                    exit={{ opacity: 0, height: 0 }}
-                    className="space-y-4"
-                  >
-                    <div className="grid grid-cols-2 gap-3">
-                      {popularCategories.map((category) => {
-                        const IconComponent =
-                          categoryIcons[category] || BookOpen;
-                        return (
-                          <Button
-                            key={category}
-                            variant="outline"
-                            className="h-16 flex flex-col items-center justify-center space-y-1 bg-gradient-to-br from-white to-gray-50 hover:from-blue-50 hover:to-purple-50 border-blue-200 hover:border-blue-300 shadow-sm hover:shadow-md transition-all duration-300"
-                          >
-                            <IconComponent className="w-5 h-5 text-blue-600" />
-                            <span className="text-xs font-medium">
-                              {category}
-                            </span>
-                          </Button>
-                        );
-                      })}
-                    </div>
-                  </motion.div>
-                )}
-              </AnimatePresence>
-            </div>
-
-            <Separator className="bg-gradient-to-r from-transparent via-gray-300 to-transparent" />
-
-            {/* Sort Options với icons */}
-            <div className="space-y-4">
-              <Button
-                variant="ghost"
-                onClick={() => toggleSection("sort")}
-                className="w-full justify-between p-0 h-auto hover:bg-purple-50 dark:hover:bg-purple-950/20"
-              >
-                <div className="flex items-center">
-                  <div className="p-2 rounded-lg bg-gradient-to-r from-purple-500 to-pink-500 mr-3">
-                    <ArrowUpDown className="w-5 h-5 text-white" />
-                  </div>
-                  <div className="text-left">
-                    <div className="font-semibold">Sắp xếp</div>
-                    <div className="text-sm text-muted-foreground">
-                      Thứ tự hiển thị
-                    </div>
-                  </div>
-                </div>
-                {expandedSections.sort ? (
-                  <ChevronUp className="w-5 h-5" />
-                ) : (
-                  <ChevronDown className="w-5 h-5" />
-                )}
-              </Button>
-
-              <AnimatePresence>
-                {expandedSections.sort && (
-                  <motion.div
-                    initial={{ opacity: 0, height: 0 }}
-                    animate={{ opacity: 1, height: "auto" }}
-                    exit={{ opacity: 0, height: 0 }}
-                  >
-                    <Select
-                      value={filters.sortBy || "newest"}
-                      onValueChange={handleSortChange}
-                    >
-                      <SelectTrigger className="h-14 bg-gradient-to-r from-white to-purple-50 dark:from-slate-800 dark:to-purple-950 border-2 border-purple-200 focus:border-purple-500 rounded-xl">
-                        <SelectValue />
-                      </SelectTrigger>
-                      <SelectContent>
-                        {sortOptions.map((option) => (
-                          <SelectItem
-                            key={option.value}
-                            value={option.value}
-                            className="h-12"
-                          >
-                            <div className="flex items-center space-x-3">
-                              <div className="p-1 rounded bg-gradient-to-r from-purple-100 to-pink-100">
-                                <option.icon className="w-4 h-4 text-purple-600" />
-                              </div>
-                              <span className="font-medium">
-                                {option.label}
-                              </span>
-                            </div>
-                          </SelectItem>
-                        ))}
-                      </SelectContent>
-                    </Select>
-                  </motion.div>
-                )}
-              </AnimatePresence>
-            </div>
-
-            <Separator className="bg-gradient-to-r from-transparent via-gray-300 to-transparent" />
-
-            {/* Advanced Price Range với slider */}
-            <div className="space-y-4">
-              <Button
-                variant="ghost"
-                onClick={() => toggleSection("price")}
-                className="w-full justify-between p-0 h-auto hover:bg-orange-50 dark:hover:bg-orange-950/20"
-              >
-                <div className="flex items-center">
-                  <div className="p-2 rounded-lg bg-gradient-to-r from-orange-500 to-red-500 mr-3">
-                    <DollarSign className="w-5 h-5 text-white" />
-                  </div>
-                  <div className="text-left">
-                    <div className="font-semibold">Khoảng giá</div>
-                    <div className="text-sm text-muted-foreground">
-                      Tùy chỉnh ngân sách
-                    </div>
-                  </div>
-                </div>
-                <div className="flex items-center space-x-2">
-                  {filters.priceRange && (
-                    <Badge
-                      variant="secondary"
-                      className="text-xs bg-orange-100 text-orange-700"
-                    >
-                      Đã chọn
-                    </Badge>
-                  )}
-                  {expandedSections.price ? (
-                    <ChevronUp className="w-5 h-5" />
-                  ) : (
-                    <ChevronDown className="w-5 h-5" />
-                  )}
-                </div>
-              </Button>
-
-              <AnimatePresence>
-                {expandedSections.price && (
-                  <motion.div
-                    initial={{ opacity: 0, height: 0 }}
-                    animate={{ opacity: 1, height: "auto" }}
-                    exit={{ opacity: 0, height: 0 }}
-                    className="space-y-6"
-                  >
-                    {/* Price Slider */}
-                    <div className="space-y-4 p-4 bg-gradient-to-br from-orange-50 to-red-50 dark:from-orange-950/20 dark:to-red-950/20 rounded-xl border border-orange-200">
-                      <div className="flex justify-between items-center">
-                        <Label className="text-sm font-medium">
-                          Tùy chỉnh khoảng giá
-                        </Label>
-                        <div className="text-xs text-muted-foreground">
-                          {priceRange[0].toLocaleString()}đ -{" "}
-                          {priceRange[1].toLocaleString()}đ
-                        </div>
-                      </div>
-                      <Slider
-                        value={priceRange}
-                        onValueChange={setPriceRange}
-                        max={500000}
-                        min={0}
-                        step={25000}
-                        className="w-full"
-                      />
-                      <div className="flex justify-between text-xs text-muted-foreground">
-                        <span>0đ</span>
-                        <span>500,000đ</span>
-                      </div>
-                    </div>
-
-                    {/* Quick Price Buttons */}
-                    <div className="grid grid-cols-2 gap-3">
-                      {priceRanges.map((range, index) => (
-                        <Button
-                          key={index}
-                          variant={
-                            JSON.stringify(filters.priceRange) ===
-                            JSON.stringify(range.value)
-                              ? "default"
-                              : "outline"
-                          }
-                          onClick={() => handlePriceRangeChange(range.value)}
-                          className="h-14 flex flex-col items-center justify-center space-y-1 bg-gradient-to-br from-white to-orange-50 hover:from-orange-50 hover:to-red-50 border-orange-200 hover:border-orange-300"
-                        >
-                          <span className="text-lg">{range.icon}</span>
-                          <span className="text-xs font-medium">
-                            {range.label}
-                          </span>
-                        </Button>
-                      ))}
-                    </div>
-
-                    {/* Price Type Switches */}
-                    <div className="space-y-3 p-4 bg-white dark:bg-slate-800 rounded-xl border">
-                      <div className="flex items-center justify-between">
-                        <div className="flex items-center space-x-2">
-                          <Gift className="w-4 h-4 text-green-500" />
-                          <Label className="text-sm">
-                            Chỉ e-books miễn phí
-                          </Label>
-                        </div>
-                        <Switch
-                          checked={showOnlyFree}
-                          onCheckedChange={setShowOnlyFree}
-                        />
-                      </div>
-                      <div className="flex items-center justify-between">
-                        <div className="flex items-center space-x-2">
-                          <Crown className="w-4 h-4 text-yellow-500" />
-                          <Label className="text-sm">Chỉ e-books premium</Label>
-                        </div>
-                        <Switch
-                          checked={showOnlyPremium}
-                          onCheckedChange={setShowOnlyPremium}
-                        />
-                      </div>
-                    </div>
-                  </motion.div>
-                )}
-              </AnimatePresence>
-            </div>
-
-            <Separator className="bg-gradient-to-r from-transparent via-gray-300 to-transparent" />
-
-            {/* Technology Tags với icons */}
-            <div className="space-y-4">
-              <Button
-                variant="ghost"
-                onClick={() => toggleSection("tags")}
-                className="w-full justify-between p-0 h-auto hover:bg-cyan-50 dark:hover:bg-cyan-950/20"
-              >
-                <div className="flex items-center">
-                  <div className="p-2 rounded-lg bg-gradient-to-r from-cyan-500 to-blue-500 mr-3">
-                    <Code className="w-5 h-5 text-white" />
-                  </div>
-                  <div className="text-left">
-                    <div className="font-semibold">Chủ đề</div>
-                    <div className="text-sm text-muted-foreground">
-                      Topics & Technologies
-                    </div>
-                  </div>
-                </div>
-                <div className="flex items-center space-x-2">
-                  <Badge
-                    variant="secondary"
-                    className="text-xs bg-cyan-100 text-cyan-700"
-                  >
-                    {ebookTags.length}
-                  </Badge>
-                  {expandedSections.tags ? (
-                    <ChevronUp className="w-5 h-5" />
-                  ) : (
-                    <ChevronDown className="w-5 h-5" />
-                  )}
-                </div>
-              </Button>
-
-              <AnimatePresence>
-                {expandedSections.tags && (
-                  <motion.div
-                    initial={{ opacity: 0, height: 0 }}
-                    animate={{ opacity: 1, height: "auto" }}
-                    exit={{ opacity: 0, height: 0 }}
-                    className="space-y-4"
-                  >
-                    {/* Popular Tech Tags */}
-                    <div className="space-y-3">
-                      <Label className="text-sm font-medium text-muted-foreground flex items-center">
-                        <Flame className="w-4 h-4 mr-1 text-orange-500" />
-                        Chủ đề phổ biến
-                      </Label>
-                      <div className="space-y-2 max-h-60 overflow-y-auto">
-                        {ebookTags.slice(0, 12).map((tag) => (
-                          <Button
-                            key={tag}
-                            variant={
-                              filters.tags?.includes(tag)
-                                ? "default"
-                                : "outline"
-                            }
-                            onClick={() => toggleTag(tag)}
-                            className="w-full h-12 justify-between bg-gradient-to-r from-white to-cyan-50 hover:from-cyan-50 hover:to-blue-50 border-cyan-200 hover:border-cyan-300"
-                          >
-                            <div className="flex items-center space-x-3">
-                              {filters.tags?.includes(tag) && (
-                                <CheckCircle className="w-4 h-4 text-green-500" />
-                              )}
-                              <BookOpen className="w-4 h-4 text-cyan-600" />
-                              <span className="font-medium">{tag}</span>
-                            </div>
-                            <Badge variant="secondary" className="text-xs">
-                              {Math.floor(Math.random() * 50) + 10}
-                            </Badge>
-                          </Button>
-                        ))}
-                      </div>
-                    </div>
-
-                    {/* Show More Tags */}
-                    {ebookTags.length > 12 && (
-                      <Button
-                        variant="ghost"
-                        className="w-full text-cyan-600 hover:text-cyan-700 hover:bg-cyan-50"
-                      >
-                        <ChevronDown className="w-4 h-4 mr-2" />
-                        Xem thêm {ebookTags.length - 12} chủ đề khác
-                      </Button>
-                    )}
-                  </motion.div>
-                )}
-              </AnimatePresence>
-            </div>
-
-            <Separator className="bg-gradient-to-r from-transparent via-gray-300 to-transparent" />
-
-            {/* Advanced Filters */}
-            <div className="space-y-4">
-              <Button
-                variant="ghost"
-                onClick={() => toggleSection("advanced")}
-                className="w-full justify-between p-0 h-auto hover:bg-indigo-50 dark:hover:bg-indigo-950/20"
-              >
-                <div className="flex items-center">
-                  <div className="p-2 rounded-lg bg-gradient-to-r from-indigo-500 to-purple-500 mr-3">
-                    <Settings className="w-5 h-5 text-white" />
-                  </div>
-                  <div className="text-left">
-                    <div className="font-semibold">Bộ lọc nâng cao</div>
-                    <div className="text-sm text-muted-foreground">
-                      Tùy chọn chi tiết
-                    </div>
-                  </div>
-                </div>
-                {expandedSections.advanced ? (
-                  <ChevronUp className="w-5 h-5" />
-                ) : (
-                  <ChevronDown className="w-5 h-5" />
-                )}
-              </Button>
-
-              <AnimatePresence>
-                {expandedSections.advanced && (
-                  <motion.div
-                    initial={{ opacity: 0, height: 0 }}
-                    animate={{ opacity: 1, height: "auto" }}
-                    exit={{ opacity: 0, height: 0 }}
-                    className="space-y-4 p-4 bg-gradient-to-br from-indigo-50 to-purple-50 dark:from-indigo-950/20 dark:to-purple-950/20 rounded-xl border border-indigo-200"
-                  >
-                    <div className="grid grid-cols-2 gap-4">
-                      <div className="space-y-2">
-                        <Label className="text-sm flex items-center">
-                          <Star className="w-4 h-4 mr-1 text-yellow-500" />
-                          Đánh giá tối thiểu
-                        </Label>
-                        <Select defaultValue="4">
-                          <SelectTrigger className="h-10">
-                            <SelectValue />
-                          </SelectTrigger>
-                          <SelectContent>
-                            <SelectItem value="3">3+ sao</SelectItem>
-                            <SelectItem value="4">4+ sao</SelectItem>
-                            <SelectItem value="5">5 sao</SelectItem>
-                          </SelectContent>
-                        </Select>
-                      </div>
-
-                      <div className="space-y-2">
-                        <Label className="text-sm flex items-center">
-                          <Download className="w-4 h-4 mr-1 text-green-500" />
-                          Lượt tải
-                        </Label>
-                        <Select defaultValue="100">
-                          <SelectTrigger className="h-10">
-                            <SelectValue />
-                          </SelectTrigger>
-                          <SelectContent>
-                            <SelectItem value="10">10+ lượt</SelectItem>
-                            <SelectItem value="100">100+ lượt</SelectItem>
-                            <SelectItem value="1000">1000+ lượt</SelectItem>
-                          </SelectContent>
-                        </Select>
-                      </div>
-                    </div>
-
-                    <div className="space-y-3">
-                      <Label className="text-sm font-medium">
-                        Tính năng đặc biệt
-                      </Label>
-                      <div className="space-y-2">
-                        {[
-                          {
-                            icon: FileText,
-                            label: "Interactive Content",
-                            color: "text-blue-500",
-                          },
-                          {
-                            icon: Video,
-                            label: "Video Tutorials",
-                            color: "text-purple-500",
-                          },
-                          {
-                            icon: Code,
-                            label: "Code Examples",
-                            color: "text-yellow-500",
-                          },
-                          {
-                            icon: Download,
-                            label: "Downloadable Resources",
-                            color: "text-green-500",
-                          },
-                        ].map((feature) => (
-                          <div
-                            key={feature.label}
-                            className="flex items-center justify-between"
-                          >
-                            <div className="flex items-center space-x-2">
-                              <feature.icon
-                                className={`w-4 h-4 ${feature.color}`}
-                              />
-                              <span className="text-sm">{feature.label}</span>
-                            </div>
-                            <Switch />
-                          </div>
-                        ))}
-                      </div>
-                    </div>
-                  </motion.div>
-                )}
-              </AnimatePresence>
-            </div>
-          </div>
-
-          {/* Fixed Bottom Actions */}
-          <div className="border-t bg-white dark:bg-slate-900 p-4 -mx-6 -mb-6">
             <div className="flex gap-3">
               <Button
-                variant="outline"
-                onClick={clearFilters}
-                className="flex-1 h-12 border-2 hover:bg-red-50 hover:border-red-200"
+                type="submit"
+                className={`flex-1 h-10 bg-gradient-to-r ${softPinkTheme.primaryGradient} hover:scale-105 ${softPinkTheme.glow} transition-all text-white font-semibold text-sm rounded-xl`}
               >
-                <X className="w-4 h-4 mr-2" />
-                Xóa bộ lọc
+                <Search className="w-4 h-4 mr-2" />
+                Tìm kiếm
               </Button>
-              <SheetClose asChild>
-                <Button className="flex-2 h-12 bg-gradient-to-r from-green-500 to-blue-600 hover:from-green-600 hover:to-blue-700 shadow-lg">
-                  <CheckCircle className="w-4 h-4 mr-2" />
-                  Áp dụng ({products.length})
+              <Button
+                type="button"
+                variant="outline"
+                onClick={() => setIsExpanded(!isExpanded)}
+                className={`h-10 px-4 border-2 border-pink-200 hover:bg-pink-50 rounded-xl text-sm`}
+              >
+                <SlidersHorizontal className="w-4 h-4" />
+              </Button>
+            </div>
+          </form>
+        </CardContent>
+      </Card>
+
+      {/* Stats Bar */}
+      <Card
+        className={`bg-gradient-to-r ${softPinkTheme.neoCard} border-0 ${softPinkTheme.softGlow} border border-white/20 rounded-2xl`}
+      >
+        <CardContent className="p-4">
+          <div className="flex items-center justify-between">
+            <div className="flex items-center gap-3">
+              <motion.div
+                animate={{ scale: [1, 1.05, 1] }}
+                transition={{ duration: 2, repeat: Infinity }}
+              >
+                <Badge
+                  className={`bg-gradient-to-r ${softPinkTheme.primaryGradient} text-white font-mono px-3 py-1 text-sm ${softPinkTheme.glow} rounded-lg`}
+                >
+                  <BookOpen className="w-3 h-3 mr-1" />
+                  {filteredProductsLength}
+                </Badge>
+              </motion.div>
+              <div className="text-sm text-gray-600">
+                <div className="font-semibold">
+                  Trang {currentPage}/{totalPages}
+                </div>
+                <div className="text-xs">{currentProductsLength} e-books</div>
+              </div>
+            </div>
+
+            <div className="flex items-center gap-2">
+              {/* View Mode Toggle */}
+              <div
+                className={`flex rounded-xl border border-pink-200/50 overflow-hidden bg-gradient-to-r ${softPinkTheme.glassCard}`}
+              >
+                <Button
+                  variant={viewMode === "grid" ? "default" : "ghost"}
+                  size="sm"
+                  onClick={() => setViewMode("grid")}
+                  className={`rounded-none px-3 py-2 text-xs ${
+                    viewMode === "grid"
+                      ? `bg-gradient-to-r ${softPinkTheme.primaryGradient} text-white`
+                      : `hover:bg-pink-50 text-gray-600`
+                  }`}
+                >
+                  <Grid className="w-3 h-3" />
                 </Button>
-              </SheetClose>
+                <Button
+                  variant={viewMode === "list" ? "default" : "ghost"}
+                  size="sm"
+                  onClick={() => setViewMode("list")}
+                  className={`rounded-none px-3 py-2 text-xs ${
+                    viewMode === "list"
+                      ? `bg-gradient-to-r ${softPinkTheme.primaryGradient} text-white`
+                      : `hover:bg-pink-50 text-gray-600`
+                  }`}
+                >
+                  <List className="w-3 h-3" />
+                </Button>
+              </div>
             </div>
           </div>
-        </div>
-      </SheetContent>
-    </Sheet>
+        </CardContent>
+      </Card>
+
+      {/* Expanded Filters */}
+      <AnimatePresence>
+        {isExpanded && (
+          <motion.div
+            initial={{ opacity: 0, height: 0 }}
+            animate={{ opacity: 1, height: "auto" }}
+            exit={{ opacity: 0, height: 0 }}
+            transition={{ duration: 0.3 }}
+          >
+            <Card
+              className={`bg-gradient-to-r ${softPinkTheme.neoCard} border-0 ${softPinkTheme.softGlow} backdrop-blur-xl border border-white/20 rounded-2xl`}
+            >
+              <CardContent className="p-4 space-y-4">
+                {/* Sort */}
+                <div>
+                  <Label className="text-sm font-semibold text-gray-700 mb-2 flex items-center">
+                    <TrendingUp className="w-4 h-4 mr-2 text-pink-500" />
+                    Sắp xếp
+                  </Label>
+                  <Select
+                    value={filters.sortBy}
+                    onValueChange={handleSortChange}
+                  >
+                    <SelectTrigger
+                      className={`h-10 bg-gradient-to-r ${softPinkTheme.glassCard} border border-pink-200/50 rounded-xl text-sm`}
+                    >
+                      <SelectValue />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {sortOptions.map((option) => (
+                        <SelectItem key={option.value} value={option.value}>
+                          <div className="flex items-center gap-2">
+                            <option.icon className="w-4 h-4 text-pink-500" />
+                            <span className="font-medium text-sm">
+                              {option.label}
+                            </span>
+                          </div>
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                </div>
+
+                {/* Quick Categories */}
+                <div>
+                  <Label className="text-sm font-semibold text-gray-700 mb-2 flex items-center">
+                    <Layout className="w-4 h-4 mr-2 text-pink-500" />
+                    Chủ đề nổi bật
+                  </Label>
+                  <div className="grid grid-cols-2 gap-2">
+                    {[
+                      { text: "Programming", icon: Code },
+                      { text: "Design", icon: Palette },
+                      { text: "Business", icon: Briefcase },
+                      { text: "Data Science", icon: BarChart3 },
+                    ].map((item, i) => (
+                      <Button
+                        key={item.text}
+                        variant="outline"
+                        size="sm"
+                        onClick={() => setSearchInput(item.text)}
+                        className={`h-10 bg-gradient-to-r ${softPinkTheme.dynamicColors[i].bg} ${softPinkTheme.dynamicColors[i].text} border-0 shadow-md hover:${softPinkTheme.dynamicColors[i].glow} transition-all font-medium text-sm rounded-xl`}
+                      >
+                        <item.icon className="w-4 h-4 mr-2" />
+                        {item.text}
+                      </Button>
+                    ))}
+                  </div>
+                </div>
+
+                {/* Popular Tags */}
+                <div>
+                  <Label className="text-sm font-semibold text-gray-700 mb-2 flex items-center">
+                    <BookMarked className="w-4 h-4 mr-2 text-pink-500" />
+                    Tags phổ biến
+                  </Label>
+                  <div className="flex flex-wrap gap-2">
+                    {ebookTags.slice(0, 6).map((tag, i) => (
+                      <Button
+                        key={tag}
+                        variant={
+                          filters.tags?.includes(tag) ? "default" : "outline"
+                        }
+                        size="sm"
+                        onClick={() => toggleTag(tag)}
+                        className={`text-xs h-8 ${
+                          filters.tags?.includes(tag)
+                            ? `bg-gradient-to-r ${softPinkTheme.primaryGradient} text-white`
+                            : "border-pink-200 hover:bg-pink-50"
+                        } rounded-lg`}
+                      >
+                        {tag}
+                      </Button>
+                    ))}
+                  </div>
+                </div>
+
+                {/* Actions */}
+                <div className="flex gap-3 pt-2">
+                  <Button
+                    variant="outline"
+                    onClick={clearFilters}
+                    className="flex-1 h-10 border-2 border-red-200 hover:bg-red-50 text-sm rounded-xl"
+                  >
+                    <X className="w-4 h-4 mr-1" />
+                    Xóa
+                  </Button>
+                  <Button
+                    onClick={() => setIsExpanded(false)}
+                    className={`flex-1 h-10 bg-gradient-to-r ${softPinkTheme.secondaryGradient} text-white text-sm rounded-xl`}
+                  >
+                    <Award className="w-4 h-4 mr-1" />
+                    OK
+                  </Button>
+                </div>
+              </CardContent>
+            </Card>
+          </motion.div>
+        )}
+      </AnimatePresence>
+    </div>
   );
 };
 
-// Enhanced Desktop Filter Sidebar với UI chuyên nghiệp
-const DesktopFilterSidebar = ({
+// ✅ DESKTOP FILTER BAR - HORIZONTAL LAYOUT
+const DesktopFilterBar = ({
   filters,
-  ebookTags,
-  priceRanges,
   sortOptions,
   searchInput,
   setSearchInput,
   handleSearch,
   handleSortChange,
+  clearFilters,
+  viewMode,
+  setViewMode,
+  filteredProductsLength,
+  currentPage,
+  totalPages,
+  currentProductsLength,
+  ebookTags,
   toggleTag,
   handlePriceRangeChange,
-  clearFilters,
-  products,
+  priceRanges,
 }) => {
   const [priceRange, setPriceRange] = useState([0, 500000]);
-  const [expandedSections, setExpandedSections] = useState({
-    categories: true,
-    tags: false,
-    advanced: false,
-  });
-
-  const toggleSection = (section: string) => {
-    setExpandedSections((prev) => ({
-      ...prev,
-      [section]: !prev[section],
-    }));
-  };
-
-  // Category stats
-  const categoryStats = useMemo(() => {
-    const stats = {};
-    ebookTags.forEach((tag) => {
-      stats[tag] = Math.floor(Math.random() * 100) + 5; // Mock data
-    });
-    return stats;
-  }, [ebookTags]);
+  const [isExpanded, setIsExpanded] = useState(false);
 
   return (
-    <motion.aside
-      initial={{ opacity: 0, x: -30 }}
-      animate={{ opacity: 1, x: 0 }}
-      className="hidden xl:block w-96 flex-shrink-0"
-    >
-      <div className="sticky top-8 space-y-6 max-h-screen overflow-y-auto">
-        {/* Main Filter Card */}
-        <Card className="shadow-2xl border-0 bg-white/95 dark:bg-slate-900/95 backdrop-blur-xl overflow-hidden">
-          {/* Enhanced Header */}
-          <CardHeader className="pb-6 bg-gradient-to-r from-green-500/10 via-blue-500/10 to-purple-500/10 relative overflow-hidden">
-            <div className="absolute inset-0 bg-gradient-to-r from-green-400/5 via-blue-400/5 to-purple-400/5"></div>
-            <CardTitle className="relative z-10">
-              <div className="flex items-center justify-between">
-                <div className="flex items-center space-x-3">
-                  <div className="p-3 rounded-2xl bg-gradient-to-r from-green-500 via-blue-600 to-purple-600 shadow-xl">
-                    <Filter className="w-6 h-6 text-white" />
-                  </div>
-                  <div>
-                    <div className="text-2xl font-bold bg-gradient-to-r from-green-600 via-blue-600 to-purple-600 bg-clip-text text-transparent">
-                      Bộ lọc E-books
-                    </div>
-                    <div className="text-sm text-muted-foreground font-normal">
-                      AI-Powered • {products.length} e-books
-                    </div>
-                  </div>
-                </div>
-                <Badge className="bg-gradient-to-r from-green-100 to-blue-100 text-green-800 border-0">
-                  Pro
-                </Badge>
-              </div>
-            </CardTitle>
-          </CardHeader>
-
-          <CardContent className="space-y-8 p-8">
-            {/* AI Search Section */}
-            <div className="space-y-4">
-              <div className="flex items-center space-x-2 mb-4">
-                <div className="p-2 rounded-lg bg-gradient-to-r from-green-500 to-cyan-500">
-                  <Search className="w-5 h-5 text-white" />
-                </div>
-                <h3 className="font-bold text-lg">Tìm kiếm thông minh</h3>
-                <Badge
-                  variant="secondary"
-                  className="ml-auto bg-gradient-to-r from-green-100 to-cyan-100 text-green-700"
-                >
-                  AI
-                </Badge>
-              </div>
-
-              <form onSubmit={handleSearch} className="space-y-4">
-                <div className="relative">
-                  <Search className="absolute left-4 top-1/2 transform -translate-y-1/2 w-5 h-5 text-muted-foreground" />
+    <div className="hidden lg:block space-y-6">
+      {/* Main Filter Bar */}
+      <Card
+        className={`bg-gradient-to-r ${softPinkTheme.glassCard} border-0 ${softPinkTheme.softGlow} backdrop-blur-2xl border border-white/20 rounded-2xl`}
+      >
+        <CardContent className="p-6">
+          <div className="grid grid-cols-12 gap-6 items-end">
+            {/* Search - 4 columns */}
+            <div className="col-span-4">
+              <Label className="text-sm font-semibold text-gray-700 mb-2 flex items-center">
+                <Wand2 className="w-4 h-4 mr-2 text-pink-500" />
+                Tìm kiếm AI thông minh
+              </Label>
+              <form onSubmit={handleSearch} className="flex gap-2">
+                <div className="relative flex-1 group">
+                  <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 w-4 h-4 text-gray-400 group-focus-within:text-pink-500 transition-colors" />
                   <Input
-                    type="search"
-                    placeholder="Tìm e-books theo nội dung, tác giả..."
+                    placeholder="VD: JavaScript, Machine Learning, UI/UX..."
                     value={searchInput}
                     onChange={(e) => setSearchInput(e.target.value)}
-                    className="h-12 pl-12 pr-16 bg-gradient-to-r from-white to-green-50 dark:from-slate-800 dark:to-green-950 border-2 border-green-200 focus:border-green-500 rounded-xl shadow-sm"
+                    className={`h-10 pl-10 pr-10 bg-gradient-to-r ${softPinkTheme.glassCard} border border-pink-200/50 rounded-xl focus:ring-2 focus:ring-pink-300 transition-all text-sm`}
                   />
-                  <div className="absolute right-3 top-1/2 transform -translate-y-1/2">
-                    <BookOpen className="w-5 h-5 text-green-500" />
-                  </div>
+                  <motion.div
+                    animate={{ rotate: [0, 360], scale: [1, 1.2, 1] }}
+                    transition={{ duration: 4, repeat: Infinity }}
+                    className="absolute right-3 top-1/2 transform -translate-y-1/2"
+                  >
+                    <Stars className="w-4 h-4 text-pink-400" />
+                  </motion.div>
                 </div>
-
                 <Button
                   type="submit"
-                  className="w-full h-12 bg-gradient-to-r from-green-500 to-blue-600 hover:from-green-600 hover:to-blue-700 shadow-lg hover:shadow-xl transition-all duration-300"
+                  className={`h-10 px-4 bg-gradient-to-r ${softPinkTheme.primaryGradient} hover:scale-105 ${softPinkTheme.glow} transition-all text-white font-semibold text-sm rounded-xl`}
                 >
-                  <Search className="w-4 h-4 mr-2" />
-                  Tìm kiếm E-books
+                  <Search className="w-4 h-4" />
                 </Button>
               </form>
-
-              {/* Quick Search Suggestions */}
-              <div className="space-y-2">
-                <Label className="text-sm font-medium text-muted-foreground">
-                  Gợi ý phổ biến:
-                </Label>
-                <div className="flex flex-wrap gap-2">
-                  {[
-                    "JavaScript Advanced",
-                    "Python ML",
-                    "React Guide",
-                    "UI/UX Design",
-                  ].map((suggestion) => (
-                    <Button
-                      key={suggestion}
-                      variant="outline"
-                      size="sm"
-                      onClick={() => setSearchInput(suggestion)}
-                      className="text-xs h-8 bg-gradient-to-r from-gray-50 to-green-50 hover:from-green-50 hover:to-blue-50 border-green-200 hover:border-green-300 rounded-lg"
-                    >
-                      {suggestion}
-                    </Button>
-                  ))}
-                </div>
-              </div>
             </div>
 
-            <Separator className="bg-gradient-to-r from-transparent via-gray-300 to-transparent" />
-
-            {/* Sort Section với enhanced UI */}
-            <div className="space-y-4">
-              <div className="flex items-center space-x-2 mb-4">
-                <div className="p-2 rounded-lg bg-gradient-to-r from-purple-500 to-pink-500">
-                  <ArrowUpDown className="w-5 h-5 text-white" />
-                </div>
-                <h3 className="font-bold text-lg">Sắp xếp</h3>
-              </div>
-
-              <Select
-                value={filters.sortBy || "newest"}
-                onValueChange={handleSortChange}
-              >
-                <SelectTrigger className="h-14 bg-gradient-to-r from-white to-purple-50 dark:from-slate-800 dark:to-purple-950 border-2 border-purple-200 focus:border-purple-500 rounded-xl shadow-sm">
+            {/* Sort - 2 columns */}
+            <div className="col-span-2">
+              <Label className="text-sm font-semibold text-gray-700 mb-2 flex items-center">
+                <TrendingUp className="w-4 h-4 mr-2 text-pink-500" />
+                Sắp xếp
+              </Label>
+              <Select value={filters.sortBy} onValueChange={handleSortChange}>
+                <SelectTrigger
+                  className={`h-10 bg-gradient-to-r ${softPinkTheme.glassCard} border border-pink-200/50 rounded-xl text-sm`}
+                >
                   <SelectValue />
                 </SelectTrigger>
-                <SelectContent className="min-w-[350px]">
+                <SelectContent>
                   {sortOptions.map((option) => (
-                    <SelectItem
-                      key={option.value}
-                      value={option.value}
-                      className="h-14 cursor-pointer"
-                    >
-                      <div className="flex items-center space-x-4 w-full">
-                        <div className="p-2 rounded-lg bg-gradient-to-r from-purple-100 to-pink-100">
-                          <option.icon className="w-5 h-5 text-purple-600" />
-                        </div>
-                        <div className="flex-1">
-                          <div className="font-semibold">{option.label}</div>
-                          <div className="text-xs text-muted-foreground">
-                            {option.value === "newest" &&
-                              "E-books được tạo gần đây nhất"}
-                            {option.value === "popular" &&
-                              "Được tải nhiều nhất"}
-                            {option.value === "rating" && "Đánh giá cao nhất"}
-                            {option.value === "price_low" &&
-                              "Phù hợp với ngân sách thấp"}
-                          </div>
-                        </div>
+                    <SelectItem key={option.value} value={option.value}>
+                      <div className="flex items-center gap-2">
+                        <option.icon className="w-4 h-4 text-pink-500" />
+                        <span className="font-medium text-sm">
+                          {option.label}
+                        </span>
                       </div>
                     </SelectItem>
                   ))}
@@ -1360,766 +590,475 @@ const DesktopFilterSidebar = ({
               </Select>
             </div>
 
-            <Separator className="bg-gradient-to-r from-transparent via-gray-300 to-transparent" />
-
-            {/* Enhanced Price Range */}
-            <div className="space-y-6">
-              <div className="flex items-center space-x-2 mb-4">
-                <div className="p-2 rounded-lg bg-gradient-to-r from-orange-500 to-red-500">
-                  <DollarSign className="w-5 h-5 text-white" />
-                </div>
-                <h3 className="font-bold text-lg">Khoảng giá</h3>
-              </div>
-
-              {/* Custom Price Slider */}
-              <div className="space-y-4 p-6 bg-gradient-to-br from-orange-50 to-red-50 dark:from-orange-950/20 dark:to-red-950/20 rounded-2xl border border-orange-200">
-                <div className="flex justify-between items-center">
-                  <Label className="font-medium">Tùy chỉnh khoảng giá</Label>
-                  <div className="text-sm font-mono bg-white dark:bg-slate-800 px-3 py-1 rounded-lg border">
-                    {priceRange[0].toLocaleString()}đ -{" "}
-                    {priceRange[1].toLocaleString()}đ
-                  </div>
-                </div>
-                <Slider
-                  value={priceRange}
-                  onValueChange={setPriceRange}
-                  max={500000}
-                  min={0}
-                  step={25000}
-                  className="w-full"
-                />
-                <div className="flex justify-between text-xs text-muted-foreground">
-                  <span>Miễn phí</span>
-                  <span>500,000đ</span>
-                </div>
-              </div>
-
-              {/* Quick Price Buttons */}
-              <div className="grid grid-cols-2 gap-4">
-                {priceRanges.map((range, index) => (
-                  <motion.div
-                    key={index}
-                    whileHover={{ scale: 1.02 }}
-                    whileTap={{ scale: 0.98 }}
-                  >
-                    <Button
-                      variant={
-                        JSON.stringify(filters.priceRange) ===
-                        JSON.stringify(range.value)
-                          ? "default"
-                          : "outline"
-                      }
-                      onClick={() => handlePriceRangeChange(range.value)}
-                      className={`w-full h-16 flex flex-col items-center justify-center space-y-1 ${
-                        JSON.stringify(filters.priceRange) ===
-                        JSON.stringify(range.value)
-                          ? "bg-gradient-to-r from-orange-500 to-red-500 text-white shadow-lg"
-                          : "bg-gradient-to-br from-white to-orange-50 hover:from-orange-50 hover:to-red-50 border-2 border-orange-200 hover:border-orange-300 shadow-sm hover:shadow-md"
-                      } transition-all duration-300 rounded-xl`}
-                    >
-                      <span className="text-xl">{range.icon}</span>
-                      <span className="text-sm font-semibold">
-                        {range.label}
-                      </span>
-                    </Button>
-                  </motion.div>
-                ))}
+            {/* View Mode - 2 columns */}
+            <div className="col-span-2">
+              <Label className="text-sm font-semibold text-gray-700 mb-2 flex items-center">
+                <Layout className="w-4 h-4 mr-2 text-pink-500" />
+                Hiển thị
+              </Label>
+              <div
+                className={`flex rounded-xl border border-pink-200/50 overflow-hidden bg-gradient-to-r ${softPinkTheme.glassCard}`}
+              >
+                <Button
+                  variant={viewMode === "grid" ? "default" : "ghost"}
+                  size="sm"
+                  onClick={() => setViewMode("grid")}
+                  className={`rounded-none px-3 py-2 text-sm ${
+                    viewMode === "grid"
+                      ? `bg-gradient-to-r ${softPinkTheme.primaryGradient} text-white`
+                      : `hover:bg-pink-50 text-gray-600`
+                  }`}
+                >
+                  <Grid className="w-4 h-4 mr-1" />
+                  Grid
+                </Button>
+                <Button
+                  variant={viewMode === "list" ? "default" : "ghost"}
+                  size="sm"
+                  onClick={() => setViewMode("list")}
+                  className={`rounded-none px-3 py-2 text-sm ${
+                    viewMode === "list"
+                      ? `bg-gradient-to-r ${softPinkTheme.primaryGradient} text-white`
+                      : `hover:bg-pink-50 text-gray-600`
+                  }`}
+                >
+                  <List className="w-4 h-4 mr-1" />
+                  List
+                </Button>
               </div>
             </div>
 
-            <Separator className="bg-gradient-to-r from-transparent via-gray-300 to-transparent" />
-
-            {/* Categories Section */}
-            <div className="space-y-4">
-              <Button
-                variant="ghost"
-                onClick={() => toggleSection("categories")}
-                className="w-full justify-between p-0 h-auto hover:bg-blue-50 dark:hover:bg-blue-950/20 rounded-xl transition-all duration-300"
-              >
-                <div className="flex items-center space-x-3">
-                  <div className="p-2.5 rounded-xl bg-gradient-to-r from-blue-500 to-purple-500 shadow-lg">
-                    <Layout className="w-5 h-5 text-white" />
-                  </div>
-                  <div className="text-left">
-                    <h3 className="font-bold text-lg">Danh mục</h3>
-                    <p className="text-sm text-muted-foreground">
-                      Chọn theo lĩnh vực
-                    </p>
-                  </div>
-                </div>
-                <div className="flex items-center space-x-2">
+            {/* Stats & Actions - 4 columns */}
+            <div className="col-span-4 flex items-center justify-between">
+              <div className="flex items-center gap-4">
+                <motion.div
+                  animate={{ scale: [1, 1.05, 1] }}
+                  transition={{ duration: 2, repeat: Infinity }}
+                >
                   <Badge
-                    variant="secondary"
-                    className="bg-blue-100 text-blue-700 px-2 py-1"
+                    className={`bg-gradient-to-r ${softPinkTheme.primaryGradient} text-white font-mono px-3 py-1 text-sm ${softPinkTheme.glow} rounded-lg`}
                   >
-                    8 phổ biến
+                    <BookOpen className="w-3 h-3 mr-1" />
+                    {filteredProductsLength} kết quả
                   </Badge>
-                  {expandedSections.categories ? (
-                    <ChevronUp className="w-5 h-5" />
-                  ) : (
-                    <ChevronDown className="w-5 h-5" />
-                  )}
+                </motion.div>
+                <div className="text-sm text-gray-600">
+                  Trang {currentPage}/{totalPages} • {currentProductsLength}{" "}
+                  e-books
                 </div>
-              </Button>
+              </div>
 
-              <AnimatePresence>
-                {expandedSections.categories && (
-                  <motion.div
-                    initial={{ opacity: 0, height: 0 }}
-                    animate={{ opacity: 1, height: "auto" }}
-                    exit={{ opacity: 0, height: 0 }}
-                    transition={{ duration: 0.3, ease: "easeInOut" }}
-                    className="space-y-4"
-                  >
-                    {/* Enhanced Categories Grid */}
-                    <div className="grid grid-cols-2 gap-4">
+              <div className="flex gap-2">
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={() => setIsExpanded(!isExpanded)}
+                  className="border-pink-200 hover:bg-pink-50 rounded-xl"
+                >
+                  <SlidersHorizontal className="w-4 h-4 mr-1" />
+                  {isExpanded ? "Thu gọn" : "Mở rộng"}
+                </Button>
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={clearFilters}
+                  className="border-red-200 hover:bg-red-50 rounded-xl"
+                >
+                  <X className="w-4 h-4 mr-1" />
+                  Xóa
+                </Button>
+              </div>
+            </div>
+          </div>
+        </CardContent>
+      </Card>
+
+      {/* Expanded Filters */}
+      <AnimatePresence>
+        {isExpanded && (
+          <motion.div
+            initial={{ opacity: 0, height: 0 }}
+            animate={{ opacity: 1, height: "auto" }}
+            exit={{ opacity: 0, height: 0 }}
+            transition={{ duration: 0.3 }}
+          >
+            <Card
+              className={`bg-gradient-to-r ${softPinkTheme.neoCard} border-0 ${softPinkTheme.softGlow} backdrop-blur-xl border border-white/20 rounded-2xl`}
+            >
+              <CardContent className="p-6">
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+                  {/* Quick Search Suggestions */}
+                  <div>
+                    <Label className="text-sm font-semibold text-gray-700 mb-3 flex items-center">
+                      <Target className="w-4 h-4 mr-2 text-pink-500" />
+                      Gợi ý thông minh
+                    </Label>
+                    <div className="grid grid-cols-2 gap-2">
                       {[
                         {
-                          name: "Programming",
+                          text: "JavaScript",
                           icon: Code,
-                          count: 85,
-                          color: "from-blue-500 to-cyan-500",
-                          bgColor: "from-blue-50 to-cyan-50",
-                          darkBgColor: "from-blue-900/20 to-cyan-900/20",
+                          color: softPinkTheme.dynamicColors[0],
                         },
                         {
-                          name: "Design",
+                          text: "Design",
                           icon: Palette,
-                          count: 62,
-                          color: "from-purple-500 to-pink-500",
-                          bgColor: "from-purple-50 to-pink-50",
-                          darkBgColor: "from-purple-900/20 to-pink-900/20",
+                          color: softPinkTheme.dynamicColors[1],
                         },
                         {
-                          name: "Data Science",
+                          text: "Data Science",
                           icon: BarChart3,
-                          count: 73,
-                          color: "from-green-500 to-emerald-500",
-                          bgColor: "from-green-50 to-emerald-50",
-                          darkBgColor: "from-green-900/20 to-emerald-900/20",
+                          color: softPinkTheme.dynamicColors[2],
                         },
                         {
-                          name: "Web Dev",
-                          icon: Globe,
-                          count: 94,
-                          color: "from-orange-500 to-red-500",
-                          bgColor: "from-orange-50 to-red-50",
-                          darkBgColor: "from-orange-900/20 to-red-900/20",
-                        },
-                        {
-                          name: "Mobile",
-                          icon: Smartphone,
-                          count: 56,
-                          color: "from-indigo-500 to-purple-500",
-                          bgColor: "from-indigo-50 to-purple-50",
-                          darkBgColor: "from-indigo-900/20 to-purple-900/20",
-                        },
-                        {
-                          name: "AI/ML",
-                          icon: Activity,
-                          count: 41,
-                          color: "from-cyan-500 to-blue-500",
-                          bgColor: "from-cyan-50 to-blue-50",
-                          darkBgColor: "from-cyan-900/20 to-blue-900/20",
-                        },
-                        {
-                          name: "Business",
+                          text: "Business",
                           icon: Briefcase,
-                          count: 38,
-                          color: "from-gray-500 to-slate-500",
-                          bgColor: "from-gray-50 to-slate-50",
-                          darkBgColor: "from-gray-900/20 to-slate-900/20",
+                          color: softPinkTheme.dynamicColors[3],
                         },
-                        {
-                          name: "DevOps",
-                          icon: Server,
-                          count: 29,
-                          color: "from-emerald-500 to-green-500",
-                          bgColor: "from-emerald-50 to-green-50",
-                          darkBgColor: "from-emerald-900/20 to-green-900/20",
-                        },
-                      ].map((category) => (
+                      ].map((item, i) => (
                         <motion.div
-                          key={category.name}
-                          whileHover={{ scale: 1.03, y: -2 }}
-                          whileTap={{ scale: 0.97 }}
-                          className="group"
+                          key={item.text}
+                          initial={{ scale: 0, opacity: 0 }}
+                          animate={{ scale: 1, opacity: 1 }}
+                          transition={{ delay: i * 0.1 }}
+                          whileHover={{ scale: 1.05 }}
                         >
                           <Button
                             variant="outline"
-                            className={`relative w-full h-20 p-4 border-2 border-transparent bg-gradient-to-br ${category.bgColor} dark:${category.darkBgColor} hover:border-blue-200 dark:hover:border-blue-700 shadow-sm hover:shadow-lg transition-all duration-300 rounded-2xl overflow-hidden`}
+                            size="sm"
+                            onClick={() => setSearchInput(item.text)}
+                            className={`h-10 w-full bg-gradient-to-r ${item.color.bg} ${item.color.text} border-0 shadow-md hover:${item.color.glow} transition-all font-medium text-sm rounded-xl`}
                           >
-                            {/* Background Gradient on Hover */}
-                            <div className="absolute inset-0 bg-gradient-to-br from-white/50 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
-
-                            {/* Content */}
-                            <div className="relative z-10 flex items-center justify-between w-full">
-                              {/* Left Side - Icon & Name */}
-                              <div className="flex items-center space-x-3">
-                                <div
-                                  className={`p-2.5 rounded-xl bg-gradient-to-r ${category.color} shadow-md group-hover:shadow-lg group-hover:scale-110 transition-all duration-300`}
-                                >
-                                  <category.icon className="w-5 h-5 text-white" />
-                                </div>
-                                <div className="text-left">
-                                  <div className="font-bold text-sm text-gray-900 dark:text-white group-hover:text-blue-700 dark:group-hover:text-blue-300 transition-colors">
-                                    {category.name}
-                                  </div>
-                                  <div className="text-xs text-muted-foreground">
-                                    E-books
-                                  </div>
-                                </div>
-                              </div>
-
-                              {/* Right Side - Count */}
-                              <div className="flex flex-col items-end">
-                                <Badge
-                                  className={`bg-gradient-to-r ${category.color} text-white border-0 shadow-sm group-hover:shadow-md transition-all duration-300`}
-                                >
-                                  {category.count}
-                                </Badge>
-                                <div className="text-xs text-muted-foreground mt-1">
-                                  available
-                                </div>
-                              </div>
-                            </div>
+                            <item.icon className="w-4 h-4 mr-2" />
+                            {item.text}
                           </Button>
                         </motion.div>
                       ))}
                     </div>
+                  </div>
 
-                    {/* Additional Info */}
-                    <div className="mt-4 p-4 bg-gradient-to-r from-blue-50 to-purple-50 dark:from-blue-900/20 dark:to-purple-900/20 rounded-xl border border-blue-200 dark:border-blue-800">
-                      <div className="flex items-center justify-between">
-                        <div className="flex items-center space-x-2">
-                          <Sparkles className="w-4 h-4 text-blue-600" />
-                          <span className="text-sm font-medium text-blue-900 dark:text-blue-300">
-                            Có thêm nhiều danh mục khác
-                          </span>
-                        </div>
-                        <Button
-                          variant="ghost"
-                          size="sm"
-                          className="text-blue-600 hover:text-blue-700"
+                  {/* Price Range */}
+                  <div>
+                    <Label className="text-sm font-semibold text-gray-700 mb-3 flex items-center">
+                      <DollarSign className="w-4 h-4 mr-2 text-pink-500" />
+                      Khoảng giá
+                    </Label>
+                    <div
+                      className={`p-4 bg-gradient-to-r ${softPinkTheme.glassCard} rounded-xl border border-pink-200/50`}
+                    >
+                      <div className="flex justify-between text-xs font-bold text-gray-700 mb-3">
+                        <span>{priceRange[0].toLocaleString()}đ</span>
+                        <span>{priceRange[1].toLocaleString()}đ</span>
+                      </div>
+                      <Slider
+                        value={priceRange}
+                        onValueChange={setPriceRange}
+                        max={500000}
+                        min={0}
+                        step={25000}
+                        className="mb-4"
+                      />
+                      <div className="grid grid-cols-2 gap-2">
+                        {priceRanges.map((range, i) => (
+                          <Button
+                            key={i}
+                            variant="outline"
+                            size="sm"
+                            onClick={() => handlePriceRangeChange(range.value)}
+                            className={`h-10 bg-gradient-to-r ${softPinkTheme.dynamicColors[i % softPinkTheme.dynamicColors.length].bg} ${softPinkTheme.dynamicColors[i % softPinkTheme.dynamicColors.length].text} border-0 shadow-md hover:${softPinkTheme.dynamicColors[i % softPinkTheme.dynamicColors.length].glow} transition-all text-xs font-bold rounded-xl flex items-center justify-center gap-2`}
+                          >
+                            {range.icon === "📚" && (
+                              <BookOpen className="w-3 h-3" />
+                            )}
+                            {range.icon === "🎁" && (
+                              <Gift className="w-3 h-3" />
+                            )}
+                            {range.icon === "💸" && (
+                              <DollarSign className="w-3 h-3" />
+                            )}
+                            {range.icon === "💎" && (
+                              <Crown className="w-3 h-3" />
+                            )}
+                            {range.label}
+                          </Button>
+                        ))}
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* Popular Tags */}
+                  <div>
+                    <Label className="text-sm font-semibold text-gray-700 mb-3 flex items-center">
+                      <BookMarked className="w-4 h-4 mr-2 text-pink-500" />
+                      Tags phổ biến
+                    </Label>
+                    <div className="space-y-2 max-h-40 overflow-y-auto">
+                      {ebookTags.slice(0, 8).map((tag, i) => (
+                        <motion.div
+                          key={tag}
+                          initial={{ scale: 0, rotate: -90 }}
+                          animate={{ scale: 1, rotate: 0 }}
+                          transition={{ delay: i * 0.1, type: "spring" }}
+                          whileHover={{ scale: 1.05 }}
                         >
-                          <ChevronDown className="w-4 h-4 mr-1" />
-                          Xem tất cả
-                        </Button>
-                      </div>
-                    </div>
-                  </motion.div>
-                )}
-              </AnimatePresence>
-            </div>
-
-            <Separator className="bg-gradient-to-r from-transparent via-gray-300 to-transparent" />
-
-            {/* Technology Tags */}
-            <div className="space-y-4">
-              <Button
-                variant="ghost"
-                onClick={() => toggleSection("tags")}
-                className="w-full justify-between p-0 h-auto hover:bg-cyan-50 dark:hover:bg-cyan-950/20"
-              >
-                <div className="flex items-center space-x-2">
-                  <div className="p-2 rounded-lg bg-gradient-to-r from-cyan-500 to-blue-500">
-                    <BookOpen className="w-5 h-5 text-white" />
-                  </div>
-                  <h3 className="font-bold text-lg">Chủ đề</h3>
-                </div>
-                <div className="flex items-center space-x-2">
-                  <Badge
-                    variant="secondary"
-                    className="bg-cyan-100 text-cyan-700"
-                  >
-                    {filters.tags?.length || 0} đã chọn
-                  </Badge>
-                  {expandedSections.tags ? (
-                    <ChevronUp className="w-5 h-5" />
-                  ) : (
-                    <ChevronDown className="w-5 h-5" />
-                  )}
-                </div>
-              </Button>
-
-              <AnimatePresence>
-                {expandedSections.tags && (
-                  <motion.div
-                    initial={{ opacity: 0, height: 0 }}
-                    animate={{ opacity: 1, height: "auto" }}
-                    exit={{ opacity: 0, height: 0 }}
-                    className="space-y-4"
-                  >
-                    {/* Popular Tags */}
-                    <div className="space-y-3">
-                      <Label className="text-sm font-medium text-muted-foreground flex items-center">
-                        <Flame className="w-4 h-4 mr-1 text-orange-500" />
-                        Chủ đề phổ biến
-                      </Label>
-                      <div className="space-y-2 max-h-64 overflow-y-auto">
-                        {ebookTags.slice(0, 15).map((tag) => (
-                          <motion.div
-                            key={tag}
-                            whileHover={{ scale: 1.01 }}
-                            whileTap={{ scale: 0.99 }}
+                          <Button
+                            variant={
+                              filters.tags?.includes(tag)
+                                ? "default"
+                                : "outline"
+                            }
+                            onClick={() => toggleTag(tag)}
+                            className={`w-full h-10 text-sm ${
+                              filters.tags?.includes(tag)
+                                ? `bg-gradient-to-r ${softPinkTheme.primaryGradient} text-white shadow-lg`
+                                : "border-pink-200 hover:bg-pink-50"
+                            } rounded-xl justify-start`}
                           >
-                            <Button
-                              variant={
-                                filters.tags?.includes(tag)
-                                  ? "default"
-                                  : "outline"
-                              }
-                              onClick={() => toggleTag(tag)}
-                              className={`w-full h-12 justify-between group transition-all duration-300 ${
-                                filters.tags?.includes(tag)
-                                  ? "bg-gradient-to-r from-cyan-500 to-blue-500 text-white shadow-lg"
-                                  : "bg-gradient-to-r from-white to-cyan-50 hover:from-cyan-50 hover:to-blue-50 border-2 border-cyan-200 hover:border-cyan-300"
-                              } rounded-xl`}
-                            >
-                              <div className="flex items-center space-x-3">
-                                {filters.tags?.includes(tag) ? (
-                                  <CheckCircle className="w-4 h-4 text-white" />
-                                ) : (
-                                  <BookOpen className="w-4 h-4 text-cyan-600 group-hover:scale-110 transition-transform" />
-                                )}
-                                <span className="font-medium">{tag}</span>
-                              </div>
-                              <Badge
-                                variant="secondary"
-                                className={`text-xs ${
-                                  filters.tags?.includes(tag)
-                                    ? "bg-white/20 text-white"
-                                    : "bg-cyan-100 text-cyan-700"
-                                }`}
-                              >
-                                {categoryStats[tag] ||
-                                  Math.floor(Math.random() * 50) + 10}
-                              </Badge>
-                            </Button>
-                          </motion.div>
-                        ))}
-                      </div>
-                    </div>
-
-                    {/* Show All Tags */}
-                    {ebookTags.length > 15 && (
-                      <Button
-                        variant="ghost"
-                        className="w-full text-cyan-600 hover:text-cyan-700 hover:bg-cyan-50 rounded-xl"
-                      >
-                        <ChevronDown className="w-4 h-4 mr-2" />
-                        Xem thêm {ebookTags.length - 15} chủ đề khác
-                      </Button>
-                    )}
-                  </motion.div>
-                )}
-              </AnimatePresence>
-            </div>
-
-            <Separator className="bg-gradient-to-r from-transparent via-gray-300 to-transparent" />
-
-            {/* Advanced Filters */}
-            <div className="space-y-4">
-              <Button
-                variant="ghost"
-                onClick={() => toggleSection("advanced")}
-                className="w-full justify-between p-0 h-auto hover:bg-indigo-50 dark:hover:bg-indigo-950/20"
-              >
-                <div className="flex items-center space-x-2">
-                  <div className="p-2 rounded-lg bg-gradient-to-r from-indigo-500 to-purple-500">
-                    <Settings className="w-5 h-5 text-white" />
-                  </div>
-                  <h3 className="font-bold text-lg">Bộ lọc nâng cao</h3>
-                </div>
-                <div className="flex items-center space-x-2">
-                  <Badge
-                    variant="secondary"
-                    className="bg-indigo-100 text-indigo-700"
-                  >
-                    Pro
-                  </Badge>
-                  {expandedSections.advanced ? (
-                    <ChevronUp className="w-5 h-5" />
-                  ) : (
-                    <ChevronDown className="w-5 h-5" />
-                  )}
-                </div>
-              </Button>
-
-              <AnimatePresence>
-                {expandedSections.advanced && (
-                  <motion.div
-                    initial={{ opacity: 0, height: 0 }}
-                    animate={{ opacity: 1, height: "auto" }}
-                    exit={{ opacity: 0, height: 0 }}
-                    className="space-y-6 p-6 bg-gradient-to-br from-indigo-50 to-purple-50 dark:from-indigo-950/20 dark:to-purple-950/20 rounded-2xl border border-indigo-200"
-                  >
-                    {/* Rating & Downloads */}
-                    <div className="grid grid-cols-2 gap-4">
-                      <div className="space-y-3">
-                        <Label className="text-sm font-semibold flex items-center">
-                          <Star className="w-4 h-4 mr-1 text-yellow-500" />
-                          Đánh giá tối thiểu
-                        </Label>
-                        <Select defaultValue="4">
-                          <SelectTrigger className="h-11 bg-white dark:bg-slate-800 border-2 border-indigo-200 rounded-lg">
-                            <SelectValue />
-                          </SelectTrigger>
-                          <SelectContent>
-                            <SelectItem value="3" className="flex items-center">
-                              <div className="flex items-center space-x-2">
-                                <div className="flex">
-                                  {[...Array(3)].map((_, i) => (
-                                    <Star
-                                      key={i}
-                                      className="w-3 h-3 text-yellow-400 fill-yellow-400"
-                                    />
-                                  ))}
-                                  {[...Array(2)].map((_, i) => (
-                                    <Star
-                                      key={i}
-                                      className="w-3 h-3 text-gray-300"
-                                    />
-                                  ))}
-                                </div>
-                                <span>3+ sao</span>
-                              </div>
-                            </SelectItem>
-                            <SelectItem value="4">
-                              <div className="flex items-center space-x-2">
-                                <div className="flex">
-                                  {[...Array(4)].map((_, i) => (
-                                    <Star
-                                      key={i}
-                                      className="w-3 h-3 text-yellow-400 fill-yellow-400"
-                                    />
-                                  ))}
-                                  {[...Array(1)].map((_, i) => (
-                                    <Star
-                                      key={i}
-                                      className="w-3 h-3 text-gray-300"
-                                    />
-                                  ))}
-                                </div>
-                                <span>4+ sao</span>
-                              </div>
-                            </SelectItem>
-                            <SelectItem value="5">
-                              <div className="flex items-center space-x-2">
-                                <div className="flex">
-                                  {[...Array(5)].map((_, i) => (
-                                    <Star
-                                      key={i}
-                                      className="w-3 h-3 text-yellow-400 fill-yellow-400"
-                                    />
-                                  ))}
-                                </div>
-                                <span>5 sao</span>
-                              </div>
-                            </SelectItem>
-                          </SelectContent>
-                        </Select>
-                      </div>
-
-                      <div className="space-y-3">
-                        <Label className="text-sm font-semibold flex items-center">
-                          <Download className="w-4 h-4 mr-1 text-green-500" />
-                          Lượt tải
-                        </Label>
-                        <Select defaultValue="100">
-                          <SelectTrigger className="h-11 bg-white dark:bg-slate-800 border-2 border-indigo-200 rounded-lg">
-                            <SelectValue />
-                          </SelectTrigger>
-                          <SelectContent>
-                            <SelectItem value="10">10+ lượt tải</SelectItem>
-                            <SelectItem value="100">100+ lượt tải</SelectItem>
-                            <SelectItem value="1000">1000+ lượt tải</SelectItem>
-                            <SelectItem value="10000">10k+ lượt tải</SelectItem>
-                          </SelectContent>
-                        </Select>
-                      </div>
-                    </div>
-
-                    {/* Special Features */}
-                    <div className="space-y-4">
-                      <Label className="text-sm font-semibold">
-                        Tính năng đặc biệt
-                      </Label>
-                      <div className="space-y-3">
-                        {[
-                          {
-                            icon: FileText,
-                            label: "Interactive Content",
-                            desc: "Nội dung tương tác",
-                            color: "text-blue-500",
-                          },
-                          {
-                            icon: Video,
-                            label: "Video Tutorials",
-                            desc: "Kèm video hướng dẫn",
-                            color: "text-purple-500",
-                          },
-                          {
-                            icon: Code,
-                            label: "Code Examples",
-                            desc: "Ví dụ code thực tế",
-                            color: "text-yellow-500",
-                          },
-                          {
-                            icon: Download,
-                            label: "Resources Pack",
-                            desc: "Tài liệu kèm theo",
-                            color: "text-green-500",
-                          },
-                          {
-                            icon: GraduationCap,
-                            label: "Certificate",
-                            desc: "Chứng chỉ hoàn thành",
-                            color: "text-cyan-500",
-                          },
-                          {
-                            icon: Users,
-                            label: "Community Access",
-                            desc: "Quyền truy cập cộng đồng",
-                            color: "text-orange-500",
-                          },
-                        ].map((feature, index) => (
-                          <div
-                            key={feature.label}
-                            className="flex items-center justify-between p-3 bg-white dark:bg-slate-800 rounded-lg border hover:shadow-sm transition-shadow"
-                          >
-                            <div className="flex items-center space-x-3">
-                              <feature.icon
-                                className={`w-5 h-5 ${feature.color}`}
-                              />
-                              <div>
-                                <div className="text-sm font-medium">
-                                  {feature.label}
-                                </div>
-                                <div className="text-xs text-muted-foreground">
-                                  {feature.desc}
-                                </div>
-                              </div>
+                            <div className="flex items-center gap-2">
+                              <Bookmark className="w-3 h-3" />
+                              <span className="font-medium">{tag}</span>
                             </div>
-                            <Switch />
-                          </div>
-                        ))}
-                      </div>
+                            <Badge className="ml-auto bg-white/20 text-xs">
+                              {Math.floor(Math.random() * 50) + 10}
+                            </Badge>
+                          </Button>
+                        </motion.div>
+                      ))}
                     </div>
-
-                    {/* Date Range */}
-                    <div className="space-y-3">
-                      <Label className="text-sm font-semibold flex items-center">
-                        <Calendar className="w-4 h-4 mr-1 text-indigo-500" />
-                        Ngày xuất bản
-                      </Label>
-                      <Select defaultValue="all">
-                        <SelectTrigger className="h-11 bg-white dark:bg-slate-800 border-2 border-indigo-200 rounded-lg">
-                          <SelectValue />
-                        </SelectTrigger>
-                        <SelectContent>
-                          <SelectItem value="all">Tất cả thời gian</SelectItem>
-                          <SelectItem value="week">7 ngày qua</SelectItem>
-                          <SelectItem value="month">30 ngày qua</SelectItem>
-                          <SelectItem value="quarter">3 tháng qua</SelectItem>
-                          <SelectItem value="year">1 năm qua</SelectItem>
-                        </SelectContent>
-                      </Select>
-                    </div>
-                  </motion.div>
-                )}
-              </AnimatePresence>
-            </div>
-          </CardContent>
-        </Card>
-
-        {/* Clear Filters Card */}
-        <Card className="shadow-lg border-0 bg-gradient-to-br from-red-50 via-pink-50 to-rose-50 dark:from-red-950/20 dark:via-pink-950/20 dark:to-rose-950/20">
-          <CardContent className="p-6">
-            <Button
-              variant="outline"
-              onClick={clearFilters}
-              className="w-full h-14 group hover:bg-red-50 hover:border-red-300 dark:hover:bg-red-950/20 border-2 border-red-200 rounded-xl transition-all duration-300"
-            >
-              <div className="flex items-center justify-center space-x-3">
-                <div className="p-2 rounded-lg bg-gradient-to-r from-red-500 to-pink-500 group-hover:scale-110 transition-transform">
-                  <X className="w-5 h-5 text-white group-hover:animate-spin" />
-                </div>
-                <div>
-                  <div className="font-bold text-base">Xóa tất cả bộ lọc</div>
-                  <div className="text-xs text-muted-foreground">
-                    Reset về mặc định
                   </div>
                 </div>
-              </div>
-            </Button>
-          </CardContent>
-        </Card>
-
-        {/* Stats Card */}
-        <Card className="shadow-lg border-0 bg-gradient-to-br from-green-50 via-blue-50 to-cyan-50 dark:from-green-950/20 dark:via-blue-950/20 dark:to-cyan-950/20">
-          <CardContent className="p-6">
-            <div className="space-y-4">
-              <div className="flex items-center space-x-2 mb-4">
-                <div className="p-2 rounded-lg bg-gradient-to-r from-green-500 to-blue-500">
-                  <BarChart3 className="w-5 h-5 text-white" />
-                </div>
-                <h3 className="font-bold text-lg">Thống kê</h3>
-              </div>
-
-              <div className="space-y-4">
-                <div className="flex justify-between items-center p-3 bg-white dark:bg-slate-800 rounded-lg">
-                  <div className="flex items-center space-x-2">
-                    <BookOpen className="w-4 h-4 text-green-500" />
-                    <span className="text-sm font-medium">Tổng e-books</span>
-                  </div>
-                  <Badge className="bg-gradient-to-r from-green-500 to-blue-500 text-white">
-                    {products.length}
-                  </Badge>
-                </div>
-
-                <div className="flex justify-between items-center p-3 bg-white dark:bg-slate-800 rounded-lg">
-                  <div className="flex items-center space-x-2">
-                    <Filter className="w-4 h-4 text-blue-500" />
-                    <span className="text-sm font-medium">Đã chọn chủ đề</span>
-                  </div>
-                  <Badge className="bg-gradient-to-r from-blue-500 to-purple-500 text-white">
-                    {filters.tags?.length || 0}
-                  </Badge>
-                </div>
-
-                <div className="flex justify-between items-center p-3 bg-white dark:bg-slate-800 rounded-lg">
-                  <div className="flex items-center space-x-2">
-                    <Eye className="w-4 h-4 text-purple-500" />
-                    <span className="text-sm font-medium">Kết quả</span>
-                  </div>
-                  <Badge className="bg-gradient-to-r from-purple-500 to-pink-500 text-white">
-                    {
-                      products.filter(
-                        (p) => filterProducts([p], filters).length > 0,
-                      ).length
-                    }
-                  </Badge>
-                </div>
-
-                <div className="flex justify-between items-center p-3 bg-white dark:bg-slate-800 rounded-lg">
-                  <div className="flex items-center space-x-2">
-                    <TrendingUp className="w-4 h-4 text-orange-500" />
-                    <span className="text-sm font-medium">Tỷ lệ khớp</span>
-                  </div>
-                  <Badge className="bg-gradient-to-r from-orange-500 to-red-500 text-white">
-                    {Math.round(
-                      (products.filter(
-                        (p) => filterProducts([p], filters).length > 0,
-                      ).length /
-                        products.length) *
-                        100,
-                    ) || 0}
-                    %
-                  </Badge>
-                </div>
-              </div>
-
-              {/* Progress visualization */}
-              <div className="space-y-2">
-                <Label className="text-sm font-medium">Độ phù hợp bộ lọc</Label>
-                <Progress
-                  value={
-                    Math.round(
-                      (products.filter(
-                        (p) => filterProducts([p], filters).length > 0,
-                      ).length /
-                        products.length) *
-                        100,
-                    ) || 0
-                  }
-                  className="h-2"
-                />
-              </div>
-            </div>
-          </CardContent>
-        </Card>
-      </div>
-    </motion.aside>
+              </CardContent>
+            </Card>
+          </motion.div>
+        )}
+      </AnimatePresence>
+    </div>
   );
 };
 
-// Enhanced Product Grid giữ nguyên
-const EnhancedProductGrid = ({ currentProducts, viewMode, addToCart }) => (
+// ✅ PRODUCT GRID - 4 COLUMNS ON PC
+const ProductGrid = ({ products, viewMode, addToCart }) => (
   <AnimatePresence mode="wait">
-    {currentProducts.length > 0 ? (
+    {products.length > 0 ? (
       <motion.div
-        key="products-grid"
+        key="products"
         initial={{ opacity: 0 }}
         animate={{ opacity: 1 }}
-        exit={{ opacity: 0 }}
         className={
           viewMode === "grid"
-            ? "grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-2 xl:grid-cols-3 2xl:grid-cols-4"
+            ? "grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6"
             : "space-y-6"
         }
       >
-        {currentProducts.map((product, index) => (
+        {products.map((product, index) => (
           <motion.div
             key={product.id}
-            initial={{ opacity: 0, y: 30 }}
-            animate={{ opacity: 1, y: 0 }}
+            initial={{
+              opacity: 0,
+              y: 50,
+              rotateX: 45,
+              scale: 0.8,
+            }}
+            animate={{
+              opacity: 1,
+              y: 0,
+              rotateX: 0,
+              scale: 1,
+            }}
             transition={{
               delay: index * 0.1,
-              duration: 0.4,
+              duration: 0.6,
+              type: "spring",
+              stiffness: 100,
             }}
-            whileHover={{ y: -4, scale: 1.02 }}
+            whileHover={{
+              y: -12,
+              rotateY: 5,
+              scale: 1.03,
+              transition: { duration: 0.3 },
+            }}
             className="group"
+            style={{ perspective: "1000px" }}
           >
-            <ProductCard
-              product={product}
-              onAddToCart={() => {
-                addToCart(product);
-                toast({
-                  title: "📚 Đã thêm vào giỏ hàng",
-                  description: `${product.title} đã được thêm.`,
-                });
-              }}
-              viewMode={viewMode}
-            />
+            <div
+              className={`relative overflow-hidden rounded-2xl bg-gradient-to-br ${softPinkTheme.neoCard} ${softPinkTheme.softGlow} hover:${softPinkTheme.glow} transition-all duration-700 border border-white/50 group-hover:border-pink-300/50`}
+            >
+              {/* 3D depth effect */}
+              <div className="absolute inset-0 bg-gradient-to-br from-transparent via-pink-500/5 to-rose-500/10 opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
+
+              {/* Animated border */}
+              <motion.div
+                animate={{
+                  background: [
+                    "linear-gradient(45deg, transparent, transparent)",
+                    "linear-gradient(45deg, rgba(244, 114, 182, 0.2), rgba(236, 72, 153, 0.2))",
+                    "linear-gradient(45deg, transparent, transparent)",
+                  ],
+                }}
+                transition={{ duration: 3, repeat: Infinity }}
+                className="absolute inset-0 rounded-2xl opacity-0 group-hover:opacity-100"
+                style={{ padding: "2px" }}
+              >
+                <div className="w-full h-full bg-white rounded-2xl" />
+              </motion.div>
+
+              {/* Shine effect */}
+              <motion.div
+                animate={{ x: [-300, 300] }}
+                transition={{
+                  duration: 3,
+                  repeat: Infinity,
+                  repeatDelay: 5,
+                  ease: "easeInOut",
+                }}
+                className="absolute inset-0 bg-gradient-to-r from-transparent via-white/20 to-transparent transform -skew-x-12 opacity-0 group-hover:opacity-100"
+              />
+
+              <div className="relative z-10">
+                <ProductCard
+                  product={product}
+                  onAddToCart={() => {
+                    addToCart(product);
+                    toast({
+                      title: "Đã thêm vào giỏ hàng",
+                      description: `${product.title} đã được thêm thành công.`,
+                      duration: 3000,
+                    });
+                  }}
+                  viewMode={viewMode}
+                />
+              </div>
+
+              {/* Floating action buttons */}
+              <div className="absolute top-3 right-3 flex gap-1 opacity-0 group-hover:opacity-100 transition-all duration-300">
+                <motion.div
+                  initial={{ scale: 0, rotate: -180 }}
+                  animate={{ scale: 1, rotate: 0 }}
+                  transition={{ delay: 0.1 }}
+                  whileHover={{ scale: 1.2, rotate: 20 }}
+                  whileTap={{ scale: 0.8 }}
+                >
+                  <Button
+                    size="sm"
+                    variant="outline"
+                    className={`w-8 h-8 p-0 bg-gradient-to-r ${softPinkTheme.glassCard} backdrop-blur-xl border-0 ${softPinkTheme.softGlow} hover:${softPinkTheme.neonGlow} transition-all group/btn rounded-xl`}
+                  >
+                    <Heart className="w-3 h-3 text-pink-500 group-hover/btn:scale-125 transition-transform" />
+                  </Button>
+                </motion.div>
+                <motion.div
+                  initial={{ scale: 0, rotate: 180 }}
+                  animate={{ scale: 1, rotate: 0 }}
+                  transition={{ delay: 0.2 }}
+                  whileHover={{ scale: 1.2, rotate: -20 }}
+                  whileTap={{ scale: 0.8 }}
+                >
+                  <Button
+                    size="sm"
+                    variant="outline"
+                    className={`w-8 h-8 p-0 bg-gradient-to-r ${softPinkTheme.glassCard} backdrop-blur-xl border-0 ${softPinkTheme.softGlow} hover:${softPinkTheme.neonGlow} transition-all group/btn rounded-xl`}
+                  >
+                    <Eye className="w-3 h-3 text-pink-500 group-hover/btn:scale-125 transition-transform" />
+                  </Button>
+                </motion.div>
+              </div>
+
+              {/* Floating particles */}
+              {[...Array(3)].map((_, i) => (
+                <motion.div
+                  key={i}
+                  animate={{
+                    y: [0, -20, 0],
+                    opacity: [0, 0.6, 0],
+                    scale: [0.5, 1, 0.5],
+                  }}
+                  transition={{
+                    duration: 4,
+                    repeat: Infinity,
+                    delay: i * 0.8,
+                    ease: "easeInOut",
+                  }}
+                  className={`absolute w-1 h-1 rounded-full bg-gradient-to-r ${softPinkTheme.dynamicColors[i % softPinkTheme.dynamicColors.length].bg}`}
+                  style={{
+                    top: `${20 + Math.random() * 60}%`,
+                    left: `${10 + Math.random() * 80}%`,
+                  }}
+                />
+              ))}
+            </div>
           </motion.div>
         ))}
       </motion.div>
     ) : (
       <motion.div
         key="no-products"
-        initial={{ opacity: 0, scale: 0.9 }}
+        initial={{ opacity: 0, scale: 0.8 }}
         animate={{ opacity: 1, scale: 1 }}
-        exit={{ opacity: 0, scale: 0.9 }}
+        exit={{ opacity: 0, scale: 0.8 }}
+        className="text-center py-20"
       >
-        <Card className="py-16 md:py-24 text-center border-0 shadow-xl bg-gradient-to-br from-white via-green-50 to-blue-50 dark:from-slate-800 dark:via-green-900 dark:to-blue-900">
-          <CardContent className="space-y-6 md:space-y-10">
+        <Card
+          className={`py-20 border-0 ${softPinkTheme.glow} bg-gradient-to-br ${softPinkTheme.neoCard} max-w-xl mx-auto relative overflow-hidden rounded-2xl`}
+        >
+          <CardContent className="space-y-8 relative z-10">
             <motion.div
-              initial={{ scale: 0 }}
-              animate={{ scale: 1 }}
-              transition={{ delay: 0.2, type: "spring", stiffness: 200 }}
+              animate={{
+                scale: [1, 1.1, 1],
+                rotate: [0, 5, -5, 0],
+              }}
+              transition={{ duration: 4, repeat: Infinity, ease: "easeInOut" }}
+              className="relative"
             >
-              <BookOpen className="w-20 h-20 md:w-32 md:h-32 mx-auto mb-4 md:mb-6 text-muted-foreground" />
+              <div
+                className={`w-32 h-32 mx-auto bg-gradient-to-r ${softPinkTheme.primaryGradient} rounded-full flex items-center justify-center ${softPinkTheme.glow} relative overflow-hidden`}
+              >
+                <BookOpen className="w-16 h-16 text-white relative z-10" />
+                <motion.div
+                  animate={{ rotate: 360 }}
+                  transition={{ duration: 8, repeat: Infinity, ease: "linear" }}
+                  className="absolute inset-0 bg-gradient-to-r from-white/20 via-transparent to-white/20"
+                />
+              </div>
             </motion.div>
 
-            <div className="space-y-4 md:space-y-6">
-              <h3 className="text-2xl md:text-4xl font-bold bg-gradient-to-r from-green-600 to-blue-600 bg-clip-text text-transparent">
+            <div className="space-y-4">
+              <motion.h3
+                className={`text-3xl font-bold bg-gradient-to-r ${softPinkTheme.heroText} bg-clip-text text-transparent`}
+                animate={{ scale: [1, 1.05, 1] }}
+                transition={{ duration: 3, repeat: Infinity }}
+              >
                 Không tìm thấy e-book
-              </h3>
-              <p className="max-w-lg mx-auto text-base md:text-xl text-muted-foreground leading-relaxed px-4">
-                Thử thay đổi bộ lọc để tìm e-books phù hợp với nhu cầu học tập
+              </motion.h3>
+              <p className="text-gray-600 leading-relaxed text-lg">
+                Thử thay đổi từ khóa tìm kiếm hoặc bộ lọc để khám phá những
+                e-books tuyệt vời
               </p>
             </div>
 
-            <div className="flex flex-col sm:flex-row gap-4 justify-center px-4">
-              <Button
-                onClick={() => window.location.reload()}
-                size="lg"
-                className="bg-gradient-to-r from-green-500 to-blue-600 hover:from-green-600 hover:to-blue-700"
+            <div className="flex gap-4 justify-center">
+              <motion.div
+                whileHover={{ scale: 1.05, rotate: 2 }}
+                whileTap={{ scale: 0.95 }}
               >
-                <X className="w-5 h-5 mr-2" />
-                Xóa tất cả bộ lọc
-              </Button>
+                <Button
+                  variant="outline"
+                  className={`bg-gradient-to-r ${softPinkTheme.glassCard} border border-pink-200 hover:bg-pink-50 px-6 py-3 text-sm font-semibold rounded-xl`}
+                >
+                  <Search className="w-4 h-4 mr-2" />
+                  Thử lại
+                </Button>
+              </motion.div>
+              <motion.div
+                whileHover={{ scale: 1.05, rotate: -2 }}
+                whileTap={{ scale: 0.95 }}
+              >
+                <Button
+                  className={`bg-gradient-to-r ${softPinkTheme.secondaryGradient} hover:scale-105 text-white px-6 py-3 text-sm font-semibold ${softPinkTheme.neonGlow} rounded-xl`}
+                >
+                  <X className="w-4 h-4 mr-2" />
+                  Xóa bộ lọc
+                </Button>
+              </motion.div>
             </div>
           </CardContent>
         </Card>
@@ -2128,265 +1067,339 @@ const EnhancedProductGrid = ({ currentProducts, viewMode, addToCart }) => (
   </AnimatePresence>
 );
 
-// Enhanced Header giữ nguyên
-// Enhanced Header giữ nguyên - phần còn lại
-const EnhancedHeader = ({ products, filteredProducts, currentProducts }) => (
-  <motion.div
-    initial={{ opacity: 0, y: -20 }}
-    animate={{ opacity: 1, y: 0 }}
-    className="space-y-6 md:space-y-8"
-  >
-    {/* Main Header */}
-    <div className="text-center md:text-left">
-      <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 md:gap-6">
-        <div className="flex flex-col md:flex-row items-center md:items-center space-y-4 md:space-y-0 md:space-x-6">
-          <motion.div
-            whileHover={{ scale: 1.05, rotate: 2 }}
-            className="flex items-center justify-center w-16 h-16 md:w-20 md:h-20 shadow-xl rounded-2xl md:rounded-3xl bg-gradient-to-br from-green-500 via-blue-600 to-purple-600"
-          >
-            <BookOpen className="w-8 h-8 md:w-10 md:h-10 text-white" />
-          </motion.div>
-          <div className="text-center md:text-left">
-            <h1 className="text-4xl md:text-6xl font-bold text-transparent bg-gradient-to-r from-green-600 via-blue-600 to-purple-600 bg-clip-text mb-2">
-              E-books
-            </h1>
-            <p className="text-lg md:text-2xl text-muted-foreground max-w-2xl">
-              Khám phá bộ sưu tập e-books chất lượng cao về lập trình, thiết kế
-              và công nghệ
-            </p>
-          </div>
-        </div>
-      </div>
-    </div>
+// ✅ PAGINATION - FULL WIDTH & CLOSER
+const SimplePagination = ({
+  currentPage,
+  totalPages,
+  onPageChange,
+  filteredProductsLength,
+  itemsPerPage,
+}) => {
+  if (totalPages <= 1) return null;
 
-    {/* Stats Grid */}
-    <div className="grid grid-cols-2 md:grid-cols-4 gap-3 md:gap-6">
-      {[
-        {
-          label: "Tổng e-books",
-          value: products.length,
-          icon: BookOpen,
-          color: "from-green-500 to-cyan-500",
-        },
-        {
-          label: "Đã lọc",
-          value: filteredProducts.length,
-          icon: Filter,
-          color: "from-blue-500 to-emerald-500",
-        },
-        {
-          label: "Hiển thị",
-          value: currentProducts.length,
-          icon: Eye,
-          color: "from-purple-500 to-pink-500",
-        },
-        {
-          label: "Chất lượng",
-          value: "A+",
-          icon: Award,
-          color: "from-orange-500 to-red-500",
-        },
-      ].map((stat, index) => (
-        <motion.div
-          key={index}
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ delay: index * 0.1 }}
-          whileHover={{ scale: 1.03, y: -2 }}
-        >
-          <Card className="text-center border-0 shadow-lg bg-gradient-to-br from-white to-gray-50 dark:from-slate-800 dark:to-slate-900 hover:shadow-xl overflow-hidden relative group">
-            <div
-              className={`absolute inset-0 bg-gradient-to-r ${stat.color} opacity-0 group-hover:opacity-10 transition-opacity duration-300`}
-            />
-            <CardContent className="p-3 md:p-6 relative z-10">
-              <div className="space-y-2 md:space-y-4">
-                <div
-                  className={`w-8 h-8 md:w-12 md:h-12 mx-auto rounded-xl bg-gradient-to-r ${stat.color} flex items-center justify-center shadow-lg`}
-                >
-                  <stat.icon className="w-4 h-4 md:w-6 md:h-6 text-white" />
-                </div>
-                <div className="text-xl md:text-2xl font-bold text-primary">
-                  {stat.value}
-                </div>
-                <div className="text-xs md:text-sm font-medium text-muted-foreground">
-                  {stat.label}
-                </div>
-              </div>
-            </CardContent>
-          </Card>
-        </motion.div>
-      ))}
-    </div>
-  </motion.div>
-);
-
-// Scroll to Top Button giữ nguyên
-const ScrollToTopButton = () => {
-  const [isVisible, setIsVisible] = useState(false);
-
-  useEffect(() => {
-    const toggleVisibility = () => {
-      setIsVisible(window.pageYOffset > 300);
-    };
-    window.addEventListener("scroll", toggleVisibility);
-    return () => window.removeEventListener("scroll", toggleVisibility);
-  }, []);
-
-  const scrollToTop = () => {
-    window.scrollTo({ top: 0, behavior: "smooth" });
-  };
+  const startItem = (currentPage - 1) * itemsPerPage + 1;
+  const endItem = Math.min(currentPage * itemsPerPage, filteredProductsLength);
 
   return (
-    <AnimatePresence>
-      {isVisible && (
-        <motion.div
-          initial={{ opacity: 0, scale: 0 }}
-          animate={{ opacity: 1, scale: 1 }}
-          exit={{ opacity: 0, scale: 0 }}
-          className="fixed bottom-20 right-4 md:bottom-8 md:right-8 z-40"
-        >
-          <Button
-            onClick={scrollToTop}
-            size="lg"
-            className="w-12 h-12 md:w-14 md:h-14 rounded-full shadow-lg bg-gradient-to-r from-green-500 to-blue-600 hover:from-green-600 hover:to-blue-700 text-white border-0"
+    <motion.div
+      className={`w-full py-8 bg-gradient-to-r ${softPinkTheme.sectionBackground} border-t border-pink-200/50 mt-8 relative overflow-hidden`}
+      initial={{ y: 30, opacity: 0 }}
+      animate={{ y: 0, opacity: 1 }}
+    >
+      {/* Background decorations */}
+      <div className="absolute inset-0">
+        {[...Array(5)].map((_, i) => (
+          <motion.div
+            key={i}
+            animate={{
+              y: [0, -20, 0],
+              rotate: [0, 180, 360],
+              scale: [1, 1.2, 1],
+              opacity: [0.1, 0.3, 0.1],
+            }}
+            transition={{
+              duration: 15 + i * 3,
+              repeat: Infinity,
+              delay: i * 2,
+              ease: "easeInOut",
+            }}
+            className={`absolute w-16 h-16 bg-gradient-to-r ${softPinkTheme.dynamicColors[i % softPinkTheme.dynamicColors.length].bg} rounded-2xl filter blur-2xl`}
+            style={{
+              top: `${Math.random() * 100}%`,
+              left: `${Math.random() * 100}%`,
+            }}
+          />
+        ))}
+      </div>
+
+      <div className="container mx-auto px-4 relative z-10">
+        <div className="text-center space-y-6">
+          {/* Stats Info */}
+          <motion.div
+            className="space-y-3"
+            initial={{ scale: 0.8, opacity: 0 }}
+            animate={{ scale: 1, opacity: 1 }}
+            transition={{ delay: 0.2 }}
           >
-            <ArrowUp className="w-5 h-5 md:w-6 md:h-6" />
-          </Button>
-        </motion.div>
-      )}
-    </AnimatePresence>
+            <Card
+              className={`inline-block bg-gradient-to-r ${softPinkTheme.glassCard} border-0 ${softPinkTheme.softGlow} backdrop-blur-xl border border-white/20 rounded-2xl`}
+            >
+              <CardContent className="px-8 py-4">
+                <p className="text-base text-gray-700 font-medium">
+                  Hiển thị{" "}
+                  <span
+                    className={`font-bold bg-gradient-to-r ${softPinkTheme.primaryText} bg-clip-text text-transparent text-lg`}
+                  >
+                    {startItem} - {endItem}
+                  </span>{" "}
+                  trong tổng số
+                  <span
+                    className={`font-bold bg-gradient-to-r ${softPinkTheme.accentText} bg-clip-text text-transparent ml-2 text-lg`}
+                  >
+                    {filteredProductsLength}
+                  </span>{" "}
+                  e-books
+                </p>
+                <div className="flex items-center justify-center gap-4 text-sm text-gray-600 mt-2">
+                  <motion.div
+                    animate={{ scale: [1, 1.1, 1] }}
+                    transition={{ duration: 2, repeat: Infinity }}
+                  >
+                    <Badge
+                      className={`bg-gradient-to-r ${softPinkTheme.primaryGradient} text-white font-mono px-3 py-1 text-sm shadow-lg rounded-lg`}
+                    >
+                      <BookOpen className="w-3 h-3 mr-1" />
+                      Trang {currentPage}/{totalPages}
+                    </Badge>
+                  </motion.div>
+                  <span>•</span>
+                  <span className="font-medium">12 e-books/trang</span>
+                </div>
+              </CardContent>
+            </Card>
+          </motion.div>
+
+          {/* Pagination Controls */}
+          <motion.div
+            className="flex items-center justify-center gap-4"
+            initial={{ y: 30, opacity: 0 }}
+            animate={{ y: 0, opacity: 1 }}
+            transition={{ delay: 0.4 }}
+          >
+            <motion.div whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }}>
+              <Button
+                variant="outline"
+                disabled={currentPage === 1}
+                onClick={() => onPageChange(currentPage - 1)}
+                className={`px-6 h-12 bg-gradient-to-r ${softPinkTheme.glassCard} border border-pink-200 hover:bg-pink-50 disabled:opacity-50 disabled:cursor-not-allowed transition-all duration-300 font-semibold text-sm rounded-xl`}
+              >
+                <ArrowUp className="w-4 h-4 mr-2 rotate-[-90deg]" />
+                <span>Trước</span>
+              </Button>
+            </motion.div>
+
+            {/* Page Numbers */}
+            <div className="flex gap-2">
+              {Array.from({ length: Math.min(5, totalPages) }, (_, i) => {
+                let pageNum;
+                if (totalPages <= 5) {
+                  pageNum = i + 1;
+                } else if (currentPage <= 3) {
+                  pageNum = i + 1;
+                } else if (currentPage >= totalPages - 2) {
+                  pageNum = totalPages - 4 + i;
+                } else {
+                  pageNum = currentPage - 2 + i;
+                }
+
+                return (
+                  <motion.div
+                    key={pageNum}
+                    initial={{ scale: 0, rotate: -180 }}
+                    animate={{ scale: 1, rotate: 0 }}
+                    transition={{
+                      delay: 0.5 + i * 0.1,
+                      type: "spring",
+                      stiffness: 200,
+                    }}
+                    whileHover={{ scale: 1.1, y: -4 }}
+                    whileTap={{ scale: 0.9 }}
+                  >
+                    <Button
+                      variant={currentPage === pageNum ? "default" : "outline"}
+                      onClick={() => onPageChange(pageNum)}
+                      className={`w-12 h-12 p-0 transition-all duration-300 font-bold text-sm rounded-xl ${
+                        currentPage === pageNum
+                          ? `bg-gradient-to-r ${softPinkTheme.primaryGradient} hover:scale-110 text-white ${softPinkTheme.glow} border-0`
+                          : `bg-gradient-to-r ${softPinkTheme.glassCard} border border-pink-200 hover:bg-pink-50`
+                      }`}
+                    >
+                      <span className="relative z-10">{pageNum}</span>
+                    </Button>
+                  </motion.div>
+                );
+              })}
+            </div>
+
+            <motion.div whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }}>
+              <Button
+                variant="outline"
+                disabled={currentPage === totalPages}
+                onClick={() => onPageChange(currentPage + 1)}
+                className={`px-6 h-12 bg-gradient-to-r ${softPinkTheme.glassCard} border border-pink-200 hover:bg-pink-50 disabled:opacity-50 disabled:cursor-not-allowed transition-all duration-300 font-semibold text-sm rounded-xl`}
+              >
+                <span>Sau</span>
+                <ArrowUp className="w-4 h-4 ml-2 rotate-90" />
+              </Button>
+            </motion.div>
+          </motion.div>
+
+          {/* Quick Jump */}
+          <motion.div
+            className="flex flex-col sm:flex-row items-center justify-center gap-4"
+            initial={{ y: 30, opacity: 0 }}
+            animate={{ y: 0, opacity: 1 }}
+            transition={{ delay: 0.6 }}
+          >
+            <div className="flex items-center gap-2">
+              <Rocket className="w-4 h-4 text-pink-500" />
+              <span className="text-sm text-gray-600 font-semibold">
+                Chuyển nhanh đến:
+              </span>
+            </div>
+            <div className="flex gap-2">
+              {[
+                1,
+                Math.ceil(totalPages / 4),
+                Math.ceil(totalPages / 2),
+                Math.ceil((3 * totalPages) / 4),
+                totalPages,
+              ]
+                .filter(
+                  (page, index, arr) =>
+                    page > 0 &&
+                    page <= totalPages &&
+                    arr.indexOf(page) === index &&
+                    page !== currentPage,
+                )
+                .slice(0, 4)
+                .map((page, i) => (
+                  <motion.div
+                    key={page}
+                    initial={{ scale: 0, rotate: 180 }}
+                    animate={{ scale: 1, rotate: 0 }}
+                    transition={{
+                      delay: 0.7 + i * 0.1,
+                      type: "spring",
+                      stiffness: 200,
+                    }}
+                    whileHover={{ scale: 1.2, rotate: 10 }}
+                    whileTap={{ scale: 0.8 }}
+                  >
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      onClick={() => onPageChange(page)}
+                      className={`w-10 h-8 p-0 text-xs bg-gradient-to-r ${softPinkTheme.glassCard} border border-pink-200 hover:bg-pink-50 transition-all duration-300 font-bold rounded-lg`}
+                    >
+                      <span className="relative z-10">{page}</span>
+                    </Button>
+                  </motion.div>
+                ))}
+            </div>
+          </motion.div>
+        </div>
+      </div>
+    </motion.div>
   );
 };
 
-// Helper function để get price range label
-function getPriceRangeLabel(range: [number, number] | undefined) {
-  if (!range) return "Tất cả";
-
-  const [min, max] = range;
-
-  if (min === 0 && max === 100000) return "Dưới 100K";
-  if (min === 100000 && max === 200000) return "100K - 200K";
-  if (min === 200000 && (max === Infinity || max === 0)) return "Trên 200K";
-
-  return `${min.toLocaleString()}đ - ${max.toLocaleString()}đ`;
-}
-
-// Main E-books Component
+// ✅ MAIN COMPONENT - EBOOKS
 const Ebooks: React.FC = () => {
-  // State Management
   const [searchParams, setSearchParams] = useSearchParams();
-  const selectedTag = searchParams.get("tag");
-  const pageFromUrl = searchParams.get("page");
+  const { addToCart } = useCart();
 
   const [filters, setFilters] = useState<FilterOptions>({
     category: "ebook",
     sortBy: "newest",
     search: "",
-    tags: selectedTag ? [selectedTag] : [],
+    tags: searchParams.get("tag") ? [searchParams.get("tag")!] : [],
     priceRange: undefined,
   });
-
   const [searchInput, setSearchInput] = useState("");
   const [viewMode, setViewMode] = useState<"grid" | "list">("grid");
   const [products, setProducts] = useState<Product[]>([]);
   const [loading, setLoading] = useState(true);
-  const { addToCart } = useCart();
-
   const [currentPage, setCurrentPage] = useState(
-    pageFromUrl ? parseInt(pageFromUrl, 10) : 1,
+    parseInt(searchParams.get("page") || "1"),
   );
-  const [itemsPerPage] = useState(12);
-  const [shouldResetPage, setShouldResetPage] = useState(false);
-
-  // Effects
-  useEffect(() => {
-    if (selectedTag) {
-      setFilters((prev) => ({ ...prev, tags: [selectedTag] }));
-      setShouldResetPage(true);
-    }
-  }, [selectedTag]);
-
-  useEffect(() => {
-    const page = searchParams.get("page");
-    if (page) {
-      setCurrentPage(parseInt(page, 10));
-    }
-  }, [searchParams]);
-
-  useEffect(() => {
-    if (shouldResetPage) {
-      setCurrentPage(1);
-      const params = new URLSearchParams(searchParams);
-      params.delete("page");
-      setSearchParams(params);
-      setShouldResetPage(false);
-    }
-  }, [shouldResetPage, setSearchParams, searchParams]);
+  const itemsPerPage = 12;
 
   useEffect(() => {
     const fetchData = async () => {
-      setLoading(true);
       try {
         const data = await getProductsByCategory("ebook");
         setProducts(data);
         toast({
-          title: "✅ Đã tải e-books",
-          description: `Tìm thấy ${data.length} e-books chất lượng cao.`,
+          title: "✅ Đã tải e-books thành công",
+          description: `Khám phá ${data.length} e-books chất lượng cao.`,
+          duration: 3000,
         });
       } catch (error) {
         toast({
           title: "❌ Lỗi tải dữ liệu",
-          description: "Không thể tải danh sách e-books.",
+          description: "Không thể tải e-books. Vui lòng thử lại.",
           variant: "destructive",
+          duration: 4000,
         });
       } finally {
         setLoading(false);
       }
     };
-
     fetchData();
   }, []);
 
-  // Computed Values
+  // ✅ FIX SORT LOGIC - Sử dụng reviewCount cho popular
+  const filteredProducts = useMemo(() => {
+    let result = [...products];
+
+    // Apply search filter
+    if (filters.search) {
+      result = result.filter(
+        (product) =>
+          product.title.toLowerCase().includes(filters.search.toLowerCase()) ||
+          product.description
+            ?.toLowerCase()
+            .includes(filters.search.toLowerCase()) ||
+          product.tags.some((tag) =>
+            tag.toLowerCase().includes(filters.search.toLowerCase()),
+          ),
+      );
+    }
+
+    // Apply sorting - FIX POPULAR SORT
+    switch (filters.sortBy) {
+      case "newest":
+        result.sort(
+          (a, b) =>
+            new Date(b.createdAt || 0).getTime() -
+            new Date(a.createdAt || 0).getTime(),
+        );
+        break;
+      case "popular":
+        // ✅ FIX: Sử dụng reviewCount thay vì views
+        result.sort((a, b) => (b.reviewCount || 0) - (a.reviewCount || 0));
+        break;
+      case "rating":
+        result.sort((a, b) => (b.rating || 0) - (a.rating || 0));
+        break;
+      case "price_low":
+        result.sort((a, b) => (a.price || 0) - (b.price || 0));
+        break;
+      default:
+        break;
+    }
+
+    return result;
+  }, [products, filters]);
+
+  const totalPages = Math.ceil(filteredProducts.length / itemsPerPage);
+  const currentProducts = filteredProducts.slice(
+    (currentPage - 1) * itemsPerPage,
+    currentPage * itemsPerPage,
+  );
+
+  // Get unique tags from products
   const ebookTags = useMemo(() => {
     const tags = new Set<string>();
     products.forEach((p) => p.tags.forEach((tag) => tags.add(tag)));
     return Array.from(tags).sort();
   }, [products]);
 
-  const filteredProducts = useMemo(() => {
-    return filterProducts(products, filters);
-  }, [filters, products]);
-
-  const indexOfLastItem = currentPage * itemsPerPage;
-  const indexOfFirstItem = indexOfLastItem - itemsPerPage;
-  const currentProducts = filteredProducts.slice(
-    indexOfFirstItem,
-    indexOfLastItem,
-  );
-  const totalPages = Math.ceil(filteredProducts.length / itemsPerPage);
-
-  // Event Handlers
-  const handlePageChange = (page: number) => {
-    setCurrentPage(page);
-    const params = new URLSearchParams(searchParams);
-    if (page > 1) {
-      params.set("page", page.toString());
-    } else {
-      params.delete("page");
-    }
-    setSearchParams(params);
-    window.scrollTo({ top: 0, behavior: "smooth" });
-  };
-
   const handleSearch = (e: React.FormEvent) => {
     e.preventDefault();
     setFilters((prev) => ({ ...prev, search: searchInput }));
-    setShouldResetPage(true);
-    toast({
-      title: "🔍 Đang tìm kiếm...",
-      description: `Tìm kiếm "${searchInput}"`,
-    });
+    setCurrentPage(1);
   };
 
   const handleSortChange = (value: string) => {
@@ -2403,11 +1416,15 @@ const Ebooks: React.FC = () => {
         ? prev.tags.filter((t) => t !== tag)
         : [...(prev.tags || []), tag],
     }));
-    setShouldResetPage(true);
+    setCurrentPage(1);
+  };
+
+  const handlePriceRangeChange = (range: [number, number] | undefined) => {
+    setFilters((prev) => ({ ...prev, priceRange: range }));
+    setCurrentPage(1);
   };
 
   const clearFilters = () => {
-    setSearchParams({});
     setFilters({
       category: "ebook",
       sortBy: "newest",
@@ -2416,326 +1433,333 @@ const Ebooks: React.FC = () => {
       priceRange: undefined,
     });
     setSearchInput("");
-    setShouldResetPage(true);
+    setCurrentPage(1);
     toast({
-      title: "🧹 Đã xóa bộ lọc",
-      description: "Hiển thị tất cả e-books.",
+      title: "🧹 Đã xóa tất cả bộ lọc",
+      description: "Hiển thị tất cả e-books có sẵn.",
+      duration: 2000,
     });
   };
 
-  const handlePriceRangeChange = (range: [number, number] | undefined) => {
-    setFilters((prev) => ({ ...prev, priceRange: range }));
-    setShouldResetPage(true);
+  const handlePageChange = (page: number) => {
+    setCurrentPage(page);
+    const params = new URLSearchParams(searchParams);
+    if (page > 1) params.set("page", page.toString());
+    else params.delete("page");
+    setSearchParams(params);
+    window.scrollTo({ top: 0, behavior: "smooth" });
   };
 
-  // Constants
+  const sortOptions = [
+    { value: "newest", label: "Mới nhất", icon: Clock },
+    { value: "popular", label: "Phổ biến nhất", icon: TrendingUp },
+    { value: "rating", label: "Đánh giá cao", icon: Star },
+    { value: "price_low", label: "Giá thấp đến cao", icon: DollarSign },
+  ];
+
   const priceRanges = [
     { label: "Tất cả", value: undefined, icon: "📚" },
-    { label: "Dưới 100K", value: [0, 100000] as [number, number], icon: "💸" },
+    { label: "Miễn phí", value: [0, 0] as [number, number], icon: "🎁" },
+    { label: "< 100K", value: [1, 100000] as [number, number], icon: "💸" },
     {
-      label: "100K - 200K",
-      value: [100000, 200000] as [number, number],
-      icon: "💵",
-    },
-    {
-      label: "Trên 200K",
-      value: [200000, Infinity] as [number, number],
+      label: "> 100K",
+      value: [100000, Infinity] as [number, number],
       icon: "💎",
     },
   ];
 
-  const sortOptions = [
-    { value: "newest", label: "Mới nhất", icon: Clock },
-    { value: "oldest", label: "Cũ nhất", icon: Clock },
-    { value: "price_low", label: "Giá thấp đến cao", icon: TrendingUp },
-    { value: "price_high", label: "Giá cao đến thấp", icon: TrendingUp },
-    { value: "rating", label: "Đánh giá cao", icon: Star },
-    { value: "popular", label: "Phổ biến", icon: Award },
-  ];
-
-  if (loading) {
-    return <EnhancedLoadingSpinner />;
-  }
-
-  const activeFiltersCount =
-    (filters.search ? 1 : 0) +
-    (filters.tags?.length || 0) +
-    (filters.priceRange ? 1 : 0);
+  if (loading) return <LoadingSpinner />;
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-50 via-green-50 to-blue-50 dark:from-slate-900 dark:via-green-900 dark:to-blue-900 relative overflow-hidden">
-      {/* Enhanced Background Effects */}
+    <div
+      className={`min-h-screen bg-gradient-to-br ${softPinkTheme.pageBackground} relative`}
+    >
+      {/* Background decoration */}
       <div className="fixed inset-0 overflow-hidden pointer-events-none">
-        <motion.div
-          animate={{
-            background: [
-              "linear-gradient(45deg, rgba(34,197,94,0.03), rgba(59,130,246,0.03))",
-              "linear-gradient(45deg, rgba(59,130,246,0.03), rgba(168,85,247,0.03))",
-              "linear-gradient(45deg, rgba(168,85,247,0.03), rgba(34,197,94,0.03))",
-            ],
-          }}
-          transition={{ duration: 20, repeat: Infinity, ease: "easeInOut" }}
-          className="absolute inset-0"
-        />
-
-        {/* Floating tech icons chỉ hiển thị trên desktop */}
-        <div className="hidden lg:block">
-          {[
-            { icon: BookOpen, color: "text-green-500/8", delay: 0 },
-            { icon: GraduationCap, color: "text-blue-500/8", delay: 2 },
-            { icon: Lightbulb, color: "text-yellow-500/8", delay: 4 },
-            { icon: Code, color: "text-purple-500/8", delay: 6 },
-            { icon: Award, color: "text-orange-500/8", delay: 8 },
-            { icon: Star, color: "text-pink-500/8", delay: 10 },
-          ].map(({ icon: Icon, color, delay }, index) => (
+        {[...Array(6)].map((_, i) => {
+          const shapes = [BookOpen, Heart, Star, Circle, Diamond, BookMarked];
+          const Shape = shapes[i % shapes.length];
+          return (
             <motion.div
-              key={index}
-              className={`absolute ${color}`}
-              style={{
-                top: `${10 + index * 15}%`,
-                left: `${5 + index * 12}%`,
-              }}
+              key={i}
               animate={{
-                y: [0, -30, 0],
+                x: [0, Math.random() * 100 - 50],
+                y: [0, Math.random() * 100 - 50],
                 rotate: [0, 360],
-                scale: [0.8, 1.2, 0.8],
-                opacity: [0.1, 0.3, 0.1],
+                scale: [1, 1.2, 1],
+                opacity: [0.05, 0.15, 0.05],
               }}
               transition={{
-                duration: 15 + index * 2,
+                duration: 20 + i * 3,
                 repeat: Infinity,
+                delay: i * 2,
                 ease: "easeInOut",
-                delay: delay,
+              }}
+              className="absolute"
+              style={{
+                top: `${Math.random() * 100}%`,
+                left: `${Math.random() * 100}%`,
+                transform: `scale(${0.3 + Math.random() * 0.4})`,
               }}
             >
-              <Icon className="w-8 h-8" />
+              <Shape className={`w-16 h-16 text-pink-300/30 filter blur-sm`} />
             </motion.div>
-          ))}
-        </div>
+          );
+        })}
       </div>
 
-      {/* Main Layout */}
-      <div className="container relative z-10 mx-auto px-4 py-6 md:py-8">
-        <div className="flex gap-6 md:gap-8">
-          {/* Enhanced Desktop Sidebar */}
-          <DesktopFilterSidebar
+      <div className="container mx-auto px-4 py-8 relative z-10">
+        {/* Enhanced Header */}
+        <motion.div
+          className="text-center mb-12"
+          initial={{ opacity: 0, y: -50 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.8, ease: "easeOut" }}
+        >
+          <div className="flex items-center justify-center gap-6 mb-6">
+            <motion.div
+              initial={{ scale: 0, rotate: -360 }}
+              animate={{ scale: 1, rotate: 0 }}
+              transition={{
+                delay: 0.3,
+                type: "spring",
+                stiffness: 200,
+                damping: 10,
+              }}
+              className="relative"
+            >
+              <div
+                className={`p-6 rounded-full bg-gradient-to-br ${softPinkTheme.primaryGradient} ${softPinkTheme.glow} relative overflow-hidden`}
+              >
+                <BookOpen className="w-10 h-10 text-white relative z-10" />
+                <motion.div
+                  animate={{ rotate: 360 }}
+                  transition={{ duration: 8, repeat: Infinity, ease: "linear" }}
+                  className="absolute inset-2 border-2 border-white/30 rounded-full"
+                />
+              </div>
+            </motion.div>
+
+            <motion.div
+              className="text-left"
+              initial={{ x: 50, opacity: 0 }}
+              animate={{ x: 0, opacity: 1 }}
+              transition={{ delay: 0.5, duration: 0.6 }}
+            >
+              <motion.h1
+                className={`text-5xl font-bold bg-gradient-to-r ${softPinkTheme.heroText} bg-clip-text text-transparent leading-tight mb-2`}
+                animate={{
+                  backgroundPosition: ["0% 50%", "100% 50%", "0% 50%"],
+                }}
+                transition={{ duration: 5, repeat: Infinity }}
+                style={{ backgroundSize: "200% 200%" }}
+              >
+                E-books Library
+              </motion.h1>
+              <motion.p
+                className="text-lg text-gray-600 font-medium flex items-center gap-2"
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                transition={{ delay: 0.7 }}
+              >
+                <Sparkles className="w-5 h-5 text-pink-500" />
+                Khám phá {products.length} e-books chất lượng cao
+                <motion.span
+                  animate={{ scale: [1, 1.2, 1] }}
+                  transition={{ duration: 2, repeat: Infinity }}
+                  className="text-pink-500"
+                >
+                  <Library className="w-5 h-5" />
+                </motion.span>
+              </motion.p>
+            </motion.div>
+          </div>
+
+          {/* Stats */}
+          <motion.div
+            className="grid grid-cols-2 md:grid-cols-4 gap-6 mt-8 max-w-4xl mx-auto"
+            initial={{ opacity: 0, y: 50 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: 0.8, duration: 0.6 }}
+          >
+            {[
+              {
+                label: "Tổng e-books",
+                value: products.length,
+                icon: BookOpen,
+                color: softPinkTheme.dynamicColors[0],
+              },
+              {
+                label: "Đã lọc",
+                value: filteredProducts.length,
+                icon: Filter,
+                color: softPinkTheme.dynamicColors[1],
+              },
+              {
+                label: "Hiển thị",
+                value: currentProducts.length,
+                icon: Eye,
+                color: softPinkTheme.dynamicColors[2],
+              },
+              {
+                label: "Chất lượng",
+                value: "A+",
+                icon: Award,
+                color: softPinkTheme.dynamicColors[3],
+              },
+            ].map((stat, i) => (
+              <motion.div
+                key={i}
+                initial={{ scale: 0, rotate: -180 }}
+                animate={{ scale: 1, rotate: 0 }}
+                transition={{
+                  delay: 1.0 + i * 0.1,
+                  type: "spring",
+                  stiffness: 200,
+                  damping: 10,
+                }}
+                whileHover={{
+                  scale: 1.05,
+                  y: -8,
+                  transition: { duration: 0.3 },
+                }}
+                className="group"
+              >
+                <Card
+                  className={`text-center border-0 ${softPinkTheme.softGlow} bg-gradient-to-br ${softPinkTheme.neoCard} backdrop-blur-xl hover:${softPinkTheme.glow} transition-all duration-500 relative overflow-hidden rounded-2xl`}
+                >
+                  <CardContent className="p-6">
+                    <motion.div
+                      animate={{ rotate: 360 }}
+                      transition={{
+                        duration: 15,
+                        repeat: Infinity,
+                        ease: "linear",
+                      }}
+                      className={`w-12 h-12 mx-auto rounded-full bg-gradient-to-br ${stat.color.bg} flex items-center justify-center mb-3 ${stat.color.glow} relative overflow-hidden group-hover:scale-110 transition-transform duration-300`}
+                    >
+                      <stat.icon className="w-6 h-6 text-white relative z-10" />
+                      <div className="absolute inset-2 bg-white/20 rounded-full" />
+                    </motion.div>
+
+                    <motion.div
+                      className="text-2xl font-bold text-gray-800 mb-1"
+                      animate={{ scale: [1, 1.05, 1] }}
+                      transition={{
+                        duration: 3,
+                        repeat: Infinity,
+                        delay: i * 0.5,
+                      }}
+                    >
+                      {stat.value}
+                    </motion.div>
+                    <div className="text-sm text-gray-600 font-medium">
+                      {stat.label}
+                    </div>
+                  </CardContent>
+                </Card>
+              </motion.div>
+            ))}
+          </motion.div>
+        </motion.div>
+
+        {/* Filter Bars - RESPONSIVE */}
+        <motion.div
+          initial={{ opacity: 0, y: 30 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ delay: 1.2 }}
+          className="mb-8"
+        >
+          {/* Mobile Filter */}
+          <MobileFilterBar
             filters={filters}
-            ebookTags={ebookTags}
-            priceRanges={priceRanges}
             sortOptions={sortOptions}
             searchInput={searchInput}
             setSearchInput={setSearchInput}
             handleSearch={handleSearch}
             handleSortChange={handleSortChange}
+            clearFilters={clearFilters}
+            viewMode={viewMode}
+            setViewMode={setViewMode}
+            filteredProductsLength={filteredProducts.length}
+            currentPage={currentPage}
+            totalPages={totalPages}
+            currentProductsLength={currentProducts.length}
+            ebookTags={ebookTags}
             toggleTag={toggleTag}
             handlePriceRangeChange={handlePriceRangeChange}
-            clearFilters={clearFilters}
-            products={products}
+            priceRanges={priceRanges}
           />
 
-          {/* Main Content */}
-          <main className="flex-1 space-y-8 md:space-y-12 min-w-0">
-            {/* Enhanced Header */}
-            <EnhancedHeader
-              products={products}
-              filteredProducts={filteredProducts}
-              currentProducts={currentProducts}
-            />
+          {/* Desktop Filter */}
+          <DesktopFilterBar
+            filters={filters}
+            sortOptions={sortOptions}
+            searchInput={searchInput}
+            setSearchInput={setSearchInput}
+            handleSearch={handleSearch}
+            handleSortChange={handleSortChange}
+            clearFilters={clearFilters}
+            viewMode={viewMode}
+            setViewMode={setViewMode}
+            filteredProductsLength={filteredProducts.length}
+            currentPage={currentPage}
+            totalPages={totalPages}
+            currentProductsLength={currentProducts.length}
+            ebookTags={ebookTags}
+            toggleTag={toggleTag}
+            handlePriceRangeChange={handlePriceRangeChange}
+            priceRanges={priceRanges}
+          />
+        </motion.div>
 
-            {/* Enhanced Mobile Filter Button */}
-            <div className="xl:hidden">
-              <MobileFilterSheet
-                filters={filters}
-                ebookTags={ebookTags}
-                priceRanges={priceRanges}
-                sortOptions={sortOptions}
-                searchInput={searchInput}
-                setSearchInput={setSearchInput}
-                handleSearch={handleSearch}
-                handleSortChange={handleSortChange}
-                toggleTag={toggleTag}
-                handlePriceRangeChange={handlePriceRangeChange}
-                clearFilters={clearFilters}
-                products={products}
-              />
-            </div>
-
-            {/* Active Filters Display */}
-            <AnimatePresence>
-              {activeFiltersCount > 0 && (
-                <motion.div
-                  initial={{ opacity: 0, y: -20 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  exit={{ opacity: 0, y: -20 }}
-                  className="relative"
-                >
-                  <Card className="border-0 shadow-lg bg-gradient-to-r from-green-50 via-blue-50 to-purple-50 dark:from-green-900/20 dark:via-blue-900/20 dark:to-purple-900/20 overflow-hidden">
-                    <CardContent className="p-4 md:p-6 relative z-10">
-                      <div className="flex flex-wrap items-center gap-3 md:gap-4">
-                        <div className="flex items-center space-x-2">
-                          <Filter className="w-4 h-4 md:w-5 md:h-5 text-green-600" />
-                          <span className="text-sm md:text-base font-semibold">
-                            Bộ lọc đang áp dụng:
-                          </span>
-                        </div>
-                        <div className="flex flex-wrap gap-2">
-                          {filters.search && (
-                            <Badge className="bg-green-100 text-green-800 text-xs md:text-sm">
-                              <Search className="w-3 h-3 mr-1" />"
-                              {filters.search}"
-                              <button
-                                onClick={() => {
-                                  setFilters((prev) => ({
-                                    ...prev,
-                                    search: "",
-                                  }));
-                                  setSearchInput("");
-                                  setShouldResetPage(true);
-                                }}
-                                className="ml-2 hover:text-red-500"
-                              >
-                                <X className="w-3 h-3" />
-                              </button>
-                            </Badge>
-                          )}
-
-                          {filters.tags?.map((tag) => (
-                            <Badge
-                              key={tag}
-                              className="bg-blue-100 text-blue-800 text-xs md:text-sm"
-                            >
-                              <BookOpen className="w-3 h-3 mr-1" />
-                              {tag}
-                              <button
-                                onClick={() => toggleTag(tag)}
-                                className="ml-2 hover:text-red-500"
-                              >
-                                <X className="w-3 h-3" />
-                              </button>
-                            </Badge>
-                          ))}
-
-                          {filters.priceRange && (
-                            <Badge className="bg-purple-100 text-purple-800 text-xs md:text-sm">
-                              <TrendingUp className="w-3 h-3 mr-1" />
-                              {getPriceRangeLabel(filters.priceRange)}
-                              <button
-                                onClick={() =>
-                                  handlePriceRangeChange(undefined)
-                                }
-                                className="ml-2 hover:text-red-500"
-                              >
-                                <X className="w-3 h-3" />
-                              </button>
-                            </Badge>
-                          )}
-                        </div>
-                        <Button
-                          variant="outline"
-                          size="sm"
-                          onClick={clearFilters}
-                          className="ml-auto"
-                        >
-                          <X className="w-4 h-4 mr-1" />
-                          Xóa tất cả
-                        </Button>
-                      </div>
-                    </CardContent>
-                  </Card>
-                </motion.div>
-              )}
-            </AnimatePresence>
-
-            {/* Results Header & View Mode */}
-            <motion.div
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ delay: 0.3 }}
-              className="space-y-6"
-            >
-              <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 md:gap-6">
-                <div>
-                  <p className="text-lg md:text-2xl text-muted-foreground">
-                    Hiển thị{" "}
-                    <span className="font-bold text-primary text-xl md:text-3xl">
-                      {currentProducts.length}
-                    </span>{" "}
-                    trên{" "}
-                    <span className="font-bold text-primary text-xl md:text-3xl">
-                      {filteredProducts.length}
-                    </span>{" "}
-                    kết quả
-                  </p>
-                  {filteredProducts.length !== products.length && (
-                    <Badge
-                      variant="outline"
-                      className="text-yellow-800 bg-yellow-100 mt-2"
-                    >
-                      <AlertCircle className="w-3 h-3 mr-1" />
-                      Đã lọc từ {products.length} e-books
-                    </Badge>
-                  )}
-                </div>
-                <div className="flex items-center space-x-3">
-                  <span className="text-sm md:text-base font-medium text-muted-foreground">
-                    Xem:
-                  </span>
-                  <div className="flex border rounded-lg bg-white dark:bg-slate-800">
-                    <Button
-                      variant={viewMode === "grid" ? "default" : "ghost"}
-                      size="sm"
-                      onClick={() => setViewMode("grid")}
-                      className="rounded-r-none px-3 py-2"
-                    >
-                      <Grid className="w-4 h-4 mr-1" />
-                      <span className="hidden sm:inline">Lưới</span>
-                    </Button>
-                    <Button
-                      variant={viewMode === "list" ? "default" : "ghost"}
-                      size="sm"
-                      onClick={() => setViewMode("list")}
-                      className="rounded-l-none px-3 py-2"
-                    >
-                      <List className="w-4 h-4 mr-1" />
-                      <span className="hidden sm:inline">DS</span>
-                    </Button>
-                  </div>
-                </div>
-              </div>
-
-              {/* Product Grid */}
-              <EnhancedProductGrid
-                currentProducts={currentProducts}
-                viewMode={viewMode}
-                addToCart={addToCart}
-              />
-
-              {/* Pagination */}
-              {filteredProducts.length > 0 && totalPages > 1 && (
-                <div className="mt-12">
-                  <Card className="border-0 shadow-lg bg-gradient-to-r from-white to-green-50 dark:from-slate-800 dark:to-green-900">
-                    <CardContent className="p-4 md:p-8">
-                      <Pagination
-                        currentPage={currentPage}
-                        totalPages={totalPages}
-                        totalItems={filteredProducts.length}
-                        itemsPerPage={itemsPerPage}
-                        onPageChange={handlePageChange}
-                      />
-                    </CardContent>
-                  </Card>
-                </div>
-              )}
-            </motion.div>
-          </main>
-        </div>
+        {/* Products Grid - 4 COLUMNS */}
+        <motion.div
+          className="mb-6"
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          transition={{ delay: 1.5 }}
+        >
+          <ProductGrid
+            products={currentProducts}
+            viewMode={viewMode}
+            addToCart={addToCart}
+          />
+        </motion.div>
       </div>
 
-      {/* Scroll to Top Button */}
-      <ScrollToTopButton />
+      {/* Full Width Pagination - CLOSER */}
+      <SimplePagination
+        currentPage={currentPage}
+        totalPages={totalPages}
+        onPageChange={handlePageChange}
+        filteredProductsLength={filteredProducts.length}
+        itemsPerPage={itemsPerPage}
+      />
 
-      {/* Mobile bottom safe area */}
-      <div className="h-20 md:h-0"></div>
+      {/* Scroll to top - PINK THEME */}
+      <motion.button
+        className={`fixed bottom-8 right-8 w-14 h-14 rounded-full ${softPinkTheme.glow} bg-gradient-to-r ${softPinkTheme.primaryGradient} hover:scale-110 text-white z-50 transition-all duration-300 relative overflow-hidden group`}
+        whileHover={{
+          scale: 1.15,
+          rotate: 360,
+          transition: { duration: 0.6 },
+        }}
+        whileTap={{ scale: 0.9 }}
+        onClick={() => window.scrollTo({ top: 0, behavior: "smooth" })}
+      >
+        <ArrowUp className="w-7 h-7 mx-auto relative z-10 group-hover:scale-125 transition-transform" />
+        <motion.div
+          animate={{ rotate: 360 }}
+          transition={{ duration: 4, repeat: Infinity, ease: "linear" }}
+          className="absolute inset-0 border-2 border-white/30 rounded-full"
+        />
+        <motion.div
+          animate={{ scale: [1, 1.3, 1], opacity: [0.5, 0.8, 0.5] }}
+          transition={{ duration: 2, repeat: Infinity }}
+          className="absolute inset-0 bg-white/20 rounded-full"
+        />
+      </motion.button>
     </div>
   );
 };

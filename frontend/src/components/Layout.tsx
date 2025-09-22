@@ -5,7 +5,7 @@ import Footer from "./Footer";
 import Chatbot from "./Chatbot";
 import ContactWidget from "./ContactWidget";
 import CustomCookieConsent from "./CookieConsent";
-import LeadForm from "./LeadForm"; // ✅ Thêm dòng này
+import LeadForm from "./LeadForm";
 
 interface LayoutProps {
   children: React.ReactNode;

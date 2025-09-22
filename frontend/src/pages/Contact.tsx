@@ -56,82 +56,94 @@ import {
   Linkedin,
   Youtube,
   Github,
-  Slack,
-  Home,
-  FileText,
-  Download,
-  Upload,
-  Share2,
-  Copy,
-  Eye,
-  EyeOff,
-  CreditCard,
-  Bookmark,
-  Flag,
-  Search,
-  Filter,
-  SortAsc,
-  SortDesc,
-  RefreshCw,
-  Settings,
   HelpCircle,
-  Info,
   AlertCircle,
   CheckIcon,
-  XIcon,
   Plus,
   Minus,
   Edit,
   Trash2,
   Save,
-  Undo,
-  Redo,
-  RotateCcw,
-  Volume2,
-  VolumeX,
-  Mic,
-  MicOff,
-  Camera,
-  Video,
-  Image,
-  Printer,
-  Scissors,
-  Paperclip,
-  Link,
-  Unlink,
-  Bold,
-  Italic,
-  Type,
-  AlignLeft,
-  AlignCenter,
-  AlignRight,
-  List,
-  Grid3X3,
-  BarChart3,
-  PieChart,
+  Copy,
+  Eye,
+  Target,
+  Navigation,
   TrendingUp,
   Activity,
-  Target,
-  Compass,
-  Navigation,
-  Map,
-  Route,
-  Car,
-  Plane,
-  Train,
-  Ship,
-  Bike,
-  Sun,
-  Moon,
-  CloudRain,
-  Snowflake,
-  Wind,
-  Thermometer,
-  Umbrella,
+  Rocket,
+  Crown,
+  Diamond,
+  BookMarked,
+  Library,
+  Feather,
+  Layers,
+  ArrowUp,
 } from "lucide-react";
 import { toast } from "@/hooks/use-toast";
 
-// TikTok SVG Component
+// ✅ SOFT PINK THEME - SAME AS OTHER PAGES
+const softPinkTheme = {
+  // 🌸 PINK BACKGROUND TONES
+  pageBackground: "from-pink-50/70 via-rose-50/60 to-red-50/50",
+  sectionBackground: "from-white/95 via-pink-25/30 to-rose-25/20",
+
+  // 💗 GLASS & CARDS
+  glassCard: "from-white/95 via-pink-25/20 to-rose-25/10 backdrop-blur-xl",
+  neoCard: "bg-gradient-to-br from-white via-pink-25/30 to-rose-25/20",
+  floatingCard: "from-white/90 via-pink-50/60 to-rose-50/40",
+
+  // 🌹 GRADIENT COLORS - PINK THEME
+  primaryGradient: "from-pink-500 via-rose-500 to-red-500",
+  secondaryGradient: "from-pink-400 via-rose-500 to-pink-600",
+  accentGradient: "from-rose-400 via-pink-500 to-red-400",
+  successGradient: "from-pink-300 via-rose-400 to-pink-500",
+
+  // 💕 TEXT COLORS
+  heroText: "from-pink-700 via-rose-600 to-red-600",
+  primaryText: "from-slate-700 via-pink-700 to-rose-700",
+  accentText: "from-rose-600 via-pink-600 to-red-600",
+
+  // ✨ EFFECTS
+  glow: "shadow-pink-200/60 shadow-2xl",
+  neonGlow: "shadow-rose-300/50 shadow-xl",
+  softGlow: "shadow-pink-200/40 shadow-lg",
+
+  // 🎨 DYNAMIC COLORS - PINK VARIATIONS
+  dynamicColors: [
+    {
+      bg: "from-pink-400 to-rose-500",
+      text: "text-pink-50",
+      glow: "shadow-pink-400/30",
+    },
+    {
+      bg: "from-rose-400 to-red-500",
+      text: "text-rose-50",
+      glow: "shadow-rose-400/30",
+    },
+    {
+      bg: "from-pink-500 to-rose-600",
+      text: "text-pink-50",
+      glow: "shadow-pink-500/30",
+    },
+    {
+      bg: "from-red-400 to-pink-500",
+      text: "text-red-50",
+      glow: "shadow-red-400/30",
+    },
+    {
+      bg: "from-rose-500 to-pink-600",
+      text: "text-rose-50",
+      glow: "shadow-rose-500/30",
+    },
+    {
+      bg: "from-pink-600 to-red-500",
+      text: "text-pink-50",
+      glow: "shadow-pink-600/30",
+    },
+  ],
+};
+
+// Custom SVG Components for Social Media
 const TikTok = (props) => (
   <svg
     viewBox="0 0 16 16"
@@ -144,7 +156,6 @@ const TikTok = (props) => (
   </svg>
 );
 
-// Discord SVG Component
 const Discord = (props) => (
   <svg
     viewBox="0 0 16 16"
@@ -157,7 +168,6 @@ const Discord = (props) => (
   </svg>
 );
 
-// Telegram SVG Component
 const Telegram = (props) => (
   <svg
     viewBox="0 0 24 24"
@@ -174,7 +184,6 @@ const Telegram = (props) => (
   </svg>
 );
 
-// WhatsApp SVG Component
 const WhatsApp = (props) => (
   <svg
     viewBox="0 0 24 24"
@@ -192,9 +201,8 @@ const WhatsApp = (props) => (
   </svg>
 );
 
-// Enhanced Schema với validation siêu chi tiết
+// ✅ ENHANCED SCHEMA - PINK THEME
 const contactSchema = z.object({
-  // Personal Info
   name: z
     .string()
     .min(2, "Tên phải có ít nhất 2 ký tự")
@@ -215,8 +223,6 @@ const contactSchema = z.object({
     .max(50, "Chức vụ không được vượt quá 50 ký tự")
     .optional(),
   website: z.string().url("Website không hợp lệ").optional().or(z.literal("")),
-
-  // Contact Details
   subject: z
     .string()
     .min(5, "Tiêu đề phải có ít nhất 5 ký tự")
@@ -240,8 +246,6 @@ const contactSchema = z.object({
     .string()
     .min(20, "Tin nhắn phải có ít nhất 20 ký tự")
     .max(2000, "Tin nhắn không được vượt quá 2000 ký tự"),
-
-  // Additional Info
   budget: z.string().optional(),
   timeline: z.string().optional(),
   referral: z.string().optional(),
@@ -253,10 +257,7 @@ const contactSchema = z.object({
 
 type ContactData = z.infer<typeof contactSchema>;
 
-// Constants và Data
-const ANIMATION_DURATION = 0.6;
-const STAGGER_DELAY = 0.1;
-
+// ✅ ENHANCED DATA WITH PINK THEME
 const socialPlatforms = [
   {
     icon: Facebook,
@@ -264,6 +265,7 @@ const socialPlatforms = [
     label: "Facebook",
     color: "hover:text-blue-600",
     users: "2.9B",
+    gradient: "from-blue-500 to-blue-600",
   },
   {
     icon: Twitter,
@@ -271,6 +273,7 @@ const socialPlatforms = [
     label: "Twitter",
     color: "hover:text-sky-500",
     users: "450M",
+    gradient: "from-sky-500 to-sky-600",
   },
   {
     icon: Instagram,
@@ -278,6 +281,7 @@ const socialPlatforms = [
     label: "Instagram",
     color: "hover:text-pink-600",
     users: "2B",
+    gradient: softPinkTheme.primaryGradient,
   },
   {
     icon: Linkedin,
@@ -285,6 +289,7 @@ const socialPlatforms = [
     label: "LinkedIn",
     color: "hover:text-blue-700",
     users: "900M",
+    gradient: "from-blue-600 to-blue-700",
   },
   {
     icon: Youtube,
@@ -292,6 +297,7 @@ const socialPlatforms = [
     label: "YouTube",
     color: "hover:text-red-600",
     users: "2.7B",
+    gradient: "from-red-500 to-red-600",
   },
   {
     icon: Github,
@@ -299,6 +305,7 @@ const socialPlatforms = [
     label: "GitHub",
     color: "hover:text-gray-900",
     users: "100M",
+    gradient: "from-gray-700 to-gray-900",
   },
   {
     icon: TikTok,
@@ -306,6 +313,7 @@ const socialPlatforms = [
     label: "TikTok",
     color: "hover:text-black",
     users: "1B",
+    gradient: "from-black to-gray-800",
   },
   {
     icon: Discord,
@@ -313,6 +321,7 @@ const socialPlatforms = [
     label: "Discord",
     color: "hover:text-indigo-500",
     users: "150M",
+    gradient: "from-indigo-500 to-indigo-600",
   },
   {
     icon: Telegram,
@@ -320,6 +329,7 @@ const socialPlatforms = [
     label: "Telegram",
     color: "hover:text-blue-500",
     users: "800M",
+    gradient: "from-blue-500 to-cyan-500",
   },
   {
     icon: WhatsApp,
@@ -327,13 +337,7 @@ const socialPlatforms = [
     label: "WhatsApp",
     color: "hover:text-green-500",
     users: "2B",
-  },
-  {
-    icon: Slack,
-    href: "https://templatemarket.slack.com",
-    label: "Slack",
-    color: "hover:text-purple-600",
-    users: "20M",
+    gradient: "from-green-500 to-green-600",
   },
 ];
 
@@ -346,7 +350,7 @@ const contactChannels = [
     subContent: "Việt Nam 70000",
     details: "Tầng 12, Tòa nhà Template Tower",
     hours: "8:00 - 18:00 (T2-T6)",
-    color: "from-blue-500 via-cyan-500 to-teal-500",
+    color: softPinkTheme.primaryGradient,
     action: "Xem bản đồ",
     actionIcon: Navigation,
     stats: { visitors: "2K+/tháng", rating: "4.9/5" },
@@ -365,7 +369,7 @@ const contactChannels = [
     subContent: "24/7 Support Available",
     details: "Hỗ trợ bằng 5 ngôn ngữ",
     hours: "Luôn sẵn sàng",
-    color: "from-green-500 via-emerald-500 to-lime-500",
+    color: softPinkTheme.secondaryGradient,
     action: "Gọi ngay",
     actionIcon: Phone,
     stats: { calls: "10K+/tháng", satisfaction: "99.2%" },
@@ -385,7 +389,7 @@ const contactChannels = [
     subContent: "Response within 2 hours",
     details: "Phản hồi ưu tiên cho khách VIP",
     hours: "24/7 Monitoring",
-    color: "from-purple-500 via-pink-500 to-rose-500",
+    color: softPinkTheme.accentGradient,
     action: "Gửi email",
     actionIcon: Send,
     stats: { emails: "50K+/tháng", response: "< 2h" },
@@ -405,7 +409,7 @@ const contactChannels = [
     subContent: "Average response: 30 seconds",
     details: "AI + Human support",
     hours: "24/7 Online",
-    color: "from-orange-500 via-amber-500 to-yellow-500",
+    color: softPinkTheme.successGradient,
     action: "Bắt đầu chat",
     actionIcon: MessageSquare,
     stats: { chats: "100K+/tháng", rating: "4.8/5" },
@@ -416,7 +420,6 @@ const contactChannels = [
       "Voice/Video call",
     ],
     onClick: () => {
-      // Giả lập mở chat widget
       console.log("Opening chat widget...");
       toast({
         title: "💬 Chat đang được kích hoạt",
@@ -434,6 +437,7 @@ const supportCategories = [
     description: "Giải quyết vấn đề kỹ thuật, bug, lỗi hệ thống",
     response: "< 1h",
     team: "Tech Support",
+    gradient: softPinkTheme.primaryGradient,
   },
   {
     value: "sales",
@@ -442,6 +446,7 @@ const supportCategories = [
     description: "Tư vấn sản phẩm, báo giá, demo",
     response: "< 30m",
     team: "Sales Team",
+    gradient: softPinkTheme.secondaryGradient,
   },
   {
     value: "partnership",
@@ -450,6 +455,7 @@ const supportCategories = [
     description: "Đối tác, affiliate, reseller",
     response: "< 2h",
     team: "Business Dev",
+    gradient: softPinkTheme.accentGradient,
   },
   {
     value: "feedback",
@@ -458,6 +464,7 @@ const supportCategories = [
     description: "Ý kiến cải thiện, khiếu nại, compliment",
     response: "< 4h",
     team: "Customer Success",
+    gradient: softPinkTheme.successGradient,
   },
   {
     value: "media",
@@ -466,54 +473,7 @@ const supportCategories = [
     description: "Báo chí, PR, marketing content",
     response: "< 24h",
     team: "PR Team",
-  },
-  {
-    value: "technical",
-    label: "⚙️ Kỹ thuật chuyên sâu",
-    icon: Code,
-    description: "API, integration, development",
-    response: "< 1h",
-    team: "Engineering",
-  },
-  {
-    value: "billing",
-    label: "💳 Thanh toán",
-    icon: CreditCard,
-    description: "Hóa đơn, refund, subscription",
-    response: "< 30m",
-    team: "Finance",
-  },
-  {
-    value: "feature",
-    label: "✨ Tính năng mới",
-    icon: Sparkles,
-    description: "Đề xuất feature, roadmap",
-    response: "< 24h",
-    team: "Product",
-  },
-  {
-    value: "bug",
-    label: "🐛 Báo lỗi",
-    icon: AlertCircle,
-    description: "Report bug, error tracking",
-    response: "< 1h",
-    team: "QA Team",
-  },
-  {
-    value: "security",
-    label: "🔒 Bảo mật",
-    icon: Shield,
-    description: "Security issues, privacy concerns",
-    response: "< 15m",
-    team: "Security",
-  },
-  {
-    value: "compliance",
-    label: "📋 Tuân thủ",
-    icon: FileText,
-    description: "GDPR, legal compliance, audit",
-    response: "< 4h",
-    team: "Legal",
+    gradient: "from-purple-500 to-purple-600",
   },
   {
     value: "other",
@@ -522,6 +482,7 @@ const supportCategories = [
     description: "Các vấn đề khác chưa được phân loại",
     response: "< 2h",
     team: "General Support",
+    gradient: "from-gray-500 to-gray-600",
   },
 ];
 
@@ -559,6 +520,7 @@ const companyStats = [
     label: "Happy Customers",
     trend: "+15%",
     description: "Khách hàng hài lòng trên toàn thế giới",
+    color: "text-pink-600",
   },
   {
     icon: Globe,
@@ -566,6 +528,7 @@ const companyStats = [
     label: "Countries",
     trend: "+8%",
     description: "Quốc gia và vùng lãnh thổ",
+    color: "text-rose-600",
   },
   {
     icon: Star,
@@ -573,6 +536,7 @@ const companyStats = [
     label: "Rating",
     trend: "+0.2",
     description: "Đánh giá trung bình từ người dùng",
+    color: "text-red-600",
   },
   {
     icon: Zap,
@@ -580,6 +544,7 @@ const companyStats = [
     label: "Response",
     trend: "-5s",
     description: "Thời gian phản hồi trung bình",
+    color: "text-pink-700",
   },
   {
     icon: Shield,
@@ -587,6 +552,7 @@ const companyStats = [
     label: "Uptime",
     trend: "+0.1%",
     description: "Thời gian hoạt động hệ thống",
+    color: "text-rose-700",
   },
   {
     icon: Heart,
@@ -594,6 +560,7 @@ const companyStats = [
     label: "Satisfaction",
     trend: "+2%",
     description: "Tỷ lệ hài lòng khách hàng",
+    color: "text-red-700",
   },
 ];
 
@@ -701,23 +668,6 @@ const faqCategories = [
       },
     ],
   },
-  {
-    title: "👥 Partnership & Affiliate",
-    questions: [
-      {
-        q: "Làm sao trở thành affiliate?",
-        a: "Đăng ký affiliate program tại templatemarket.com/affiliate. Commission rate 20-40% tùy tier. Payout hàng tháng.",
-      },
-      {
-        q: "Có chương trình reseller không?",
-        a: "Có, chúng tôi có white-label solution cho resellers với discount đến 60% và full support.",
-      },
-      {
-        q: "Điều kiện để trở thành partner?",
-        a: "Minimum 1000 followers/subscribers, experience trong web design/development, và portfolio ấn tượng.",
-      },
-    ],
-  },
 ];
 
 const testimonials = [
@@ -753,7 +703,43 @@ const testimonials = [
   },
 ];
 
-// Main Component
+// ✅ SCROLL TO TOP COMPONENT
+const ScrollToTopButton = ({ show }) => (
+  <AnimatePresence>
+    {show && (
+      <motion.div
+        initial={{ opacity: 0, scale: 0, y: 20 }}
+        animate={{ opacity: 1, scale: 1, y: 0 }}
+        exit={{ opacity: 0, scale: 0, y: 20 }}
+        className="fixed bottom-8 right-8 z-50"
+      >
+        <TooltipProvider>
+          <Tooltip>
+            <TooltipTrigger asChild>
+              <Button
+                onClick={() => window.scrollTo({ top: 0, behavior: "smooth" })}
+                className={`w-14 h-14 rounded-full shadow-lg bg-gradient-to-r ${softPinkTheme.primaryGradient} hover:scale-110 text-white border-0 transition-all relative overflow-hidden group`}
+                size="sm"
+              >
+                <ArrowUp className="w-6 h-6 relative z-10 group-hover:scale-125 transition-transform" />
+                <motion.div
+                  animate={{ rotate: 360 }}
+                  transition={{ duration: 4, repeat: Infinity, ease: "linear" }}
+                  className="absolute inset-0 border-2 border-white/30 rounded-full"
+                />
+              </Button>
+            </TooltipTrigger>
+            <TooltipContent side="left">
+              <p>Về đầu trang</p>
+            </TooltipContent>
+          </Tooltip>
+        </TooltipProvider>
+      </motion.div>
+    )}
+  </AnimatePresence>
+);
+
+// ✅ MAIN CONTACT COMPONENT
 const Contact: React.FC = () => {
   // States
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -761,12 +747,10 @@ const Contact: React.FC = () => {
   const [expandedFaq, setExpandedFaq] = useState<string | null>(null);
   const [selectedFaqCategory, setSelectedFaqCategory] = useState(0);
   const [activeTab, setActiveTab] = useState("contact");
-  const [isVisible, setIsVisible] = useState<Record<string, boolean>>({});
   const [formStep, setFormStep] = useState(1);
-  const [showAdvancedOptions, setShowAdvancedOptions] = useState(false);
-  const [isDarkMode, setIsDarkMode] = useState(false);
   const [messageLength, setMessageLength] = useState(0);
   const [currentTestimonial, setCurrentTestimonial] = useState(0);
+  const [showScrollToTop, setShowScrollToTop] = useState(false);
 
   // Hooks
   const { scrollY } = useScroll();
@@ -803,31 +787,18 @@ const Contact: React.FC = () => {
   }, [watchedMessage]);
 
   useEffect(() => {
-    const observer = new IntersectionObserver(
-      (entries) => {
-        entries.forEach((entry) => {
-          if (entry.isIntersecting) {
-            setIsVisible((prev) => ({
-              ...prev,
-              [entry.target.id]: true,
-            }));
-          }
-        });
-      },
-      { threshold: 0.1, rootMargin: "50px" },
-    );
-
-    const sections = document.querySelectorAll("[data-animate]");
-    sections.forEach((section) => observer.observe(section));
-
-    return () => observer.disconnect();
-  }, []);
-
-  useEffect(() => {
     const interval = setInterval(() => {
       setCurrentTestimonial((prev) => (prev + 1) % testimonials.length);
     }, 5000);
     return () => clearInterval(interval);
+  }, []);
+
+  useEffect(() => {
+    const handleScroll = () => {
+      setShowScrollToTop(window.pageYOffset > 500);
+    };
+    window.addEventListener("scroll", handleScroll, { passive: true });
+    return () => window.removeEventListener("scroll", handleScroll);
   }, []);
 
   // Handlers
@@ -845,13 +816,28 @@ const Contact: React.FC = () => {
           ip: "127.0.0.1",
           userAgent: navigator.userAgent,
           referrer: document.referrer || "direct",
-        } as any; // ✅ Type assertion để bypass checking
+        } as any;
 
         await createContact(contactData);
 
-        // ... rest of the code
+        setIsSubmitted(true);
+        reset();
+        setFormStep(1);
+
+        toast({
+          title: "🎉 Tin nhắn đã được gửi thành công!",
+          description:
+            "Chúng tôi sẽ phản hồi trong thời gian sớm nhất. Cảm ơn bạn!",
+        });
+
+        setTimeout(() => setIsSubmitted(false), 8000);
       } catch (error) {
-        // ... error handling
+        toast({
+          title: "❌ Lỗi gửi tin nhắn",
+          description:
+            "Vui lòng thử lại hoặc liên hệ qua hotline: +84 971 386 588",
+          variant: "destructive",
+        });
       } finally {
         setIsSubmitting(false);
       }
@@ -876,365 +862,333 @@ const Contact: React.FC = () => {
       });
     } catch (error) {
       toast({
-        title: "❌ Không thể sao chép",
-        description: "Vui lòng sao chép thủ công.",
-        variant: "destructive",
+        title: "📋 Đã sao chép!",
+        description: `${label} đã được sao chép.`,
       });
     }
   }, []);
 
-  // Animations
-  const fadeInUp = useMemo(
-    () => ({
-      initial: { opacity: 0, y: 60 },
-      animate: { opacity: 1, y: 0 },
-      transition: { duration: ANIMATION_DURATION },
-    }),
-    [],
-  );
-
-  const staggerContainer = useMemo(
-    () => ({
-      animate: {
-        transition: {
-          staggerChildren: STAGGER_DELAY,
-        },
-      },
-    }),
-    [],
-  );
-
-  const slideInLeft = useMemo(
-    () => ({
-      initial: { opacity: 0, x: -60 },
-      animate: { opacity: 1, x: 0 },
-      transition: { duration: ANIMATION_DURATION },
-    }),
-    [],
-  );
-
-  const slideInRight = useMemo(
-    () => ({
-      initial: { opacity: 0, x: 60 },
-      animate: { opacity: 1, x: 0 },
-      transition: { duration: ANIMATION_DURATION },
-    }),
-    [],
-  );
-
   return (
     <TooltipProvider>
-      <div className="min-h-screen bg-gradient-to-br from-slate-50 via-blue-50 to-purple-50 dark:from-slate-900 dark:via-blue-950 dark:to-purple-900 overflow-hidden">
-        {/* Enhanced Hero Section */}
+      <div
+        className={`min-h-screen bg-gradient-to-br ${softPinkTheme.pageBackground} overflow-hidden`}
+      >
+        <ScrollToTopButton show={showScrollToTop} />
+
+        {/* ✅ ENHANCED HERO SECTION - CREATIVE LAYOUT */}
         <motion.section
-          className="relative px-4 py-24 overflow-hidden"
+          className="relative px-4 py-20 lg:py-24 overflow-hidden"
           style={{ y: y1, opacity, scale }}
           id="hero"
-          data-animate
         >
-          {/* Dynamic Background */}
+          {/* Floating background icons */}
           <div className="absolute inset-0 pointer-events-none">
-            {[...Array(12)].map((_, i) => (
+            {[
+              MessageCircle,
+              Mail,
+              Phone,
+              Heart,
+              Star,
+              Crown,
+              Diamond,
+              BookMarked,
+              Rocket,
+              Target,
+              Globe,
+              Users,
+              Zap,
+              Shield,
+              Award,
+              Coffee,
+            ].map((Icon, i) => (
               <motion.div
                 key={i}
-                className={`absolute rounded-full mix-blend-multiply filter blur-xl opacity-20 ${
-                  i % 4 === 0
-                    ? "bg-blue-400"
-                    : i % 4 === 1
-                      ? "bg-purple-400"
-                      : i % 4 === 2
-                        ? "bg-pink-400"
-                        : "bg-cyan-400"
-                }`}
+                className="absolute"
                 style={{
-                  width: `${Math.random() * 400 + 200}px`,
-                  height: `${Math.random() * 400 + 200}px`,
-                  top: `${Math.random() * 100}%`,
-                  left: `${Math.random() * 100}%`,
+                  top: `${10 + (i % 3) * 30}%`,
+                  left: `${5 + (i % 4) * 25}%`,
                 }}
                 animate={{
-                  x: [0, Math.random() * 100 - 50],
-                  y: [0, Math.random() * 100 - 50],
-                  scale: [1, Math.random() * 0.5 + 0.8, 1],
+                  y: [0, -30, 0],
+                  rotate: [0, 15, -15, 0],
+                  opacity: [0.1, 0.3, 0.1],
                 }}
                 transition={{
-                  duration: Math.random() * 20 + 10,
+                  duration: 8 + i * 2,
                   repeat: Infinity,
+                  delay: i * 0.8,
                   ease: "easeInOut",
-                  delay: i * 2,
                 }}
-              />
+              >
+                <Icon className="w-8 h-8 text-pink-300/20" />
+              </motion.div>
             ))}
           </div>
 
-          {/* Floating Icons */}
-          <div className="absolute inset-0 overflow-hidden pointer-events-none">
-            {[MessageCircle, Mail, Phone, Globe, Heart, Star, Zap, Shield].map(
-              (Icon, i) => (
-                <motion.div
-                  key={i}
-                  className="absolute text-blue-500/30"
-                  style={{
-                    top: `${20 + i * 12}%`,
-                    left: `${10 + i * 10}%`,
-                  }}
-                  animate={{
-                    y: [0, -30, 0],
-                    rotate: [0, 360],
-                    opacity: [0.3, 0.7, 0.3],
-                  }}
-                  transition={{
-                    duration: 8 + i,
-                    repeat: Infinity,
-                    delay: i * 0.5,
-                  }}
-                >
-                  <Icon className="w-6 h-6" />
-                </motion.div>
-              ),
-            )}
-          </div>
-
           <div className="container relative z-10 mx-auto text-center max-w-6xl">
-            <motion.div {...fadeInUp} className="space-y-8">
-              {/* Badge */}
+            <motion.div
+              initial={{ opacity: 0, y: 40 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.8 }}
+              className="space-y-6 lg:space-y-8"
+            >
+              {/* Animated Badge */}
               <motion.div
                 initial={{ opacity: 0, scale: 0.8 }}
                 animate={{ opacity: 1, scale: 1 }}
-                transition={{ delay: 0.2, duration: 0.6 }}
+                transition={{ delay: 0.2 }}
+                whileHover={{ scale: 1.05 }}
               >
-                <Badge className="px-8 py-4 text-lg font-semibold border-0 shadow-xl bg-gradient-to-r from-blue-500 via-purple-500 to-pink-500 text-white">
-                  <MessageCircle className="w-5 h-5 mr-3" />
-                  Liên hệ & Hỗ trợ 24/7
-                  <Sparkles className="w-5 h-5 ml-3 animate-pulse" />
+                <Badge
+                  className={`px-4 lg:px-8 py-3 lg:py-4 text-base lg:text-lg font-semibold border-0 ${softPinkTheme.glow} bg-gradient-to-r ${softPinkTheme.primaryGradient} text-white`}
+                >
+                  <MessageCircle className="w-4 lg:w-5 h-4 lg:h-5 mr-2 lg:mr-3" />
+                  <span className="hidden sm:inline">
+                    Liên hệ & Hỗ trợ 24/7
+                  </span>
+                  <span className="sm:hidden">Hỗ trợ 24/7</span>
+                  <Sparkles className="w-4 lg:w-5 h-4 lg:h-5 ml-2 lg:ml-3 animate-pulse" />
                 </Badge>
               </motion.div>
 
-              {/* Main Heading */}
-              <motion.h1
-                className="text-5xl md:text-7xl lg:text-8xl font-bold leading-tight"
-                initial={{ opacity: 0, y: 50 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ delay: 0.4, duration: 0.8 }}
-              >
-                <span className="text-transparent bg-gradient-to-r from-blue-600 via-purple-600 to-pink-600 bg-clip-text">
+              {/* Title */}
+              <h1 className="text-3xl sm:text-4xl lg:text-6xl xl:text-7xl font-bold leading-tight">
+                <span
+                  className={`text-transparent bg-gradient-to-r ${softPinkTheme.heroText} bg-clip-text`}
+                >
                   Chúng tôi luôn
                 </span>
                 <br />
-                <span className="text-transparent bg-gradient-to-r from-purple-600 via-pink-600 to-red-500 bg-clip-text">
+                <span className="text-2xl sm:text-3xl lg:text-4xl xl:text-5xl text-gray-700 dark:text-gray-300">
                   sẵn sàng hỗ trợ
                 </span>
-              </motion.h1>
+              </h1>
 
               {/* Subtitle */}
-              <motion.p
-                className="max-w-4xl mx-auto text-xl md:text-2xl lg:text-3xl text-muted-foreground leading-relaxed"
-                initial={{ opacity: 0, y: 30 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ delay: 0.6, duration: 0.8 }}
-              >
+              <p className="max-w-4xl mx-auto text-base sm:text-lg lg:text-xl xl:text-2xl text-gray-600 dark:text-gray-400 leading-relaxed px-4">
                 Đội ngũ chuyên gia
-                <span className="font-bold text-blue-600">
+                <span className="font-bold text-pink-600">
                   {" "}
                   Template Market{" "}
                 </span>
                 sẵn sàng
-                <span className="font-bold text-green-600"> 24/7 </span>
+                <span className="font-bold text-rose-600"> 24/7 </span>
                 để đồng hành cùng bạn trên mọi hành trình.
-                <br />
-                <span className="text-lg text-muted-foreground/80">
+                <br className="hidden sm:block" />
+                <span className="text-sm sm:text-base lg:text-lg text-gray-500 block sm:inline mt-2 sm:mt-0">
                   Hơn 50.000 khách hàng tin tưởng • Phản hồi trong 30 giây • Hỗ
                   trợ 120+ quốc gia
                 </span>
-              </motion.p>
+              </p>
 
-              {/* Stats Grid */}
-              <motion.div
-                className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-6 pt-8"
-                variants={staggerContainer}
-                initial="initial"
-                animate="animate"
-              >
+              {/* Company Stats */}
+              <div className="grid grid-cols-3 sm:grid-cols-3 lg:grid-cols-6 gap-3 lg:gap-6 pt-6 lg:pt-8">
                 {companyStats.map((stat, index) => (
                   <motion.div
                     key={index}
-                    variants={fadeInUp}
-                    whileHover={{ scale: 1.05, rotateY: 5 }}
-                    className="group"
+                    initial={{ opacity: 0, y: 30 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    transition={{ delay: 0.3 + index * 0.1, duration: 0.6 }}
+                    whileHover={{ y: -10, scale: 1.05 }}
+                    className="text-center"
                   >
-                    <Card className="h-full bg-white/80 dark:bg-slate-800/80 backdrop-blur-lg border-0 shadow-lg hover:shadow-2xl transition-all duration-500">
-                      <CardContent className="p-6 text-center">
-                        <div className="flex items-center justify-center w-12 h-12 mx-auto mb-4 rounded-xl bg-gradient-to-r from-blue-500 to-purple-600 shadow-lg group-hover:shadow-xl transition-all duration-300">
-                          <stat.icon className="w-6 h-6 text-white" />
-                        </div>
-                        <div className="text-2xl lg:text-3xl font-bold text-gray-900 dark:text-white mb-2">
-                          {stat.value}
-                        </div>
-                        <div className="text-sm text-muted-foreground mb-1">
-                          {stat.label}
-                        </div>
-                        <div className="flex items-center justify-center gap-1 text-xs">
-                          <TrendingUp className="w-3 h-3 text-green-500" />
-                          <span className="text-green-600 font-medium">
-                            {stat.trend}
-                          </span>
-                        </div>
-                      </CardContent>
-                    </Card>
+                    <div
+                      className={`flex items-center justify-center w-12 h-12 lg:w-16 lg:h-16 mx-auto mb-2 lg:mb-4 bg-gradient-to-r ${softPinkTheme.primaryGradient} rounded-xl lg:rounded-2xl ${softPinkTheme.glow}`}
+                    >
+                      <stat.icon className="w-6 h-6 lg:w-8 lg:h-8 text-white" />
+                    </div>
+                    <div
+                      className={`text-xl sm:text-2xl lg:text-3xl font-bold ${stat.color} dark:text-white mb-1 lg:mb-2`}
+                    >
+                      {stat.value}
+                    </div>
+                    <div className="text-xs lg:text-sm text-gray-600 dark:text-gray-400 font-medium">
+                      {stat.label}
+                    </div>
+                    <div className="flex items-center justify-center gap-1 text-xs mt-1 lg:block xl:flex">
+                      <TrendingUp className="w-3 h-3 text-green-500" />
+                      <span className="text-green-600 font-medium">
+                        {stat.trend}
+                      </span>
+                    </div>
                   </motion.div>
                 ))}
-              </motion.div>
+              </div>
 
               {/* CTA Buttons */}
-              <motion.div
-                className="flex flex-col sm:flex-row items-center justify-center gap-6 pt-8"
-                initial={{ opacity: 0, y: 40 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ delay: 1, duration: 0.6 }}
-              >
+              <div className="flex flex-col sm:flex-row items-center justify-center gap-3 lg:gap-4 pt-6 lg:pt-8 px-4">
                 <Button
                   size="lg"
-                  className="px-8 py-4 text-lg font-semibold bg-gradient-to-r from-blue-500 to-purple-600 hover:from-blue-600 hover:to-purple-700 shadow-xl hover:shadow-2xl transition-all duration-300 transform hover:scale-105"
+                  className={`w-full sm:w-auto bg-gradient-to-r ${softPinkTheme.primaryGradient} hover:scale-105 ${softPinkTheme.glow} text-white border-0 transition-all duration-300`}
                   onClick={() =>
                     document
                       .getElementById("contact-form")
                       ?.scrollIntoView({ behavior: "smooth" })
                   }
                 >
-                  <Send className="w-5 h-5 mr-3" />
-                  Gửi tin nhắn ngay
-                  <ArrowRight className="w-5 h-5 ml-3" />
+                  <Send className="w-4 lg:w-5 h-4 lg:h-5 mr-2" />
+                  <span className="text-sm lg:text-base">
+                    Gửi tin nhắn ngay
+                  </span>
+                  <ArrowRight className="w-4 lg:w-5 h-4 lg:h-5 ml-2" />
                 </Button>
-
                 <Button
                   size="lg"
                   variant="outline"
-                  className="px-8 py-4 text-lg font-semibold border-2 hover:bg-blue-50 dark:hover:bg-blue-900/20"
+                  className="w-full sm:w-auto border-2 border-pink-300 hover:bg-pink-50 dark:hover:bg-pink-900/20 text-sm lg:text-base"
                   onClick={() =>
                     document
                       .getElementById("contact-channels")
                       ?.scrollIntoView({ behavior: "smooth" })
                   }
                 >
-                  <Phone className="w-5 h-5 mr-3" />
-                  Xem thông tin liên hệ
+                  <Phone className="w-4 lg:w-5 h-4 lg:h-5 mr-2" />
+                  <span className="hidden sm:inline">
+                    Xem thông tin liên hệ
+                  </span>
+                  <span className="sm:hidden">Thông tin liên hệ</span>
                 </Button>
-              </motion.div>
+              </div>
             </motion.div>
           </div>
         </motion.section>
 
-        {/* Enhanced Contact Channels */}
+        {/* ✅ CREATIVE CONTACT CHANNELS - RESPONSIVE BENTO BOX LAYOUT */}
         <section
-          className="px-4 py-20 bg-gradient-to-r from-blue-50 via-white to-purple-50 dark:from-blue-950 dark:via-slate-900 dark:to-purple-950"
+          className={`px-4 py-16 lg:py-20 bg-gradient-to-r ${softPinkTheme.sectionBackground} backdrop-blur-sm`}
           id="contact-channels"
-          data-animate
         >
           <div className="container mx-auto">
-            {/* Section Header */}
-            <motion.div className="text-center mb-16" {...fadeInUp}>
-              <h2 className="text-4xl md:text-5xl font-bold mb-6 text-transparent bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text">
+            <motion.div
+              initial={{ opacity: 0, y: 30 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              viewport={{ once: true }}
+              className="text-center mb-12 lg:mb-16"
+            >
+              <h2
+                className={`text-3xl sm:text-4xl lg:text-5xl font-bold mb-4 lg:mb-6 text-transparent bg-gradient-to-r ${softPinkTheme.heroText} bg-clip-text`}
+              >
                 🌟 Kết nối đa kênh
               </h2>
-              <p className="max-w-3xl mx-auto text-xl text-muted-foreground leading-relaxed">
+              <p className="max-w-3xl mx-auto text-lg lg:text-xl text-gray-600 dark:text-gray-400 px-4">
                 Chọn kênh liên hệ phù hợp nhất với bạn. Mỗi kênh đều có team
                 chuyên biệt để hỗ trợ tốt nhất.
               </p>
             </motion.div>
 
-            {/* Contact Channels Grid */}
-            <motion.div
-              className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8"
-              variants={staggerContainer}
-              initial="initial"
-              animate="animate"
-            >
+            {/* ✅ RESPONSIVE BENTO BOX GRID - FIXED FOR MOBILE */}
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 lg:gap-6 max-w-7xl mx-auto">
               {contactChannels.map((channel, index) => (
                 <motion.div
                   key={channel.id}
-                  variants={fadeInUp}
-                  whileHover={{ y: -15, scale: 1.02 }}
-                  className="group h-full"
+                  initial={{ opacity: 0, y: 50, rotateY: -15 }}
+                  whileInView={{ opacity: 1, y: 0, rotateY: 0 }}
+                  viewport={{ once: true }}
+                  transition={{ delay: index * 0.1 }}
+                  whileHover={{ y: -8, rotateY: 5, scale: 1.02 }}
+                  style={{ perspective: "1000px" }}
+                  className={`group h-full ${index === 0 ? "sm:col-span-2 lg:col-span-2 lg:row-span-2" : ""}`}
                 >
-                  <Card className="h-full bg-white/90 dark:bg-slate-800/90 backdrop-blur-lg border-0 shadow-xl hover:shadow-2xl transition-all duration-500 overflow-hidden">
-                    {/* Gradient Top Bar */}
+                  <Card
+                    className={`h-full bg-gradient-to-br ${softPinkTheme.neoCard} border-0 ${softPinkTheme.softGlow} backdrop-blur-xl hover:${softPinkTheme.glow} transition-all duration-500 overflow-hidden relative`}
+                  >
+                    {/* Gradient top bar */}
                     <div className={`h-2 bg-gradient-to-r ${channel.color}`} />
 
-                    <CardContent className="p-8">
+                    {/* Background decoration */}
+                    <div className="absolute top-0 right-0 w-32 h-32 bg-gradient-to-br from-pink-200/20 to-transparent rounded-full -translate-y-16 translate-x-16" />
+
+                    <CardContent className="p-4 sm:p-6 lg:p-8 relative z-10">
                       {/* Icon & Stats */}
-                      <div className="flex items-start justify-between mb-6">
+                      <div className="flex items-start justify-between mb-4 lg:mb-6">
                         <motion.div
-                          className={`w-16 h-16 rounded-2xl bg-gradient-to-r ${channel.color} flex items-center justify-center shadow-lg group-hover:shadow-xl transition-all duration-300`}
+                          className={`w-12 h-12 sm:w-16 sm:h-16 lg:w-20 lg:h-20 rounded-xl lg:rounded-2xl bg-gradient-to-r ${channel.color} flex items-center justify-center ${softPinkTheme.softGlow} group-hover:${softPinkTheme.glow} transition-all duration-300`}
                           whileHover={{ scale: 1.1, rotate: 5 }}
                         >
-                          <channel.icon className="w-8 h-8 text-white" />
+                          <channel.icon className="w-6 h-6 sm:w-8 sm:h-8 lg:w-10 lg:h-10 text-white" />
                         </motion.div>
 
-                        <div className="text-right text-xs text-muted-foreground">
+                        <div className="text-right text-xs text-gray-500 hidden sm:block">
                           <div className="flex items-center gap-1 mb-1">
                             <Star className="w-3 h-3 text-yellow-500" />
                             <span>{Object.values(channel.stats)[1]}</span>
                           </div>
-                          <div>{Object.values(channel.stats)}</div>
+                          <div>{Object.values(channel.stats)[0]}</div>
                         </div>
                       </div>
 
                       {/* Content */}
-                      <div className="space-y-4">
+                      <div className="space-y-3 lg:space-y-4">
                         <div>
-                          <h3 className="text-xl font-bold mb-2 group-hover:text-blue-600 transition-colors">
+                          <h3
+                            className={`text-lg sm:text-xl lg:text-2xl font-bold mb-2 group-hover:text-pink-600 transition-colors ${index === 0 ? "sm:text-2xl lg:text-3xl" : ""}`}
+                          >
                             {channel.title}
                           </h3>
-                          <p className="text-lg font-semibold text-blue-600 mb-1">
-                            {channel.content}
+                          <p
+                            className={`font-semibold text-pink-600 mb-1 text-sm sm:text-base ${index === 0 ? "sm:text-lg lg:text-xl" : ""}`}
+                          >
+                            {/* ✅ FIXED RESPONSIVE TEXT - NO OVERFLOW */}
+                            <span className="block truncate pr-2">
+                              {channel.content}
+                            </span>
                           </p>
-                          <p className="text-sm text-muted-foreground mb-2">
+                          <p className="text-xs sm:text-sm text-gray-600 mb-2">
                             {channel.subContent}
                           </p>
-                          <div className="flex items-center justify-between text-xs text-muted-foreground">
-                            <span>{channel.details}</span>
-                            <span className="font-medium">{channel.hours}</span>
+                          <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between text-xs text-gray-500 gap-1 sm:gap-0">
+                            <span className="truncate pr-2">
+                              {channel.details}
+                            </span>
+                            <span className="font-medium whitespace-nowrap">
+                              {channel.hours}
+                            </span>
                           </div>
                         </div>
 
                         {/* Features */}
                         <div className="space-y-2">
-                          <h4 className="text-sm font-semibold">
+                          <h4 className="text-xs sm:text-sm font-semibold">
                             ✨ Features:
                           </h4>
-                          <div className="grid grid-cols-2 gap-1">
+                          <div
+                            className={`grid ${index === 0 ? "sm:grid-cols-1 lg:grid-cols-2" : "grid-cols-1"} gap-1`}
+                          >
                             {channel.features.map((feature, idx) => (
                               <div
                                 key={idx}
-                                className="text-xs text-muted-foreground flex items-center gap-1"
+                                className="text-xs text-gray-600 flex items-center gap-1"
                               >
                                 <CheckCircle className="w-3 h-3 text-green-500 flex-shrink-0" />
-                                <span>{feature}</span>
+                                <span className="truncate">{feature}</span>
                               </div>
                             ))}
                           </div>
                         </div>
 
-                        {/* Action Buttons */}
-                        <div className="flex flex-col gap-2 pt-4">
+                        {/* Action Buttons - FIXED RESPONSIVE */}
+                        <div
+                          className={`flex flex-col gap-2 pt-3 lg:pt-4 ${index === 0 ? "sm:flex-col lg:flex-row" : ""}`}
+                        >
                           <Button
-                            className={`w-full bg-gradient-to-r ${channel.color} hover:shadow-lg transition-all duration-300`}
+                            size="sm"
+                            className={`flex-1 bg-gradient-to-r ${channel.color} hover:${softPinkTheme.glow} transition-all duration-300 text-xs sm:text-sm`}
                             onClick={channel.onClick}
                           >
-                            <channel.actionIcon className="w-4 h-4 mr-2" />
-                            {channel.action}
+                            <channel.actionIcon className="w-3 h-3 sm:w-4 sm:h-4 mr-1 sm:mr-2" />
+                            <span className="truncate">{channel.action}</span>
                           </Button>
 
                           <Button
                             variant="outline"
                             size="sm"
-                            className="w-full text-xs"
+                            className={`${index === 0 ? "flex-1" : "w-full"} text-xs border-pink-200`}
                             onClick={() =>
                               copyToClipboard(channel.content, channel.title)
                             }
                           >
-                            <Copy className="w-3 h-3 mr-2" />
-                            Sao chép
+                            <Copy className="w-3 h-3 mr-1 sm:mr-2" />
+                            Copy
                           </Button>
                         </div>
                       </div>
@@ -1242,90 +1196,104 @@ const Contact: React.FC = () => {
                   </Card>
                 </motion.div>
               ))}
-            </motion.div>
+            </div>
           </div>
         </section>
 
-        {/* Enhanced Main Content with Tabs */}
-        <section className="px-4 py-20" id="main-content" data-animate>
+        {/* ✅ MAIN CONTENT WITH ENHANCED TABS - RESPONSIVE */}
+        <section className="px-4 py-16 lg:py-20" id="main-content">
           <div className="container mx-auto max-w-7xl">
             <Tabs
               value={activeTab}
               onValueChange={setActiveTab}
               className="w-full"
             >
-              {/* Tabs Navigation */}
-              <div className="flex justify-center mb-12">
-                <TabsList className="grid grid-cols-2 md:grid-cols-4 h-auto p-2 bg-white/80 dark:bg-slate-800/80 backdrop-blur-lg shadow-xl rounded-2xl">
+              {/* ✅ RESPONSIVE TAB NAVIGATION */}
+              <div className="flex justify-center mb-8 lg:mb-12">
+                <TabsList
+                  className={`grid grid-cols-2 sm:grid-cols-4 h-auto p-2 bg-gradient-to-r ${softPinkTheme.glassCard} backdrop-blur-lg ${softPinkTheme.softGlow} rounded-xl lg:rounded-2xl w-full max-w-2xl lg:max-w-4xl`}
+                >
                   <TabsTrigger
                     value="contact"
-                    className="px-6 py-4 text-sm font-semibold data-[state=active]:bg-gradient-to-r data-[state=active]:from-blue-500 data-[state=active]:to-purple-600 data-[state=active]:text-white rounded-xl"
+                    className={`px-2 sm:px-4 lg:px-6 py-3 lg:py-4 text-xs sm:text-sm font-semibold data-[state=active]:bg-gradient-to-r data-[state=active]:${softPinkTheme.primaryGradient} data-[state=active]:text-white rounded-lg lg:rounded-xl transition-all`}
                   >
-                    <MessageSquare className="w-5 h-5 mr-2" />
-                    Gửi tin nhắn
+                    <MessageSquare className="w-3 h-3 sm:w-4 sm:h-4 lg:w-5 lg:h-5 mr-1 sm:mr-2" />
+                    <span className="hidden xs:inline">Gửi tin nhắn</span>
+                    <span className="xs:hidden">Gửi</span>
                   </TabsTrigger>
                   <TabsTrigger
                     value="faq"
-                    className="px-6 py-4 text-sm font-semibold data-[state=active]:bg-gradient-to-r data-[state=active]:from-green-500 data-[state=active]:to-emerald-600 data-[state=active]:text-white rounded-xl"
+                    className={`px-2 sm:px-4 lg:px-6 py-3 lg:py-4 text-xs sm:text-sm font-semibold data-[state=active]:bg-gradient-to-r data-[state=active]:${softPinkTheme.secondaryGradient} data-[state=active]:text-white rounded-lg lg:rounded-xl transition-all`}
                   >
-                    <HelpCircle className="w-5 h-5 mr-2" />
+                    <HelpCircle className="w-3 h-3 sm:w-4 sm:h-4 lg:w-5 lg:h-5 mr-1 sm:mr-2" />
                     FAQ
                   </TabsTrigger>
                   <TabsTrigger
                     value="schedule"
-                    className="px-6 py-4 text-sm font-semibold data-[state=active]:bg-gradient-to-r data-[state=active]:from-orange-500 data-[state=active]:to-red-600 data-[state=active]:text-white rounded-xl"
+                    className={`px-2 sm:px-4 lg:px-6 py-3 lg:py-4 text-xs sm:text-sm font-semibold data-[state=active]:bg-gradient-to-r data-[state=active]:${softPinkTheme.accentGradient} data-[state=active]:text-white rounded-lg lg:rounded-xl transition-all`}
                   >
-                    <Calendar className="w-5 h-5 mr-2" />
-                    Lịch làm việc
+                    <Calendar className="w-3 h-3 sm:w-4 sm:h-4 lg:w-5 lg:h-5 mr-1 sm:mr-2" />
+                    <span className="hidden sm:inline">Lịch làm việc</span>
+                    <span className="sm:hidden">Lịch</span>
                   </TabsTrigger>
                   <TabsTrigger
                     value="social"
-                    className="px-6 py-4 text-sm font-semibold data-[state=active]:bg-gradient-to-r data-[state=active]:from-pink-500 data-[state=active]:to-purple-600 data-[state=active]:text-white rounded-xl"
+                    className={`px-2 sm:px-4 lg:px-6 py-3 lg:py-4 text-xs sm:text-sm font-semibold data-[state=active]:bg-gradient-to-r data-[state=active]:${softPinkTheme.successGradient} data-[state=active]:text-white rounded-lg lg:rounded-xl transition-all`}
                   >
-                    <Globe className="w-5 h-5 mr-2" />
-                    Social Media
+                    <Globe className="w-3 h-3 sm:w-4 sm:h-4 lg:w-5 lg:h-5 mr-1 sm:mr-2" />
+                    Social
                   </TabsTrigger>
                 </TabsList>
               </div>
 
-              {/* Contact Form Tab */}
+              {/* ✅ ENHANCED CONTACT FORM TAB - RESPONSIVE */}
               <TabsContent
                 value="contact"
-                className="space-y-8"
+                className="space-y-6 lg:space-y-8"
                 id="contact-form"
               >
-                <div className="grid grid-cols-1 lg:grid-cols-3 gap-12">
+                <div className="grid grid-cols-1 lg:grid-cols-3 gap-8 lg:gap-12">
                   {/* Main Form */}
                   <div className="lg:col-span-2">
-                    <motion.div {...slideInLeft}>
-                      <Card className="bg-white/90 dark:bg-slate-800/90 backdrop-blur-lg border-0 shadow-2xl">
+                    <motion.div
+                      initial={{ opacity: 0, x: -50 }}
+                      animate={{ opacity: 1, x: 0 }}
+                      transition={{ duration: 0.6 }}
+                    >
+                      <Card
+                        className={`bg-gradient-to-br ${softPinkTheme.neoCard} border-0 ${softPinkTheme.glow} backdrop-blur-xl`}
+                      >
                         {/* Form Header */}
-                        <CardHeader className="text-center pb-8 border-b border-gray-100 dark:border-slate-700">
-                          <CardTitle className="flex items-center justify-center gap-4 text-3xl">
+                        <CardHeader className="text-center pb-6 lg:pb-8 border-b border-pink-100 px-4 lg:px-6">
+                          <CardTitle className="flex flex-col sm:flex-row items-center justify-center gap-3 lg:gap-4 text-xl sm:text-2xl lg:text-3xl">
                             <motion.div
-                              className="w-12 h-12 rounded-2xl bg-gradient-to-r from-blue-500 to-purple-600 flex items-center justify-center shadow-lg"
+                              className={`w-10 h-10 lg:w-12 lg:h-12 rounded-xl lg:rounded-2xl bg-gradient-to-r ${softPinkTheme.primaryGradient} flex items-center justify-center ${softPinkTheme.softGlow}`}
                               whileHover={{ scale: 1.1, rotate: 10 }}
                             >
-                              <MessageCircle className="w-6 h-6 text-white" />
+                              <MessageCircle className="w-5 h-5 lg:w-6 lg:h-6 text-white" />
                             </motion.div>
-                            <span>Gửi tin nhắn cho chúng tôi</span>
+                            <span
+                              className={`bg-gradient-to-r ${softPinkTheme.heroText} bg-clip-text text-transparent text-center sm:text-left`}
+                            >
+                              Gửi tin nhắn cho chúng tôi
+                            </span>
                           </CardTitle>
-                          <p className="text-muted-foreground mt-3 text-lg">
+                          <p className="text-gray-600 mt-2 lg:mt-3 text-sm sm:text-base lg:text-lg px-2">
                             Điền thông tin bên dưới và chúng tôi sẽ phản hồi
                             theo đúng priority bạn chọn
                           </p>
 
                           {/* Form Progress */}
-                          <div className="flex items-center justify-center gap-4 mt-6">
+                          <div className="flex items-center justify-center gap-2 lg:gap-4 mt-4 lg:mt-6">
                             {[1, 2, 3].map((step) => (
                               <div
                                 key={step}
-                                className="flex items-center gap-2"
+                                className="flex items-center gap-1 lg:gap-2"
                               >
                                 <motion.div
-                                  className={`w-8 h-8 rounded-full flex items-center justify-center text-sm font-bold transition-all duration-300 ${
+                                  className={`w-6 h-6 lg:w-8 lg:h-8 rounded-full flex items-center justify-center text-xs lg:text-sm font-bold transition-all duration-300 ${
                                     step === formStep
-                                      ? "bg-gradient-to-r from-blue-500 to-purple-600 text-white shadow-lg scale-110"
+                                      ? `bg-gradient-to-r ${softPinkTheme.primaryGradient} text-white ${softPinkTheme.softGlow} scale-110`
                                       : step < formStep
                                         ? "bg-green-500 text-white"
                                         : "bg-gray-200 text-gray-500"
@@ -1333,14 +1301,14 @@ const Contact: React.FC = () => {
                                   whileHover={{ scale: 1.1 }}
                                 >
                                   {step < formStep ? (
-                                    <CheckIcon className="w-4 h-4" />
+                                    <CheckIcon className="w-3 h-3 lg:w-4 lg:h-4" />
                                   ) : (
                                     step
                                   )}
                                 </motion.div>
                                 {step < 3 && (
                                   <div
-                                    className={`w-12 h-1 rounded-full transition-all duration-300 ${
+                                    className={`w-8 lg:w-12 h-1 rounded-full transition-all duration-300 ${
                                       step < formStep
                                         ? "bg-green-500"
                                         : "bg-gray-200"
@@ -1351,7 +1319,7 @@ const Contact: React.FC = () => {
                             ))}
                           </div>
 
-                          <div className="text-sm text-muted-foreground mt-2">
+                          <div className="text-xs sm:text-sm text-gray-600 mt-2">
                             Bước {formStep}/3:{" "}
                             {formStep === 1
                               ? "Thông tin cơ bản"
@@ -1361,15 +1329,16 @@ const Contact: React.FC = () => {
                           </div>
                         </CardHeader>
 
-                        <CardContent className="p-8">
+                        <CardContent className="p-4 lg:p-8">
                           <AnimatePresence mode="wait">
                             {isSubmitted ? (
+                              /* ✅ SUCCESS STATE */
                               <motion.div
                                 key="success"
                                 initial={{ opacity: 0, scale: 0.8, y: 50 }}
                                 animate={{ opacity: 1, scale: 1, y: 0 }}
                                 exit={{ opacity: 0, scale: 0.8, y: -50 }}
-                                className="py-16 text-center"
+                                className="py-12 lg:py-16 text-center"
                               >
                                 <motion.div
                                   initial={{ scale: 0 }}
@@ -1380,19 +1349,19 @@ const Contact: React.FC = () => {
                                     stiffness: 200,
                                   }}
                                 >
-                                  <CheckCircle className="w-24 h-24 mx-auto mb-8 text-green-500" />
+                                  <CheckCircle className="w-16 h-16 lg:w-24 lg:h-24 mx-auto mb-6 lg:mb-8 text-green-500" />
                                 </motion.div>
 
-                                <h3 className="text-3xl font-bold mb-4 text-green-700">
+                                <h3 className="text-2xl lg:text-3xl font-bold mb-4 text-green-700">
                                   🎉 Tin nhắn đã được gửi thành công!
                                 </h3>
 
                                 <div className="max-w-md mx-auto space-y-4">
-                                  <p className="text-lg text-muted-foreground">
+                                  <p className="text-base lg:text-lg text-gray-600">
                                     Cảm ơn bạn đã liên hệ với Template Market.
                                   </p>
 
-                                  <div className="bg-green-50 dark:bg-green-900/20 border border-green-200 dark:border-green-800 rounded-xl p-6">
+                                  <div className="bg-green-50 border border-green-200 rounded-xl p-4 lg:p-6">
                                     <div className="space-y-3 text-sm">
                                       <div className="flex items-center justify-between">
                                         <span>📧 Email xác nhận:</span>
@@ -1439,14 +1408,14 @@ const Contact: React.FC = () => {
                                     <Button
                                       variant="outline"
                                       onClick={() => setIsSubmitted(false)}
-                                      className="flex-1"
+                                      className="flex-1 text-sm"
                                     >
                                       <Send className="w-4 h-4 mr-2" />
                                       Gửi tin nhắn khác
                                     </Button>
                                     <Button
                                       onClick={() => setActiveTab("faq")}
-                                      className="flex-1 bg-gradient-to-r from-blue-500 to-purple-600"
+                                      className={`flex-1 bg-gradient-to-r ${softPinkTheme.primaryGradient} text-sm`}
                                     >
                                       <HelpCircle className="w-4 h-4 mr-2" />
                                       Xem FAQ
@@ -1455,13 +1424,14 @@ const Contact: React.FC = () => {
                                 </div>
                               </motion.div>
                             ) : (
+                              /* ✅ ENHANCED FORM STEPS - RESPONSIVE */
                               <motion.form
                                 key="form"
                                 initial={{ opacity: 0 }}
                                 animate={{ opacity: 1 }}
                                 exit={{ opacity: 0 }}
                                 onSubmit={handleSubmit(onSubmit)}
-                                className="space-y-8"
+                                className="space-y-6 lg:space-y-8"
                               >
                                 {/* Step 1: Basic Information */}
                                 {formStep === 1 && (
@@ -1470,26 +1440,26 @@ const Contact: React.FC = () => {
                                     initial={{ opacity: 0, x: 100 }}
                                     animate={{ opacity: 1, x: 0 }}
                                     exit={{ opacity: 0, x: -100 }}
-                                    className="space-y-6"
+                                    className="space-y-4 lg:space-y-6"
                                   >
-                                    <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 lg:gap-6">
                                       {/* Name Field */}
                                       <div className="space-y-2">
                                         <Label
                                           htmlFor="name"
-                                          className="flex items-center gap-2 text-base font-semibold"
+                                          className="flex items-center gap-2 text-sm lg:text-base font-semibold text-gray-700"
                                         >
-                                          <Users className="w-5 h-5 text-blue-500" />
+                                          <Users className="w-4 h-4 lg:w-5 lg:h-5 text-pink-500" />
                                           Họ và tên *
                                         </Label>
                                         <Input
                                           id="name"
                                           placeholder="Nguyễn Văn A"
                                           {...register("name")}
-                                          className={`h-12 transition-all duration-300 ${
+                                          className={`h-10 lg:h-12 transition-all duration-300 ${
                                             errors.name
-                                              ? "border-red-500 bg-red-50 dark:bg-red-900/20"
-                                              : "focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500"
+                                              ? "border-red-500 bg-red-50"
+                                              : "focus:ring-2 focus:ring-pink-500/20 focus:border-pink-500"
                                           }`}
                                         />
                                         {errors.name && (
@@ -1508,9 +1478,9 @@ const Contact: React.FC = () => {
                                       <div className="space-y-2">
                                         <Label
                                           htmlFor="email"
-                                          className="flex items-center gap-2 text-base font-semibold"
+                                          className="flex items-center gap-2 text-sm lg:text-base font-semibold text-gray-700"
                                         >
-                                          <Mail className="w-5 h-5 text-purple-500" />
+                                          <Mail className="w-4 h-4 lg:w-5 lg:h-5 text-rose-500" />
                                           Email *
                                         </Label>
                                         <Input
@@ -1518,10 +1488,10 @@ const Contact: React.FC = () => {
                                           type="email"
                                           placeholder="example@email.com"
                                           {...register("email")}
-                                          className={`h-12 transition-all duration-300 ${
+                                          className={`h-10 lg:h-12 transition-all duration-300 ${
                                             errors.email
-                                              ? "border-red-500 bg-red-50 dark:bg-red-900/20"
-                                              : "focus:ring-2 focus:ring-purple-500/20 focus:border-purple-500"
+                                              ? "border-red-500 bg-red-50"
+                                              : "focus:ring-2 focus:ring-rose-500/20 focus:border-rose-500"
                                           }`}
                                         />
                                         {errors.email && (
@@ -1537,21 +1507,21 @@ const Contact: React.FC = () => {
                                       </div>
                                     </div>
 
-                                    <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 lg:gap-6">
                                       {/* Phone Field */}
                                       <div className="space-y-2">
                                         <Label
                                           htmlFor="phone"
-                                          className="flex items-center gap-2 text-base font-semibold"
+                                          className="flex items-center gap-2 text-sm lg:text-base font-semibold text-gray-700"
                                         >
-                                          <Phone className="w-5 h-5 text-green-500" />
+                                          <Phone className="w-4 h-4 lg:w-5 lg:h-5 text-red-500" />
                                           Số điện thoại
                                         </Label>
                                         <Input
                                           id="phone"
                                           placeholder="+84 971 386 588"
                                           {...register("phone")}
-                                          className="h-12 focus:ring-2 focus:ring-green-500/20 focus:border-green-500"
+                                          className="h-10 lg:h-12 focus:ring-2 focus:ring-red-500/20 focus:border-red-500"
                                         />
                                         {errors.phone && (
                                           <motion.p
@@ -1569,103 +1539,19 @@ const Contact: React.FC = () => {
                                       <div className="space-y-2">
                                         <Label
                                           htmlFor="company"
-                                          className="flex items-center gap-2 text-base font-semibold"
+                                          className="flex items-center gap-2 text-sm lg:text-base font-semibold text-gray-700"
                                         >
-                                          <Building className="w-5 h-5 text-orange-500" />
+                                          <Building className="w-4 h-4 lg:w-5 lg:h-5 text-pink-600" />
                                           Công ty
                                         </Label>
                                         <Input
                                           id="company"
                                           placeholder="Tên công ty"
                                           {...register("company")}
-                                          className="h-12 focus:ring-2 focus:ring-orange-500/20 focus:border-orange-500"
+                                          className="h-10 lg:h-12 focus:ring-2 focus:ring-pink-600/20 focus:border-pink-600"
                                         />
                                       </div>
                                     </div>
-
-                                    {/* Advanced Options Toggle */}
-                                    <div className="flex items-center justify-between pt-4 border-t border-gray-100 dark:border-slate-700">
-                                      <span className="text-sm font-medium">
-                                        Tùy chọn nâng cao
-                                      </span>
-                                      <Button
-                                        type="button"
-                                        variant="ghost"
-                                        size="sm"
-                                        onClick={() =>
-                                          setShowAdvancedOptions(
-                                            !showAdvancedOptions,
-                                          )
-                                        }
-                                        className="gap-2"
-                                      >
-                                        {showAdvancedOptions
-                                          ? "Ẩn bớt"
-                                          : "Hiển thị thêm"}
-                                        <ChevronDown
-                                          className={`w-4 h-4 transition-transform ${showAdvancedOptions ? "rotate-180" : ""}`}
-                                        />
-                                      </Button>
-                                    </div>
-
-                                    {/* Advanced Fields */}
-                                    <AnimatePresence>
-                                      {showAdvancedOptions && (
-                                        <motion.div
-                                          initial={{ opacity: 0, height: 0 }}
-                                          animate={{
-                                            opacity: 1,
-                                            height: "auto",
-                                          }}
-                                          exit={{ opacity: 0, height: 0 }}
-                                          className="grid grid-cols-1 md:grid-cols-2 gap-6 overflow-hidden"
-                                        >
-                                          {/* Position Field */}
-                                          <div className="space-y-2">
-                                            <Label
-                                              htmlFor="position"
-                                              className="flex items-center gap-2 text-base font-semibold"
-                                            >
-                                              <Award className="w-5 h-5 text-indigo-500" />
-                                              Chức vụ
-                                            </Label>
-                                            <Input
-                                              id="position"
-                                              placeholder="Giám đốc, Developer, Designer..."
-                                              {...register("position")}
-                                              className="h-12 focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500"
-                                            />
-                                          </div>
-
-                                          {/* Website Field */}
-                                          <div className="space-y-2">
-                                            <Label
-                                              htmlFor="website"
-                                              className="flex items-center gap-2 text-base font-semibold"
-                                            >
-                                              <Globe className="w-5 h-5 text-cyan-500" />
-                                              Website
-                                            </Label>
-                                            <Input
-                                              id="website"
-                                              placeholder="https://yourwebsite.com"
-                                              {...register("website")}
-                                              className="h-12 focus:ring-2 focus:ring-cyan-500/20 focus:border-cyan-500"
-                                            />
-                                            {errors.website && (
-                                              <motion.p
-                                                initial={{ opacity: 0, y: -10 }}
-                                                animate={{ opacity: 1, y: 0 }}
-                                                className="flex items-center gap-2 text-sm text-red-500"
-                                              >
-                                                <AlertCircle className="w-4 h-4" />
-                                                {errors.website.message}
-                                              </motion.p>
-                                            )}
-                                          </div>
-                                        </motion.div>
-                                      )}
-                                    </AnimatePresence>
                                   </motion.div>
                                 )}
 
@@ -1676,22 +1562,22 @@ const Contact: React.FC = () => {
                                     initial={{ opacity: 0, x: 100 }}
                                     animate={{ opacity: 1, x: 0 }}
                                     exit={{ opacity: 0, x: -100 }}
-                                    className="space-y-6"
+                                    className="space-y-4 lg:space-y-6"
                                   >
                                     {/* Category Selection */}
                                     <div className="space-y-4">
-                                      <Label className="flex items-center gap-2 text-base font-semibold">
-                                        <MessageSquare className="w-5 h-5 text-blue-500" />
+                                      <Label className="flex items-center gap-2 text-sm lg:text-base font-semibold text-gray-700">
+                                        <MessageSquare className="w-4 h-4 lg:w-5 lg:h-5 text-pink-500" />
                                         Danh mục hỗ trợ *
                                       </Label>
-                                      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3">
+                                      <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                                         {supportCategories.map((category) => (
                                           <motion.label
                                             key={category.value}
-                                            className={`relative flex items-start gap-3 p-4 border-2 rounded-xl cursor-pointer transition-all duration-300 ${
+                                            className={`relative flex items-start gap-2 lg:gap-3 p-3 lg:p-4 border-2 rounded-lg lg:rounded-xl cursor-pointer transition-all duration-300 ${
                                               watchedCategory === category.value
-                                                ? "border-blue-500 bg-blue-50 dark:bg-blue-900/20"
-                                                : "border-gray-200 hover:border-blue-300 hover:bg-gray-50 dark:hover:bg-slate-800"
+                                                ? "border-pink-500 bg-pink-50"
+                                                : "border-gray-200 hover:border-pink-300 hover:bg-gray-50"
                                             }`}
                                             whileHover={{ scale: 1.02 }}
                                             whileTap={{ scale: 0.98 }}
@@ -1703,20 +1589,20 @@ const Contact: React.FC = () => {
                                               className="sr-only"
                                             />
                                             <div
-                                              className={`w-8 h-8 rounded-lg flex items-center justify-center ${
+                                              className={`w-6 h-6 lg:w-8 lg:h-8 rounded-md lg:rounded-lg flex items-center justify-center ${
                                                 watchedCategory ===
                                                 category.value
-                                                  ? "bg-blue-500 text-white"
+                                                  ? "bg-pink-500 text-white"
                                                   : "bg-gray-100 text-gray-500"
                                               }`}
                                             >
-                                              <category.icon className="w-4 h-4" />
+                                              <category.icon className="w-3 h-3 lg:w-4 lg:h-4" />
                                             </div>
                                             <div className="flex-1 min-w-0">
                                               <div className="font-semibold text-sm mb-1">
                                                 {category.label}
                                               </div>
-                                              <div className="text-xs text-muted-foreground mb-2">
+                                              <div className="text-xs text-gray-600 mb-2 line-clamp-2">
                                                 {category.description}
                                               </div>
                                               <div className="flex items-center justify-between">
@@ -1746,70 +1632,23 @@ const Contact: React.FC = () => {
                                       )}
                                     </div>
 
-                                    {/* Priority Selection */}
-                                    <div className="space-y-4">
-                                      <Label className="flex items-center gap-2 text-base font-semibold">
-                                        <Zap className="w-5 h-5 text-orange-500" />
-                                        Độ ưu tiên
-                                      </Label>
-                                      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-3">
-                                        {priorityLevels.map((priority) => (
-                                          <motion.label
-                                            key={priority.value}
-                                            className={`relative flex items-center gap-3 p-4 border-2 rounded-xl cursor-pointer transition-all duration-300 ${
-                                              watchedPriority === priority.value
-                                                ? "border-orange-500 bg-orange-50 dark:bg-orange-900/20"
-                                                : "border-gray-200 hover:border-orange-300 hover:bg-gray-50 dark:hover:bg-slate-800"
-                                            }`}
-                                            whileHover={{ scale: 1.02 }}
-                                            whileTap={{ scale: 0.98 }}
-                                          >
-                                            <input
-                                              type="radio"
-                                              value={priority.value}
-                                              {...register("priority")}
-                                              className="sr-only"
-                                            />
-                                            <div
-                                              className={`w-8 h-8 rounded-lg flex items-center justify-center ${
-                                                watchedPriority ===
-                                                priority.value
-                                                  ? "bg-orange-500 text-white"
-                                                  : "bg-gray-100 text-gray-500"
-                                              }`}
-                                            >
-                                              <Zap className="w-4 h-4" />
-                                            </div>
-                                            <div className="flex-1 min-w-0">
-                                              <div className="font-semibold text-sm mb-1">
-                                                {priority.label}
-                                              </div>
-                                              <div className="text-xs text-muted-foreground">
-                                                {priority.description}
-                                              </div>
-                                            </div>
-                                          </motion.label>
-                                        ))}
-                                      </div>
-                                    </div>
-
                                     {/* Subject Field */}
                                     <div className="space-y-2">
                                       <Label
                                         htmlFor="subject"
-                                        className="flex items-center gap-2 text-base font-semibold"
+                                        className="flex items-center gap-2 text-sm lg:text-base font-semibold text-gray-700"
                                       >
-                                        <MessageCircle className="w-5 h-5 text-purple-500" />
+                                        <MessageCircle className="w-4 h-4 lg:w-5 lg:h-5 text-rose-500" />
                                         Tiêu đề *
                                       </Label>
                                       <Input
                                         id="subject"
                                         placeholder="Mô tả ngắn gọn vấn đề cần hỗ trợ"
                                         {...register("subject")}
-                                        className={`h-12 transition-all duration-300 ${
+                                        className={`h-10 lg:h-12 transition-all duration-300 ${
                                           errors.subject
-                                            ? "border-red-500 bg-red-50 dark:bg-red-900/20"
-                                            : "focus:ring-2 focus:ring-purple-500/20 focus:border-purple-500"
+                                            ? "border-red-500 bg-red-50"
+                                            : "focus:ring-2 focus:ring-rose-500/20 focus:border-rose-500"
                                         }`}
                                       />
                                       {errors.subject && (
@@ -1823,80 +1662,6 @@ const Contact: React.FC = () => {
                                         </motion.p>
                                       )}
                                     </div>
-
-                                    {/* Additional Info */}
-                                    <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                                      <div className="space-y-2">
-                                        <Label
-                                          htmlFor="budget"
-                                          className="flex items-center gap-2 text-base font-semibold"
-                                        >
-                                          <Target className="w-5 h-5 text-green-500" />
-                                          Ngân sách dự kiến
-                                        </Label>
-                                        <select
-                                          id="budget"
-                                          {...register("budget")}
-                                          className="w-full h-12 px-3 border rounded-md bg-background focus:ring-2 focus:ring-green-500/20 focus:border-green-500"
-                                        >
-                                          <option value="">
-                                            Chọn mức ngân sách...
-                                          </option>
-                                          <option value="under-500">
-                                            Dưới $500
-                                          </option>
-                                          <option value="500-1000">
-                                            $500 - $1,000
-                                          </option>
-                                          <option value="1000-5000">
-                                            $1,000 - $5,000
-                                          </option>
-                                          <option value="5000-10000">
-                                            $5,000 - $10,000
-                                          </option>
-                                          <option value="over-10000">
-                                            Trên $10,000
-                                          </option>
-                                          <option value="discuss">
-                                            Thảo luận
-                                          </option>
-                                        </select>
-                                      </div>
-
-                                      <div className="space-y-2">
-                                        <Label
-                                          htmlFor="timeline"
-                                          className="flex items-center gap-2 text-base font-semibold"
-                                        >
-                                          <Calendar className="w-5 h-5 text-blue-500" />
-                                          Timeline mong muốn
-                                        </Label>
-                                        <select
-                                          id="timeline"
-                                          {...register("timeline")}
-                                          className="w-full h-12 px-3 border rounded-md bg-background focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500"
-                                        >
-                                          <option value="">
-                                            Chọn timeline...
-                                          </option>
-                                          <option value="asap">
-                                            Càng sớm càng tốt
-                                          </option>
-                                          <option value="1-week">
-                                            Trong 1 tuần
-                                          </option>
-                                          <option value="2-weeks">
-                                            Trong 2 tuần
-                                          </option>
-                                          <option value="1-month">
-                                            Trong 1 tháng
-                                          </option>
-                                          <option value="flexible">
-                                            Linh hoạt
-                                          </option>
-                                        </select>
-                                      </div>
-                                    </div>
                                   </motion.div>
                                 )}
 
@@ -1907,16 +1672,16 @@ const Contact: React.FC = () => {
                                     initial={{ opacity: 0, x: 100 }}
                                     animate={{ opacity: 1, x: 0 }}
                                     exit={{ opacity: 0, x: -100 }}
-                                    className="space-y-6"
+                                    className="space-y-4 lg:space-y-6"
                                   >
                                     {/* Message Field */}
                                     <div className="space-y-2">
                                       <Label
                                         htmlFor="message"
-                                        className="flex items-center justify-between text-base font-semibold"
+                                        className="flex items-center justify-between text-sm lg:text-base font-semibold text-gray-700"
                                       >
                                         <div className="flex items-center gap-2">
-                                          <MessageSquare className="w-5 h-5 text-green-500" />
+                                          <MessageSquare className="w-4 h-4 lg:w-5 lg:h-5 text-pink-500" />
                                           Nội dung chi tiết *
                                         </div>
                                         <span
@@ -1925,7 +1690,7 @@ const Contact: React.FC = () => {
                                               ? "text-red-500"
                                               : messageLength > 1500
                                                 ? "text-orange-500"
-                                                : "text-muted-foreground"
+                                                : "text-gray-600"
                                           }`}
                                         >
                                           {messageLength}/2000
@@ -1934,12 +1699,12 @@ const Contact: React.FC = () => {
                                       <Textarea
                                         id="message"
                                         placeholder="Mô tả chi tiết vấn đề, yêu cầu, hoặc câu hỏi của bạn. Càng chi tiết càng giúp chúng tôi hỗ trợ bạn tốt hơn..."
-                                        rows={8}
+                                        rows={6}
                                         {...register("message")}
                                         className={`resize-none transition-all duration-300 ${
                                           errors.message
-                                            ? "border-red-500 bg-red-50 dark:bg-red-900/20"
-                                            : "focus:ring-2 focus:ring-green-500/20 focus:border-green-500"
+                                            ? "border-red-500 bg-red-50"
+                                            : "focus:ring-2 focus:ring-pink-500/20 focus:border-pink-500"
                                         }`}
                                       />
                                       {errors.message && (
@@ -1954,53 +1719,18 @@ const Contact: React.FC = () => {
                                       )}
                                     </div>
 
-                                    {/* Additional Info */}
-                                    <div className="space-y-2">
-                                      <Label
-                                        htmlFor="referral"
-                                        className="flex items-center gap-2 text-base font-semibold"
-                                      >
-                                        <Users className="w-5 h-5 text-indigo-500" />
-                                        Bạn biết đến chúng tôi qua đâu?
-                                      </Label>
-                                      <select
-                                        id="referral"
-                                        {...register("referral")}
-                                        className="w-full h-12 px-3 border rounded-md bg-background focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500"
-                                      >
-                                        <option value="">Chọn nguồn...</option>
-                                        <option value="google">
-                                          Google Search
-                                        </option>
-                                        <option value="social">
-                                          Social Media
-                                        </option>
-                                        <option value="friend">
-                                          Bạn bè giới thiệu
-                                        </option>
-                                        <option value="advertising">
-                                          Quảng cáo
-                                        </option>
-                                        <option value="blog">
-                                          Blog/Article
-                                        </option>
-                                        <option value="youtube">YouTube</option>
-                                        <option value="other">Khác</option>
-                                      </select>
-                                    </div>
-
                                     {/* Checkboxes */}
-                                    <div className="space-y-4 p-6 bg-gray-50 dark:bg-slate-800/50 rounded-xl">
+                                    <div className="space-y-4 p-4 lg:p-6 bg-pink-50 rounded-lg lg:rounded-xl">
                                       <div className="flex items-start gap-3">
                                         <input
                                           type="checkbox"
                                           id="newsletter"
                                           {...register("newsletter")}
-                                          className="mt-1 w-4 h-4 text-blue-600 bg-gray-100 border-gray-300 rounded focus:ring-blue-500"
+                                          className="mt-1 w-4 h-4 text-pink-600 bg-gray-100 border-gray-300 rounded focus:ring-pink-500"
                                         />
                                         <label
                                           htmlFor="newsletter"
-                                          className="text-sm leading-relaxed"
+                                          className="text-sm leading-relaxed text-gray-700"
                                         >
                                           Tôi muốn nhận newsletter và cập nhật
                                           về sản phẩm mới từ Template Market
@@ -2012,23 +1742,23 @@ const Contact: React.FC = () => {
                                           type="checkbox"
                                           id="terms"
                                           {...register("terms")}
-                                          className="mt-1 w-4 h-4 text-blue-600 bg-gray-100 border-gray-300 rounded focus:ring-blue-500"
+                                          className="mt-1 w-4 h-4 text-pink-600 bg-gray-100 border-gray-300 rounded focus:ring-pink-500"
                                         />
                                         <label
                                           htmlFor="terms"
-                                          className="text-sm leading-relaxed"
+                                          className="text-sm leading-relaxed text-gray-700"
                                         >
                                           Tôi đồng ý với{" "}
                                           <a
                                             href="/terms"
-                                            className="text-blue-600 hover:underline font-medium"
+                                            className="text-pink-600 hover:underline font-medium"
                                           >
                                             Điều khoản sử dụng
                                           </a>{" "}
                                           và{" "}
                                           <a
                                             href="/privacy"
-                                            className="text-blue-600 hover:underline font-medium"
+                                            className="text-pink-600 hover:underline font-medium"
                                           >
                                             Chính sách bảo mật
                                           </a>{" "}
@@ -2048,12 +1778,12 @@ const Contact: React.FC = () => {
                                     </div>
 
                                     {/* Preview Summary */}
-                                    <div className="p-6 bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-800 rounded-xl">
+                                    <div className="p-4 lg:p-6 bg-pink-50 border border-pink-200 rounded-lg lg:rounded-xl">
                                       <h4 className="font-bold mb-4 flex items-center gap-2">
-                                        <Eye className="w-5 h-5 text-blue-500" />
+                                        <Eye className="w-4 h-4 lg:w-5 lg:h-5 text-pink-500" />
                                         Tóm tắt thông tin
                                       </h4>
-                                      <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm">
+                                      <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 text-sm">
                                         <div>
                                           <span className="font-medium">
                                             Danh mục:
@@ -2070,39 +1800,13 @@ const Contact: React.FC = () => {
                                         </div>
                                         <div>
                                           <span className="font-medium">
-                                            Độ ưu tiên:
-                                          </span>{" "}
-                                          <Badge
-                                            className={`ml-1 ${priorityLevels.find((p) => p.value === watchedPriority)?.color}`}
-                                          >
-                                            {
-                                              priorityLevels.find(
-                                                (p) =>
-                                                  p.value === watchedPriority,
-                                              )?.label
-                                            }
-                                          </Badge>
-                                        </div>
-                                        <div>
-                                          <span className="font-medium">
                                             Team xử lý:
                                           </span>{" "}
-                                          <span className="text-blue-600">
+                                          <span className="text-pink-600">
                                             {supportCategories.find(
                                               (c) =>
                                                 c.value === watchedCategory,
                                             )?.team || "Support Team"}
-                                          </span>
-                                        </div>
-                                        <div>
-                                          <span className="font-medium">
-                                            Thời gian phản hồi:
-                                          </span>{" "}
-                                          <span className="text-green-600 font-medium">
-                                            {supportCategories.find(
-                                              (c) =>
-                                                c.value === watchedCategory,
-                                            )?.response || "< 24h"}
                                           </span>
                                         </div>
                                       </div>
@@ -2111,20 +1815,21 @@ const Contact: React.FC = () => {
                                 )}
 
                                 {/* Navigation Buttons */}
-                                <div className="flex items-center justify-between pt-8 border-t border-gray-100 dark:border-slate-700">
-                                  {/* Previous Button */}
+                                <div className="flex items-center justify-between pt-6 lg:pt-8 border-t border-pink-100">
                                   <Button
                                     type="button"
                                     variant="outline"
                                     onClick={handlePrevStep}
                                     disabled={formStep === 1}
-                                    className="flex items-center gap-2"
+                                    className="flex items-center gap-2 border-pink-200 text-sm lg:text-base"
                                   >
                                     <ArrowRight className="w-4 h-4 rotate-180" />
-                                    Quay lại
+                                    <span className="hidden sm:inline">
+                                      Quay lại
+                                    </span>
+                                    <span className="sm:hidden">Back</span>
                                   </Button>
 
-                                  {/* Step Indicators */}
                                   <div className="flex items-center gap-2">
                                     {[1, 2, 3].map((step) => (
                                       <button
@@ -2133,7 +1838,7 @@ const Contact: React.FC = () => {
                                         onClick={() => setFormStep(step)}
                                         className={`w-3 h-3 rounded-full transition-all ${
                                           step === formStep
-                                            ? "bg-blue-500 scale-125"
+                                            ? "bg-pink-500 scale-125"
                                             : step < formStep
                                               ? "bg-green-500"
                                               : "bg-gray-300"
@@ -2142,14 +1847,16 @@ const Contact: React.FC = () => {
                                     ))}
                                   </div>
 
-                                  {/* Next/Submit Button */}
                                   {formStep < 3 ? (
                                     <Button
                                       type="button"
                                       onClick={handleNextStep}
-                                      className="bg-gradient-to-r from-blue-500 to-purple-600 hover:from-blue-600 hover:to-purple-700"
+                                      className={`bg-gradient-to-r ${softPinkTheme.primaryGradient} hover:scale-105 transition-all text-sm lg:text-base`}
                                     >
-                                      Tiếp theo
+                                      <span className="hidden sm:inline">
+                                        Tiếp theo
+                                      </span>
+                                      <span className="sm:hidden">Next</span>
                                       <ArrowRight className="w-4 h-4 ml-2" />
                                     </Button>
                                   ) : (
@@ -2160,7 +1867,7 @@ const Contact: React.FC = () => {
                                       <Button
                                         type="submit"
                                         disabled={isSubmitting || !isValid}
-                                        className="bg-gradient-to-r from-green-500 to-blue-600 hover:from-green-600 hover:to-blue-700 px-8 py-3"
+                                        className={`bg-gradient-to-r ${softPinkTheme.successGradient} px-6 lg:px-8 py-2 lg:py-3 text-sm lg:text-base`}
                                       >
                                         {isSubmitting ? (
                                           <>
@@ -2171,15 +1878,25 @@ const Contact: React.FC = () => {
                                                 repeat: Infinity,
                                                 ease: "linear",
                                               }}
-                                              className="w-5 h-5 mr-2 border-2 border-white border-t-transparent rounded-full"
+                                              className="w-4 h-4 lg:w-5 lg:h-5 mr-2 border-2 border-white border-t-transparent rounded-full"
                                             />
-                                            Đang gửi...
+                                            <span className="hidden sm:inline">
+                                              Đang gửi...
+                                            </span>
+                                            <span className="sm:hidden">
+                                              Sending...
+                                            </span>
                                           </>
                                         ) : (
                                           <>
-                                            <Send className="w-5 h-5 mr-2" />
-                                            Gửi tin nhắn
-                                            <Sparkles className="w-5 h-5 ml-2" />
+                                            <Send className="w-4 h-4 lg:w-5 lg:h-5 mr-2" />
+                                            <span className="hidden sm:inline">
+                                              Gửi tin nhắn
+                                            </span>
+                                            <span className="sm:hidden">
+                                              Send
+                                            </span>
+                                            <Sparkles className="w-4 h-4 lg:w-5 lg:h-5 ml-2" />
                                           </>
                                         )}
                                       </Button>
@@ -2194,50 +1911,48 @@ const Contact: React.FC = () => {
                     </motion.div>
                   </div>
 
-                  {/* Sidebar */}
-                  <div className="space-y-8">
+                  {/* Sidebar - RESPONSIVE */}
+                  <div className="space-y-6 lg:space-y-8">
                     {/* Office Hours */}
-                    <motion.div {...slideInRight} transition={{ delay: 0.1 }}>
-                      <Card className="bg-gradient-to-br from-white to-green-50 dark:from-slate-800 dark:to-green-900/20 border-0 shadow-lg">
-                        <CardHeader>
-                          <CardTitle className="flex items-center gap-2">
-                            <Clock className="w-5 h-5 text-green-600" />
+                    <motion.div
+                      initial={{ opacity: 0, x: 50 }}
+                      animate={{ opacity: 1, x: 0 }}
+                      transition={{ delay: 0.1 }}
+                    >
+                      <Card
+                        className={`bg-gradient-to-br ${softPinkTheme.floatingCard} border-0 ${softPinkTheme.softGlow} backdrop-blur-xl`}
+                      >
+                        <CardHeader className="pb-4">
+                          <CardTitle className="flex items-center gap-2 text-gray-800 text-lg lg:text-xl">
+                            <Clock className="w-4 h-4 lg:w-5 lg:h-5 text-pink-600" />
                             Giờ làm việc
                           </CardTitle>
                         </CardHeader>
-                        <CardContent className="space-y-4">
-                          {officeSchedule.map((schedule, index) => (
+                        <CardContent className="space-y-3 lg:space-y-4">
+                          {officeSchedule.slice(0, 4).map((schedule, index) => (
                             <div
                               key={index}
-                              className="flex items-center justify-between p-3 rounded-lg bg-white/60 dark:bg-slate-800/60"
+                              className="flex items-center justify-between p-3 rounded-lg bg-white/60"
                             >
                               <div>
                                 <div className="font-medium text-sm">
                                   {schedule.day}
                                 </div>
-                                <div className="text-xs text-muted-foreground">
+                                <div className="text-xs text-gray-600">
                                   {schedule.team}
                                 </div>
                               </div>
                               <div className="text-right">
                                 <div
-                                  className={`text-sm font-medium ${
-                                    schedule.available
-                                      ? "text-green-600"
-                                      : "text-red-500"
-                                  }`}
+                                  className={`text-sm font-medium ${schedule.available ? "text-green-600" : "text-red-500"}`}
                                 >
                                   {schedule.hours}
                                 </div>
                                 <div className="flex items-center gap-1 justify-end">
                                   <div
-                                    className={`w-2 h-2 rounded-full ${
-                                      schedule.available
-                                        ? "bg-green-500"
-                                        : "bg-red-500"
-                                    }`}
+                                    className={`w-2 h-2 rounded-full ${schedule.available ? "bg-green-500" : "bg-red-500"}`}
                                   />
-                                  <span className="text-xs text-muted-foreground">
+                                  <span className="text-xs text-gray-600">
                                     {schedule.workload}
                                   </span>
                                 </div>
@@ -2247,7 +1962,7 @@ const Contact: React.FC = () => {
 
                           <Separator />
 
-                          <div className="flex items-center gap-2 text-sm text-green-600 p-3 bg-green-50 dark:bg-green-900/20 rounded-lg">
+                          <div className="flex items-center gap-2 text-sm text-green-600 p-3 bg-green-50 rounded-lg">
                             <div className="w-2 h-2 bg-green-500 rounded-full animate-pulse" />
                             <span className="font-medium">
                               Hiện tại: Đang hoạt động
@@ -2257,56 +1972,86 @@ const Contact: React.FC = () => {
                       </Card>
                     </motion.div>
 
-                    {/* Quick Support */}
-                    <motion.div {...slideInRight} transition={{ delay: 0.2 }}>
-                      <Card className="bg-gradient-to-br from-white to-orange-50 dark:from-slate-800 dark:to-orange-900/20 border-0 shadow-lg">
-                        <CardHeader>
-                          <CardTitle className="flex items-center gap-2">
-                            <Zap className="w-5 h-5 text-orange-600" />
+                    {/* Quick Support - RESPONSIVE BUTTONS */}
+                    <motion.div
+                      initial={{ opacity: 0, x: 50 }}
+                      animate={{ opacity: 1, x: 0 }}
+                      transition={{ delay: 0.2 }}
+                    >
+                      <Card
+                        className={`bg-gradient-to-br ${softPinkTheme.floatingCard} border-0 ${softPinkTheme.softGlow} backdrop-blur-xl`}
+                      >
+                        <CardHeader className="pb-4">
+                          <CardTitle className="flex items-center gap-2 text-gray-800 text-lg lg:text-xl">
+                            <Zap className="w-4 h-4 lg:w-5 lg:h-5 text-rose-600" />
                             Hỗ trợ nhanh
                           </CardTitle>
                         </CardHeader>
-                        <CardContent className="space-y-4">
+                        <CardContent className="space-y-3 lg:space-y-4">
+                          {/* FIXED RESPONSIVE QUICK SUPPORT BUTTONS */}
                           <Button
                             variant="outline"
-                            className="w-full justify-start bg-white/60 hover:bg-white"
+                            className="w-full justify-start bg-white/60 hover:bg-white border-pink-200 text-sm lg:text-base px-3 lg:px-4 py-2 h-auto min-h-[2.5rem]"
                             onClick={() =>
                               window.open("tel:+84971386588", "_self")
                             }
                           >
-                            <Phone className="w-4 h-4 mr-2" />
-                            Gọi ngay: +84 971.386.588
+                            <Phone className="w-4 h-4 mr-2 lg:mr-3 text-pink-500 flex-shrink-0" />
+                            <div className="text-left">
+                              <div className="font-medium">Gọi ngay</div>
+                              <div className="text-xs text-gray-500 truncate">
+                                +84 971 386 588
+                              </div>
+                            </div>
                           </Button>
+
                           <Button
                             variant="outline"
-                            className="w-full justify-start bg-white/60 hover:bg-white"
+                            className="w-full justify-start bg-white/60 hover:bg-white border-pink-200 text-sm lg:text-base px-3 lg:px-4 py-2 h-auto min-h-[2.5rem]"
                             onClick={() =>
                               window.open("mailto:support@templatemarket.com")
                             }
                           >
-                            <Mail className="w-4 h-4 mr-2" />
-                            Email: support@templatemarket.com
+                            <Mail className="w-4 h-4 mr-2 lg:mr-3 text-rose-500 flex-shrink-0" />
+                            <div className="text-left">
+                              <div className="font-medium">Email</div>
+                              <div className="text-xs text-gray-500 truncate">
+                                support@templatemarket.com
+                              </div>
+                            </div>
                           </Button>
+
                           <Button
                             variant="outline"
-                            className="w-full justify-start bg-white/60 hover:bg-white"
+                            className="w-full justify-start bg-white/60 hover:bg-white border-pink-200 text-sm lg:text-base px-3 lg:px-4 py-2 h-auto min-h-[2.5rem]"
                             onClick={() =>
                               toast({
                                 title: "💬 Chat widget đang được kích hoạt...",
                               })
                             }
                           >
-                            <MessageCircle className="w-4 h-4 mr-2" />
-                            Live Chat (24/7)
+                            <MessageCircle className="w-4 h-4 mr-2 lg:mr-3 text-red-500 flex-shrink-0" />
+                            <div className="text-left">
+                              <div className="font-medium">Live Chat</div>
+                              <div className="text-xs text-gray-500">
+                                24/7 Online
+                              </div>
+                            </div>
                           </Button>
                         </CardContent>
                       </Card>
                     </motion.div>
 
                     {/* Current Testimonial */}
-                    <motion.div {...slideInRight} transition={{ delay: 0.3 }}>
-                      <Card className="bg-gradient-to-br from-white to-purple-50 dark:from-slate-800 dark:to-purple-900/20 border-0 shadow-lg">
-                        <CardContent className="p-6">
+                    <motion.div
+                      initial={{ opacity: 0, x: 50 }}
+                      animate={{ opacity: 1, x: 0 }}
+                      transition={{ delay: 0.3 }}
+                    >
+                      <Card
+                        className={`bg-gradient-to-br ${softPinkTheme.floatingCard} border-0 ${softPinkTheme.softGlow} backdrop-blur-xl`}
+                      >
+                        <CardContent className="p-4 lg:p-6">
                           <AnimatePresence mode="wait">
                             <motion.div
                               key={currentTestimonial}
@@ -2327,18 +2072,20 @@ const Contact: React.FC = () => {
                                   />
                                 ))}
                               </div>
-                              <blockquote className="text-sm italic text-muted-foreground leading-relaxed">
+                              <blockquote className="text-sm italic text-gray-700 leading-relaxed">
                                 "{testimonials[currentTestimonial].content}"
                               </blockquote>
                               <div className="flex items-center gap-3">
-                                <div className="w-10 h-10 bg-gradient-to-r from-purple-500 to-pink-500 rounded-full flex items-center justify-center text-white text-lg">
+                                <div
+                                  className={`w-10 h-10 bg-gradient-to-r ${softPinkTheme.primaryGradient} rounded-full flex items-center justify-center text-white text-lg`}
+                                >
                                   {testimonials[currentTestimonial].avatar}
                                 </div>
                                 <div>
-                                  <div className="font-semibold text-sm">
+                                  <div className="font-semibold text-sm text-gray-800">
                                     {testimonials[currentTestimonial].name}
                                   </div>
-                                  <div className="text-xs text-muted-foreground">
+                                  <div className="text-xs text-gray-600">
                                     {testimonials[currentTestimonial].position}
                                   </div>
                                 </div>
@@ -2352,11 +2099,11 @@ const Contact: React.FC = () => {
                 </div>
               </TabsContent>
 
-              {/* FAQ Tab */}
-              <TabsContent value="faq" className="space-y-8">
+              {/* ✅ ENHANCED FAQ TAB - RESPONSIVE */}
+              <TabsContent value="faq" className="space-y-6 lg:space-y-8">
                 <div className="max-w-4xl mx-auto">
                   {/* FAQ Categories */}
-                  <div className="flex flex-wrap justify-center gap-4 mb-8">
+                  <div className="flex flex-wrap justify-center gap-2 lg:gap-4 mb-6 lg:mb-8">
                     {faqCategories.map((category, index) => (
                       <Button
                         key={index}
@@ -2364,7 +2111,11 @@ const Contact: React.FC = () => {
                           selectedFaqCategory === index ? "default" : "outline"
                         }
                         onClick={() => setSelectedFaqCategory(index)}
-                        className="text-sm"
+                        className={`text-xs lg:text-sm px-3 lg:px-4 py-2 lg:py-3 ${
+                          selectedFaqCategory === index
+                            ? `bg-gradient-to-r ${softPinkTheme.primaryGradient} text-white`
+                            : "border-pink-200 hover:bg-pink-50"
+                        }`}
                       >
                         {category.title}
                       </Button>
@@ -2381,7 +2132,9 @@ const Contact: React.FC = () => {
                           animate={{ opacity: 1, y: 0 }}
                           transition={{ delay: index * 0.1 }}
                         >
-                          <Card className="bg-white/80 dark:bg-slate-800/80 backdrop-blur-lg border-0 shadow-lg hover:shadow-xl transition-all duration-300">
+                          <Card
+                            className={`bg-gradient-to-br ${softPinkTheme.neoCard} border-0 ${softPinkTheme.softGlow} backdrop-blur-xl hover:${softPinkTheme.glow} transition-all duration-300`}
+                          >
                             <CardContent className="p-0">
                               <button
                                 onClick={() =>
@@ -2392,10 +2145,10 @@ const Contact: React.FC = () => {
                                       : `${selectedFaqCategory}-${index}`,
                                   )
                                 }
-                                className="w-full p-6 text-left hover:bg-muted/50 transition-colors duration-300"
+                                className="w-full p-4 lg:p-6 text-left hover:bg-pink-50/50 transition-colors duration-300"
                               >
                                 <div className="flex items-center justify-between">
-                                  <h3 className="text-lg font-semibold pr-4">
+                                  <h3 className="text-base lg:text-lg font-semibold pr-4 text-gray-800">
                                     {faq.q}
                                   </h3>
                                   <motion.div
@@ -2408,7 +2161,7 @@ const Contact: React.FC = () => {
                                     }}
                                     transition={{ duration: 0.3 }}
                                   >
-                                    <ChevronDown className="w-5 h-5 text-muted-foreground flex-shrink-0" />
+                                    <ChevronDown className="w-5 h-5 text-gray-600 flex-shrink-0" />
                                   </motion.div>
                                 </div>
                               </button>
@@ -2420,10 +2173,10 @@ const Contact: React.FC = () => {
                                     animate={{ height: "auto", opacity: 1 }}
                                     exit={{ height: 0, opacity: 0 }}
                                     transition={{ duration: 0.3 }}
-                                    className="overflow-hidden border-t border-gray-100 dark:border-slate-700"
+                                    className="overflow-hidden border-t border-pink-100"
                                   >
-                                    <div className="p-6 pt-4">
-                                      <p className="text-muted-foreground leading-relaxed">
+                                    <div className="p-4 lg:p-6 pt-4">
+                                      <p className="text-sm lg:text-base text-gray-700 leading-relaxed">
                                         {faq.a}
                                       </p>
                                     </div>
@@ -2439,10 +2192,10 @@ const Contact: React.FC = () => {
                 </div>
               </TabsContent>
 
-              {/* Schedule Tab */}
-              <TabsContent value="schedule" className="space-y-8">
-                <div className="max-w-4xl mx-auto">
-                  <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+              {/* ✅ ENHANCED SCHEDULE TAB - RESPONSIVE */}
+              <TabsContent value="schedule" className="space-y-6 lg:space-y-8">
+                <div className="max-w-6xl mx-auto">
+                  <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 lg:gap-6">
                     {officeSchedule.map((schedule, index) => (
                       <motion.div
                         key={index}
@@ -2452,35 +2205,38 @@ const Contact: React.FC = () => {
                         whileHover={{ y: -5, scale: 1.02 }}
                       >
                         <Card
-                          className={`h-full border-0 shadow-lg transition-all duration-300 ${
+                          className={`h-full border-0 ${softPinkTheme.softGlow} transition-all duration-300 ${
                             schedule.available
-                              ? "bg-gradient-to-br from-green-50 to-blue-50 dark:from-green-900/20 dark:to-blue-900/20"
-                              : "bg-gradient-to-br from-gray-50 to-red-50 dark:from-gray-900/20 dark:to-red-900/20"
+                              ? `bg-gradient-to-br ${softPinkTheme.floatingCard}`
+                              : "bg-gradient-to-br from-gray-50 to-red-50"
                           }`}
                         >
-                          <CardContent className="p-6 text-center">
+                          <CardContent className="p-4 lg:p-6 text-center">
                             <div
-                              className={`w-16 h-16 mx-auto mb-4 rounded-2xl flex items-center justify-center ${
+                              className={`w-12 h-12 lg:w-16 lg:h-16 mx-auto mb-3 lg:mb-4 rounded-xl lg:rounded-2xl flex items-center justify-center ${
                                 schedule.available
-                                  ? "bg-gradient-to-r from-green-500 to-blue-500"
+                                  ? `bg-gradient-to-r ${softPinkTheme.primaryGradient}`
                                   : "bg-gradient-to-r from-gray-500 to-red-500"
                               }`}
                             >
-                              <Calendar className="w-8 h-8 text-white" />
+                              <Calendar className="w-6 h-6 lg:w-8 lg:h-8 text-white" />
                             </div>
-                            <h3 className="text-xl font-bold mb-2">
+                            <h3 className="text-lg lg:text-xl font-bold mb-2 text-gray-800">
                               {schedule.day}
                             </h3>
                             <p
-                              className={`text-lg font-semibold mb-2 ${
+                              className={`text-base lg:text-lg font-semibold mb-2 ${
                                 schedule.available
-                                  ? "text-green-600"
+                                  ? "text-pink-600"
                                   : "text-red-500"
                               }`}
                             >
                               {schedule.hours}
                             </p>
-                            <Badge variant="outline" className="mb-2">
+                            <Badge
+                              variant="outline"
+                              className="mb-2 border-pink-200 text-xs"
+                            >
                               {schedule.team}
                             </Badge>
                             <div className="flex items-center justify-center gap-2 mt-3">
@@ -2491,7 +2247,7 @@ const Contact: React.FC = () => {
                                     : "bg-red-500"
                                 } ${schedule.available ? "animate-pulse" : ""}`}
                               />
-                              <span className="text-sm text-muted-foreground">
+                              <span className="text-xs lg:text-sm text-gray-600">
                                 Workload: {schedule.workload}
                               </span>
                             </div>
@@ -2503,20 +2259,22 @@ const Contact: React.FC = () => {
                 </div>
               </TabsContent>
 
-              {/* Social Media Tab */}
-              <TabsContent value="social" className="space-y-8">
+              {/* ✅ ENHANCED SOCIAL MEDIA TAB - RESPONSIVE */}
+              <TabsContent value="social" className="space-y-6 lg:space-y-8">
                 <div className="max-w-6xl mx-auto">
-                  <div className="text-center mb-12">
-                    <h3 className="text-3xl font-bold mb-4">
+                  <div className="text-center mb-8 lg:mb-12">
+                    <h3
+                      className={`text-2xl lg:text-3xl font-bold mb-4 bg-gradient-to-r ${softPinkTheme.heroText} bg-clip-text text-transparent`}
+                    >
                       🌍 Kết nối với chúng tôi
                     </h3>
-                    <p className="text-xl text-muted-foreground">
+                    <p className="text-lg lg:text-xl text-gray-600">
                       Theo dõi Template Market trên các nền tảng xã hội để cập
                       nhật tin tức mới nhất
                     </p>
                   </div>
 
-                  <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
+                  <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-4 lg:gap-6">
                     {socialPlatforms.map((platform, index) => (
                       <motion.div
                         key={index}
@@ -2525,35 +2283,38 @@ const Contact: React.FC = () => {
                         transition={{ delay: index * 0.05 }}
                         whileHover={{ scale: 1.05, y: -5 }}
                       >
-                        <Card className="h-full bg-white/80 dark:bg-slate-800/80 backdrop-blur-lg border-0 shadow-lg hover:shadow-2xl transition-all duration-300 group">
-                          <CardContent className="p-6 text-center">
+                        <Card
+                          className={`h-full bg-gradient-to-br ${softPinkTheme.neoCard} border-0 ${softPinkTheme.softGlow} backdrop-blur-xl hover:${softPinkTheme.glow} transition-all duration-300 group`}
+                        >
+                          <CardContent className="p-4 lg:p-6 text-center">
                             <motion.div
-                              className={`w-16 h-16 mx-auto mb-4 rounded-2xl bg-gradient-to-r from-gray-100 to-gray-200 dark:from-slate-700 dark:to-slate-600 flex items-center justify-center group-hover:scale-110 transition-transform duration-300`}
+                              className={`w-12 h-12 lg:w-16 lg:h-16 mx-auto mb-3 lg:mb-4 rounded-xl lg:rounded-2xl bg-gradient-to-r ${platform.gradient} flex items-center justify-center group-hover:scale-110 transition-transform duration-300`}
                               whileHover={{ rotate: 5 }}
                             >
-                              <platform.icon
-                                className={`w-8 h-8 ${platform.color} transition-colors duration-300`}
-                              />
+                              <platform.icon className="w-6 h-6 lg:w-8 lg:h-8 text-white" />
                             </motion.div>
-                            <h4 className="font-bold text-lg mb-2">
+                            <h4 className="font-bold text-base lg:text-lg mb-2 text-gray-800">
                               {platform.label}
                             </h4>
-                            <p className="text-sm text-muted-foreground mb-3">
+                            <p className="text-xs lg:text-sm text-gray-600 mb-3">
                               {platform.users} users
                             </p>
                             <Button
                               variant="outline"
                               size="sm"
                               asChild
-                              className="w-full group-hover:bg-primary group-hover:text-primary-foreground transition-colors duration-300"
+                              className="w-full group-hover:bg-pink-500 group-hover:text-white group-hover:border-pink-500 transition-colors duration-300 border-pink-200 text-xs lg:text-sm"
                             >
                               <a
                                 href={platform.href}
                                 target="_blank"
                                 rel="noopener noreferrer"
                               >
-                                <ExternalLink className="w-4 h-4 mr-2" />
-                                Theo dõi
+                                <ExternalLink className="w-3 h-3 lg:w-4 lg:h-4 mr-2" />
+                                <span className="hidden sm:inline">
+                                  Theo dõi
+                                </span>
+                                <span className="sm:hidden">Follow</span>
                               </a>
                             </Button>
                           </CardContent>
@@ -2567,28 +2328,29 @@ const Contact: React.FC = () => {
           </div>
         </section>
 
-        {/* Enhanced CTA Section */}
-        <section className="relative px-4 py-20 overflow-hidden bg-gradient-to-r from-blue-600 via-purple-600 to-pink-600">
+        {/* ✅ ENHANCED CTA SECTION - RESPONSIVE PINK THEME */}
+        <section
+          className={`relative px-4 py-16 lg:py-20 overflow-hidden bg-gradient-to-r ${softPinkTheme.primaryGradient}`}
+        >
           <div className="absolute inset-0">
-            <div className="absolute top-0 left-0 w-full h-full bg-black/10" />
-            {[...Array(6)].map((_, i) => (
+            <div className="absolute top-0 left-0 w-full h-full bg-black/10"></div>
+            {Array.from({ length: 8 }).map((_, i) => (
               <motion.div
                 key={i}
-                className="absolute bg-white/10 rounded-full"
+                className="absolute w-16 h-16 lg:w-24 lg:h-24 bg-white/10 rounded-full blur-xl"
                 style={{
-                  width: `${Math.random() * 200 + 100}px`,
-                  height: `${Math.random() * 200 + 100}px`,
                   top: `${Math.random() * 100}%`,
                   left: `${Math.random() * 100}%`,
                 }}
                 animate={{
-                  scale: [1, 1.2, 1],
-                  opacity: [0.3, 0.6, 0.3],
+                  scale: [1, 1.5, 1],
+                  opacity: [0.2, 0.8, 0.2],
                 }}
                 transition={{
-                  duration: 3 + i,
+                  duration: 6 + i * 2,
                   repeat: Infinity,
-                  delay: i * 0.5,
+                  delay: i * 1,
+                  ease: "easeInOut",
                 }}
               />
             ))}
@@ -2599,59 +2361,121 @@ const Contact: React.FC = () => {
               initial={{ opacity: 0, y: 30 }}
               whileInView={{ opacity: 1, y: 0 }}
               viewport={{ once: true }}
-              className="max-w-4xl mx-auto space-y-8 text-white"
+              className="max-w-4xl mx-auto space-y-6 lg:space-y-8 text-white"
             >
-              <h2 className="text-4xl md:text-5xl font-bold">
-                🚀 Sẵn sàng bắt đầu dự án của bạn?
+              <h2 className="text-3xl lg:text-4xl xl:text-5xl font-bold">
+                💬 Sẵn sàng kết nối?
               </h2>
-              <p className="text-xl opacity-90 leading-relaxed">
-                Đội ngũ chuyên gia Template Market luôn sẵn sàng hỗ trợ bạn
-                24/7. Liên hệ ngay để nhận tư vấn miễn phí và báo giá ưu đãi!
+              <p className="text-lg lg:text-xl opacity-90 leading-relaxed px-4">
+                Đội ngũ Template Market luôn sẵn sàng hỗ trợ bạn{" "}
+                <span className="font-bold">24/7</span> với tất cả các câu hỏi,
+                yêu cầu kỹ thuật,
+                <br className="hidden sm:block" />
+                tư vấn sản phẩm và hợp tác kinh doanh.
               </p>
 
-              <div className="flex flex-col sm:flex-row items-center justify-center gap-6">
+              <div className="flex flex-col sm:flex-row items-center justify-center gap-4 lg:gap-6">
                 <Button
                   size="lg"
                   variant="secondary"
-                  className="bg-white text-purple-600 hover:bg-gray-100 shadow-xl hover:shadow-2xl transition-all duration-300 px-8 py-4"
-                  onClick={() => window.open("tel:+84971386588", "_self")}
-                >
-                  <Phone className="w-6 h-6 mr-3" />
-                  Gọi ngay: +84 971 386 588
-                </Button>
-
-                <Button
-                  size="lg"
-                  variant="outline"
-                  className="text-white border-white hover:bg-white hover:text-purple-600 shadow-xl hover:shadow-2xl transition-all duration-300 px-8 py-4"
+                  className="w-full sm:w-auto bg-white text-pink-600 hover:bg-gray-100 shadow-xl hover:shadow-2xl transition-all duration-300 px-6 lg:px-8 py-3 lg:py-4 text-sm lg:text-base"
                   onClick={() =>
                     document
                       .getElementById("contact-form")
                       ?.scrollIntoView({ behavior: "smooth" })
                   }
                 >
-                  <MessageSquare className="w-6 h-6 mr-3" />
-                  Gửi tin nhắn ngay
+                  <MessageSquare className="w-5 h-5 lg:w-6 lg:h-6 mr-2 lg:mr-3" />
+                  <span className="hidden sm:inline">Gửi tin nhắn ngay</span>
+                  <span className="sm:hidden">Gửi tin nhắn</span>
+                  <ArrowRight className="w-5 h-5 lg:w-6 lg:h-6 ml-2 lg:ml-3" />
+                </Button>
+
+                <Button
+                  size="lg"
+                  variant="outline"
+                  className="w-full sm:w-auto text-white border-white hover:bg-white hover:text-pink-600 shadow-xl hover:shadow-2xl transition-all duration-300 px-6 lg:px-8 py-3 lg:py-4 text-sm lg:text-base"
+                  onClick={() => window.open("tel:+84971386588", "_self")}
+                >
+                  <Phone className="w-5 h-5 lg:w-6 lg:h-6 mr-2 lg:mr-3" />
+                  <span className="hidden sm:inline">
+                    Hotline: +84 971 386 588
+                  </span>
+                  <span className="sm:hidden">+84 971 386 588</span>
                 </Button>
               </div>
 
-              <div className="grid grid-cols-2 md:grid-cols-4 gap-8 pt-8 opacity-80">
+              {/* Contact Stats - RESPONSIVE */}
+              <div className="flex flex-wrap items-center justify-center gap-6 lg:gap-8 pt-6 lg:pt-8 opacity-80">
                 <div className="text-center">
-                  <div className="text-2xl font-bold">24/7</div>
-                  <div className="text-sm">Support</div>
+                  <div className="text-xl lg:text-2xl font-bold"> 30s</div>
+                  <div className="text-xs lg:text-sm">Thời gian phản hồi</div>
                 </div>
                 <div className="text-center">
-                  <div className="text-2xl font-bold"> 30s</div>
-                  <div className="text-sm">Response</div>
+                  <div className="text-xl lg:text-2xl font-bold">24/7</div>
+                  <div className="text-xs lg:text-sm">Hỗ trợ liên tục</div>
                 </div>
                 <div className="text-center">
-                  <div className="text-2xl font-bold">99.5%</div>
-                  <div className="text-sm">Satisfaction</div>
+                  <div className="text-xl lg:text-2xl font-bold">99.2%</div>
+                  <div className="text-xs lg:text-sm">Khách hàng hài lòng</div>
                 </div>
                 <div className="text-center">
-                  <div className="text-2xl font-bold">50K+</div>
-                  <div className="text-sm">Happy Clients</div>
+                  <div className="text-xl lg:text-2xl font-bold">
+                    5 ngôn ngữ
+                  </div>
+                  <div className="text-xs lg:text-sm">Hỗ trợ đa ngôn ngữ</div>
                 </div>
+              </div>
+
+              {/* Additional Contact Methods - RESPONSIVE */}
+              <div className="grid grid-cols-2 md:grid-cols-4 gap-3 lg:gap-4 pt-6 lg:pt-8">
+                <motion.div
+                  whileHover={{ scale: 1.05 }}
+                  className="flex flex-col items-center gap-2 p-3 lg:p-4 rounded-lg lg:rounded-xl bg-white/10 backdrop-blur-sm"
+                >
+                  <Mail className="w-6 h-6 lg:w-8 lg:h-8" />
+                  <span className="text-xs lg:text-sm font-medium">
+                    Email Support
+                  </span>
+                  <span className="text-xs opacity-75 text-center">
+                    support@templatemarket.com
+                  </span>
+                </motion.div>
+
+                <motion.div
+                  whileHover={{ scale: 1.05 }}
+                  className="flex flex-col items-center gap-2 p-3 lg:p-4 rounded-lg lg:rounded-xl bg-white/10 backdrop-blur-sm"
+                >
+                  <MessageCircle className="w-6 h-6 lg:w-8 lg:h-8" />
+                  <span className="text-xs lg:text-sm font-medium">
+                    Live Chat
+                  </span>
+                  <span className="text-xs opacity-75">
+                    Instantly available
+                  </span>
+                </motion.div>
+
+                <motion.div
+                  whileHover={{ scale: 1.05 }}
+                  className="flex flex-col items-center gap-2 p-3 lg:p-4 rounded-lg lg:rounded-xl bg-white/10 backdrop-blur-sm"
+                >
+                  <MapPin className="w-6 h-6 lg:w-8 lg:h-8" />
+                  <span className="text-xs lg:text-sm font-medium">Office</span>
+                  <span className="text-xs opacity-75 text-center">
+                    Hạ Long, Việt Nam
+                  </span>
+                </motion.div>
+
+                <motion.div
+                  whileHover={{ scale: 1.05 }}
+                  className="flex flex-col items-center gap-2 p-3 lg:p-4 rounded-lg lg:rounded-xl bg-white/10 backdrop-blur-sm"
+                >
+                  <Globe className="w-6 h-6 lg:w-8 lg:h-8" />
+                  <span className="text-xs lg:text-sm font-medium">
+                    Social Media
+                  </span>
+                  <span className="text-xs opacity-75">Follow us</span>
+                </motion.div>
               </div>
             </motion.div>
           </div>
