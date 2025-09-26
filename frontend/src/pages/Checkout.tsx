@@ -555,7 +555,7 @@ const Checkout: React.FC = () => {
         country: data.country,
         payment_method: data.paymentMethod,
         total_price: finalPrice,
-        original_price: totalPrice,
+        // original_price: totalPrice,
         discount_id: appliedDiscount?.id || null,
         discount_code: appliedDiscount?.code || null,
         discount_amount: discountAmount,
