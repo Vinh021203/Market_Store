@@ -10,6 +10,12 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Input } from "@/components/ui/input";
 import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog";
+import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
@@ -20,7 +26,6 @@ import {
 import {
   Sheet,
   SheetContent,
-  SheetDescription,
   SheetHeader,
   SheetTitle,
   SheetTrigger,
@@ -34,7 +39,6 @@ import {
   NavigationMenuTrigger,
 } from "@/components/ui/navigation-menu";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-import { Separator } from "@/components/ui/separator";
 import {
   Menu,
   Search,
@@ -49,59 +53,35 @@ import {
   Star,
   Download,
   Code,
-  Palette,
-  Smartphone,
   Globe,
   Zap,
   TrendingUp,
   Award,
   Users,
   ChevronDown,
-  Sun,
-  Moon,
-  Monitor,
   X,
-  Filter,
-  SortAsc,
-  Grid,
-  List,
-  Sparkles,
-  Crown,
-  Flame,
-  Clock,
-  Eye,
-  MessageCircle,
-  Share2,
   Shield,
-  Database,
   BarChart3,
   FileText,
-  UserCog,
   ArrowRight,
   Phone,
   Mail,
-  MapPin,
   Gift,
-  Percent,
   ExternalLink,
   Facebook,
-  Twitter,
   Instagram,
+  Twitter,
   Youtube,
-  ChevronUp,
-  ArrowDown,
-  AlertCircle,
-  PhoneCall,
-  Tag,
-  Headphones,
+  Crown,
   LayoutTemplate,
-  Lightbulb,
-  Target,
-  PenTool,
-  Camera,
-  LineChart,
-  DollarSign,
-  Briefcase,
+  Sparkles,
+  Tag,
+  MessageCircle,
+  Palette,
+  Smartphone,
+  Database,
+  Clock,
+  CheckCircle,
 } from "lucide-react";
 import { useAuth } from "@/contexts/AuthContext";
 import { useCart } from "@/contexts/CartContext";
@@ -117,122 +97,43 @@ import {
 import { cn } from "@/lib/utils";
 
 const Header: React.FC = () => {
-  // ✨ Pastel Color Schemes - Pink Theme
-  const pastelColors = {
-    // Top Bar Colors
-    topBar: {
-      background: "from-pink-100/90 via-rose-100/90 to-red-100/90",
-      text: "text-slate-700",
-      hover: "hover:text-pink-600",
-      promotionBg: "bg-white/70 backdrop-blur-sm",
-      promotionBorder: "border-pink-200/50",
-      badge: "bg-pink-200 text-pink-800",
-      socialHover: "hover:bg-white/30",
-    },
-    // Main Header Colors
-    mainHeader: {
-      background:
-        "bg-gradient-to-r from-pink-50/95 via-rose-50/95 to-red-50/95 backdrop-blur-lg",
-      border: "border-pink-200/50",
-      logoBg: "from-pink-500 via-rose-500 to-red-500",
-      logoDot: "bg-pink-300",
-      searchBg: "bg-gradient-to-r from-white/90 via-pink-50/60 to-rose-50/40",
-      searchBorder: "border-pink-200",
-      searchFocus: "focus:border-pink-300 focus:ring-pink-200/50",
-      buttonHover: "hover:bg-pink-50",
-      authButton: "from-pink-500 via-rose-500 to-red-500",
-    },
-    // Navigation Colors
-    navigation: {
-      background:
-        "bg-gradient-to-r from-pink-50/90 via-rose-50/90 to-red-50/90 backdrop-blur-sm",
-      border: "border-pink-200/40",
-      navHover: "hover:bg-pink-50",
-      badgeHot: "bg-pink-100 text-pink-700",
-      badgeNew: "bg-rose-100 text-rose-700",
-      adminHover: "hover:bg-pink-50 hover:text-pink-700",
-      adminBadge: "bg-pink-100 text-pink-800",
-    },
-    // Dropdown Colors
-    dropdown: {
-      headerBg:
-        "from-pink-50 to-rose-50 dark:from-pink-900/20 dark:to-rose-900/20",
-      titleGradient: "from-pink-600 to-rose-600",
-      cardBg: "bg-white/95 dark:bg-slate-800/95",
-      cardHover: "hover:border-pink-300/50",
-      featuredBg: "from-pink-500 to-rose-500",
-      actionColors: [
-        { bg: "bg-pink-500", accent: "border-pink-200 bg-pink-50" },
-        { bg: "bg-rose-500", accent: "border-rose-200 bg-rose-50" },
-        { bg: "bg-red-500", accent: "border-red-200 bg-red-50" },
-        { bg: "bg-orange-500", accent: "border-orange-200 bg-orange-50" },
-      ],
-    },
-  };
-
   // States
-  const [headerState, setHeaderState] = useState({
-    isCollapsed: false,
-    isHidden: false,
-    showTopBar: true,
-  });
   const [searchQuery, setSearchQuery] = useState("");
-  const [isSearchFocused, setIsSearchFocused] = useState(false);
-  const [notifications, setNotifications] = useState(3);
+  const [isSearchModalOpen, setIsSearchModalOpen] = useState(false);
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
-  const lastScrollYRef = useRef(0);
+  const [showTopBar, setShowTopBar] = useState(true);
+  const searchInputRef = useRef<HTMLInputElement>(null);
 
   // Hooks
   const location = useLocation();
   const navigate = useNavigate();
   const { user, logout } = useAuth();
   const { items, getTotalItems } = useCart();
-  const { theme, setTheme } = useTheme();
   const { wishlist, getTotalWishlistItems } = useWishlist();
-  const { scrollY } = useScroll();
 
-  // Scroll-based transforms for smooth animations
-  const topBarOpacity = useTransform(scrollY, [0, 100], [1, 0]);
-  const topBarHeight = useTransform(scrollY, [0, 100], ["auto", "0px"]);
-  const headerPadding = useTransform(scrollY, [0, 200], ["1rem", "0.5rem"]);
-  const logoScale = useTransform(scrollY, [0, 200], [1, 0.9]);
-
-  // Optimized scroll handler with throttling
-  const handleScroll = useCallback(() => {
-    const currentScrollY = window.scrollY;
-    const scrollDirection =
-      currentScrollY > lastScrollYRef.current ? "down" : "up";
-
-    setHeaderState((prev) => ({
-      ...prev,
-      isCollapsed: currentScrollY > 100,
-      isHidden:
-        currentScrollY > 300 &&
-        scrollDirection === "down" &&
-        currentScrollY > lastScrollYRef.current + 10,
-      showTopBar: currentScrollY < 50,
-    }));
-
-    lastScrollYRef.current = currentScrollY;
-  }, []);
-
+  // Scroll behavior for showing/hiding top bar
   useEffect(() => {
-    let ticking = false;
-    const throttledScroll = () => {
-      if (!ticking) {
-        requestAnimationFrame(() => {
-          handleScroll();
-          ticking = false;
-        });
-        ticking = true;
+    let lastScrollY = window.scrollY;
+
+    const handleScroll = () => {
+      const currentScrollY = window.scrollY;
+
+      // Show top bar when at top (0-50px) or scrolling up
+      if (currentScrollY < 50 || currentScrollY < lastScrollY) {
+        setShowTopBar(true);
+      } else {
+        // Hide top bar when scrolling down
+        setShowTopBar(false);
       }
+
+      lastScrollY = currentScrollY;
     };
 
-    window.addEventListener("scroll", throttledScroll, { passive: true });
-    return () => window.removeEventListener("scroll", throttledScroll);
-  }, [handleScroll]);
+    window.addEventListener("scroll", handleScroll, { passive: true });
+    return () => window.removeEventListener("scroll", handleScroll);
+  }, []);
 
-  // Memoized values for performance
+  // Memoized values
   const totalWishlistItems = useMemo(
     () => getTotalWishlistItems() || 0,
     [getTotalWishlistItems],
@@ -246,7 +147,7 @@ const Header: React.FC = () => {
       if (searchQuery.trim()) {
         navigate(`/search?q=${encodeURIComponent(searchQuery.trim())}`);
         setSearchQuery("");
-        setIsSearchFocused(false);
+        setIsSearchModalOpen(false);
       }
     },
     [searchQuery, navigate],
@@ -261,145 +162,202 @@ const Header: React.FC = () => {
     }
   }, [logout]);
 
+  const openSearchModal = useCallback(() => {
+    setIsSearchModalOpen(true);
+    setTimeout(() => {
+      searchInputRef.current?.focus();
+    }, 100);
+  }, []);
+
+  // Keyboard shortcuts
+  useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if ((e.ctrlKey || e.metaKey) && e.key === "k") {
+        e.preventDefault();
+        openSearchModal();
+      }
+      if (e.key === "Escape" && isSearchModalOpen) {
+        setIsSearchModalOpen(false);
+      }
+    };
+
+    document.addEventListener("keydown", handleKeyDown);
+    return () => document.removeEventListener("keydown", handleKeyDown);
+  }, [isSearchModalOpen, openSearchModal]);
+
   return (
     <>
-      {/* Floating Background Elements - Pink Theme */}
-      <div className="fixed inset-0 overflow-hidden pointer-events-none z-0">
-        {[
-          { emoji: "🌸", color: "from-pink-100 to-rose-200" },
-          { emoji: "💖", color: "from-rose-100 to-pink-200" },
-          { emoji: "🌷", color: "from-red-100 to-pink-200" },
-          { emoji: "💫", color: "from-orange-100 to-red-200" },
-          { emoji: "✨", color: "from-pink-100 to-orange-200" },
-        ].map((item, i) => (
-          <motion.div
-            key={i}
-            className="absolute text-2xl opacity-10"
-            style={{
-              top: `${Math.random() * 100}%`,
-              left: `${Math.random() * 100}%`,
-            }}
-            animate={{
-              y: [0, -20, 0],
-              rotate: [0, 10, -10, 0],
-              scale: [1, 1.2, 1],
-            }}
-            transition={{
-              duration: 8 + i * 2,
-              repeat: Infinity,
-              ease: "easeInOut",
-              delay: i,
-            }}
-          >
-            <motion.div
-              className={`p-2 rounded-full bg-gradient-to-r ${item.color} backdrop-blur-sm shadow-lg`}
-              whileHover={{ scale: 1.3, rotate: 20 }}
-            >
-              <span>{item.emoji}</span>
-            </motion.div>
-          </motion.div>
-        ))}
-      </div>
+      {/* ===== SEARCH MODAL ===== */}
+      <Dialog open={isSearchModalOpen} onOpenChange={setIsSearchModalOpen}>
+        <DialogContent className="sm:max-w-2xl p-0 gap-0 bg-gradient-to-br from-pink-50 via-white to-rose-50">
+          <DialogHeader className="px-6 py-4 border-b border-pink-200/50 bg-gradient-to-r from-pink-100/50 to-rose-100/50">
+            <DialogTitle className="text-lg font-semibold text-transparent bg-gradient-to-r from-pink-600 via-rose-600 to-red-600 bg-clip-text">
+              🔍 Tìm kiếm Templates & E-books
+            </DialogTitle>
+          </DialogHeader>
 
-      {/* Header Container */}
-      <motion.header
-        className="sticky top-0 z-50 w-full"
-        animate={{
-          y: headerState.isHidden ? -100 : 0,
-        }}
-        transition={{
-          duration: 0.3,
-          ease: "easeInOut",
-        }}
-      >
-        {/* ===== TOP BAR - Promotional/Info ===== */}
-        <AnimatePresence>
-          {headerState.showTopBar && (
-            <motion.div
-              initial={{ opacity: 1, height: "auto" }}
-              exit={{ opacity: 0, height: 0 }}
-              style={{
-                opacity: topBarOpacity,
-                height: topBarHeight,
-              }}
-              className={`bg-gradient-to-r ${pastelColors.topBar.background} border-b border-pink-200/30`}
-            >
-              <div className="container mx-auto px-3 sm:px-4 lg:px-6">
-                <div className="flex items-center justify-between py-2 text-xs sm:text-sm">
-                  {/* Left: Promotion */}
-                  <motion.div
-                    initial={{ x: -20, opacity: 0 }}
-                    animate={{ x: 0, opacity: 1 }}
-                    className="flex items-center space-x-2"
+          <div className="p-6">
+            <form onSubmit={handleSearch} className="space-y-4">
+              <div className="relative">
+                <Search className="absolute left-4 top-1/2 transform -translate-y-1/2 w-5 h-5 text-pink-500" />
+                <Input
+                  ref={searchInputRef}
+                  type="text"
+                  placeholder="Nhập từ khóa tìm kiếm..."
+                  value={searchQuery}
+                  onChange={(e) => setSearchQuery(e.target.value)}
+                  className="pl-12 pr-4 py-4 text-lg border-2 border-pink-200 focus:border-pink-400 rounded-xl bg-white/70 backdrop-blur-sm"
+                />
+                <div className="absolute right-4 top-1/2 transform -translate-y-1/2">
+                  <Badge
+                    variant="outline"
+                    className="text-xs text-muted-foreground bg-pink-50"
                   >
-                    <div
-                      className={`${pastelColors.topBar.promotionBg} border ${pastelColors.topBar.promotionBorder} px-2 py-1 rounded-full flex items-center space-x-2`}
+                    Enter
+                  </Badge>
+                </div>
+              </div>
+
+              {/* Quick Search Suggestions */}
+              <div className="space-y-3">
+                <p className="text-sm font-medium text-pink-700 flex items-center gap-2">
+                  <Sparkles className="w-4 h-4" />
+                  Tìm kiếm phổ biến:
+                </p>
+                <div className="flex flex-wrap gap-2">
+                  {[
+                    "React Templates",
+                    "Admin Dashboard",
+                    "E-commerce",
+                    "Landing Pages",
+                    "Mobile UI",
+                    "Design System",
+                  ].map((suggestion) => (
+                    <Button
+                      key={suggestion}
+                      variant="outline"
+                      size="sm"
+                      className="h-8 px-3 text-xs border-pink-200 hover:bg-gradient-to-r hover:from-pink-50 hover:to-rose-50 hover:border-pink-300 transition-all"
+                      onClick={() => {
+                        setSearchQuery(suggestion);
+                        setTimeout(
+                          () =>
+                            handleSearch({ preventDefault: () => {} } as any),
+                          100,
+                        );
+                      }}
                     >
-                      <Gift className="w-3 h-3 text-pink-600" />
+                      {suggestion}
+                    </Button>
+                  ))}
+                </div>
+              </div>
+
+              {/* Keyboard Shortcuts */}
+              <div className="pt-4 border-t border-pink-100">
+                <div className="flex items-center justify-between text-xs text-muted-foreground">
+                  <span>
+                    Nhấn{" "}
+                    <kbd className="px-2 py-1 bg-pink-50 rounded border">
+                      Enter
+                    </kbd>{" "}
+                    để tìm kiếm
+                  </span>
+                  <span>
+                    Nhấn{" "}
+                    <kbd className="px-2 py-1 bg-pink-50 rounded border">
+                      Esc
+                    </kbd>{" "}
+                    để đóng
+                  </span>
+                </div>
+              </div>
+            </form>
+          </div>
+        </DialogContent>
+      </Dialog>
+
+      <div>
+        {/* ===== TẦNG 1: TOP BAR - CONDITIONAL DISPLAY ===== */}
+        <AnimatePresence>
+          {showTopBar && (
+            <motion.div
+              initial={{ height: 0, opacity: 0 }}
+              animate={{ height: "auto", opacity: 1 }}
+              exit={{ height: 0, opacity: 0 }}
+              transition={{ duration: 0.3, ease: "easeInOut" }}
+              className="bg-gradient-to-r from-pink-50 via-rose-50 to-red-50 border-b border-pink-200/30 overflow-hidden"
+            >
+              <div className="container mx-auto px-4">
+                <div className="flex items-center justify-between py-2.5 text-sm">
+                  {/* Left: Promotion */}
+                  <div className="flex items-center space-x-3">
+                    <div className="bg-white/70 px-3 py-1 rounded-full flex items-center space-x-2 backdrop-blur-sm shadow-sm">
+                      <Gift className="w-4 h-4 text-pink-600" />
                       <span className="font-medium text-pink-700">
                         🎉 Template Sale 50% OFF
                       </span>
-                      <Badge className={pastelColors.topBar.badge}>
+                      <Badge className="bg-pink-200 text-pink-800 text-xs px-2 py-0.5">
                         Limited
                       </Badge>
                     </div>
-                  </motion.div>
+                  </div>
 
-                  {/* Center: Contact Info - Hidden on mobile */}
-                  <div className="hidden md:flex items-center space-x-4 text-slate-600">
-                    <div className="flex items-center space-x-1">
-                      <PhoneCall className="w-3 h-3" />
-                      <span>+84 123 456 789</span>
+                  {/* Center: Contact Info - Desktop Only */}
+                  <div className="hidden lg:flex items-center space-x-6 text-slate-600">
+                    <div className="flex items-center space-x-2">
+                      <Phone className="w-4 h-4" />
+                      <span>0971.385.588</span>
                     </div>
-                    <div className="w-px h-3 bg-pink-300/50"></div>
-                    <div className="flex items-center space-x-1">
-                      <Mail className="w-3 h-3" />
-                      <span>hello@templatemarket.com</span>
+                    <div className="w-px h-4 bg-pink-300/50"></div>
+                    <div className="flex items-center space-x-2">
+                      <Mail className="w-4 h-4" />
+                      <span>veutong961@gmail.com</span>
                     </div>
                   </div>
 
-                  {/* Right: Social & User */}
-                  <div className="flex items-center space-x-2 sm:space-x-4">
-                    {/* Social Links - Hidden on mobile */}
-                    <div className="hidden lg:flex items-center space-x-1">
+                  {/* Right: Social + User Status */}
+                  <div className="flex items-center space-x-4">
+                    {/* Social Links - Desktop Only */}
+                    <div className="hidden lg:flex items-center space-x-2">
                       {[
                         { icon: Facebook, href: "#", color: "text-blue-600" },
                         { icon: Instagram, href: "#", color: "text-pink-600" },
                         { icon: Twitter, href: "#", color: "text-sky-600" },
+                        { icon: Youtube, href: "#", color: "text-red-600" },
                       ].map((social, index) => (
                         <motion.a
                           key={index}
                           href={social.href}
                           whileHover={{ scale: 1.2 }}
                           whileTap={{ scale: 0.9 }}
-                          className={`p-1.5 rounded-full ${pastelColors.topBar.socialHover} ${social.color} transition-colors`}
+                          className={`p-2 rounded-full hover:bg-white/30 ${social.color} transition-colors`}
                         >
-                          <social.icon className="w-3 h-3" />
+                          <social.icon className="w-4 h-4" />
                         </motion.a>
                       ))}
                     </div>
 
-                    <div className="w-px h-3 bg-pink-300/50"></div>
+                    <div className="w-px h-4 bg-pink-300/50"></div>
 
                     {/* User Status */}
                     {user ? (
-                      <motion.div
-                        className="flex items-center space-x-2"
-                        initial={{ opacity: 0, x: 10 }}
-                        animate={{ opacity: 1, x: 0 }}
-                      >
-                        <span className="text-xs">Xin chào, {user.name}</span>
+                      <div className="flex items-center space-x-2">
+                        <span className="text-sm text-slate-700">
+                          Xin chào,{" "}
+                          <span className="font-medium">{user.name}</span>
+                        </span>
                         {isAdmin(user) && (
-                          <Badge
-                            className={`px-1 py-0 text-xs ${pastelColors.topBar.badge}`}
-                          >
-                            <Crown className="w-2 h-2 mr-1" />
+                          <Badge className="bg-pink-200 text-pink-800 text-xs px-2 py-0">
+                            <Crown className="w-3 h-3 mr-1" />
                             Admin
                           </Badge>
                         )}
-                      </motion.div>
+                      </div>
                     ) : (
-                      <span className="text-xs">Cần hỗ trợ? Liên hệ ngay!</span>
+                      <span className="text-sm text-slate-600">
+                        Cần hỗ trợ? Liên hệ ngay!
+                      </span>
                     )}
                   </div>
                 </div>
@@ -408,127 +366,619 @@ const Header: React.FC = () => {
           )}
         </AnimatePresence>
 
-        {/* ===== MAIN HEADER - Mobile Optimized ===== */}
-        <motion.div
-          className={`${pastelColors.mainHeader.background} border-b ${pastelColors.mainHeader.border}`}
-          style={{ padding: headerPadding }}
-        >
+        {/* ===== TẦNG 2: MAIN HEADER - STICKY FIXED ===== */}
+        <div className="sticky top-0 z-50 bg-gradient-to-r from-pink-50 via-rose-50 to-red-50 border-b border-pink-200/30 shadow-sm backdrop-blur-md">
           <div className="container mx-auto px-4">
-            <motion.div
-              className="flex items-center justify-between"
-              animate={{
-                height: headerState.isCollapsed ? 48 : 56,
-              }}
-              transition={{ duration: 0.3 }}
-            >
+            <div className="flex items-center justify-between py-4">
               {/* Logo */}
-              <Link
-                to="/"
-                className="flex items-center space-x-2 sm:space-x-3 group"
-              >
-                <motion.div
-                  style={{ scale: logoScale }}
-                  whileHover={{ scale: 1.05, rotate: 3 }}
-                  whileTap={{ scale: 0.95 }}
-                  className={`relative w-8 h-8 sm:w-10 sm:h-10 lg:w-12 lg:h-12 flex items-center justify-center bg-gradient-to-br ${pastelColors.mainHeader.logoBg} rounded-xl shadow-lg group-hover:shadow-xl transition-all duration-300`}
-                >
-                  <LayoutTemplate className="w-4 h-4 sm:w-5 sm:h-5 lg:w-6 lg:h-6 text-white font-bold" />
+              <Link to="/" className="flex items-center space-x-3 group">
+                <div className="relative">
                   <motion.div
-                    className={`absolute w-1.5 h-1.5 sm:w-2 sm:h-2 ${pastelColors.mainHeader.logoDot} rounded-full -top-0.5 -right-0.5 sm:-top-1 sm:-right-1`}
-                    animate={{
-                      scale: [1, 1.3, 1],
-                      opacity: [0.7, 1, 0.7],
+                    whileHover={{ scale: 1.1, rotate: 5 }}
+                    whileTap={{ scale: 0.9 }}
+                    className="flex items-center justify-center w-12 h-12 transition-all duration-300 shadow-lg bg-gradient-to-r from-pink-500 via-rose-500 to-red-500 rounded-xl group-hover:shadow-xl"
+                  >
+                    <span className="text-lg font-bold text-white">TM</span>
+                  </motion.div>
+                  <motion.div
+                    className="absolute flex items-center justify-center w-4 h-4 rounded-full -top-1 -right-1 bg-gradient-to-r from-orange-400 to-red-500"
+                    animate={{ rotate: 360 }}
+                    transition={{
+                      duration: 2,
+                      repeat: Infinity,
+                      ease: "linear",
                     }}
-                    transition={{ duration: 2, repeat: Infinity }}
-                  />
-                </motion.div>
-
+                  >
+                    <Sparkles className="w-2 h-2 text-white" />
+                  </motion.div>
+                </div>
                 <div className="flex flex-col">
                   <motion.h1
-                    className="text-base sm:text-lg lg:text-xl font-bold text-transparent bg-gradient-to-r from-pink-600 via-rose-600 to-red-600 bg-clip-text"
-                    animate={{ opacity: headerState.isCollapsed ? 0.7 : 1 }}
+                    className="text-xl font-bold text-transparent bg-gradient-to-r from-pink-600 via-rose-600 to-red-600 bg-clip-text"
+                    whileHover={{ scale: 1.02 }}
                   >
                     Template Market
                   </motion.h1>
-                  <AnimatePresence>
-                    {!headerState.isCollapsed && (
-                      <motion.p
-                        initial={{ opacity: 0, height: 0 }}
-                        animate={{ opacity: 1, height: "auto" }}
-                        exit={{ opacity: 0, height: 0 }}
-                        className="hidden sm:block text-xs text-muted-foreground -mt-1"
-                      >
-                        Welcome back to creativity 🎨
-                      </motion.p>
-                    )}
-                  </AnimatePresence>
+                  <p className="hidden sm:block text-xs text-slate-500 -mt-1">
+                    Premium Quality Store
+                  </p>
                 </div>
               </Link>
 
-              {/* Search Bar - Desktop Only */}
-              <div className="hidden lg:flex flex-1 max-w-2xl mx-8">
-                <motion.form
-                  onSubmit={handleSearch}
-                  className="relative w-full group"
-                  whileFocus={{ scale: 1.02 }}
-                  transition={{ duration: 0.2 }}
-                >
-                  <div
-                    className={`relative ${pastelColors.mainHeader.searchBg} backdrop-blur-sm rounded-xl border ${pastelColors.mainHeader.searchBorder} ${isSearchFocused ? pastelColors.mainHeader.searchFocus : ""} transition-all duration-300 group-hover:shadow-md`}
-                  >
-                    <Search className="absolute left-4 top-1/2 transform -translate-y-1/2 w-4 h-4 text-pink-500" />
-                    <Input
-                      type="text"
-                      placeholder="Tìm templates, components, e-books..."
-                      value={searchQuery}
-                      onChange={(e) => setSearchQuery(e.target.value)}
-                      onFocus={() => setIsSearchFocused(true)}
-                      onBlur={() => setIsSearchFocused(false)}
-                      className="pl-12 pr-4 py-3 w-full bg-transparent border-0 focus:ring-0 placeholder:text-pink-400"
-                    />
-                  </div>
-                </motion.form>
+              {/* ===== NAVIGATION MENU - DESKTOP CENTER ===== */}
+              <div className="hidden lg:block">
+                <NavigationMenu>
+                  <NavigationMenuList className="flex items-center space-x-1">
+                    {/* Templates với ENHANCED SUBMENU */}
+                    <NavigationMenuItem>
+                      <NavigationMenuTrigger className="h-10 px-4 rounded-lg font-medium hover:bg-pink-100/70 transition-colors flex items-center gap-2">
+                        <Package className="w-4 h-4" />
+                        Templates
+                        <Badge className="bg-red-500 text-white text-xs px-2 py-0.5 hover:bg-red-600 transition-colors">
+                          Hot
+                        </Badge>
+                      </NavigationMenuTrigger>
+                      <NavigationMenuContent className="z-[9999]">
+                        <div className="w-[600px] p-6 bg-gradient-to-br from-white via-pink-50/30 to-rose-50/30 shadow-2xl rounded-xl border border-pink-200/50 backdrop-blur-sm">
+                          <div className="grid grid-cols-3 gap-6">
+                            {/* Popular Categories với ENHANCED BACKGROUNDS */}
+                            <div className="space-y-3">
+                              <h4 className="font-semibold text-sm text-pink-600 flex items-center gap-2">
+                                <div className="p-1.5 rounded-lg bg-pink-100">
+                                  <Star className="w-4 h-4 text-pink-600" />
+                                </div>
+                                Popular Categories
+                              </h4>
+                              {[
+                                {
+                                  name: "React Templates",
+                                  icon: Code,
+                                  href: "/templates?category=react",
+                                  color:
+                                    "bg-gradient-to-br from-blue-50 to-blue-100",
+                                  iconColor: "text-blue-600",
+                                  borderColor: "border-blue-200",
+                                },
+                                {
+                                  name: "Vue Templates",
+                                  icon: Zap,
+                                  href: "/templates?category=vue",
+                                  color:
+                                    "bg-gradient-to-br from-green-50 to-green-100",
+                                  iconColor: "text-green-600",
+                                  borderColor: "border-green-200",
+                                },
+                                {
+                                  name: "HTML Templates",
+                                  icon: Globe,
+                                  href: "/templates?category=html",
+                                  color:
+                                    "bg-gradient-to-br from-orange-50 to-orange-100",
+                                  iconColor: "text-orange-600",
+                                  borderColor: "border-orange-200",
+                                },
+                                {
+                                  name: "Mobile Apps",
+                                  icon: Smartphone,
+                                  href: "/templates?category=mobile",
+                                  color:
+                                    "bg-gradient-to-br from-purple-50 to-purple-100",
+                                  iconColor: "text-purple-600",
+                                  borderColor: "border-purple-200",
+                                },
+                              ].map((item) => (
+                                <NavigationMenuLink
+                                  key={item.name}
+                                  href={item.href}
+                                  className={`flex items-center space-x-3 p-3 rounded-xl hover:bg-gradient-to-r hover:from-pink-50 hover:to-rose-50 transition-all duration-300 border border-transparent hover:${item.borderColor} hover:shadow-sm`}
+                                >
+                                  <div
+                                    className={`p-2 rounded-lg ${item.color} shadow-sm border ${item.borderColor}`}
+                                  >
+                                    <item.icon
+                                      className={`w-4 h-4 ${item.iconColor}`}
+                                    />
+                                  </div>
+                                  <span className="font-medium text-sm text-gray-700">
+                                    {item.name}
+                                  </span>
+                                </NavigationMenuLink>
+                              ))}
+                            </div>
+
+                            {/* By Industry với ENHANCED BACKGROUNDS */}
+                            <div className="space-y-3">
+                              <h4 className="font-semibold text-sm text-pink-600 flex items-center gap-2">
+                                <div className="p-1.5 rounded-lg bg-pink-100">
+                                  <BarChart3 className="w-4 h-4 text-pink-600" />
+                                </div>
+                                By Industry
+                              </h4>
+                              {[
+                                {
+                                  name: "E-commerce",
+                                  icon: ShoppingCart,
+                                  href: "/templates?industry=ecommerce",
+                                  color:
+                                    "bg-gradient-to-br from-pink-50 to-pink-100",
+                                  iconColor: "text-pink-600",
+                                  borderColor: "border-pink-200",
+                                },
+                                {
+                                  name: "SaaS",
+                                  icon: Database,
+                                  href: "/templates?industry=saas",
+                                  color:
+                                    "bg-gradient-to-br from-indigo-50 to-indigo-100",
+                                  iconColor: "text-indigo-600",
+                                  borderColor: "border-indigo-200",
+                                },
+                                {
+                                  name: "Portfolio",
+                                  icon: Award,
+                                  href: "/templates?industry=portfolio",
+                                  color:
+                                    "bg-gradient-to-br from-yellow-50 to-yellow-100",
+                                  iconColor: "text-yellow-600",
+                                  borderColor: "border-yellow-200",
+                                },
+                                {
+                                  name: "Corporate",
+                                  icon: FileText,
+                                  href: "/templates?industry=corporate",
+                                  color:
+                                    "bg-gradient-to-br from-gray-50 to-gray-100",
+                                  iconColor: "text-gray-600",
+                                  borderColor: "border-gray-200",
+                                },
+                              ].map((item) => (
+                                <NavigationMenuLink
+                                  key={item.name}
+                                  href={item.href}
+                                  className={`flex items-center space-x-3 p-3 rounded-xl hover:bg-gradient-to-r hover:from-pink-50 hover:to-rose-50 transition-all duration-300 border border-transparent hover:${item.borderColor} hover:shadow-sm`}
+                                >
+                                  <div
+                                    className={`p-2 rounded-lg ${item.color} shadow-sm border ${item.borderColor}`}
+                                  >
+                                    <item.icon
+                                      className={`w-4 h-4 ${item.iconColor}`}
+                                    />
+                                  </div>
+                                  <span className="font-medium text-sm text-gray-700">
+                                    {item.name}
+                                  </span>
+                                </NavigationMenuLink>
+                              ))}
+                            </div>
+
+                            {/* Featured với ENHANCED DESIGN */}
+                            <div className="space-y-3">
+                              <h4 className="font-semibold text-sm text-pink-600 flex items-center gap-2">
+                                <div className="p-1.5 rounded-lg bg-pink-100">
+                                  <Crown className="w-4 h-4 text-pink-600" />
+                                </div>
+                                Featured
+                              </h4>
+                              <div className="bg-gradient-to-br from-pink-100 via-rose-100 to-pink-200 p-4 rounded-xl border border-pink-200 shadow-sm">
+                                <div className="flex items-center gap-2 mb-2">
+                                  <div className="p-1 rounded-full bg-white shadow-sm">
+                                    <Sparkles className="w-3 h-3 text-pink-600" />
+                                  </div>
+                                  <span className="font-semibold text-sm text-pink-700">
+                                    New Release
+                                  </span>
+                                </div>
+                                <p className="text-xs text-pink-600 mb-3">
+                                  Premium React Dashboard với 100+ components
+                                </p>
+                                <Button
+                                  size="sm"
+                                  className="w-full bg-gradient-to-r from-pink-500 to-rose-500 hover:from-pink-600 hover:to-rose-600 text-white text-xs shadow-lg"
+                                >
+                                  Xem ngay
+                                  <ArrowRight className="w-3 h-3 ml-1" />
+                                </Button>
+                              </div>
+
+                              <div className="space-y-2">
+                                <NavigationMenuLink
+                                  href="/templates?featured=true"
+                                  className="block p-3 rounded-xl hover:bg-gradient-to-r hover:from-orange-50 hover:to-yellow-50 border border-transparent hover:border-orange-200 transition-all hover:shadow-sm"
+                                >
+                                  <div className="flex items-center gap-2">
+                                    <div className="p-1 rounded-lg bg-gradient-to-br from-orange-50 to-orange-100 border border-orange-200">
+                                      <TrendingUp className="w-4 h-4 text-orange-500" />
+                                    </div>
+                                    <span className="text-sm font-medium">
+                                      Trending Templates
+                                    </span>
+                                  </div>
+                                </NavigationMenuLink>
+                                <NavigationMenuLink
+                                  href="/templates?new=true"
+                                  className="block p-3 rounded-xl hover:bg-gradient-to-r hover:from-blue-50 hover:to-sky-50 border border-transparent hover:border-blue-200 transition-all hover:shadow-sm"
+                                >
+                                  <div className="flex items-center gap-2">
+                                    <div className="p-1 rounded-lg bg-gradient-to-br from-blue-50 to-blue-100 border border-blue-200">
+                                      <Clock className="w-4 h-4 text-blue-500" />
+                                    </div>
+                                    <span className="text-sm font-medium">
+                                      Recently Added
+                                    </span>
+                                  </div>
+                                </NavigationMenuLink>
+                              </div>
+                            </div>
+                          </div>
+
+                          {/* Bottom CTA */}
+                          <div className="mt-6 pt-4 border-t border-pink-200/50 bg-gradient-to-r from-pink-50/50 to-rose-50/50 rounded-lg px-4 py-3">
+                            <div className="flex items-center justify-between">
+                              <div className="flex items-center gap-2 text-sm text-pink-700">
+                                <div className="p-1 rounded-full bg-green-100">
+                                  <CheckCircle className="w-4 h-4 text-green-500" />
+                                </div>
+                                <span className="font-medium">
+                                  2,500+ Templates available
+                                </span>
+                              </div>
+                              <Button
+                                variant="outline"
+                                size="sm"
+                                className="border-pink-300 hover:bg-pink-50"
+                                asChild
+                              >
+                                <Link to="/templates">
+                                  View All Templates
+                                  <ArrowRight className="w-4 h-4 ml-1" />
+                                </Link>
+                              </Button>
+                            </div>
+                          </div>
+                        </div>
+                      </NavigationMenuContent>
+                    </NavigationMenuItem>
+
+                    {/* E-books với ENHANCED SUBMENU */}
+                    <NavigationMenuItem>
+                      <NavigationMenuTrigger className="h-10 px-4 rounded-lg font-medium hover:bg-pink-100/70 transition-colors flex items-center gap-2">
+                        <BookOpen className="w-4 h-4" />
+                        E-books
+                        <Badge className="bg-green-500 text-white text-xs px-2 py-0.5 hover:bg-green-600 transition-colors">
+                          New
+                        </Badge>
+                      </NavigationMenuTrigger>
+                      <NavigationMenuContent className="z-[9999]">
+                        <div className="w-[600px] p-6 bg-gradient-to-br from-white via-purple-50/30 to-indigo-50/30 shadow-2xl rounded-xl border border-purple-200/50 backdrop-blur-sm">
+                          <div className="grid grid-cols-3 gap-6">
+                            {/* Development với ENHANCED BACKGROUNDS */}
+                            <div className="space-y-3">
+                              <h4 className="font-semibold text-sm text-purple-600 flex items-center gap-2">
+                                <div className="p-1.5 rounded-lg bg-purple-100">
+                                  <Code className="w-4 h-4 text-purple-600" />
+                                </div>
+                                Development
+                              </h4>
+                              {[
+                                {
+                                  name: "React Mastery",
+                                  icon: Code,
+                                  href: "/ebooks?category=react",
+                                  color:
+                                    "bg-gradient-to-br from-blue-50 to-blue-100",
+                                  iconColor: "text-blue-600",
+                                  borderColor: "border-blue-200",
+                                },
+                                {
+                                  name: "JavaScript Guide",
+                                  icon: Zap,
+                                  href: "/ebooks?category=javascript",
+                                  color:
+                                    "bg-gradient-to-br from-yellow-50 to-yellow-100",
+                                  iconColor: "text-yellow-600",
+                                  borderColor: "border-yellow-200",
+                                },
+                                {
+                                  name: "Node.js Handbook",
+                                  icon: Database,
+                                  href: "/ebooks?category=nodejs",
+                                  color:
+                                    "bg-gradient-to-br from-green-50 to-green-100",
+                                  iconColor: "text-green-600",
+                                  borderColor: "border-green-200",
+                                },
+                                {
+                                  name: "TypeScript Pro",
+                                  icon: Shield,
+                                  href: "/ebooks?category=typescript",
+                                  color:
+                                    "bg-gradient-to-br from-indigo-50 to-indigo-100",
+                                  iconColor: "text-indigo-600",
+                                  borderColor: "border-indigo-200",
+                                },
+                              ].map((item) => (
+                                <NavigationMenuLink
+                                  key={item.name}
+                                  href={item.href}
+                                  className={`flex items-center space-x-3 p-3 rounded-xl hover:bg-gradient-to-r hover:from-purple-50 hover:to-indigo-50 transition-all duration-300 border border-transparent hover:${item.borderColor} hover:shadow-sm`}
+                                >
+                                  <div
+                                    className={`p-2 rounded-lg ${item.color} shadow-sm border ${item.borderColor}`}
+                                  >
+                                    <item.icon
+                                      className={`w-4 h-4 ${item.iconColor}`}
+                                    />
+                                  </div>
+                                  <span className="font-medium text-sm text-gray-700">
+                                    {item.name}
+                                  </span>
+                                </NavigationMenuLink>
+                              ))}
+                            </div>
+
+                            {/* Design với ENHANCED BACKGROUNDS */}
+                            <div className="space-y-3">
+                              <h4 className="font-semibold text-sm text-purple-600 flex items-center gap-2">
+                                <div className="p-1.5 rounded-lg bg-purple-100">
+                                  <Palette className="w-4 h-4 text-purple-600" />
+                                </div>
+                                Design & UX
+                              </h4>
+                              {[
+                                {
+                                  name: "Design Systems",
+                                  icon: Palette,
+                                  href: "/ebooks?category=design-systems",
+                                  color:
+                                    "bg-gradient-to-br from-pink-50 to-pink-100",
+                                  iconColor: "text-pink-600",
+                                  borderColor: "border-pink-200",
+                                },
+                                {
+                                  name: "UI/UX Principles",
+                                  icon: Sparkles,
+                                  href: "/ebooks?category=uiux",
+                                  color:
+                                    "bg-gradient-to-br from-purple-50 to-purple-100",
+                                  iconColor: "text-purple-600",
+                                  borderColor: "border-purple-200",
+                                },
+                                {
+                                  name: "Color Theory",
+                                  icon: Palette,
+                                  href: "/ebooks?category=color",
+                                  color:
+                                    "bg-gradient-to-br from-orange-50 to-orange-100",
+                                  iconColor: "text-orange-600",
+                                  borderColor: "border-orange-200",
+                                },
+                                {
+                                  name: "Typography",
+                                  icon: FileText,
+                                  href: "/ebooks?category=typography",
+                                  color:
+                                    "bg-gradient-to-br from-gray-50 to-gray-100",
+                                  iconColor: "text-gray-600",
+                                  borderColor: "border-gray-200",
+                                },
+                              ].map((item) => (
+                                <NavigationMenuLink
+                                  key={item.name}
+                                  href={item.href}
+                                  className={`flex items-center space-x-3 p-3 rounded-xl hover:bg-gradient-to-r hover:from-purple-50 hover:to-indigo-50 transition-all duration-300 border border-transparent hover:${item.borderColor} hover:shadow-sm`}
+                                >
+                                  <div
+                                    className={`p-2 rounded-lg ${item.color} shadow-sm border ${item.borderColor}`}
+                                  >
+                                    <item.icon
+                                      className={`w-4 h-4 ${item.iconColor}`}
+                                    />
+                                  </div>
+                                  <span className="font-medium text-sm text-gray-700">
+                                    {item.name}
+                                  </span>
+                                </NavigationMenuLink>
+                              ))}
+                            </div>
+
+                            {/* Business với ENHANCED DESIGN */}
+                            <div className="space-y-3">
+                              <h4 className="font-semibold text-sm text-purple-600 flex items-center gap-2">
+                                <div className="p-1.5 rounded-lg bg-purple-100">
+                                  <TrendingUp className="w-4 h-4 text-purple-600" />
+                                </div>
+                                Business
+                              </h4>
+                              <div className="bg-gradient-to-br from-purple-100 via-indigo-100 to-purple-200 p-4 rounded-xl border border-purple-200 shadow-sm">
+                                <div className="flex items-center gap-2 mb-2">
+                                  <div className="p-1 rounded-full bg-white shadow-sm">
+                                    <Crown className="w-3 h-3 text-purple-600" />
+                                  </div>
+                                  <span className="font-semibold text-sm text-purple-700">
+                                    Bestseller
+                                  </span>
+                                </div>
+                                <p className="text-xs text-purple-600 mb-3">
+                                  Complete Guide to Building SaaS Products
+                                </p>
+                                <Button
+                                  size="sm"
+                                  className="w-full bg-gradient-to-r from-purple-500 to-indigo-500 hover:from-purple-600 hover:to-indigo-600 text-white text-xs shadow-lg"
+                                >
+                                  Download Now
+                                  <Download className="w-3 h-3 ml-1" />
+                                </Button>
+                              </div>
+
+                              <div className="space-y-2">
+                                <NavigationMenuLink
+                                  href="/ebooks?category=marketing"
+                                  className="block p-3 rounded-xl hover:bg-gradient-to-r hover:from-green-50 hover:to-emerald-50 border border-transparent hover:border-green-200 transition-all hover:shadow-sm"
+                                >
+                                  <div className="flex items-center gap-2">
+                                    <div className="p-1 rounded-lg bg-gradient-to-br from-green-50 to-green-100 border border-green-200">
+                                      <TrendingUp className="w-4 h-4 text-green-500" />
+                                    </div>
+                                    <span className="text-sm font-medium">
+                                      Marketing
+                                    </span>
+                                  </div>
+                                </NavigationMenuLink>
+                                <NavigationMenuLink
+                                  href="/ebooks?category=startup"
+                                  className="block p-3 rounded-xl hover:bg-gradient-to-r hover:from-orange-50 hover:to-red-50 border border-transparent hover:border-orange-200 transition-all hover:shadow-sm"
+                                >
+                                  <div className="flex items-center gap-2">
+                                    <div className="p-1 rounded-lg bg-gradient-to-br from-orange-50 to-orange-100 border border-orange-200">
+                                      <Zap className="w-4 h-4 text-orange-500" />
+                                    </div>
+                                    <span className="text-sm font-medium">
+                                      Startup Guide
+                                    </span>
+                                  </div>
+                                </NavigationMenuLink>
+                              </div>
+                            </div>
+                          </div>
+
+                          {/* Bottom Stats */}
+                          <div className="mt-6 pt-4 border-t border-purple-200/50 bg-gradient-to-r from-purple-50/50 to-indigo-50/50 rounded-lg px-4 py-3">
+                            <div className="flex items-center justify-between">
+                              <div className="flex items-center gap-4">
+                                <div className="flex items-center gap-2 text-sm text-purple-700">
+                                  <div className="p-1 rounded-full bg-purple-100">
+                                    <BookOpen className="w-4 h-4 text-purple-500" />
+                                  </div>
+                                  <span className="font-medium">
+                                    1,200+ E-books
+                                  </span>
+                                </div>
+                                <div className="flex items-center gap-2 text-sm text-purple-700">
+                                  <div className="p-1 rounded-full bg-green-100">
+                                    <Download className="w-4 h-4 text-green-500" />
+                                  </div>
+                                  <span className="font-medium">
+                                    50K+ Downloads
+                                  </span>
+                                </div>
+                              </div>
+                              <Button
+                                variant="outline"
+                                size="sm"
+                                className="border-purple-300 hover:bg-purple-50"
+                                asChild
+                              >
+                                <Link to="/ebooks">
+                                  Browse All E-books
+                                  <ArrowRight className="w-4 h-4 ml-1" />
+                                </Link>
+                              </Button>
+                            </div>
+                          </div>
+                        </div>
+                      </NavigationMenuContent>
+                    </NavigationMenuItem>
+
+                    {/* Simple Links */}
+                    <NavigationMenuItem>
+                      <NavigationMenuLink
+                        className="inline-flex h-10 w-max items-center justify-center rounded-lg px-4 py-2 text-sm font-medium transition-colors hover:bg-pink-100/70"
+                        href="/pricing"
+                      >
+                        <Tag className="w-4 h-4 mr-2" />
+                        Pricing
+                      </NavigationMenuLink>
+                    </NavigationMenuItem>
+
+                    <NavigationMenuItem>
+                      <NavigationMenuLink
+                        className="inline-flex h-10 w-max items-center justify-center rounded-lg px-4 py-2 text-sm font-medium transition-colors hover:bg-pink-100/70"
+                        href="/blog"
+                      >
+                        <MessageCircle className="w-4 h-4 mr-2" />
+                        Blog
+                      </NavigationMenuLink>
+                    </NavigationMenuItem>
+
+                    {/* Admin Panel - Conditional */}
+                    {user && isAdmin(user) && (
+                      <NavigationMenuItem>
+                        <NavigationMenuLink
+                          className="inline-flex h-10 w-max items-center justify-center rounded-lg px-4 py-2 text-sm font-medium transition-colors hover:bg-pink-100/70"
+                          href="/admin"
+                        >
+                          <Shield className="w-4 h-4 mr-2" />
+                          Admin Panel
+                          <Badge className="ml-2 bg-pink-200 text-pink-800 text-xs px-2 py-0">
+                            <Crown className="w-3 h-3" />
+                          </Badge>
+                        </NavigationMenuLink>
+                      </NavigationMenuItem>
+                    )}
+                  </NavigationMenuList>
+                </NavigationMenu>
               </div>
 
-              {/* Action Buttons - Mobile Optimized */}
-              <div className="flex items-center space-x-1 sm:space-x-2">
-                {/* Mobile Search */}
+              {/* Action Buttons - RIGHT SIDE */}
+              <div className="flex items-center space-x-2">
+                {/* Search Icon Button */}
                 <Button
                   variant="ghost"
                   size="sm"
-                  className={`lg:hidden p-1.5 sm:p-2 ${pastelColors.mainHeader.buttonHover}`}
+                  className="p-2 hover:bg-pink-100/70 relative group"
+                  onClick={openSearchModal}
                 >
-                  <Search className="w-4 h-4" />
+                  <Search className="w-5 h-5" />
+                  <span className="absolute -bottom-8 left-1/2 transform -translate-x-1/2 text-xs text-muted-foreground opacity-0 group-hover:opacity-100 transition-opacity whitespace-nowrap">
+                    Ctrl+K
+                  </span>
                 </Button>
 
-                {/* Cart - Always Visible */}
+                {/* Wishlist */}
                 <Button
                   variant="ghost"
                   size="sm"
-                  className={`relative p-1.5 sm:p-2 ${pastelColors.mainHeader.buttonHover}`}
+                  className="relative p-2 hover:bg-pink-100/70"
+                  asChild
+                >
+                  <Link to="/wishlist">
+                    <Heart className="w-5 h-5" />
+                    {totalWishlistItems > 0 && (
+                      <Badge className="absolute -top-1 -right-1 w-5 h-5 flex items-center justify-center p-0 text-xs bg-red-500 text-white">
+                        {totalWishlistItems}
+                      </Badge>
+                    )}
+                  </Link>
+                </Button>
+
+                {/* Cart */}
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  className="relative p-2 hover:bg-pink-100/70"
                   asChild
                 >
                   <Link to="/cart">
-                    <ShoppingCart className="w-4 h-4" />
+                    <ShoppingCart className="w-5 h-5" />
                     {totalItems > 0 && (
-                      <Badge className="absolute -top-1 -right-1 w-4 h-4 sm:w-5 sm:h-5 flex items-center justify-center p-0 text-xs bg-pink-500">
+                      <Badge className="absolute -top-1 -right-1 w-5 h-5 flex items-center justify-center p-0 text-xs bg-pink-500 text-white">
                         {totalItems}
                       </Badge>
                     )}
                   </Link>
                 </Button>
 
-                {/* User Menu or Auth - Always Visible */}
+                {/* User Menu or Auth */}
                 {user ? (
                   <DropdownMenu>
                     <DropdownMenuTrigger asChild>
                       <Button
                         variant="ghost"
-                        className="relative h-7 w-7 sm:h-8 sm:w-8 rounded-full"
+                        className="relative h-8 w-8 rounded-full"
                       >
-                        <Avatar className="h-7 w-7 sm:h-8 sm:w-8">
+                        <Avatar className="h-8 w-8">
                           <AvatarImage src={user.avatar} alt={user.name} />
-                          <AvatarFallback className="bg-gradient-to-br from-pink-400 to-rose-500 text-white text-xs">
+                          <AvatarFallback className="bg-gradient-to-br from-pink-500 via-rose-500 to-red-500 text-white text-xs">
                             {getInitials(user.name)}
                           </AvatarFallback>
                         </Avatar>
@@ -544,6 +994,7 @@ const Header: React.FC = () => {
                         </div>
                       </DropdownMenuLabel>
                       <DropdownMenuSeparator />
+
                       {isAdmin(user) && (
                         <>
                           <DropdownMenuItem asChild>
@@ -555,24 +1006,23 @@ const Header: React.FC = () => {
                           <DropdownMenuSeparator />
                         </>
                       )}
+
                       <DropdownMenuItem asChild>
                         <Link to="/profile">
                           <User className="mr-2 h-4 w-4" />
                           Profile
                         </Link>
                       </DropdownMenuItem>
+
                       <DropdownMenuItem asChild>
-                        <Link to="/wishlist">
-                          <Heart className="mr-2 h-4 w-4" />
-                          Wishlist ({totalWishlistItems})
-                        </Link>
-                      </DropdownMenuItem>
-                      <DropdownMenuItem asChild>
-                        <Link to="/orders">
+                        <Link to="/my-orders">
                           <Package className="mr-2 h-4 w-4" />
                           Orders
                         </Link>
                       </DropdownMenuItem>
+
+                      <DropdownMenuSeparator />
+
                       <DropdownMenuItem onClick={handleLogout}>
                         <LogOut className="mr-2 h-4 w-4" />
                         Log out
@@ -580,18 +1030,18 @@ const Header: React.FC = () => {
                     </DropdownMenuContent>
                   </DropdownMenu>
                 ) : (
-                  <div className="flex items-center space-x-1 sm:space-x-2">
+                  <div className="flex items-center space-x-2">
                     <Button
                       variant="ghost"
                       size="sm"
-                      className="hidden sm:flex text-xs sm:text-sm px-2 sm:px-3"
+                      className="hidden sm:flex text-sm px-3 hover:bg-pink-100/70"
                       asChild
                     >
                       <Link to="/auth/login">Đăng nhập</Link>
                     </Button>
                     <Button
                       size="sm"
-                      className={`bg-gradient-to-r ${pastelColors.mainHeader.authButton} text-white text-xs sm:text-sm px-2 sm:px-4 h-8 sm:h-9`}
+                      className="bg-gradient-to-r from-pink-500 via-rose-500 to-red-500 hover:from-pink-600 hover:via-rose-600 hover:to-red-600 text-white text-sm px-4 h-9 shadow-md"
                       asChild
                     >
                       <Link to="/auth/register">Đăng ký</Link>
@@ -608,629 +1058,154 @@ const Header: React.FC = () => {
                     <Button
                       variant="ghost"
                       size="sm"
-                      className={`lg:hidden p-1.5 sm:p-2 ${pastelColors.mainHeader.buttonHover}`}
+                      className="lg:hidden p-2 hover:bg-pink-100/70"
                     >
-                      <Menu className="w-4 h-4" />
+                      <Menu className="w-5 h-5" />
                     </Button>
                   </SheetTrigger>
-                  <SheetContent side="right" className="w-72">
-                    <SheetHeader>
-                      <SheetTitle className="text-left">
+                  <SheetContent
+                    side="right"
+                    className="w-80 bg-gradient-to-br from-pink-50 via-white to-rose-50 border-l border-pink-200/50"
+                  >
+                    <SheetHeader className="bg-gradient-to-r from-pink-100 to-rose-100 -mx-6 -mt-6 px-6 pt-6 pb-4 border-b border-pink-200/50">
+                      <SheetTitle className="text-transparent bg-gradient-to-r from-pink-600 via-rose-600 to-red-600 bg-clip-text flex items-center gap-2">
+                        <LayoutTemplate className="w-5 h-5 text-pink-600" />
                         Template Market
                       </SheetTitle>
-                      <SheetDescription className="text-left">
-                        Premium template store
-                      </SheetDescription>
                     </SheetHeader>
 
-                    {/* Mobile Menu Items - Compact */}
-                    <div className="mt-6 space-y-2">
-                      {[
-                        {
-                          name: "Templates",
-                          href: "/templates",
-                          icon: LayoutTemplate,
-                          badge: "Hot",
-                        },
-                        {
-                          name: "E-books",
-                          href: "/ebooks",
-                          icon: BookOpen,
-                          badge: "New",
-                        },
-                        { name: "Pricing", href: "/pricing", icon: Tag },
-                        { name: "Blog", href: "/blog", icon: FileText },
-                      ].map((item) => (
+                    {/* Mobile menu content */}
+                    <div className="mt-6 space-y-4">
+                      <Button
+                        variant="outline"
+                        className="w-full justify-start bg-gradient-to-r from-pink-50 to-rose-50 border-pink-200 hover:from-pink-100 hover:to-rose-100"
+                        onClick={() => {
+                          setIsMobileMenuOpen(false);
+                          openSearchModal();
+                        }}
+                      >
+                        <Search className="w-4 h-4 mr-3 text-pink-600" />
+                        <span>Tìm kiếm</span>
+                        <Badge className="ml-auto bg-pink-200 text-pink-800 text-xs">
+                          Ctrl+K
+                        </Badge>
+                      </Button>
+
+                      <Link
+                        to="/templates"
+                        className="flex items-center space-x-3 p-3 rounded-lg hover:bg-gradient-to-r hover:from-pink-50 hover:to-rose-50 transition-all duration-300 border border-transparent hover:border-pink-200"
+                        onClick={() => setIsMobileMenuOpen(false)}
+                      >
+                        <Package className="w-5 h-5 text-pink-600" />
+                        <span>Templates</span>
+                        <Badge className="bg-red-500 text-white text-xs ml-auto">
+                          Hot
+                        </Badge>
+                      </Link>
+                      <Link
+                        to="/ebooks"
+                        className="flex items-center space-x-3 p-3 rounded-lg hover:bg-gradient-to-r hover:from-pink-50 hover:to-rose-50 transition-all duration-300 border border-transparent hover:border-pink-200"
+                        onClick={() => setIsMobileMenuOpen(false)}
+                      >
+                        <BookOpen className="w-5 h-5 text-pink-600" />
+                        <span>E-books</span>
+                        <Badge className="bg-green-500 text-white text-xs ml-auto">
+                          New
+                        </Badge>
+                      </Link>
+                      <Link
+                        to="/pricing"
+                        className="flex items-center space-x-3 p-3 rounded-lg hover:bg-gradient-to-r hover:from-pink-50 hover:to-rose-50 transition-all duration-300 border border-transparent hover:border-pink-200"
+                        onClick={() => setIsMobileMenuOpen(false)}
+                      >
+                        <Tag className="w-5 h-5 text-pink-600" />
+                        <span>Pricing</span>
+                      </Link>
+                      <Link
+                        to="/blog"
+                        className="flex items-center space-x-3 p-3 rounded-lg hover:bg-gradient-to-r hover:from-pink-50 hover:to-rose-50 transition-all duration-300 border border-transparent hover:border-pink-200"
+                        onClick={() => setIsMobileMenuOpen(false)}
+                      >
+                        <MessageCircle className="w-5 h-5 text-pink-600" />
+                        <span>Blog</span>
+                      </Link>
+                      {user && isAdmin(user) && (
                         <Link
-                          key={item.name}
-                          to={item.href}
-                          className="flex items-center justify-between p-3 rounded-lg hover:bg-pink-50 transition-colors group"
+                          to="/admin"
+                          className="flex items-center space-x-3 p-3 rounded-lg hover:bg-gradient-to-r hover:from-pink-50 hover:to-rose-50 transition-all duration-300 border border-transparent hover:border-pink-200"
                           onClick={() => setIsMobileMenuOpen(false)}
                         >
-                          <div className="flex items-center space-x-3">
-                            <item.icon className="w-5 h-5 text-pink-600" />
-                            <span className="font-medium">{item.name}</span>
-                          </div>
-                          {item.badge && (
-                            <Badge className="bg-pink-100 text-pink-700 text-xs">
-                              {item.badge}
-                            </Badge>
-                          )}
+                          <Shield className="w-5 h-5 text-pink-600" />
+                          <span>Admin Panel</span>
+                          <Badge className="bg-pink-200 text-pink-800 text-xs ml-auto">
+                            <Crown className="w-3 h-3" />
+                          </Badge>
                         </Link>
-                      ))}
-                    </div>
+                      )}
 
-                    {/* User Actions - Compact */}
-                    {!user && (
-                      <div className="mt-6 pt-4 border-t space-y-2">
-                        <Button asChild className="w-full" variant="outline">
-                          <Link to="/auth/login">Đăng nhập</Link>
-                        </Button>
-                        <Button
-                          asChild
-                          className="w-full bg-gradient-to-r from-pink-500 to-rose-500"
-                        >
-                          <Link to="/auth/register">Đăng ký</Link>
-                        </Button>
-                      </div>
-                    )}
+                      {/* Contact Info - Mobile Only */}
+                      <div className="mt-8 pt-4 border-t border-pink-200/50">
+                        <p className="text-xs text-pink-600 font-semibold mb-3 flex items-center gap-2">
+                          <Phone className="w-3 h-3" />
+                          Liên hệ hỗ trợ:
+                        </p>
+                        <div className="space-y-2 text-sm text-gray-600">
+                          <div className="flex items-center gap-2">
+                            <Phone className="w-3 h-3" />
+                            <span>0971.385.588</span>
+                          </div>
+                          <div className="flex items-center gap-2">
+                            <Mail className="w-3 h-3" />
+                            <span>veutong961@gmail.com</span>
+                          </div>
+                        </div>
 
-                    {/* Theme Toggle - Compact */}
-                    <div className="mt-6 pt-4 border-t">
-                      <p className="text-sm font-semibold mb-3">Giao diện</p>
-                      <div className="grid grid-cols-3 gap-2">
-                        {[
-                          { value: "light", icon: Sun, label: "Sáng" },
-                          { value: "dark", icon: Moon, label: "Tối" },
-                          { value: "system", icon: Monitor, label: "Hệ thống" },
-                        ].map((themeOption) => (
-                          <Button
-                            key={themeOption.value}
-                            variant={
-                              theme === themeOption.value
-                                ? "default"
-                                : "outline"
-                            }
-                            size="sm"
-                            onClick={() => setTheme(themeOption.value as any)}
-                            className="flex flex-col items-center gap-1 h-auto py-2"
-                          >
-                            <themeOption.icon className="w-3 h-3" />
-                            <span className="text-xs">{themeOption.label}</span>
-                          </Button>
-                        ))}
+                        {/* Social Links - Mobile */}
+                        <div className="flex items-center gap-3 mt-4">
+                          {[
+                            {
+                              icon: Facebook,
+                              href: "#",
+                              color:
+                                "text-blue-600 bg-blue-50 hover:bg-blue-100",
+                            },
+                            {
+                              icon: Instagram,
+                              href: "#",
+                              color:
+                                "text-pink-600 bg-pink-50 hover:bg-pink-100",
+                            },
+                            {
+                              icon: Twitter,
+                              href: "#",
+                              color: "text-sky-600 bg-sky-50 hover:bg-sky-100",
+                            },
+                            {
+                              icon: Youtube,
+                              href: "#",
+                              color: "text-red-600 bg-red-50 hover:bg-red-100",
+                            },
+                          ].map((social, index) => (
+                            <motion.a
+                              key={index}
+                              href={social.href}
+                              whileHover={{ scale: 1.1 }}
+                              whileTap={{ scale: 0.9 }}
+                              className={`p-2 rounded-lg ${social.color} transition-all shadow-sm`}
+                            >
+                              <social.icon className="w-4 h-4" />
+                            </motion.a>
+                          ))}
+                        </div>
                       </div>
                     </div>
                   </SheetContent>
                 </Sheet>
               </div>
-            </motion.div>
+            </div>
           </div>
-        </motion.div>
-
-        {/* ===== NAVIGATION MENU - Desktop Only - NO SPACING ===== */}
-        <AnimatePresence>
-          {!headerState.isCollapsed && (
-            <motion.div
-              initial={{ opacity: 0, height: 0 }}
-              animate={{ opacity: 1, height: "auto" }}
-              exit={{ opacity: 0, height: 0 }}
-              transition={{ duration: 0.3 }}
-              className={`hidden lg:block ${pastelColors.navigation.background} border-b ${pastelColors.navigation.border}`}
-            >
-              <div className="container px-4 mx-auto">
-                <div className="relative flex justify-center py-3">
-                  <NavigationMenu>
-                    {/* ===== NAVIGATION LIST - NO SPACING ===== */}
-                    <NavigationMenuList className="flex items-center gap-0">
-                      {/* ===== TEMPLATES - NO SPACING ===== */}
-                      <NavigationMenuItem>
-                        <NavigationMenuTrigger
-                          className={`group h-10 px-4 rounded-lg font-medium ${pastelColors.navigation.navHover} transition-colors flex items-center gap-2`}
-                        >
-                          <Package className="w-4 h-4" />
-                          Templates
-                          <Badge
-                            className={`${pastelColors.navigation.badgeHot}`}
-                          >
-                            Hot
-                          </Badge>
-                        </NavigationMenuTrigger>
-                        <NavigationMenuContent className="z-[9999]">
-                          {/* Templates Mega Menu Content */}
-                          <div className="w-[600px] h-[450px] bg-white dark:bg-slate-900 shadow-2xl border-0 rounded-xl overflow-hidden">
-                            {/* Header */}
-                            <div
-                              className={`bg-gradient-to-r ${pastelColors.dropdown.headerBg} p-4 border-b border-pink-200/50`}
-                            >
-                              <div className="flex items-center justify-between">
-                                <div>
-                                  <h3
-                                    className={`text-lg font-bold text-transparent bg-gradient-to-r ${pastelColors.dropdown.titleGradient} bg-clip-text`}
-                                  >
-                                    Template Categories
-                                  </h3>
-                                  <p className="text-xs text-muted-foreground mt-0.5">
-                                    Premium templates for modern web
-                                  </p>
-                                </div>
-                                <NavigationMenuLink asChild>
-                                  <Link
-                                    to="/templates"
-                                    className={`flex items-center space-x-1 px-3 py-1.5 ${pastelColors.dropdown.cardBg} rounded-lg hover:bg-pink-50 transition-colors text-xs font-medium border border-pink-200/50`}
-                                  >
-                                    <span>Xem tất cả</span>
-                                    <ArrowRight className="w-3 h-3" />
-                                  </Link>
-                                </NavigationMenuLink>
-                              </div>
-                            </div>
-
-                            {/* Content */}
-                            <div className="h-[386px] overflow-y-auto overflow-x-hidden scrollbar-thin scrollbar-thumb-pink-300 hover:scrollbar-thumb-pink-400 scrollbar-track-transparent">
-                              <div className="p-4">
-                                <div className="grid grid-cols-4 gap-4">
-                                  {/* Categories */}
-                                  <div className="col-span-3">
-                                    <div className="grid grid-cols-3 gap-3">
-                                      {[
-                                        {
-                                          name: "React Templates",
-                                          subtitle: "Components",
-                                          tag: "react",
-                                          icon: Code,
-                                          color: "from-pink-400 to-rose-500",
-                                          count: "200+",
-                                          badge: "Hot",
-                                          badgeColor:
-                                            pastelColors.navigation.badgeHot,
-                                        },
-                                        {
-                                          name: "Vue Templates",
-                                          subtitle: "Templates",
-                                          tag: "vue",
-                                          icon: Zap,
-                                          color: "from-rose-400 to-red-500",
-                                          count: "150+",
-                                          badge: "Popular",
-                                          badgeColor:
-                                            pastelColors.navigation.badgeNew,
-                                        },
-                                        {
-                                          name: "HTML Templates",
-                                          subtitle: "Static",
-                                          tag: "html",
-                                          icon: Globe,
-                                          color: "from-orange-400 to-pink-500",
-                                          count: "100+",
-                                        },
-                                        {
-                                          name: "Mobile Apps",
-                                          subtitle: "Apps",
-                                          tag: "mobile",
-                                          icon: Smartphone,
-                                          color: "from-purple-400 to-pink-500",
-                                          count: "80+",
-                                          badge: "New",
-                                          badgeColor:
-                                            "bg-purple-100 text-purple-700",
-                                        },
-                                        {
-                                          name: "Admin Panels",
-                                          subtitle: "Dashboards",
-                                          tag: "admin",
-                                          icon: Grid,
-                                          color: "from-red-400 to-pink-500",
-                                          count: "120+",
-                                          badge: "Pro",
-                                          badgeColor: "bg-red-100 text-red-700",
-                                        },
-                                        {
-                                          name: "E-commerce",
-                                          subtitle: "Stores",
-                                          tag: "ecommerce",
-                                          icon: Database,
-                                          color: "from-pink-400 to-red-500",
-                                          count: "90+",
-                                        },
-                                      ].map((category, index) => (
-                                        <motion.button
-                                          key={category.tag}
-                                          onClick={() =>
-                                            navigate(
-                                              `/templates?tag=${category.tag}`,
-                                            )
-                                          }
-                                          className={`group p-3 ${pastelColors.dropdown.cardBg} rounded-lg border border-pink-200/30 ${pastelColors.dropdown.cardHover} hover:shadow-md transition-all duration-300 text-left`}
-                                          whileHover={{ y: -1 }}
-                                          initial={{ opacity: 0, y: 10 }}
-                                          animate={{ opacity: 1, y: 0 }}
-                                          transition={{ delay: index * 0.03 }}
-                                        >
-                                          <div
-                                            className={cn(
-                                              "w-8 h-8 rounded-lg bg-gradient-to-r flex items-center justify-center mb-2 group-hover:scale-105 transition-transform duration-300",
-                                              category.color,
-                                            )}
-                                          >
-                                            <category.icon className="w-4 h-4 text-white" />
-                                          </div>
-
-                                          <div>
-                                            <div className="font-medium text-sm text-gray-900 dark:text-gray-100 group-hover:text-pink-700 transition-colors duration-300">
-                                              {category.name}
-                                            </div>
-                                            <div className="text-xs text-muted-foreground">
-                                              {category.subtitle}
-                                            </div>
-                                            <div className="flex items-center justify-between mt-1">
-                                              <span className="text-xs font-semibold text-pink-600">
-                                                {category.count}
-                                              </span>
-                                              {category.badge && (
-                                                <Badge
-                                                  className={`text-xs px-1.5 py-0 ${category.badgeColor}`}
-                                                >
-                                                  {category.badge}
-                                                </Badge>
-                                              )}
-                                            </div>
-                                          </div>
-                                        </motion.button>
-                                      ))}
-                                    </div>
-                                  </div>
-
-                                  {/* Featured Section */}
-                                  <div className="col-span-1">
-                                    <div className="space-y-4">
-                                      <div>
-                                        <h4 className="text-sm font-semibold text-pink-700 mb-2">
-                                          Featured
-                                        </h4>
-                                        <div className="bg-gradient-to-br from-pink-50 to-rose-50 p-3 rounded-lg border border-pink-200">
-                                          <div className="aspect-video bg-pink-200 rounded-md mb-2"></div>
-                                          <div className="space-y-1">
-                                            <div className="font-medium text-sm">
-                                              Pastel Dashboard Pro
-                                            </div>
-                                            <div className="flex items-center justify-between">
-                                              <span className="text-xs text-muted-foreground">
-                                                ⭐ 4.9
-                                              </span>
-                                              <span className="font-bold text-pink-600">
-                                                $49
-                                              </span>
-                                            </div>
-                                          </div>
-                                        </div>
-                                      </div>
-
-                                      <div>
-                                        <h4 className="text-sm font-semibold text-pink-700 mb-2">
-                                          Quick Actions
-                                        </h4>
-                                        <div className="space-y-2">
-                                          {[
-                                            {
-                                              name: "Browse All",
-                                              href: "/templates",
-                                              icon: Grid,
-                                            },
-                                            {
-                                              name: "Free Templates",
-                                              href: "/templates/free",
-                                              icon: Gift,
-                                            },
-                                            {
-                                              name: "Premium",
-                                              href: "/templates/premium",
-                                              icon: Crown,
-                                            },
-                                          ].map((action, actionIndex) => (
-                                            <NavigationMenuLink
-                                              key={actionIndex}
-                                              className="flex items-center space-x-2 p-2 text-sm hover:bg-pink-50 rounded-md transition-colors"
-                                              href={action.href}
-                                            >
-                                              <action.icon className="w-4 h-4 text-pink-600" />
-                                              <span>{action.name}</span>
-                                            </NavigationMenuLink>
-                                          ))}
-                                        </div>
-                                      </div>
-                                    </div>
-                                  </div>
-                                </div>
-                              </div>
-                            </div>
-                          </div>
-                        </NavigationMenuContent>
-                      </NavigationMenuItem>
-
-                      {/* ===== E-BOOKS - ENHANCED MEGA MENU LIKE TEMPLATES ===== */}
-                      <NavigationMenuItem>
-                        <NavigationMenuTrigger
-                          className={`group h-10 px-4 rounded-lg font-medium ${pastelColors.navigation.navHover} transition-colors flex items-center gap-2`}
-                        >
-                          <BookOpen className="w-4 h-4" />
-                          E-books
-                          <Badge
-                            className={`${pastelColors.navigation.badgeNew}`}
-                          >
-                            New
-                          </Badge>
-                        </NavigationMenuTrigger>
-                        <NavigationMenuContent className="z-[9999]">
-                          {/* E-books Mega Menu - Enhanced Like Templates */}
-                          <div className="w-[600px] h-[450px] bg-white dark:bg-slate-900 shadow-2xl border-0 rounded-xl overflow-hidden">
-                            {/* Header */}
-                            <div
-                              className={`bg-gradient-to-r ${pastelColors.dropdown.headerBg} p-4 border-b border-pink-200/50`}
-                            >
-                              <div className="flex items-center justify-between">
-                                <div>
-                                  <h3
-                                    className={`text-lg font-bold text-transparent bg-gradient-to-r ${pastelColors.dropdown.titleGradient} bg-clip-text`}
-                                  >
-                                    Digital E-books
-                                  </h3>
-                                  <p className="text-xs text-muted-foreground mt-0.5">
-                                    Learn from expert guides & tutorials
-                                  </p>
-                                </div>
-                                <NavigationMenuLink asChild>
-                                  <Link
-                                    to="/ebooks"
-                                    className={`flex items-center space-x-1 px-3 py-1.5 ${pastelColors.dropdown.cardBg} rounded-lg hover:bg-pink-50 transition-colors text-xs font-medium border border-pink-200/50`}
-                                  >
-                                    <span>Browse All</span>
-                                    <ArrowRight className="w-3 h-3" />
-                                  </Link>
-                                </NavigationMenuLink>
-                              </div>
-                            </div>
-
-                            {/* Content */}
-                            <div className="h-[386px] overflow-y-auto overflow-x-hidden scrollbar-thin scrollbar-thumb-pink-300 hover:scrollbar-thumb-pink-400 scrollbar-track-transparent">
-                              <div className="p-4">
-                                <div className="grid grid-cols-4 gap-4">
-                                  {/* E-book Categories */}
-                                  <div className="col-span-3">
-                                    <div className="grid grid-cols-3 gap-3">
-                                      {[
-                                        {
-                                          name: "Design Systems",
-                                          subtitle: "UI/UX Guide",
-                                          tag: "design-systems",
-                                          icon: Palette,
-                                          color: "from-pink-400 to-rose-500",
-                                          count: "25+",
-                                          badge: "Popular",
-                                          badgeColor:
-                                            pastelColors.navigation.badgeHot,
-                                        },
-                                        {
-                                          name: "React Mastery",
-                                          subtitle: "Frontend Guide",
-                                          tag: "react-mastery",
-                                          icon: Code,
-                                          color: "from-rose-400 to-red-500",
-                                          count: "18+",
-                                          badge: "New",
-                                          badgeColor:
-                                            pastelColors.navigation.badgeNew,
-                                        },
-                                        {
-                                          name: "CSS Animation",
-                                          subtitle: "Motion Guide",
-                                          tag: "css-animation",
-                                          icon: Sparkles,
-                                          color: "from-orange-400 to-pink-500",
-                                          count: "12+",
-                                          badge: "Trending",
-                                          badgeColor:
-                                            "bg-orange-100 text-orange-700",
-                                        },
-                                        {
-                                          name: "Business Guide",
-                                          subtitle: "Startup Tips",
-                                          tag: "business",
-                                          icon: TrendingUp,
-                                          color: "from-purple-400 to-pink-500",
-                                          count: "20+",
-                                          badge: "Essential",
-                                          badgeColor:
-                                            "bg-purple-100 text-purple-700",
-                                        },
-                                        {
-                                          name: "Photography",
-                                          subtitle: "Visual Guide",
-                                          tag: "photography",
-                                          icon: Camera,
-                                          color: "from-blue-400 to-purple-500",
-                                          count: "15+",
-                                          badge: "Creative",
-                                          badgeColor:
-                                            "bg-blue-100 text-blue-700",
-                                        },
-                                        {
-                                          name: "Marketing",
-                                          subtitle: "Growth Guide",
-                                          tag: "marketing",
-                                          icon: Target,
-                                          color: "from-green-400 to-teal-500",
-                                          count: "22+",
-                                          badge: "Pro",
-                                          badgeColor:
-                                            "bg-green-100 text-green-700",
-                                        },
-                                      ].map((ebook, index) => (
-                                        <motion.button
-                                          key={ebook.tag}
-                                          onClick={() =>
-                                            navigate(
-                                              `/ebooks?category=${ebook.tag}`,
-                                            )
-                                          }
-                                          className={`group p-3 ${pastelColors.dropdown.cardBg} rounded-lg border border-pink-200/30 ${pastelColors.dropdown.cardHover} hover:shadow-md transition-all duration-300 text-left`}
-                                          whileHover={{ y: -1 }}
-                                          initial={{ opacity: 0, y: 10 }}
-                                          animate={{ opacity: 1, y: 0 }}
-                                          transition={{ delay: index * 0.03 }}
-                                        >
-                                          <div
-                                            className={cn(
-                                              "w-8 h-8 rounded-lg bg-gradient-to-r flex items-center justify-center mb-2 group-hover:scale-105 transition-transform duration-300",
-                                              ebook.color,
-                                            )}
-                                          >
-                                            <ebook.icon className="w-4 h-4 text-white" />
-                                          </div>
-
-                                          <div>
-                                            <div className="font-medium text-sm text-gray-900 dark:text-gray-100 group-hover:text-pink-700 transition-colors duration-300">
-                                              {ebook.name}
-                                            </div>
-                                            <div className="text-xs text-muted-foreground">
-                                              {ebook.subtitle}
-                                            </div>
-                                            <div className="flex items-center justify-between mt-1">
-                                              <span className="text-xs font-semibold text-pink-600">
-                                                {ebook.count}
-                                              </span>
-                                              {ebook.badge && (
-                                                <Badge
-                                                  className={`text-xs px-1.5 py-0 ${ebook.badgeColor}`}
-                                                >
-                                                  {ebook.badge}
-                                                </Badge>
-                                              )}
-                                            </div>
-                                          </div>
-                                        </motion.button>
-                                      ))}
-                                    </div>
-                                  </div>
-
-                                  {/* Featured E-book Section */}
-                                  <div className="col-span-1">
-                                    <div className="space-y-4">
-                                      <div>
-                                        <h4 className="text-sm font-semibold text-pink-700 mb-2">
-                                          Featured
-                                        </h4>
-                                        <div className="bg-gradient-to-br from-pink-50 to-rose-50 p-3 rounded-lg border border-pink-200">
-                                          <div className="aspect-video bg-pink-200 rounded-md mb-2 flex items-center justify-center">
-                                            <BookOpen className="w-8 h-8 text-pink-400" />
-                                          </div>
-                                          <div className="space-y-1">
-                                            <div className="font-medium text-sm">
-                                              Ultimate Design Guide
-                                            </div>
-                                            <div className="flex items-center justify-between">
-                                              <span className="text-xs text-muted-foreground">
-                                                ⭐ 4.8
-                                              </span>
-                                              <span className="font-bold text-pink-600">
-                                                $29
-                                              </span>
-                                            </div>
-                                          </div>
-                                        </div>
-                                      </div>
-
-                                      <div>
-                                        <h4 className="text-sm font-semibold text-pink-700 mb-2">
-                                          Quick Actions
-                                        </h4>
-                                        <div className="space-y-2">
-                                          {[
-                                            {
-                                              name: "Browse All",
-                                              href: "/ebooks",
-                                              icon: BookOpen,
-                                            },
-                                            {
-                                              name: "Free E-books",
-                                              href: "/ebooks/free",
-                                              icon: Gift,
-                                            },
-                                            {
-                                              name: "Bestsellers",
-                                              href: "/ebooks/bestsellers",
-                                              icon: Star,
-                                            },
-                                            {
-                                              name: "Latest",
-                                              href: "/ebooks/latest",
-                                              icon: Sparkles,
-                                            },
-                                          ].map((action, actionIndex) => (
-                                            <NavigationMenuLink
-                                              key={actionIndex}
-                                              className="flex items-center space-x-2 p-2 text-sm hover:bg-pink-50 rounded-md transition-colors"
-                                              href={action.href}
-                                            >
-                                              <action.icon className="w-4 h-4 text-pink-600" />
-                                              <span>{action.name}</span>
-                                            </NavigationMenuLink>
-                                          ))}
-                                        </div>
-                                      </div>
-                                    </div>
-                                  </div>
-                                </div>
-                              </div>
-                            </div>
-                          </div>
-                        </NavigationMenuContent>
-                      </NavigationMenuItem>
-
-                      {/* ===== OTHER MENU ITEMS - Simple Links - NO SPACING ===== */}
-                      <NavigationMenuItem>
-                        <NavigationMenuLink
-                          className={`group inline-flex h-10 w-max items-center justify-center rounded-lg px-4 py-2 text-sm font-medium transition-colors ${pastelColors.navigation.navHover} focus:outline-none disabled:pointer-events-none disabled:opacity-50`}
-                          href="/pricing"
-                        >
-                          <Tag className="w-4 h-4 mr-2" />
-                          Pricing
-                        </NavigationMenuLink>
-                      </NavigationMenuItem>
-
-                      <NavigationMenuItem>
-                        <NavigationMenuLink
-                          className={`group inline-flex h-10 w-max items-center justify-center rounded-lg px-4 py-2 text-sm font-medium transition-colors ${pastelColors.navigation.navHover} focus:outline-none disabled:pointer-events-none disabled:opacity-50`}
-                          href="/blog"
-                        >
-                          <MessageCircle className="w-4 h-4 mr-2" />
-                          Blog
-                        </NavigationMenuLink>
-                      </NavigationMenuItem>
-                    </NavigationMenuList>
-                  </NavigationMenu>
-
-                  {/* Admin Panel Link - Right side */}
-                  {user && isAdmin(user) && (
-                    <div className="absolute right-4 top-1/2 transform -translate-y-1/2">
-                      <Link
-                        to="/admin"
-                        className={`flex items-center space-x-2 px-3 py-1.5 text-sm font-medium rounded-lg transition-colors ${pastelColors.navigation.adminHover}`}
-                      >
-                        <Shield className="w-4 h-4" />
-                        <span>Admin Panel</span>
-                        <Badge className={pastelColors.navigation.adminBadge}>
-                          <Crown className="w-3 h-3" />
-                        </Badge>
-                      </Link>
-                    </div>
-                  )}
-                </div>
-              </div>
-            </motion.div>
-          )}
-        </AnimatePresence>
-      </motion.header>
+        </div>
+      </div>
     </>
   );
 };

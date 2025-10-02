@@ -3,19 +3,19 @@ import { User, Mail, Gift, XCircle, CheckCircle } from "lucide-react";
 
 const LS_KEY = "template-market-leadform-success";
 
-// ✅ UPDATED: Pink/Rose/Red color scheme đồng bộ với Home page
+// 🎨 SOFTPINKTHEME Color scheme - giống Templates
 const pastelSchemes = {
-  main: "from-pink-50 via-rose-50 to-red-50", // ✅ Pink theme
-  secondary: "from-rose-50 via-pink-50 to-white", // ✅ Rose theme
-  accent: "from-red-50 via-white to-pink-50", // ✅ Red theme
-  button: "from-pink-400 via-rose-400 to-red-400", // ✅ Pink gradient buttons
-  buttonHover: "from-pink-500 via-rose-500 to-red-500", // ✅ Pink hover
-  card: "from-white via-pink-50 to-rose-50", // ✅ Pink card
-  textMain: "from-pink-600 via-rose-600 to-red-600", // ✅ Pink text
-  textAccent: "from-rose-500 via-pink-500 to-red-500", // ✅ Rose accent
-  iconPink: "from-pink-100 to-rose-200", // ✅ Pink icons
-  iconBlue: "from-rose-100 to-pink-200", // ✅ Rose instead of blue
-  iconYellow: "from-red-100 to-pink-200", // ✅ Red instead of yellow
+  main: "from-pink-50 via-blue-50 to-yellow-50", // ✅ SoftPinkTheme
+  secondary: "from-pink-50/80 via-blue-50/60 to-yellow-50/80", // ✅ SoftPinkTheme
+  accent: "from-orange-50 via-pink-50 to-yellow-50", // ✅ SoftPinkTheme
+  button: "from-pink-400 via-orange-400 to-yellow-400", // ✅ SoftPinkTheme buttons
+  buttonHover: "from-pink-500 via-orange-500 to-yellow-500", // ✅ SoftPinkTheme hover
+  card: "from-white via-pink-50 to-blue-50", // ✅ SoftPinkTheme card
+  textMain: "from-pink-600 via-blue-600 to-orange-600", // ✅ SoftPinkTheme text
+  textAccent: "from-orange-500 via-pink-500 to-yellow-500", // ✅ SoftPinkTheme accent
+  iconPink: "from-pink-100 to-orange-200", // ✅ Pink icon background
+  iconBlue: "from-blue-100 to-cyan-200", // ✅ Blue icon background
+  iconYellow: "from-yellow-100 to-orange-200", // ✅ Yellow icon background
 };
 
 const LeadForm: React.FC = () => {
@@ -122,12 +122,12 @@ const LeadForm: React.FC = () => {
       <div style={containerStyle}>
         <div
           style={{
-            // ✅ UPDATED: Pink/Rose/Red gradient background
-            background: `linear-gradient(135deg, #ec4899 0%, #f43f5e 50%, #dc2626 100%)`,
+            // ✅ CHỈ ĐỔI DÒNG NÀY: SoftPinkTheme gradient background
+            background: `linear-gradient(135deg, #ec4899 0%, #f97316 50%, #eab308 100%)`,
             borderRadius: isMobile ? 16 : 20,
             boxShadow: isMobile
               ? "0 20px 40px rgba(236, 72, 153, 0.3)" // ✅ Pink shadow
-              : "0 16px 48px rgba(244, 63, 94, 0.25), 0 4px 16px rgba(220, 38, 38, 0.15)", // ✅ Pink/Red shadows
+              : "0 16px 48px rgba(249, 115, 22, 0.25), 0 4px 16px rgba(234, 179, 8, 0.15)", // ✅ Orange/Yellow shadows
             padding: isMobile ? "24px 20px 20px" : "32px 28px 24px",
             position: "relative",
             border: "1px solid rgba(255, 255, 255, 0.1)",
@@ -154,11 +154,15 @@ const LeadForm: React.FC = () => {
             >
               <div
                 style={{
-                  background: "rgba(255, 255, 255, 0.15)",
+                  // ✅ THÊM: Icon background với SoftPinkTheme
+                  background:
+                    "linear-gradient(135deg, rgba(255, 255, 255, 0.25) 0%, rgba(254, 215, 170, 0.2) 100%)",
                   borderRadius: 12,
                   padding: isMobile ? 10 : 12,
                   backdropFilter: "blur(6px)",
                   flexShrink: 0,
+                  border: "1px solid rgba(255, 255, 255, 0.2)",
+                  boxShadow: "0 4px 12px rgba(249, 115, 22, 0.15)",
                 }}
               >
                 <Gift
@@ -303,18 +307,29 @@ const LeadForm: React.FC = () => {
                   Họ tên *
                 </label>
                 <div style={{ position: "relative" }}>
-                  <User
-                    size={16}
+                  {/* ✅ THÊM: Icon với background */}
+                  <div
                     style={{
                       position: "absolute",
-                      left: 14,
+                      left: 12,
                       top: "50%",
                       transform: "translateY(-50%)",
-                      color: "#f9a8d4", // ✅ UPDATED: Pink icon color
-                      opacity: 0.7,
-                      pointerEvents: "none",
+                      background:
+                        "linear-gradient(135deg, #f9a8d4 0%, #fed7aa 100%)", // ✅ Pink-orange gradient
+                      borderRadius: 6,
+                      padding: 4,
+                      display: "flex",
+                      alignItems: "center",
+                      justifyContent: "center",
+                      boxShadow: "0 2px 4px rgba(249, 168, 212, 0.3)",
                     }}
-                  />
+                  >
+                    <User
+                      size={14}
+                      color="#ec4899" // ✅ Pink icon color
+                      strokeWidth={2.5}
+                    />
+                  </div>
                   <input
                     id="name"
                     name="name"
@@ -324,30 +339,30 @@ const LeadForm: React.FC = () => {
                     style={{
                       width: "100%",
                       padding: isMobile
-                        ? "14px 16px 14px 44px"
-                        : "13px 16px 13px 42px",
+                        ? "14px 16px 14px 48px" // ✅ Increased left padding for icon background
+                        : "13px 16px 13px 46px", // ✅ Increased left padding for icon background
                       borderRadius: 10,
                       border: "1px solid rgba(255, 255, 255, 0.2)",
                       fontSize: isMobile ? 15 : 16,
                       background: "rgba(255, 255, 255, 0.95)",
                       color: "#2d3748",
                       outline: "none",
-                      boxShadow: "0 2px 8px rgba(236, 72, 153, 0.08)", // ✅ Pink shadow
+                      boxShadow: "0 2px 8px rgba(249, 115, 22, 0.08)", // ✅ Orange shadow
                       fontFamily: "inherit",
                       transition: "all 0.2s ease",
                       boxSizing: "border-box",
                     }}
                     onFocus={(e) => {
                       e.target.style.background = "#fff";
-                      e.target.style.borderColor = "rgba(249, 168, 212, 0.5)"; // ✅ Pink border
+                      e.target.style.borderColor = "rgba(254, 215, 170, 0.5)"; // ✅ Orange border
                       e.target.style.boxShadow =
-                        "0 0 0 3px rgba(249, 168, 212, 0.1)"; // ✅ Pink focus shadow
+                        "0 0 0 3px rgba(254, 215, 170, 0.1)"; // ✅ Orange focus shadow
                     }}
                     onBlur={(e) => {
                       e.target.style.background = "rgba(255, 255, 255, 0.95)";
                       e.target.style.borderColor = "rgba(255, 255, 255, 0.2)";
                       e.target.style.boxShadow =
-                        "0 2px 8px rgba(236, 72, 153, 0.08)"; // ✅ Pink shadow
+                        "0 2px 8px rgba(249, 115, 22, 0.08)"; // ✅ Orange shadow
                     }}
                     autoFocus={!isMobile} // Không auto focus trên mobile
                   />
@@ -370,18 +385,29 @@ const LeadForm: React.FC = () => {
                   Email *
                 </label>
                 <div style={{ position: "relative" }}>
-                  <Mail
-                    size={16}
+                  {/* ✅ THÊM: Icon với background */}
+                  <div
                     style={{
                       position: "absolute",
-                      left: 14,
+                      left: 12,
                       top: "50%",
                       transform: "translateY(-50%)",
-                      color: "#f9a8d4", // ✅ UPDATED: Pink icon color
-                      opacity: 0.7,
-                      pointerEvents: "none",
+                      background:
+                        "linear-gradient(135deg, #fbbf24 0%, #fed7aa 100%)", // ✅ Yellow-orange gradient
+                      borderRadius: 6,
+                      padding: 4,
+                      display: "flex",
+                      alignItems: "center",
+                      justifyContent: "center",
+                      boxShadow: "0 2px 4px rgba(251, 191, 36, 0.3)",
                     }}
-                  />
+                  >
+                    <Mail
+                      size={14}
+                      color="#f97316" // ✅ Orange icon color
+                      strokeWidth={2.5}
+                    />
+                  </div>
                   <input
                     id="email"
                     name="email"
@@ -392,30 +418,30 @@ const LeadForm: React.FC = () => {
                     style={{
                       width: "100%",
                       padding: isMobile
-                        ? "14px 16px 14px 44px"
-                        : "13px 16px 13px 42px",
+                        ? "14px 16px 14px 48px" // ✅ Increased left padding for icon background
+                        : "13px 16px 13px 46px", // ✅ Increased left padding for icon background
                       borderRadius: 10,
                       border: "1px solid rgba(255, 255, 255, 0.2)",
                       fontSize: isMobile ? 15 : 16,
                       background: "rgba(255, 255, 255, 0.95)",
                       color: "#2d3748",
                       outline: "none",
-                      boxShadow: "0 2px 8px rgba(236, 72, 153, 0.08)", // ✅ Pink shadow
+                      boxShadow: "0 2px 8px rgba(249, 115, 22, 0.08)", // ✅ Orange shadow
                       fontFamily: "inherit",
                       transition: "all 0.2s ease",
                       boxSizing: "border-box",
                     }}
                     onFocus={(e) => {
                       e.target.style.background = "#fff";
-                      e.target.style.borderColor = "rgba(249, 168, 212, 0.5)"; // ✅ Pink border
+                      e.target.style.borderColor = "rgba(254, 215, 170, 0.5)"; // ✅ Orange border
                       e.target.style.boxShadow =
-                        "0 0 0 3px rgba(249, 168, 212, 0.1)"; // ✅ Pink focus shadow
+                        "0 0 0 3px rgba(254, 215, 170, 0.1)"; // ✅ Orange focus shadow
                     }}
                     onBlur={(e) => {
                       e.target.style.background = "rgba(255, 255, 255, 0.95)";
                       e.target.style.borderColor = "rgba(255, 255, 255, 0.2)";
                       e.target.style.boxShadow =
-                        "0 2px 8px rgba(236, 72, 153, 0.08)"; // ✅ Pink shadow
+                        "0 2px 8px rgba(249, 115, 22, 0.08)"; // ✅ Orange shadow
                     }}
                   />
                 </div>
@@ -446,8 +472,8 @@ const LeadForm: React.FC = () => {
                   width: "100%",
                   padding: isMobile ? "15px 20px" : "14px 20px",
                   borderRadius: 10,
-                  background: "linear-gradient(120deg, #fff 0%, #fdf2f8 100%)", // ✅ UPDATED: Pink-tinted white
-                  color: "#ec4899", // ✅ UPDATED: Pink text
+                  background: "linear-gradient(120deg, #fff 0%, #fef3c7 100%)", // ✅ UPDATED: Yellow-tinted white
+                  color: "#f97316", // ✅ UPDATED: Orange text
                   fontWeight: 700,
                   fontSize: isMobile ? 16 : 17,
                   border: "none",

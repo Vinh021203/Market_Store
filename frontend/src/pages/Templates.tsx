@@ -1,4 +1,5 @@
 import React, { useState, useMemo, useEffect } from "react";
+import { Helmet } from "react-helmet-async";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import {
@@ -83,65 +84,65 @@ import {
 } from "lucide-react";
 import { toast } from "@/hooks/use-toast";
 
-// ✅ SOFT PINK THEME - MÀU HỒNG NHẸ NHÀNG
+// ✅ GIỮ NGUYÊN TÊN BIẾN - CHỈ ĐỔI GIÁ TRỊ
 const softPinkTheme = {
-  // 🌸 PINK BACKGROUND TONES
-  pageBackground: "from-pink-50/70 via-rose-50/60 to-red-50/50",
-  sectionBackground: "from-white/95 via-pink-25/30 to-rose-25/20",
+  // PINK BACKGROUND TONES - ĐỔI THÀNH PASTEL GIỐNG HOME
+  pageBackground: "from-pink-50 via-blue-50 to-yellow-50", // ✅ Giống Home
+  sectionBackground: "from-pink-50/80 via-blue-50/60 to-yellow-50/80", // ✅ Giống Home
 
-  // 💗 GLASS & CARDS
-  glassCard: "from-white/95 via-pink-25/20 to-rose-25/10 backdrop-blur-xl",
-  neoCard: "bg-gradient-to-br from-white via-pink-25/30 to-rose-25/20",
-  floatingCard: "from-white/90 via-pink-50/60 to-rose-50/40",
+  // GLASS CARDS - ĐỔI THÀNH PASTEL
+  glassCard: "from-white/95 via-pink-50/60 to-blue-50/40 backdrop-blur-xl", // ✅ Giống Home
+  neoCard: "bg-gradient-to-br from-white/95 via-pink-50/60 to-blue-50/40", // ✅ Giống Home
+  floatingCard: "from-white/90 via-pink-50/60 to-blue-50/40",
 
-  // 🌹 GRADIENT COLORS - PINK THEME
-  primaryGradient: "from-pink-500 via-rose-500 to-red-500",
-  secondaryGradient: "from-pink-400 via-rose-500 to-pink-600",
-  accentGradient: "from-rose-400 via-pink-500 to-red-400",
-  successGradient: "from-pink-300 via-rose-400 to-pink-500",
+  // GRADIENT COLORS - ĐỔI THÀNH PASTEL GIỐNG HOME
+  primaryGradient: "from-pink-400 via-orange-400 to-yellow-400", // ✅ Giống Home button
+  secondaryGradient: "from-pink-500 via-orange-500 to-yellow-500", // ✅ Giống Home buttonHover
+  accentGradient: "from-orange-500 via-pink-500 to-yellow-500", // ✅ Giống Home textAccent
+  successGradient: "from-green-100 to-emerald-200", // ✅ Pastel green
 
-  // 💕 TEXT COLORS
-  heroText: "from-pink-700 via-rose-600 to-red-600",
-  primaryText: "from-slate-700 via-pink-700 to-rose-700",
-  accentText: "from-rose-600 via-pink-600 to-red-600",
+  // TEXT COLORS - ĐỔI THÀNH PASTEL
+  heroText: "from-pink-600 via-blue-600 to-orange-600", // ✅ Giống Home textMain
+  primaryText: "from-pink-600 via-blue-600 to-orange-600", // ✅ Giống Home textMain
+  accentText: "from-orange-500 via-pink-500 to-yellow-500", // ✅ Giống Home textAccent
 
-  // ✨ EFFECTS
-  glow: "shadow-pink-200/60 shadow-2xl",
-  neonGlow: "shadow-rose-300/50 shadow-xl",
-  softGlow: "shadow-pink-200/40 shadow-lg",
+  // EFFECTS - ĐỔI THÀNH PASTEL
+  glow: "shadow-pink-200/60 shadow-2xl", // ✅ Nhẹ hơn
+  neonGlow: "shadow-rose-300/50 shadow-xl", // ✅ Nhẹ hơn
+  softGlow: "shadow-pink-200/40 shadow-lg", // ✅ Nhẹ hơn
 
-  // 🎨 DYNAMIC COLORS - PINK VARIATIONS
+  // DYNAMIC COLORS - ĐỔI THÀNH PASTEL GIỐNG HOME
   dynamicColors: [
     {
-      bg: "from-pink-400 to-rose-500",
-      text: "text-pink-50",
+      bg: "from-pink-100 to-pink-200",
+      text: "text-pink-600",
       glow: "shadow-pink-400/30",
-    },
+    }, // ✅ Pastel
     {
-      bg: "from-rose-400 to-red-500",
-      text: "text-rose-50",
+      bg: "from-blue-100 to-cyan-200",
+      text: "text-blue-600",
+      glow: "shadow-blue-400/30",
+    }, // ✅ Pastel
+    {
+      bg: "from-yellow-100 to-orange-200",
+      text: "text-orange-600",
+      glow: "shadow-orange-400/30",
+    }, // ✅ Pastel
+    {
+      bg: "from-green-100 to-emerald-200",
+      text: "text-green-600",
+      glow: "shadow-green-400/30",
+    }, // ✅ Pastel
+    {
+      bg: "from-purple-100 to-pink-200",
+      text: "text-purple-600",
+      glow: "shadow-purple-400/30",
+    }, // ✅ Pastel
+    {
+      bg: "from-rose-100 to-red-200",
+      text: "text-rose-600",
       glow: "shadow-rose-400/30",
-    },
-    {
-      bg: "from-pink-500 to-rose-600",
-      text: "text-pink-50",
-      glow: "shadow-pink-500/30",
-    },
-    {
-      bg: "from-red-400 to-pink-500",
-      text: "text-red-50",
-      glow: "shadow-red-400/30",
-    },
-    {
-      bg: "from-rose-500 to-pink-600",
-      text: "text-rose-50",
-      glow: "shadow-rose-500/30",
-    },
-    {
-      bg: "from-pink-600 to-red-500",
-      text: "text-pink-50",
-      glow: "shadow-pink-600/30",
-    },
+    }, // ✅ Pastel
   ],
 };
 
@@ -1392,288 +1393,529 @@ const Templates: React.FC = () => {
   if (loading) return <LoadingSpinner />;
 
   return (
-    <div
-      className={`min-h-screen bg-gradient-to-br ${softPinkTheme.pageBackground} relative`}
-    >
-      {/* Background decoration */}
-      <div className="fixed inset-0 overflow-hidden pointer-events-none">
-        {[...Array(6)].map((_, i) => {
-          const shapes = [Heart, Star, Circle, Diamond];
-          const Shape = shapes[i % shapes.length];
-          return (
+    <>
+      <Helmet>
+        <title>Templates Studio - Premium UI Templates | Template Market</title>
+        <meta
+          name="description"
+          content={`Khám phá ${products.length} templates cao cấp cho React, Vue, Next.js. Thiết kế đẹp, code chất lượng, cập nhật liên tục.`}
+        />
+        <meta
+          name="keywords"
+          content="react templates, vue templates, nextjs templates, admin dashboard, landing page, ecommerce templates, UI components, premium templates"
+        />
+        <link rel="canonical" href="https://templatemarket.com/templates" />
+
+        {/* Open Graph Tags */}
+        <meta
+          property="og:title"
+          content="Templates Studio - Premium UI Templates"
+        />
+        <meta
+          property="og:description"
+          content={`Khám phá ${products.length} templates cao cấp cho React, Vue, Next.js. Thiết kế chuyên nghiệp, code sạch.`}
+        />
+        <meta property="og:type" content="website" />
+        <meta
+          property="og:url"
+          content="https://templatemarket.com/templates"
+        />
+        <meta
+          property="og:image"
+          content="https://templatemarket.com/images/templates-preview.jpg"
+        />
+
+        {/* Twitter Tags */}
+        <meta name="twitter:card" content="summary_large_image" />
+        <meta
+          name="twitter:title"
+          content="Templates Studio - Premium UI Templates"
+        />
+        <meta
+          name="twitter:description"
+          content={`${products.length} templates cao cấp cho React, Vue, Next.js`}
+        />
+        <meta
+          name="twitter:image"
+          content="https://templatemarket.com/images/templates-preview.jpg"
+        />
+
+        {/* Dynamic title based on filters */}
+        {filters.search && (
+          <>
+            <title>{`Tìm kiếm "${filters.search}" - Templates Studio | Template Market`}</title>
+            <meta
+              name="description"
+              content={`Kết quả tìm kiếm cho "${filters.search}": ${filteredProducts.length} templates phù hợp. Thiết kế chuyên nghiệp, code sạch.`}
+            />
+          </>
+        )}
+      </Helmet>
+
+      <div
+        className={`min-h-screen bg-gradient-to-br ${softPinkTheme.pageBackground} relative`}
+      >
+        {/* Background decoration */}
+        <div className="fixed inset-0 overflow-hidden pointer-events-none">
+          {/* ✅ THÊM FLOATING ELEMENTS GIỐNG HOME */}
+          {[
+            {
+              emoji: "🍪",
+              color: "from-orange-100 to-yellow-200",
+              position: "top-10 right-20",
+            },
+            {
+              emoji: "💖",
+              color: "from-pink-100 to-pink-200",
+              position: "top-32 left-10",
+            },
+            {
+              emoji: "🚀",
+              color: "from-blue-100 to-cyan-200",
+              position: "bottom-20 right-10",
+            },
+            {
+              emoji: "✨",
+              color: "from-yellow-100 to-orange-200",
+              position: "bottom-32 left-20",
+            },
+            {
+              emoji: "🎨",
+              color: "from-green-100 to-emerald-200",
+              position: "top-1/2 right-1/4",
+            },
+            {
+              emoji: "🌟",
+              color: "from-pink-100 to-pink-200",
+              position: "top-1/3 left-1/3",
+            },
+          ].map((item, i) => (
             <motion.div
               key={i}
+              className={`absolute ${item.position} text-4xl opacity-30`}
               animate={{
-                x: [0, Math.random() * 100 - 50],
-                y: [0, Math.random() * 100 - 50],
-                rotate: [0, 360],
-                scale: [1, 1.2, 1],
-                opacity: [0.05, 0.15, 0.05],
+                y: [0, -15, 0],
+                rotate: [0, 8, -8, 0],
+                scale: [1, 1.1, 1],
               }}
               transition={{
-                duration: 20 + i * 3,
+                duration: 6 + i,
                 repeat: Infinity,
-                delay: i * 2,
                 ease: "easeInOut",
-              }}
-              className="absolute"
-              style={{
-                top: `${Math.random() * 100}%`,
-                left: `${Math.random() * 100}%`,
-                transform: `scale(${0.3 + Math.random() * 0.4})`,
+                delay: i * 0.5,
               }}
             >
-              <Shape className={`w-16 h-16 text-pink-300/30 filter blur-sm`} />
-            </motion.div>
-          );
-        })}
-      </div>
-
-      <div className="container mx-auto px-4 relative z-10">
-        {/* Enhanced Header */}
-        <motion.div
-          className="text-center mb-12"
-          initial={{ opacity: 0, y: -50 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.8, ease: "easeOut" }}
-        >
-          <div className="flex items-center justify-center gap-6 mb-6">
-            <motion.div
-              initial={{ scale: 0, rotate: -360 }}
-              animate={{ scale: 1, rotate: 0 }}
-              transition={{
-                delay: 0.3,
-                type: "spring",
-                stiffness: 200,
-                damping: 10,
-              }}
-              className="relative"
-            >
-              <div
-                className={`p-6 rounded-full bg-gradient-to-br ${softPinkTheme.primaryGradient} ${softPinkTheme.glow} relative overflow-hidden`}
+              <motion.div
+                className={`p-2 lg:p-3 rounded-full bg-gradient-to-r ${item.color} backdrop-blur-sm shadow-lg`}
+                whileHover={{ scale: 1.2, rotate: 15 }}
               >
-                <Package className="w-10 h-10 text-white relative z-10" />
-                <motion.div
-                  animate={{ rotate: 360 }}
-                  transition={{ duration: 8, repeat: Infinity, ease: "linear" }}
-                  className="absolute inset-2 border-2 border-white/30 rounded-full"
-                />
-              </div>
+                <span>{item.emoji}</span>
+              </motion.div>
             </motion.div>
+          ))}
 
-            <motion.div
-              className="text-left"
-              initial={{ x: 50, opacity: 0 }}
-              animate={{ x: 0, opacity: 1 }}
-              transition={{ delay: 0.5, duration: 0.6 }}
-            >
-              <motion.h1
-                className={`text-5xl font-bold bg-gradient-to-r ${softPinkTheme.heroText} bg-clip-text text-transparent leading-tight mb-2`}
-                animate={{
-                  backgroundPosition: ["0% 50%", "100% 50%", "0% 50%"],
-                }}
-                transition={{ duration: 5, repeat: Infinity }}
-                style={{ backgroundSize: "200% 200%" }}
-              >
-                Templates Studio
-              </motion.h1>
-              <motion.p
-                className="text-lg text-gray-600 font-medium flex items-center gap-2"
-                initial={{ opacity: 0 }}
-                animate={{ opacity: 1 }}
-                transition={{ delay: 0.7 }}
-              >
-                <Sparkles className="w-5 h-5 text-pink-500" />
-                Khám phá {products.length} templates siêu đẹp
-                <motion.span
-                  animate={{ scale: [1, 1.2, 1] }}
-                  transition={{ duration: 2, repeat: Infinity }}
-                  className="text-pink-500"
-                >
-                  💖
-                </motion.span>
-              </motion.p>
-            </motion.div>
-          </div>
-
-          {/* Stats */}
-          <motion.div
-            className="grid grid-cols-2 md:grid-cols-4 gap-6 mt-8 max-w-4xl mx-auto"
-            initial={{ opacity: 0, y: 50 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: 0.8, duration: 0.6 }}
-          >
-            {[
-              {
-                label: "Tổng templates",
-                value: products.length,
-                icon: Package,
-                color: softPinkTheme.dynamicColors[0],
-              },
-              {
-                label: "Đã lọc",
-                value: filteredProducts.length,
-                icon: Filter,
-                color: softPinkTheme.dynamicColors[1],
-              },
-              {
-                label: "Hiển thị",
-                value: currentProducts.length,
-                icon: Eye,
-                color: softPinkTheme.dynamicColors[2],
-              },
-              {
-                label: "Chất lượng",
-                value: "A+",
-                icon: Award,
-                color: softPinkTheme.dynamicColors[3],
-              },
-            ].map((stat, i) => (
+          {/* ✅ GIỮ NGUYÊN SHAPES CŨ NHƯNG ĐỔI MÀU */}
+          {[...Array(6)].map((_, i) => {
+            const shapes = [Heart, Star, Circle, Diamond];
+            const Shape = shapes[i % shapes.length];
+            return (
               <motion.div
                 key={i}
-                initial={{ scale: 0, rotate: -180 }}
-                animate={{ scale: 1, rotate: 0 }}
+                animate={{
+                  x: [0, Math.random() * 100 - 50],
+                  y: [0, Math.random() * 100 - 50],
+                  rotate: [0, 360],
+                  scale: [1, 1.2, 1],
+                  opacity: [0.05, 0.15, 0.05],
+                }}
                 transition={{
-                  delay: 1.0 + i * 0.1,
-                  type: "spring",
-                  stiffness: 200,
-                  damping: 10,
+                  duration: 20 + i * 3,
+                  repeat: Infinity,
+                  delay: i * 2,
+                  ease: "easeInOut",
                 }}
-                whileHover={{
-                  scale: 1.05,
-                  y: -8,
-                  transition: { duration: 0.3 },
+                className="absolute"
+                style={{
+                  top: `${Math.random() * 100}%`,
+                  left: `${Math.random() * 100}%`,
+                  transform: `scale(${0.3 + Math.random() * 0.4})`,
                 }}
-                className="group"
               >
-                <Card
-                  className={`text-center border-0 ${softPinkTheme.softGlow} bg-gradient-to-br ${softPinkTheme.neoCard} backdrop-blur-xl hover:${softPinkTheme.glow} transition-all duration-500 relative overflow-hidden rounded-2xl`}
-                >
-                  <CardContent className="p-6">
-                    <motion.div
-                      animate={{ rotate: 360 }}
-                      transition={{
-                        duration: 15,
-                        repeat: Infinity,
-                        ease: "linear",
-                      }}
-                      className={`w-12 h-12 mx-auto rounded-full bg-gradient-to-br ${stat.color.bg} flex items-center justify-center mb-3 ${stat.color.glow} relative overflow-hidden group-hover:scale-110 transition-transform duration-300`}
-                    >
-                      <stat.icon className="w-6 h-6 text-white relative z-10" />
-                      <div className="absolute inset-2 bg-white/20 rounded-full" />
-                    </motion.div>
-
-                    <motion.div
-                      className="text-2xl font-bold text-gray-800 mb-1"
-                      animate={{ scale: [1, 1.05, 1] }}
-                      transition={{
-                        duration: 3,
-                        repeat: Infinity,
-                        delay: i * 0.5,
-                      }}
-                    >
-                      {stat.value}
-                    </motion.div>
-                    <div className="text-sm text-gray-600 font-medium">
-                      {stat.label}
-                    </div>
-                  </CardContent>
-                </Card>
+                <Shape className="w-16 h-16 text-pink-300/30 filter blur-sm" />
               </motion.div>
-            ))}
+            );
+          })}
+        </div>
+
+        <div className="container mx-auto px-4 relative z-10">
+          {/* Enhanced Header */}
+          <motion.div
+            className="text-center mb-8 sm:mb-12 pt-8 sm:pt-12 lg:pt-16"
+            initial={{ opacity: 0, y: -80 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 1.2, ease: "easeOut" }}
+          >
+            {/* ✅ HEADER SECTION - RESPONSIVE */}
+            <div className="relative mb-6 sm:mb-8">
+              {/* Background Glow Effect - Smaller on mobile */}
+              <motion.div
+                className="absolute inset-0 bg-gradient-to-r from-pink-200/20 via-blue-200/20 to-yellow-200/20 blur-2xl sm:blur-3xl rounded-full"
+                animate={{
+                  scale: [1, 1.15, 1],
+                  opacity: [0.2, 0.5, 0.2],
+                }}
+                transition={{ duration: 4, repeat: Infinity }}
+              />
+
+              {/* Main Header Content */}
+              <div className="relative z-10 flex flex-col items-center gap-3 sm:gap-6">
+                {/* ✅ ICON + TITLE - MOBILE RESPONSIVE */}
+                <motion.div
+                  className="flex flex-col sm:flex-row items-center justify-center gap-3 sm:gap-4"
+                  initial={{ scale: 0.8, opacity: 0 }}
+                  animate={{ scale: 1, opacity: 1 }}
+                  transition={{ delay: 0.3, duration: 0.8 }}
+                >
+                  {/* Enhanced Icon - Smaller on mobile */}
+                  <motion.div
+                    initial={{ scale: 0, rotate: -360 }}
+                    animate={{ scale: 1, rotate: 0 }}
+                    transition={{
+                      delay: 0.5,
+                      type: "spring",
+                      stiffness: 300,
+                      damping: 15,
+                    }}
+                    whileHover={{ scale: 1.05, rotate: 5 }}
+                    className="relative"
+                  >
+                    <div
+                      className={`p-3 sm:p-4 lg:p-5 rounded-xl sm:rounded-2xl bg-gradient-to-br ${softPinkTheme.primaryGradient} ${softPinkTheme.glow} relative overflow-hidden shadow-xl sm:shadow-2xl`}
+                    >
+                      {/* Shimmer Effect */}
+                      <motion.div
+                        className="absolute inset-0 bg-gradient-to-r from-transparent via-white/30 to-transparent"
+                        animate={{ x: ["-100%", "100%"] }}
+                        transition={{
+                          duration: 2,
+                          repeat: Infinity,
+                          ease: "linear",
+                        }}
+                      />
+
+                      <Package className="w-6 h-6 sm:w-8 sm:h-8 lg:w-10 lg:h-10 text-white relative z-10 drop-shadow-lg" />
+
+                      {/* Rotating Border */}
+                      <motion.div
+                        animate={{ rotate: 360 }}
+                        transition={{
+                          duration: 10,
+                          repeat: Infinity,
+                          ease: "linear",
+                        }}
+                        className="absolute inset-1 border-2 border-white/40 rounded-lg sm:rounded-xl"
+                      />
+                    </div>
+                  </motion.div>
+
+                  {/* ✅ TITLE - MOBILE RESPONSIVE */}
+                  <motion.div
+                    className="text-center sm:text-left"
+                    initial={{ x: 0, opacity: 0, y: 20 }}
+                    animate={{ x: 0, opacity: 1, y: 0 }}
+                    transition={{ delay: 0.7, duration: 0.8 }}
+                  >
+                    <motion.h1
+                      className={`text-2xl sm:text-4xl lg:text-5xl xl:text-6xl font-bold bg-gradient-to-r ${softPinkTheme.heroText} bg-clip-text text-transparent leading-tight mb-1 sm:mb-2`}
+                      animate={{
+                        backgroundPosition: ["0% 50%", "100% 50%", "0% 50%"],
+                      }}
+                      transition={{ duration: 6, repeat: Infinity }}
+                      style={{ backgroundSize: "200% 200%" }}
+                    >
+                      Templates Studio
+                    </motion.h1>
+
+                    {/* ✅ SUBTITLE - MOBILE RESPONSIVE */}
+                    <motion.p
+                      className="text-sm sm:text-base lg:text-lg xl:text-xl text-gray-600 font-medium flex items-center gap-1 sm:gap-2 flex-wrap justify-center sm:justify-start"
+                      initial={{ opacity: 0, y: 10 }}
+                      animate={{ opacity: 1, y: 0 }}
+                      transition={{ delay: 0.9, duration: 0.6 }}
+                    >
+                      <motion.div
+                        animate={{ rotate: [0, 10, -10, 0] }}
+                        transition={{ duration: 2, repeat: Infinity }}
+                      >
+                        <Sparkles className="w-4 h-4 sm:w-5 sm:h-5 lg:w-6 lg:h-6 text-pink-500 drop-shadow-sm" />
+                      </motion.div>
+
+                      <span className="bg-gradient-to-r from-pink-600 to-orange-600 bg-clip-text text-transparent font-semibold">
+                        Khám phá {products.length} templates siêu đẹp
+                      </span>
+
+                      <motion.span
+                        animate={{
+                          scale: [1, 1.2, 1],
+                          rotate: [0, 8, -8, 0],
+                        }}
+                        transition={{ duration: 2.5, repeat: Infinity }}
+                        className="text-pink-500 text-lg sm:text-xl lg:text-2xl filter drop-shadow-sm"
+                      >
+                        💖
+                      </motion.span>
+                    </motion.p>
+                  </motion.div>
+                </motion.div>
+              </div>
+            </div>
+
+            {/* ✅ STATS SECTION - MOBILE RESPONSIVE + BACKGROUND COLORS */}
+            <motion.div
+              className="grid grid-cols-2 gap-3 sm:gap-4 lg:grid-cols-4 lg:gap-6 max-w-5xl mx-auto px-4 sm:px-0"
+              initial={{ opacity: 0, y: 60 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: 1, duration: 0.8 }}
+            >
+              {[
+                {
+                  label: "Tổng templates",
+                  value: products.length,
+                  icon: Package,
+                  color: softPinkTheme.dynamicColors[0],
+                  iconBg: "from-pink-400 to-rose-400",
+                  cardBg: "from-pink-50/90 via-pink-100/70 to-rose-50/80", // ✅ Pink background
+                  hoverBg: "from-pink-100/95 via-pink-200/80 to-rose-100/90",
+                },
+                {
+                  label: "Đã lọc",
+                  value: filteredProducts.length,
+                  icon: Filter,
+                  color: softPinkTheme.dynamicColors[1],
+                  iconBg: "from-blue-400 to-cyan-400",
+                  cardBg: "from-blue-50/90 via-cyan-50/70 to-blue-100/80", // ✅ Blue background
+                  hoverBg: "from-blue-100/95 via-cyan-100/80 to-blue-200/90",
+                },
+                {
+                  label: "Hiển thị",
+                  value: currentProducts.length,
+                  icon: Eye,
+                  color: softPinkTheme.dynamicColors[2],
+                  iconBg: "from-yellow-400 to-orange-400",
+                  cardBg: "from-yellow-50/90 via-orange-50/70 to-yellow-100/80", // ✅ Yellow background
+                  hoverBg:
+                    "from-yellow-100/95 via-orange-100/80 to-yellow-200/90",
+                },
+                {
+                  label: "Chất lượng",
+                  value: "A+",
+                  icon: Award,
+                  color: softPinkTheme.dynamicColors[3],
+                  iconBg: "from-green-400 to-emerald-400",
+                  cardBg: "from-green-50/90 via-emerald-50/70 to-green-100/80", // ✅ Green background
+                  hoverBg:
+                    "from-green-100/95 via-emerald-100/80 to-green-200/90",
+                },
+              ].map((stat, i) => (
+                <motion.div
+                  key={i}
+                  initial={{ scale: 0, rotate: -180 }}
+                  animate={{ scale: 1, rotate: 0 }}
+                  transition={{
+                    delay: 1.2 + i * 0.15,
+                    type: "spring",
+                    stiffness: 300,
+                    damping: 20,
+                  }}
+                  whileHover={{
+                    scale: 1.05,
+                    y: -8,
+                    transition: {
+                      duration: 0.3,
+                      type: "spring",
+                      stiffness: 400,
+                    },
+                  }}
+                  className="group cursor-pointer"
+                >
+                  <Card
+                    className={`text-center border-0 ${softPinkTheme.softGlow} bg-gradient-to-br ${stat.cardBg} backdrop-blur-xl hover:bg-gradient-to-br hover:${stat.hoverBg} transition-all duration-500 relative overflow-hidden rounded-xl sm:rounded-2xl lg:rounded-3xl shadow-lg hover:shadow-2xl`}
+                  >
+                    {/* Card Shimmer Effect */}
+                    <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/20 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
+
+                    <CardContent className="p-3 sm:p-4 lg:p-6 relative z-10">
+                      {/* ✅ ENHANCED ICON - MOBILE RESPONSIVE */}
+                      <motion.div
+                        animate={{
+                          rotate: [0, 360],
+                          scale: [1, 1.05, 1],
+                        }}
+                        transition={{
+                          rotate: {
+                            duration: 20,
+                            repeat: Infinity,
+                            ease: "linear",
+                          },
+                          scale: {
+                            duration: 3,
+                            repeat: Infinity,
+                            delay: i * 0.5,
+                          },
+                        }}
+                        className={`w-10 h-10 sm:w-12 sm:h-12 lg:w-14 lg:h-14 mx-auto rounded-xl sm:rounded-2xl bg-gradient-to-br ${stat.iconBg} flex items-center justify-center mb-2 sm:mb-3 lg:mb-4 ${stat.color.glow} relative overflow-hidden group-hover:scale-110 transition-transform duration-300 shadow-md sm:shadow-lg`}
+                      >
+                        <stat.icon className="w-5 h-5 sm:w-6 sm:h-6 lg:w-7 lg:h-7 text-white relative z-10 drop-shadow-md" />
+
+                        {/* Pulsing Inner Ring */}
+                        <motion.div
+                          className="absolute inset-1.5 sm:inset-2 bg-white/20 rounded-lg sm:rounded-xl"
+                          animate={{
+                            scale: [1, 1.15, 1],
+                            opacity: [0.3, 0.6, 0.3],
+                          }}
+                          transition={{
+                            duration: 2,
+                            repeat: Infinity,
+                            delay: i * 0.3,
+                          }}
+                        />
+                      </motion.div>
+
+                      {/* ✅ ENHANCED VALUE - MOBILE RESPONSIVE */}
+                      <motion.div
+                        className="text-xl sm:text-2xl lg:text-3xl font-bold text-gray-800 mb-1 lg:mb-2"
+                        animate={{
+                          scale: [1, 1.05, 1],
+                          color: [
+                            "rgb(31 41 55)",
+                            "rgb(219 39 119)",
+                            "rgb(31 41 55)",
+                          ],
+                        }}
+                        transition={{
+                          duration: 4,
+                          repeat: Infinity,
+                          delay: i * 0.8,
+                        }}
+                      >
+                        {stat.value}
+                      </motion.div>
+
+                      {/* ✅ ENHANCED LABEL - MOBILE RESPONSIVE */}
+                      <div className="text-xs sm:text-sm lg:text-base text-gray-600 font-medium leading-tight">
+                        {stat.label}
+                      </div>
+
+                      {/* ✅ HOVER SPARKLE EFFECT */}
+                      <motion.div
+                        className="absolute top-1 right-1 sm:top-2 sm:right-2 opacity-0 group-hover:opacity-100"
+                        animate={{
+                          rotate: [0, 360],
+                          scale: [0.8, 1.2, 0.8],
+                        }}
+                        transition={{ duration: 2, repeat: Infinity }}
+                      >
+                        <Sparkles className="w-3 h-3 sm:w-4 sm:h-4 text-pink-400" />
+                      </motion.div>
+                    </CardContent>
+                  </Card>
+                </motion.div>
+              ))}
+            </motion.div>
           </motion.div>
-        </motion.div>
 
-        {/* Filter Bars - RESPONSIVE */}
-        <motion.div
-          initial={{ opacity: 0, y: 30 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ delay: 1.2 }}
-          className="mb-8"
+          {/* Filter Bars - RESPONSIVE */}
+          <motion.div
+            initial={{ opacity: 0, y: 30 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: 1.2 }}
+            className="mb-8"
+          >
+            {/* Mobile Filter */}
+            <MobileFilterBar
+              filters={filters}
+              sortOptions={sortOptions}
+              searchInput={searchInput}
+              setSearchInput={setSearchInput}
+              handleSearch={handleSearch}
+              handleSortChange={handleSortChange}
+              clearFilters={clearFilters}
+              viewMode={viewMode}
+              setViewMode={setViewMode}
+              filteredProductsLength={filteredProducts.length}
+              currentPage={currentPage}
+              totalPages={totalPages}
+              currentProductsLength={currentProducts.length}
+            />
+
+            {/* Desktop Filter */}
+            <DesktopFilterBar
+              filters={filters}
+              sortOptions={sortOptions}
+              searchInput={searchInput}
+              setSearchInput={setSearchInput}
+              handleSearch={handleSearch}
+              handleSortChange={handleSortChange}
+              clearFilters={clearFilters}
+              viewMode={viewMode}
+              setViewMode={setViewMode}
+              filteredProductsLength={filteredProducts.length}
+              currentPage={currentPage}
+              totalPages={totalPages}
+              currentProductsLength={currentProducts.length}
+            />
+          </motion.div>
+
+          {/* Products Grid - 4 COLUMNS */}
+          <motion.div
+            className="mb-6" // ✅ Giảm margin-bottom từ 12 xuống 6
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            transition={{ delay: 1.5 }}
+          >
+            <ProductGrid
+              products={currentProducts}
+              viewMode={viewMode}
+              addToCart={addToCart}
+            />
+          </motion.div>
+        </div>
+
+        {/* Full Width Pagination - CLOSER */}
+        <SimplePagination
+          currentPage={currentPage}
+          totalPages={totalPages}
+          onPageChange={handlePageChange}
+          filteredProductsLength={filteredProducts.length}
+          itemsPerPage={itemsPerPage}
+        />
+
+        {/* Scroll to top - PINK THEME */}
+        <motion.button
+          className={`fixed bottom-8 right-8 w-14 h-14 rounded-full ${softPinkTheme.glow} bg-gradient-to-r ${softPinkTheme.primaryGradient} hover:scale-110 text-white z-50 transition-all duration-300 relative overflow-hidden group`}
+          whileHover={{
+            scale: 1.15,
+            rotate: 360,
+            transition: { duration: 0.6 },
+          }}
+          whileTap={{ scale: 0.9 }}
+          onClick={() => window.scrollTo({ top: 0, behavior: "smooth" })}
         >
-          {/* Mobile Filter */}
-          <MobileFilterBar
-            filters={filters}
-            sortOptions={sortOptions}
-            searchInput={searchInput}
-            setSearchInput={setSearchInput}
-            handleSearch={handleSearch}
-            handleSortChange={handleSortChange}
-            clearFilters={clearFilters}
-            viewMode={viewMode}
-            setViewMode={setViewMode}
-            filteredProductsLength={filteredProducts.length}
-            currentPage={currentPage}
-            totalPages={totalPages}
-            currentProductsLength={currentProducts.length}
+          <ArrowUp className="w-7 h-7 mx-auto relative z-10 group-hover:scale-125 transition-transform" />
+          <motion.div
+            animate={{ rotate: 360 }}
+            transition={{ duration: 4, repeat: Infinity, ease: "linear" }}
+            className="absolute inset-0 border-2 border-white/30 rounded-full"
           />
-
-          {/* Desktop Filter */}
-          <DesktopFilterBar
-            filters={filters}
-            sortOptions={sortOptions}
-            searchInput={searchInput}
-            setSearchInput={setSearchInput}
-            handleSearch={handleSearch}
-            handleSortChange={handleSortChange}
-            clearFilters={clearFilters}
-            viewMode={viewMode}
-            setViewMode={setViewMode}
-            filteredProductsLength={filteredProducts.length}
-            currentPage={currentPage}
-            totalPages={totalPages}
-            currentProductsLength={currentProducts.length}
+          <motion.div
+            animate={{ scale: [1, 1.3, 1], opacity: [0.5, 0.8, 0.5] }}
+            transition={{ duration: 2, repeat: Infinity }}
+            className="absolute inset-0 bg-white/20 rounded-full"
           />
-        </motion.div>
-
-        {/* Products Grid - 4 COLUMNS */}
-        <motion.div
-          className="mb-6" // ✅ Giảm margin-bottom từ 12 xuống 6
-          initial={{ opacity: 0 }}
-          animate={{ opacity: 1 }}
-          transition={{ delay: 1.5 }}
-        >
-          <ProductGrid
-            products={currentProducts}
-            viewMode={viewMode}
-            addToCart={addToCart}
-          />
-        </motion.div>
+        </motion.button>
       </div>
-
-      {/* Full Width Pagination - CLOSER */}
-      <SimplePagination
-        currentPage={currentPage}
-        totalPages={totalPages}
-        onPageChange={handlePageChange}
-        filteredProductsLength={filteredProducts.length}
-        itemsPerPage={itemsPerPage}
-      />
-
-      {/* Scroll to top - PINK THEME */}
-      <motion.button
-        className={`fixed bottom-8 right-8 w-14 h-14 rounded-full ${softPinkTheme.glow} bg-gradient-to-r ${softPinkTheme.primaryGradient} hover:scale-110 text-white z-50 transition-all duration-300 relative overflow-hidden group`}
-        whileHover={{
-          scale: 1.15,
-          rotate: 360,
-          transition: { duration: 0.6 },
-        }}
-        whileTap={{ scale: 0.9 }}
-        onClick={() => window.scrollTo({ top: 0, behavior: "smooth" })}
-      >
-        <ArrowUp className="w-7 h-7 mx-auto relative z-10 group-hover:scale-125 transition-transform" />
-        <motion.div
-          animate={{ rotate: 360 }}
-          transition={{ duration: 4, repeat: Infinity, ease: "linear" }}
-          className="absolute inset-0 border-2 border-white/30 rounded-full"
-        />
-        <motion.div
-          animate={{ scale: [1, 1.3, 1], opacity: [0.5, 0.8, 0.5] }}
-          transition={{ duration: 2, repeat: Infinity }}
-          className="absolute inset-0 bg-white/20 rounded-full"
-        />
-      </motion.button>
-    </div>
+    </>
   );
 };
 

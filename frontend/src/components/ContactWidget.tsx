@@ -97,10 +97,10 @@ const ContactWidget: React.FC = () => {
             transition={{ duration: 0.25, ease: "easeOut" }}
             className="mb-3"
           >
-            {/* ✅ UPDATED: Pink/Rose/Red Main Card */}
+            {/* ✅ UPDATED: Main Card với SoftPinkTheme Background */}
             <Card className="border-0 shadow-xl overflow-hidden backdrop-blur-sm">
-              {/* ✅ UPDATED: Pink/Rose/Red gradient background */}
-              <div className="absolute inset-0 bg-gradient-to-br from-pink-400 via-rose-400 to-red-400" />
+              {/* ✅ CHỈ ĐỔI DÒNG NÀY: from-pink-400 via-orange-400 to-yellow-400 */}
+              <div className="absolute inset-0 bg-gradient-to-br from-pink-400 via-orange-400 to-yellow-400" />
               <div className="absolute inset-0 bg-gradient-to-t from-black/20 to-transparent" />
 
               <CardContent
@@ -211,21 +211,21 @@ const ContactWidget: React.FC = () => {
         )}
       </AnimatePresence>
 
-      {/* ✅ UPDATED: Pink/Rose/Red Toggle Button */}
+      {/* ✅ UPDATED: Toggle Button với SoftPinkTheme Background */}
       <motion.div
         whileHover={{ scale: 1.05 }}
         whileTap={{ scale: 0.95 }}
         className="relative"
       >
-        {/* ✅ UPDATED: Pink glow effect */}
-        <div className="absolute inset-0 rounded-full bg-gradient-to-r from-pink-400 via-rose-400 to-red-400 opacity-20 blur-lg animate-pulse" />
+        {/* ✅ CHỈ ĐỔI DÒNG NÀY: from-pink-400 via-orange-400 to-yellow-400 */}
+        <div className="absolute inset-0 rounded-full bg-gradient-to-r from-pink-400 via-orange-400 to-yellow-400 opacity-20 blur-lg animate-pulse" />
 
         <Button
           onClick={() => setIsExpanded(!isExpanded)}
           className={cn(
             "relative rounded-full shadow-lg border-2 border-white/10 transition-all duration-300 group",
-            "bg-gradient-to-r from-pink-400 via-rose-400 to-red-400", // ✅ UPDATED: Pink gradient
-            "hover:from-pink-500 hover:via-rose-500 hover:to-red-500", // ✅ UPDATED: Pink hover
+            "bg-gradient-to-r from-pink-400 via-orange-400 to-yellow-400", // ✅ CHỈ ĐỔI DÒNG NÀY
+            "hover:from-pink-500 hover:via-orange-500 hover:to-yellow-500", // ✅ CHỈ ĐỔI DÒNG NÀY
             "hover:shadow-xl hover:scale-105",
             isMobile ? "w-12 h-12" : "w-14 h-14",
           )}
