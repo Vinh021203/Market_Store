@@ -16,7 +16,6 @@ import { uploadFileToCloudinary } from "@/lib/uploadFileToCloudinary";
 import {
   Settings as SettingsIcon,
   Camera,
-  Upload,
   X,
   Loader2,
   Eye,
@@ -27,19 +26,28 @@ import {
   Shield,
   Bell,
   Palette,
-  Globe,
-  Trash2,
   Save,
-  RefreshCw,
   CheckCircle,
   AlertTriangle,
   Info,
   Crown,
   Star,
+  Sparkles,
+  Zap,
+  TrendingUp,
 } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import { toast } from "@/components/ui/use-toast";
 import { useTheme } from "@/contexts/ThemeContext";
+
+// 🎨 COLOR SCHEME - Pastel theme
+const colorScheme = {
+  primaryGradient: "from-pink-400 via-orange-400 to-yellow-400",
+  secondaryGradient: "from-pink-500 via-orange-500 to-yellow-500",
+  pageBackground: "from-pink-50 via-blue-50 to-yellow-50",
+  sectionBackground: "from-pink-50/80 via-blue-50/60 to-yellow-50/80",
+  glassCard: "from-white/95 via-pink-50/60 to-blue-50/40",
+};
 
 const Settings: React.FC = () => {
   const { user, updateProfile } = useAuth();
@@ -61,7 +69,6 @@ const Settings: React.FC = () => {
   );
   const [uploadProgress, setUploadProgress] = useState(0);
 
-  // Load user preferences
   useEffect(() => {
     const loadUserPreferences = async () => {
       if (!user) return;
@@ -88,7 +95,6 @@ const Settings: React.FC = () => {
     loadUserPreferences();
   }, [user]);
 
-  // Avatar upload handler
   const handleAvatarUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (!file) return;
@@ -236,42 +242,86 @@ const Settings: React.FC = () => {
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-50 via-blue-50 to-indigo-50 dark:from-slate-900 dark:via-purple-900 dark:to-slate-900">
-      {/* Floating Elements */}
-      <div className="fixed inset-0 overflow-hidden pointer-events-none">
-        <div className="absolute top-1/4 left-1/4 animate-float">
-          <SettingsIcon className="w-8 h-8 text-blue-500 opacity-20" />
-        </div>
-        <div className="absolute top-1/3 right-1/4 animate-float-delay-1">
-          <Shield className="w-6 h-6 text-purple-500 opacity-20" />
-        </div>
-        <div className="absolute bottom-1/4 left-1/3 animate-float-delay-2">
-          <Bell className="text-green-500 w-7 h-7 opacity-20" />
-        </div>
+    <div
+      className={`min-h-screen bg-gradient-to-br ${colorScheme.pageBackground}`}
+      style={{
+        backgroundImage: `radial-gradient(circle at 20% 80%, rgba(236, 72, 153, 0.04) 0%, transparent 50%),
+                 radial-gradient(circle at 80% 20%, rgba(244, 63, 94, 0.04) 0%, transparent 50%),
+                 radial-gradient(circle at 40% 40%, rgba(220, 38, 127, 0.03) 0%, transparent 50%)`,
+      }}
+    >
+      {/* Floating Background Elements */}
+      <div className="fixed inset-0 overflow-hidden pointer-events-none z-0">
+        {[
+          {
+            emoji: "⚙️",
+            position: "top-20 right-20",
+            color: "from-purple-100 to-indigo-200",
+          },
+          {
+            emoji: "🔒",
+            position: "top-40 left-10",
+            color: "from-blue-100 to-cyan-200",
+          },
+          {
+            emoji: "🔔",
+            position: "bottom-20 right-10",
+            color: "from-green-100 to-emerald-200",
+          },
+          {
+            emoji: "🎨",
+            position: "bottom-40 left-20",
+            color: "from-pink-100 to-rose-200",
+          },
+        ].map((item, i) => (
+          <motion.div
+            key={i}
+            className={`absolute ${item.position} text-4xl opacity-20`}
+            animate={{
+              y: [0, -20, 0],
+              rotate: [0, 10, -10, 0],
+              scale: [1, 1.2, 1],
+            }}
+            transition={{
+              duration: 6 + i,
+              repeat: Infinity,
+              ease: "easeInOut",
+              delay: i * 0.5,
+            }}
+          >
+            <div
+              className={`p-3 rounded-full bg-gradient-to-r ${item.color} backdrop-blur-sm shadow-lg`}
+            >
+              {item.emoji}
+            </div>
+          </motion.div>
+        ))}
       </div>
 
-      <div className="container relative z-10 px-4 py-8 mx-auto">
-        <div className="max-w-6xl mx-auto space-y-8">
+      <div className="container px-4 py-8 mx-auto relative z-10">
+        <div className="max-w-6xl mx-auto space-y-6">
           {/* Header */}
           <motion.div
-            initial={{ opacity: 0, y: -20 }}
+            initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
-            className="space-y-4 text-center"
+            className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between"
           >
-            <div className="flex items-center justify-center gap-3 mb-4">
-              <motion.div
-                whileHover={{ scale: 1.1, rotate: 5 }}
-                className="flex items-center justify-center w-16 h-16 shadow-lg rounded-2xl bg-gradient-to-r from-purple-500 to-blue-600"
+            <div>
+              <h1
+                className={`flex items-center gap-3 text-4xl font-bold bg-gradient-to-r ${colorScheme.primaryGradient} bg-clip-text text-transparent`}
               >
-                <SettingsIcon className="w-8 h-8 text-white" />
-              </motion.div>
+                <div
+                  className={`p-2 rounded-xl bg-gradient-to-r ${colorScheme.primaryGradient} shadow-lg`}
+                >
+                  <SettingsIcon className="w-8 h-8 text-white" />
+                </div>
+                Cài đặt tài khoản
+              </h1>
+              <p className="mt-2 text-slate-600 flex items-center gap-2">
+                <Sparkles className="w-4 h-4" />
+                Quản lý thông tin cá nhân, bảo mật và tùy chọn thông báo
+              </p>
             </div>
-            <h1 className="text-4xl font-bold text-transparent bg-gradient-to-r from-purple-600 via-blue-600 to-indigo-600 bg-clip-text">
-              Cài đặt tài khoản
-            </h1>
-            <p className="max-w-2xl mx-auto text-lg text-muted-foreground">
-              Quản lý thông tin cá nhân, bảo mật và tùy chọn thông báo của bạn
-            </p>
           </motion.div>
 
           {/* User Info Card */}
@@ -280,18 +330,24 @@ const Settings: React.FC = () => {
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: 0.1 }}
           >
-            <Card className="border-0 shadow-xl bg-gradient-to-r from-white to-blue-50 dark:from-slate-800 dark:to-blue-900">
+            <Card
+              className={`border-0 shadow-xl bg-gradient-to-br from-purple-50/90 via-blue-50/70 to-indigo-100/80 backdrop-blur-lg rounded-2xl`}
+            >
               <CardContent className="p-6">
                 <div className="flex items-center gap-6">
                   <div className="relative">
                     <Avatar className="w-20 h-20 border-4 border-white shadow-lg">
                       <AvatarImage src={user.avatar} />
-                      <AvatarFallback className="text-xl text-white bg-gradient-to-r from-blue-500 to-purple-600">
+                      <AvatarFallback
+                        className={`text-xl text-white bg-gradient-to-r ${colorScheme.primaryGradient}`}
+                      >
                         {getInitials(user.name)}
                       </AvatarFallback>
                     </Avatar>
                     <div className="absolute -bottom-1 -right-1">
-                      <Badge className="text-white bg-gradient-to-r from-green-500 to-emerald-600">
+                      <Badge
+                        className={`bg-gradient-to-r ${colorScheme.primaryGradient} text-white border-0 shadow-lg`}
+                      >
                         {user.role === "admin" ? (
                           <Crown className="w-3 h-3" />
                         ) : (
@@ -301,20 +357,15 @@ const Settings: React.FC = () => {
                     </div>
                   </div>
                   <div className="flex-1">
-                    <h3 className="text-2xl font-bold">{user.name}</h3>
-                    <p className="text-muted-foreground">{user.email}</p>
+                    <h3 className="text-2xl font-bold text-slate-800">
+                      {user.name}
+                    </h3>
+                    <p className="text-slate-600">{user.email}</p>
                     <div className="flex items-center gap-2 mt-2">
-                      <Badge
-                        variant={
-                          user.role === "admin" ? "default" : "secondary"
-                        }
-                      >
+                      <Badge className="bg-purple-100 text-purple-700 border-purple-200">
                         {user.role === "admin" ? "Quản trị viên" : "Khách hàng"}
                       </Badge>
-                      <Badge
-                        variant="outline"
-                        className="text-green-600 border-green-600"
-                      >
+                      <Badge className="bg-green-100 text-green-700 border-green-200">
                         <CheckCircle className="w-3 h-3 mr-1" />
                         Đã xác thực
                       </Badge>
@@ -332,64 +383,63 @@ const Settings: React.FC = () => {
             transition={{ delay: 0.2 }}
           >
             <Tabs value={activeTab} onValueChange={setActiveTab}>
-              <TabsList className="grid w-full grid-cols-4 bg-white shadow-lg dark:bg-slate-800">
-                <TabsTrigger
-                  value="profile"
-                  className="flex items-center gap-2"
-                >
-                  <User className="w-4 h-4" />
-                  Hồ sơ
-                </TabsTrigger>
-                <TabsTrigger
-                  value="security"
-                  className="flex items-center gap-2"
-                >
-                  <Shield className="w-4 h-4" />
-                  Bảo mật
-                </TabsTrigger>
-                <TabsTrigger
-                  value="notifications"
-                  className="flex items-center gap-2"
-                >
-                  <Bell className="w-4 h-4" />
-                  Thông báo
-                </TabsTrigger>
-                <TabsTrigger
-                  value="appearance"
-                  className="flex items-center gap-2"
-                >
-                  <Palette className="w-4 h-4" />
-                  Giao diện
-                </TabsTrigger>
+              <TabsList
+                className={`grid w-full grid-cols-4 p-1.5 bg-gradient-to-r ${colorScheme.glassCard} backdrop-blur-xl border-0 shadow-lg rounded-2xl`}
+              >
+                {[
+                  { value: "profile", label: "Hồ sơ", icon: User },
+                  { value: "security", label: "Bảo mật", icon: Shield },
+                  { value: "notifications", label: "Thông báo", icon: Bell },
+                  { value: "appearance", label: "Giao diện", icon: Palette },
+                ].map((tab) => (
+                  <TabsTrigger
+                    key={tab.value}
+                    value={tab.value}
+                    className={`data-[state=active]:bg-gradient-to-r data-[state=active]:${colorScheme.primaryGradient} data-[state=active]:text-white data-[state=active]:shadow-lg rounded-xl transition-all font-semibold`}
+                  >
+                    <tab.icon className="w-4 h-4 mr-2" />
+                    {tab.label}
+                  </TabsTrigger>
+                ))}
               </TabsList>
 
               {/* Profile Tab */}
               <TabsContent value="profile" className="mt-6">
                 <div className="grid gap-6 lg:grid-cols-2">
                   {/* Avatar Upload */}
-                  <Card className="border-0 shadow-xl bg-gradient-to-br from-white to-purple-50 dark:from-slate-800 dark:to-purple-900">
+                  <Card
+                    className={`border-0 shadow-xl bg-gradient-to-br from-purple-50/90 via-pink-50/70 to-purple-100/80 backdrop-blur-lg rounded-2xl`}
+                  >
                     <CardHeader>
                       <CardTitle className="flex items-center gap-2">
-                        <Camera className="w-5 h-5 text-purple-600" />
-                        Ảnh đại diện
+                        <Camera
+                          className={`w-5 h-5 bg-gradient-to-r ${colorScheme.primaryGradient} bg-clip-text text-transparent`}
+                        />
+                        <span
+                          className={`bg-gradient-to-r from-purple-600 via-pink-600 to-orange-600 bg-clip-text text-transparent font-bold`}
+                        >
+                          Ảnh đại diện
+                        </span>
                       </CardTitle>
                     </CardHeader>
                     <CardContent className="space-y-6">
                       <div className="flex flex-col items-center gap-4">
                         <div className="relative">
-                          <Avatar className="w-32 h-32 border-4 border-purple-200 shadow-xl">
+                          <Avatar className="w-32 h-32 border-4 border-pink-200 shadow-xl">
                             <AvatarImage
                               src={
                                 uploadedAvatarUrl || editAvatar || user.avatar
                               }
                             />
-                            <AvatarFallback className="text-2xl text-white bg-gradient-to-r from-purple-500 to-blue-600">
+                            <AvatarFallback
+                              className={`text-2xl text-white bg-gradient-to-r ${colorScheme.primaryGradient}`}
+                            >
                               {getInitials(user.name)}
                             </AvatarFallback>
                           </Avatar>
                           <label
                             htmlFor="avatar-upload"
-                            className="absolute bottom-0 right-0 p-2 text-white transition-colors bg-purple-600 rounded-full shadow-lg cursor-pointer hover:bg-purple-700"
+                            className={`absolute bottom-0 right-0 p-2 text-white rounded-full shadow-lg cursor-pointer bg-gradient-to-r ${colorScheme.primaryGradient} hover:${colorScheme.secondaryGradient} transition-all`}
                           >
                             <Camera className="w-4 h-4" />
                           </label>
@@ -406,13 +456,13 @@ const Settings: React.FC = () => {
 
                         {isUploadingAvatar && (
                           <div className="w-full space-y-2">
-                            <div className="flex items-center gap-2 text-sm text-muted-foreground">
+                            <div className="flex items-center gap-2 text-sm text-slate-600">
                               <Loader2 className="w-4 h-4 animate-spin" />
                               <span>Đang tải lên... {uploadProgress}%</span>
                             </div>
-                            <div className="w-full h-2 overflow-hidden bg-gray-200 rounded-full">
+                            <div className="w-full h-2 overflow-hidden bg-pink-100 rounded-full">
                               <motion.div
-                                className="h-2 rounded-full bg-gradient-to-r from-purple-500 to-blue-600"
+                                className={`h-2 rounded-full bg-gradient-to-r ${colorScheme.primaryGradient}`}
                                 initial={{ width: 0 }}
                                 animate={{ width: `${uploadProgress}%` }}
                                 transition={{ duration: 0.3 }}
@@ -427,11 +477,11 @@ const Settings: React.FC = () => {
                               initial={{ opacity: 0, scale: 0.8 }}
                               animate={{ opacity: 1, scale: 1 }}
                               exit={{ opacity: 0, scale: 0.8 }}
-                              className="flex items-center justify-between w-full p-3 border border-green-200 rounded-lg bg-green-50 dark:bg-green-900/20"
+                              className="flex items-center justify-between w-full p-3 border-0 rounded-xl bg-green-50/80 backdrop-blur-sm shadow-sm"
                             >
                               <div className="flex items-center gap-2">
                                 <CheckCircle className="w-4 h-4 text-green-600" />
-                                <span className="text-sm text-green-800 dark:text-green-400">
+                                <span className="text-sm text-green-800 font-medium">
                                   Ảnh mới đã được tải lên
                                 </span>
                               </div>
@@ -450,50 +500,62 @@ const Settings: React.FC = () => {
                   </Card>
 
                   {/* Personal Info */}
-                  <Card className="border-0 shadow-xl bg-gradient-to-br from-white to-blue-50 dark:from-slate-800 dark:to-blue-900">
+                  <Card
+                    className={`border-0 shadow-xl bg-gradient-to-br from-blue-50/90 via-cyan-50/70 to-blue-100/80 backdrop-blur-lg rounded-2xl`}
+                  >
                     <CardHeader>
                       <CardTitle className="flex items-center gap-2">
                         <User className="w-5 h-5 text-blue-600" />
-                        Thông tin cá nhân
+                        <span
+                          className={`bg-gradient-to-r from-blue-600 via-cyan-600 to-blue-600 bg-clip-text text-transparent font-bold`}
+                        >
+                          Thông tin cá nhân
+                        </span>
                       </CardTitle>
                     </CardHeader>
                     <CardContent className="space-y-4">
                       <div>
-                        <Label htmlFor="name" className="text-sm font-medium">
+                        <Label
+                          htmlFor="name"
+                          className="text-sm font-medium text-slate-700"
+                        >
                           Họ và tên
                         </Label>
                         <Input
                           id="name"
-                          className="mt-1 bg-gray-100 border-0 dark:bg-gray-800"
+                          className="mt-1 bg-white/80 border-blue-200 focus:border-blue-300 focus:ring-blue-300"
                           value={editName}
                           onChange={(e) => setEditName(e.target.value)}
                           disabled={isLoading}
                         />
                       </div>
                       <div>
-                        <Label htmlFor="email" className="text-sm font-medium">
+                        <Label
+                          htmlFor="email"
+                          className="text-sm font-medium text-slate-700"
+                        >
                           Email
                         </Label>
                         <Input
                           id="email"
-                          className="mt-1 bg-gray-100 border-0 dark:bg-gray-800"
+                          className="mt-1 bg-white/50 border-blue-200"
                           value={user.email}
                           disabled
                         />
-                        <p className="mt-1 text-xs text-muted-foreground">
+                        <p className="mt-1 text-xs text-slate-500">
                           Email không thể thay đổi
                         </p>
                       </div>
                       <div>
                         <Label
                           htmlFor="avatar-url"
-                          className="text-sm font-medium"
+                          className="text-sm font-medium text-slate-700"
                         >
                           Avatar URL (tùy chọn)
                         </Label>
                         <Input
                           id="avatar-url"
-                          className="mt-1 bg-gray-100 border-0 dark:bg-gray-800"
+                          className="mt-1 bg-white/80 border-blue-200 focus:border-blue-300 focus:ring-blue-300"
                           value={editAvatar}
                           onChange={(e) => setEditAvatar(e.target.value)}
                           placeholder="https://example.com/avatar.jpg"
@@ -503,7 +565,7 @@ const Settings: React.FC = () => {
                       <Button
                         onClick={handleUpdateProfile}
                         disabled={isLoading || isUploadingAvatar}
-                        className="w-full bg-gradient-to-r from-blue-500 to-purple-600 hover:from-blue-600 hover:to-purple-700"
+                        className={`w-full bg-gradient-to-r ${colorScheme.primaryGradient} hover:${colorScheme.secondaryGradient} text-white shadow-lg`}
                       >
                         {isLoading ? (
                           <>
@@ -524,11 +586,17 @@ const Settings: React.FC = () => {
 
               {/* Security Tab */}
               <TabsContent value="security" className="mt-6">
-                <Card className="border-0 shadow-xl bg-gradient-to-br from-white to-red-50 dark:from-slate-800 dark:to-red-900">
+                <Card
+                  className={`border-0 shadow-xl bg-gradient-to-br from-red-50/90 via-pink-50/70 to-rose-100/80 backdrop-blur-lg rounded-2xl`}
+                >
                   <CardHeader>
                     <CardTitle className="flex items-center gap-2">
                       <Shield className="w-5 h-5 text-red-600" />
-                      Bảo mật tài khoản
+                      <span
+                        className={`bg-gradient-to-r from-red-600 via-pink-600 to-rose-600 bg-clip-text text-transparent font-bold`}
+                      >
+                        Bảo mật tài khoản
+                      </span>
                     </CardTitle>
                   </CardHeader>
                   <CardContent className="space-y-6">
@@ -536,7 +604,7 @@ const Settings: React.FC = () => {
                       <div>
                         <Label
                           htmlFor="password"
-                          className="text-sm font-medium"
+                          className="text-sm font-medium text-slate-700"
                         >
                           Mật khẩu mới
                         </Label>
@@ -547,7 +615,7 @@ const Settings: React.FC = () => {
                             value={password}
                             onChange={(e) => setPassword(e.target.value)}
                             disabled={isLoading}
-                            className="pr-10 bg-gray-100 border-0 dark:bg-gray-800"
+                            className="pr-10 bg-white/80 border-pink-200 focus:border-pink-300 focus:ring-pink-300"
                             placeholder="Nhập mật khẩu mới"
                           />
                           <Button
@@ -568,7 +636,7 @@ const Settings: React.FC = () => {
                       <div>
                         <Label
                           htmlFor="confirmPassword"
-                          className="text-sm font-medium"
+                          className="text-sm font-medium text-slate-700"
                         >
                           Xác nhận mật khẩu
                         </Label>
@@ -579,7 +647,7 @@ const Settings: React.FC = () => {
                             value={confirmPassword}
                             onChange={(e) => setConfirmPassword(e.target.value)}
                             disabled={isLoading}
-                            className="pr-10 bg-gray-100 border-0 dark:bg-gray-800"
+                            className="pr-10 bg-white/80 border-pink-200 focus:border-pink-300 focus:ring-pink-300"
                             placeholder="Xác nhận mật khẩu"
                           />
                           <Button
@@ -601,14 +669,14 @@ const Settings: React.FC = () => {
                       </div>
                     </div>
 
-                    <div className="p-4 border border-yellow-200 rounded-lg bg-yellow-50 dark:bg-yellow-900/20 dark:border-yellow-800">
+                    <div className="p-4 border-0 rounded-xl bg-yellow-50/80 backdrop-blur-sm shadow-sm">
                       <div className="flex items-start gap-3">
                         <AlertTriangle className="w-5 h-5 text-yellow-600 mt-0.5" />
                         <div>
-                          <h4 className="font-medium text-yellow-800 dark:text-yellow-400">
+                          <h4 className="font-semibold text-yellow-800">
                             Yêu cầu mật khẩu
                           </h4>
-                          <ul className="mt-1 space-y-1 text-sm text-yellow-700 dark:text-yellow-300">
+                          <ul className="mt-1 space-y-1 text-sm text-yellow-700">
                             <li>• Ít nhất 8 ký tự</li>
                             <li>• Bao gồm chữ hoa và chữ thường</li>
                             <li>• Có ít nhất 1 số</li>
@@ -621,7 +689,7 @@ const Settings: React.FC = () => {
                     <Button
                       onClick={handleChangePassword}
                       disabled={isLoading || !password || !confirmPassword}
-                      className="w-full bg-gradient-to-r from-red-500 to-pink-600 hover:from-red-600 hover:to-pink-700"
+                      className="w-full bg-gradient-to-r from-red-500 to-pink-600 hover:from-red-600 hover:to-pink-700 text-white shadow-lg"
                     >
                       <Lock className="w-4 h-4 mr-2" />
                       Đổi mật khẩu
@@ -632,73 +700,80 @@ const Settings: React.FC = () => {
 
               {/* Notifications Tab */}
               <TabsContent value="notifications" className="mt-6">
-                <Card className="border-0 shadow-xl bg-gradient-to-br from-white to-green-50 dark:from-slate-800 dark:to-green-900">
+                <Card
+                  className={`border-0 shadow-xl bg-gradient-to-br from-green-50/90 via-emerald-50/70 to-green-100/80 backdrop-blur-lg rounded-2xl`}
+                >
                   <CardHeader>
                     <CardTitle className="flex items-center gap-2">
                       <Bell className="w-5 h-5 text-green-600" />
-                      Cài đặt thông báo
+                      <span
+                        className={`bg-gradient-to-r from-green-600 via-emerald-600 to-green-600 bg-clip-text text-transparent font-bold`}
+                      >
+                        Cài đặt thông báo
+                      </span>
                     </CardTitle>
                   </CardHeader>
                   <CardContent className="space-y-6">
                     <div className="space-y-4">
-                      <div className="flex items-center justify-between p-4 rounded-lg bg-gray-50 dark:bg-gray-800">
-                        <div className="flex items-start gap-3">
-                          <Mail className="w-5 h-5 mt-1 text-blue-600" />
-                          <div>
-                            <h4 className="font-medium">Email marketing</h4>
-                            <p className="text-sm text-muted-foreground">
-                              Nhận thông tin về sản phẩm mới và khuyến mãi
-                            </p>
+                      {[
+                        {
+                          icon: Mail,
+                          title: "Email marketing",
+                          description:
+                            "Nhận thông tin về sản phẩm mới và khuyến mãi",
+                          checked: emailNotifications,
+                          onChange: setEmailNotifications,
+                          color: "text-blue-600",
+                        },
+                        {
+                          icon: Bell,
+                          title: "Thông báo đơn hàng",
+                          description: "Nhận thông báo về trạng thái đơn hàng",
+                          checked: orderNotifications,
+                          onChange: setOrderNotifications,
+                          color: "text-green-600",
+                        },
+                        {
+                          icon: Star,
+                          title: "Email khuyến mãi",
+                          description: "Nhận các ưu đãi và giảm giá đặc biệt",
+                          checked: marketingEmails,
+                          onChange: setMarketingEmails,
+                          color: "text-purple-600",
+                        },
+                      ].map((item, index) => (
+                        <div
+                          key={index}
+                          className="flex items-center justify-between p-4 rounded-xl bg-white/80 backdrop-blur-sm shadow-sm border border-green-100"
+                        >
+                          <div className="flex items-start gap-3">
+                            <item.icon
+                              className={`w-5 h-5 mt-1 ${item.color}`}
+                            />
+                            <div>
+                              <h4 className="font-semibold text-slate-800">
+                                {item.title}
+                              </h4>
+                              <p className="text-sm text-slate-600">
+                                {item.description}
+                              </p>
+                            </div>
                           </div>
+                          <Switch
+                            checked={item.checked}
+                            onCheckedChange={item.onChange}
+                            disabled={isLoading}
+                          />
                         </div>
-                        <Switch
-                          checked={emailNotifications}
-                          onCheckedChange={setEmailNotifications}
-                          disabled={isLoading}
-                        />
-                      </div>
-
-                      <div className="flex items-center justify-between p-4 rounded-lg bg-gray-50 dark:bg-gray-800">
-                        <div className="flex items-start gap-3">
-                          <Bell className="w-5 h-5 mt-1 text-green-600" />
-                          <div>
-                            <h4 className="font-medium">Thông báo đơn hàng</h4>
-                            <p className="text-sm text-muted-foreground">
-                              Nhận thông báo về trạng thái đơn hàng
-                            </p>
-                          </div>
-                        </div>
-                        <Switch
-                          checked={orderNotifications}
-                          onCheckedChange={setOrderNotifications}
-                          disabled={isLoading}
-                        />
-                      </div>
-
-                      <div className="flex items-center justify-between p-4 rounded-lg bg-gray-50 dark:bg-gray-800">
-                        <div className="flex items-start gap-3">
-                          <Star className="w-5 h-5 mt-1 text-purple-600" />
-                          <div>
-                            <h4 className="font-medium">Email khuyến mãi</h4>
-                            <p className="text-sm text-muted-foreground">
-                              Nhận các ưu đãi và giảm giá đặc biệt
-                            </p>
-                          </div>
-                        </div>
-                        <Switch
-                          checked={marketingEmails}
-                          onCheckedChange={setMarketingEmails}
-                          disabled={isLoading}
-                        />
-                      </div>
+                      ))}
                     </div>
 
-                    <Separator />
+                    <Separator className="bg-green-200" />
 
                     <Button
                       onClick={handleUpdateNotifications}
                       disabled={isLoading}
-                      className="w-full bg-gradient-to-r from-green-500 to-emerald-600 hover:from-green-600 hover:to-emerald-700"
+                      className="w-full bg-gradient-to-r from-green-500 to-emerald-600 hover:from-green-600 hover:to-emerald-700 text-white shadow-lg"
                     >
                       <Save className="w-4 h-4 mr-2" />
                       Lưu cài đặt thông báo
@@ -709,50 +784,60 @@ const Settings: React.FC = () => {
 
               {/* Appearance Tab */}
               <TabsContent value="appearance" className="mt-6">
-                <Card className="border-0 shadow-xl bg-gradient-to-br from-white to-indigo-50 dark:from-slate-800 dark:to-indigo-900">
+                <Card
+                  className={`border-0 shadow-xl bg-gradient-to-br from-indigo-50/90 via-purple-50/70 to-indigo-100/80 backdrop-blur-lg rounded-2xl`}
+                >
                   <CardHeader>
                     <CardTitle className="flex items-center gap-2">
                       <Palette className="w-5 h-5 text-indigo-600" />
-                      Giao diện và hiển thị
+                      <span
+                        className={`bg-gradient-to-r from-indigo-600 via-purple-600 to-indigo-600 bg-clip-text text-transparent font-bold`}
+                      >
+                        Giao diện và hiển thị
+                      </span>
                     </CardTitle>
                   </CardHeader>
                   <CardContent className="space-y-6">
                     <div>
-                      <Label className="text-sm font-medium">
+                      <Label className="text-sm font-medium text-slate-700">
                         Chế độ hiển thị
                       </Label>
-                      <div className="grid grid-cols-3 gap-3 mt-3">
+                      <div className="grid grid-cols-3 gap-4 mt-3">
                         {[
                           { value: "light", label: "Sáng", icon: "☀️" },
                           { value: "dark", label: "Tối", icon: "🌙" },
                           { value: "system", label: "Hệ thống", icon: "💻" },
                         ].map((option) => (
-                          <button
+                          <motion.button
                             key={option.value}
+                            whileHover={{ scale: 1.05, y: -2 }}
+                            whileTap={{ scale: 0.95 }}
                             onClick={() => setTheme(option.value as any)}
-                            className={`p-4 border-2 rounded-lg text-center transition-all ${
+                            className={`p-6 border-2 rounded-2xl text-center transition-all shadow-lg ${
                               theme === option.value
-                                ? "border-indigo-500 bg-indigo-50 dark:bg-indigo-900/50"
-                                : "border-gray-200 dark:border-gray-700 hover:border-indigo-300"
+                                ? "border-indigo-500 bg-indigo-50/80 backdrop-blur-sm shadow-xl"
+                                : "border-pink-200 bg-white/80 hover:border-indigo-300"
                             }`}
                           >
-                            <div className="mb-2 text-2xl">{option.icon}</div>
-                            <div className="font-medium">{option.label}</div>
-                          </button>
+                            <div className="mb-3 text-3xl">{option.icon}</div>
+                            <div className="font-semibold text-slate-800">
+                              {option.label}
+                            </div>
+                          </motion.button>
                         ))}
                       </div>
                     </div>
 
-                    <Separator />
+                    <Separator className="bg-indigo-200" />
 
-                    <div className="p-4 border border-blue-200 rounded-lg bg-blue-50 dark:bg-blue-900/20 dark:border-blue-800">
+                    <div className="p-4 border-0 rounded-xl bg-blue-50/80 backdrop-blur-sm shadow-sm">
                       <div className="flex items-start gap-3">
                         <Info className="w-5 h-5 text-blue-600 mt-0.5" />
                         <div>
-                          <h4 className="font-medium text-blue-800 dark:text-blue-400">
+                          <h4 className="font-semibold text-blue-800">
                             Thông tin giao diện
                           </h4>
-                          <p className="mt-1 text-sm text-blue-700 dark:text-blue-300">
+                          <p className="mt-1 text-sm text-blue-700">
                             Chế độ "Hệ thống" sẽ tự động thay đổi theo cài đặt
                             của thiết bị bạn. Các thay đổi sẽ được lưu và áp
                             dụng cho tất cả các phiên đăng nhập.
