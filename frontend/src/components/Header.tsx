@@ -88,59 +88,61 @@ import { useCart } from "@/contexts/CartContext";
 import { useTheme } from "@/contexts/ThemeContext";
 import { useWishlist } from "@/hooks/useWishlist";
 import { isAdmin, getInitials } from "@/lib/auth";
-import {
-  motion,
-  AnimatePresence,
-  useScroll,
-  useTransform,
-} from "framer-motion";
+import { motion, AnimatePresence } from "framer-motion";
 import { cn } from "@/lib/utils";
 
 const Header: React.FC = () => {
-  // States
   const [searchQuery, setSearchQuery] = useState("");
   const [isSearchModalOpen, setIsSearchModalOpen] = useState(false);
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
-  const [showTopBar, setShowTopBar] = useState(true);
+  const [isScrolled, setIsScrolled] = useState(false);
+  const [showHeader, setShowHeader] = useState(true);
+  const [lastScrollY, setLastScrollY] = useState(0);
   const searchInputRef = useRef<HTMLInputElement>(null);
 
-  // Hooks
   const location = useLocation();
   const navigate = useNavigate();
   const { user, logout } = useAuth();
   const { items, getTotalItems } = useCart();
   const { wishlist, getTotalWishlistItems } = useWishlist();
 
-  // Scroll behavior for showing/hiding top bar
+  // ✅ Smart sticky header
   useEffect(() => {
-    let lastScrollY = window.scrollY;
+    let ticking = false;
 
     const handleScroll = () => {
-      const currentScrollY = window.scrollY;
+      if (!ticking) {
+        window.requestAnimationFrame(() => {
+          const currentScrollY = window.scrollY;
 
-      // Show top bar when at top (0-50px) or scrolling up
-      if (currentScrollY < 50 || currentScrollY < lastScrollY) {
-        setShowTopBar(true);
-      } else {
-        // Hide top bar when scrolling down
-        setShowTopBar(false);
+          if (currentScrollY < 50) {
+            setShowHeader(true);
+            setIsScrolled(false);
+          } else if (currentScrollY < lastScrollY) {
+            setShowHeader(true);
+            setIsScrolled(true);
+          } else if (currentScrollY > lastScrollY && currentScrollY > 100) {
+            setShowHeader(false);
+            setIsScrolled(true);
+          }
+
+          setLastScrollY(currentScrollY);
+          ticking = false;
+        });
+        ticking = true;
       }
-
-      lastScrollY = currentScrollY;
     };
 
     window.addEventListener("scroll", handleScroll, { passive: true });
     return () => window.removeEventListener("scroll", handleScroll);
-  }, []);
+  }, [lastScrollY]);
 
-  // Memoized values
   const totalWishlistItems = useMemo(
     () => getTotalWishlistItems() || 0,
     [getTotalWishlistItems],
   );
   const totalItems = useMemo(() => getTotalItems(), [getTotalItems]);
 
-  // Event handlers
   const handleSearch = useCallback(
     (e: React.FormEvent) => {
       e.preventDefault();
@@ -169,7 +171,6 @@ const Header: React.FC = () => {
     }, 100);
   }, []);
 
-  // Keyboard shortcuts
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
       if ((e.ctrlKey || e.metaKey) && e.key === "k") {
@@ -187,7 +188,7 @@ const Header: React.FC = () => {
 
   return (
     <>
-      {/* ===== SEARCH MODAL ===== */}
+      {/* SEARCH MODAL */}
       <Dialog open={isSearchModalOpen} onOpenChange={setIsSearchModalOpen}>
         <DialogContent className="sm:max-w-2xl p-0 gap-0 bg-gradient-to-br from-pink-50 via-white to-rose-50">
           <DialogHeader className="px-6 py-4 border-b border-pink-200/50 bg-gradient-to-r from-pink-100/50 to-rose-100/50">
@@ -218,7 +219,6 @@ const Header: React.FC = () => {
                 </div>
               </div>
 
-              {/* Quick Search Suggestions */}
               <div className="space-y-3">
                 <p className="text-sm font-medium text-pink-700 flex items-center gap-2">
                   <Sparkles className="w-4 h-4" />
@@ -253,7 +253,6 @@ const Header: React.FC = () => {
                 </div>
               </div>
 
-              {/* Keyboard Shortcuts */}
               <div className="pt-4 border-t border-pink-100">
                 <div className="flex items-center justify-between text-xs text-muted-foreground">
                   <span>
@@ -277,151 +276,129 @@ const Header: React.FC = () => {
         </DialogContent>
       </Dialog>
 
-      <div>
-        {/* ===== TẦNG 1: TOP BAR - CONDITIONAL DISPLAY ===== */}
-        <AnimatePresence>
-          {showTopBar && (
-            <motion.div
-              initial={{ height: 0, opacity: 0 }}
-              animate={{ height: "auto", opacity: 1 }}
-              exit={{ height: 0, opacity: 0 }}
-              transition={{ duration: 0.3, ease: "easeInOut" }}
-              className="bg-gradient-to-r from-pink-50 via-rose-50 to-red-50 border-b border-pink-200/30 overflow-hidden"
-            >
-              <div className="container mx-auto px-4">
-                <div className="flex items-center justify-between py-2.5 text-sm">
-                  {/* Left: Promotion */}
-                  <div className="flex items-center space-x-3">
-                    <div className="bg-white/70 px-3 py-1 rounded-full flex items-center space-x-2 backdrop-blur-sm shadow-sm">
-                      <Gift className="w-4 h-4 text-pink-600" />
-                      <span className="font-medium text-pink-700">
-                        🎉 Template Sale 50% OFF
-                      </span>
-                      <Badge className="bg-pink-200 text-pink-800 text-xs px-2 py-0.5">
-                        Limited
-                      </Badge>
-                    </div>
-                  </div>
-
-                  {/* Center: Contact Info - Desktop Only */}
-                  <div className="hidden lg:flex items-center space-x-6 text-slate-600">
-                    <div className="flex items-center space-x-2">
-                      <Phone className="w-4 h-4" />
-                      <span>0971.385.588</span>
-                    </div>
-                    <div className="w-px h-4 bg-pink-300/50"></div>
-                    <div className="flex items-center space-x-2">
-                      <Mail className="w-4 h-4" />
-                      <span>veutong961@gmail.com</span>
-                    </div>
-                  </div>
-
-                  {/* Right: Social + User Status */}
-                  <div className="flex items-center space-x-4">
-                    {/* Social Links - Desktop Only */}
-                    <div className="hidden lg:flex items-center space-x-2">
-                      {[
-                        { icon: Facebook, href: "#", color: "text-blue-600" },
-                        { icon: Instagram, href: "#", color: "text-pink-600" },
-                        { icon: Twitter, href: "#", color: "text-sky-600" },
-                        { icon: Youtube, href: "#", color: "text-red-600" },
-                      ].map((social, index) => (
-                        <motion.a
-                          key={index}
-                          href={social.href}
-                          whileHover={{ scale: 1.2 }}
-                          whileTap={{ scale: 0.9 }}
-                          className={`p-2 rounded-full hover:bg-white/30 ${social.color} transition-colors`}
-                        >
-                          <social.icon className="w-4 h-4" />
-                        </motion.a>
-                      ))}
-                    </div>
-
-                    <div className="w-px h-4 bg-pink-300/50"></div>
-
-                    {/* User Status */}
-                    {user ? (
-                      <div className="flex items-center space-x-2">
-                        <span className="text-sm text-slate-700">
-                          Xin chào,{" "}
-                          <span className="font-medium">{user.name}</span>
-                        </span>
-                        {isAdmin(user) && (
-                          <Badge className="bg-pink-200 text-pink-800 text-xs px-2 py-0">
-                            <Crown className="w-3 h-3 mr-1" />
-                            Admin
-                          </Badge>
-                        )}
-                      </div>
-                    ) : (
-                      <span className="text-sm text-slate-600">
-                        Cần hỗ trợ? Liên hệ ngay!
-                      </span>
-                    )}
-                  </div>
+      {/* ✅ HEADER VỚI FIXED + PADDING SPACE */}
+      <div
+        className={cn(
+          "fixed top-0 left-0 right-0 z-50 transition-transform duration-300",
+          showHeader ? "translate-y-0" : "-translate-y-full",
+        )}
+      >
+        {/* TOP BAR */}
+        <div
+          className={cn(
+            "bg-gradient-to-r from-pink-50 via-rose-50 to-red-50 border-b border-pink-200/30 transition-all duration-300",
+            isScrolled ? "h-0 opacity-0 overflow-hidden" : "h-auto opacity-100",
+          )}
+        >
+          <div className="container mx-auto px-4">
+            <div className="flex items-center justify-between py-2.5 text-sm">
+              <div className="flex items-center space-x-3">
+                <div className="bg-white/70 px-3 py-1 rounded-full flex items-center space-x-2 backdrop-blur-sm shadow-sm">
+                  <Gift className="w-4 h-4 text-pink-600" />
+                  <span className="font-medium text-pink-700">
+                    🎉 Template Sale 50% OFF
+                  </span>
+                  <Badge className="bg-pink-200 text-pink-800 text-xs px-2 py-0.5">
+                    Limited
+                  </Badge>
                 </div>
               </div>
-            </motion.div>
-          )}
-        </AnimatePresence>
 
-        {/* ===== TẦNG 2: MAIN HEADER - STICKY FIXED ===== */}
-        <div className="sticky top-0 z-50 bg-gradient-to-r from-pink-50 via-rose-50 to-red-50 border-b border-pink-200/30 shadow-sm backdrop-blur-md">
+              <div className="hidden lg:flex items-center space-x-6 text-slate-600">
+                <div className="flex items-center space-x-2">
+                  <Phone className="w-4 h-4" />
+                  <span>0971.385.588</span>
+                </div>
+                <div className="w-px h-4 bg-pink-300/50"></div>
+                <div className="flex items-center space-x-2">
+                  <Mail className="w-4 h-4" />
+                  <span>veutong961@gmail.com</span>
+                </div>
+              </div>
+
+              <div className="flex items-center space-x-4">
+                <div className="hidden lg:flex items-center space-x-2">
+                  {[
+                    { icon: Facebook, href: "#", color: "text-blue-600" },
+                    { icon: Instagram, href: "#", color: "text-pink-600" },
+                    { icon: Twitter, href: "#", color: "text-sky-600" },
+                    { icon: Youtube, href: "#", color: "text-red-600" },
+                  ].map((social, index) => (
+                    <a
+                      key={index}
+                      href={social.href}
+                      className={`p-2 rounded-full hover:bg-white/30 ${social.color} transition-colors`}
+                    >
+                      <social.icon className="w-4 h-4" />
+                    </a>
+                  ))}
+                </div>
+
+                <div className="w-px h-4 bg-pink-300/50"></div>
+
+                {user ? (
+                  <div className="flex items-center space-x-2">
+                    <span className="text-sm text-slate-700">
+                      Xin chào, <span className="font-medium">{user.name}</span>
+                    </span>
+                    {isAdmin(user) && (
+                      <Badge className="bg-pink-200 text-pink-800 text-xs px-2 py-0">
+                        <Crown className="w-3 h-3 mr-1" />
+                        Admin
+                      </Badge>
+                    )}
+                  </div>
+                ) : (
+                  <span className="text-sm text-slate-600">
+                    Cần hỗ trợ? Liên hệ ngay!
+                  </span>
+                )}
+              </div>
+            </div>
+          </div>
+        </div>
+
+        {/* MAIN HEADER */}
+        <div className="bg-gradient-to-r from-pink-50 via-rose-50 to-red-50 border-b border-pink-200/30 shadow-sm backdrop-blur-md">
           <div className="container mx-auto px-4">
             <div className="flex items-center justify-between py-4">
               {/* Logo */}
               <Link to="/" className="flex items-center space-x-3 group">
                 <div className="relative">
-                  <motion.div
-                    whileHover={{ scale: 1.1, rotate: 5 }}
-                    whileTap={{ scale: 0.9 }}
-                    className="flex items-center justify-center w-12 h-12 transition-all duration-300 shadow-lg bg-gradient-to-r from-pink-500 via-rose-500 to-red-500 rounded-xl group-hover:shadow-xl"
-                  >
+                  <div className="flex items-center justify-center w-12 h-12 transition-all duration-300 shadow-lg bg-gradient-to-r from-pink-500 via-rose-500 to-red-500 rounded-xl group-hover:shadow-xl group-hover:scale-105">
                     <span className="text-lg font-bold text-white">TM</span>
-                  </motion.div>
-                  <motion.div
-                    className="absolute flex items-center justify-center w-4 h-4 rounded-full -top-1 -right-1 bg-gradient-to-r from-orange-400 to-red-500"
-                    animate={{ rotate: 360 }}
-                    transition={{
-                      duration: 2,
-                      repeat: Infinity,
-                      ease: "linear",
-                    }}
-                  >
+                  </div>
+                  <div className="absolute flex items-center justify-center w-4 h-4 rounded-full -top-1 -right-1 bg-gradient-to-r from-orange-400 to-red-500">
                     <Sparkles className="w-2 h-2 text-white" />
-                  </motion.div>
+                  </div>
                 </div>
                 <div className="flex flex-col">
-                  <motion.h1
-                    className="text-xl font-bold text-transparent bg-gradient-to-r from-pink-600 via-rose-600 to-red-600 bg-clip-text"
-                    whileHover={{ scale: 1.02 }}
-                  >
+                  <h1 className="text-xl font-bold text-transparent bg-gradient-to-r from-pink-600 via-rose-600 to-red-600 bg-clip-text">
                     Template Market
-                  </motion.h1>
+                  </h1>
                   <p className="hidden sm:block text-xs text-slate-500 -mt-1">
                     Premium Quality Store
                   </p>
                 </div>
               </Link>
 
-              {/* ===== NAVIGATION MENU - DESKTOP CENTER ===== */}
+              {/* Navigation Menu - Desktop */}
               <div className="hidden lg:block">
                 <NavigationMenu>
                   <NavigationMenuList className="flex items-center space-x-1">
-                    {/* Templates với ENHANCED SUBMENU */}
+                    {/* Templates Menu */}
                     <NavigationMenuItem>
-                      <NavigationMenuTrigger className="h-10 px-4 rounded-lg font-medium hover:bg-pink-100/70 transition-colors flex items-center gap-2">
+                      <NavigationMenuTrigger className="h-10 px-4 rounded-lg font-medium hover:bg-pink-100/70 transition-colors flex items-center gap-2 bg-gradient-to-r from-pink-50 to-rose-50">
                         <Package className="w-4 h-4" />
                         Templates
-                        <Badge className="bg-red-500 text-white text-xs px-2 py-0.5 hover:bg-red-600 transition-colors">
+                        <Badge className="bg-red-500 text-white text-xs px-2 py-0.5">
                           Hot
                         </Badge>
                       </NavigationMenuTrigger>
                       <NavigationMenuContent className="z-[9999]">
-                        <div className="w-[600px] p-6 bg-gradient-to-br from-white via-pink-50/30 to-rose-50/30 shadow-2xl rounded-xl border border-pink-200/50 backdrop-blur-sm">
+                        <div className="w-[600px] p-6 bg-gradient-to-br from-pink-50 via-rose-50 to-red-50 shadow-2xl rounded-xl border border-pink-200/50 backdrop-blur-sm">
                           <div className="grid grid-cols-3 gap-6">
-                            {/* Popular Categories với ENHANCED BACKGROUNDS */}
+                            {/* Popular Categories */}
                             <div className="space-y-3">
                               <h4 className="font-semibold text-sm text-pink-600 flex items-center gap-2">
                                 <div className="p-1.5 rounded-lg bg-pink-100">
@@ -434,50 +411,30 @@ const Header: React.FC = () => {
                                   name: "React Templates",
                                   icon: Code,
                                   href: "/templates?category=react",
-                                  color:
-                                    "bg-gradient-to-br from-blue-50 to-blue-100",
-                                  iconColor: "text-blue-600",
-                                  borderColor: "border-blue-200",
                                 },
                                 {
                                   name: "Vue Templates",
                                   icon: Zap,
                                   href: "/templates?category=vue",
-                                  color:
-                                    "bg-gradient-to-br from-green-50 to-green-100",
-                                  iconColor: "text-green-600",
-                                  borderColor: "border-green-200",
                                 },
                                 {
                                   name: "HTML Templates",
                                   icon: Globe,
                                   href: "/templates?category=html",
-                                  color:
-                                    "bg-gradient-to-br from-orange-50 to-orange-100",
-                                  iconColor: "text-orange-600",
-                                  borderColor: "border-orange-200",
                                 },
                                 {
                                   name: "Mobile Apps",
                                   icon: Smartphone,
                                   href: "/templates?category=mobile",
-                                  color:
-                                    "bg-gradient-to-br from-purple-50 to-purple-100",
-                                  iconColor: "text-purple-600",
-                                  borderColor: "border-purple-200",
                                 },
                               ].map((item) => (
                                 <NavigationMenuLink
                                   key={item.name}
                                   href={item.href}
-                                  className={`flex items-center space-x-3 p-3 rounded-xl hover:bg-gradient-to-r hover:from-pink-50 hover:to-rose-50 transition-all duration-300 border border-transparent hover:${item.borderColor} hover:shadow-sm`}
+                                  className="flex items-center space-x-3 p-3 rounded-xl hover:bg-white/70 transition-all"
                                 >
-                                  <div
-                                    className={`p-2 rounded-lg ${item.color} shadow-sm border ${item.borderColor}`}
-                                  >
-                                    <item.icon
-                                      className={`w-4 h-4 ${item.iconColor}`}
-                                    />
+                                  <div className="p-2 rounded-lg bg-gradient-to-br from-pink-100 to-pink-200">
+                                    <item.icon className="w-4 h-4 text-pink-600" />
                                   </div>
                                   <span className="font-medium text-sm text-gray-700">
                                     {item.name}
@@ -486,7 +443,7 @@ const Header: React.FC = () => {
                               ))}
                             </div>
 
-                            {/* By Industry với ENHANCED BACKGROUNDS */}
+                            {/* By Industry */}
                             <div className="space-y-3">
                               <h4 className="font-semibold text-sm text-pink-600 flex items-center gap-2">
                                 <div className="p-1.5 rounded-lg bg-pink-100">
@@ -499,50 +456,30 @@ const Header: React.FC = () => {
                                   name: "E-commerce",
                                   icon: ShoppingCart,
                                   href: "/templates?industry=ecommerce",
-                                  color:
-                                    "bg-gradient-to-br from-pink-50 to-pink-100",
-                                  iconColor: "text-pink-600",
-                                  borderColor: "border-pink-200",
                                 },
                                 {
                                   name: "SaaS",
                                   icon: Database,
                                   href: "/templates?industry=saas",
-                                  color:
-                                    "bg-gradient-to-br from-indigo-50 to-indigo-100",
-                                  iconColor: "text-indigo-600",
-                                  borderColor: "border-indigo-200",
                                 },
                                 {
                                   name: "Portfolio",
                                   icon: Award,
                                   href: "/templates?industry=portfolio",
-                                  color:
-                                    "bg-gradient-to-br from-yellow-50 to-yellow-100",
-                                  iconColor: "text-yellow-600",
-                                  borderColor: "border-yellow-200",
                                 },
                                 {
                                   name: "Corporate",
                                   icon: FileText,
                                   href: "/templates?industry=corporate",
-                                  color:
-                                    "bg-gradient-to-br from-gray-50 to-gray-100",
-                                  iconColor: "text-gray-600",
-                                  borderColor: "border-gray-200",
                                 },
                               ].map((item) => (
                                 <NavigationMenuLink
                                   key={item.name}
                                   href={item.href}
-                                  className={`flex items-center space-x-3 p-3 rounded-xl hover:bg-gradient-to-r hover:from-pink-50 hover:to-rose-50 transition-all duration-300 border border-transparent hover:${item.borderColor} hover:shadow-sm`}
+                                  className="flex items-center space-x-3 p-3 rounded-xl hover:bg-white/70 transition-all"
                                 >
-                                  <div
-                                    className={`p-2 rounded-lg ${item.color} shadow-sm border ${item.borderColor}`}
-                                  >
-                                    <item.icon
-                                      className={`w-4 h-4 ${item.iconColor}`}
-                                    />
+                                  <div className="p-2 rounded-lg bg-gradient-to-br from-pink-100 to-pink-200">
+                                    <item.icon className="w-4 h-4 text-pink-600" />
                                   </div>
                                   <span className="font-medium text-sm text-gray-700">
                                     {item.name}
@@ -551,7 +488,7 @@ const Header: React.FC = () => {
                               ))}
                             </div>
 
-                            {/* Featured với ENHANCED DESIGN */}
+                            {/* Featured */}
                             <div className="space-y-3">
                               <h4 className="font-semibold text-sm text-pink-600 flex items-center gap-2">
                                 <div className="p-1.5 rounded-lg bg-pink-100">
@@ -559,11 +496,9 @@ const Header: React.FC = () => {
                                 </div>
                                 Featured
                               </h4>
-                              <div className="bg-gradient-to-br from-pink-100 via-rose-100 to-pink-200 p-4 rounded-xl border border-pink-200 shadow-sm">
+                              <div className="bg-gradient-to-br from-pink-100 to-pink-200 p-4 rounded-xl">
                                 <div className="flex items-center gap-2 mb-2">
-                                  <div className="p-1 rounded-full bg-white shadow-sm">
-                                    <Sparkles className="w-3 h-3 text-pink-600" />
-                                  </div>
+                                  <Sparkles className="w-3 h-3 text-pink-600" />
                                   <span className="font-semibold text-sm text-pink-700">
                                     New Release
                                   </span>
@@ -573,51 +508,20 @@ const Header: React.FC = () => {
                                 </p>
                                 <Button
                                   size="sm"
-                                  className="w-full bg-gradient-to-r from-pink-500 to-rose-500 hover:from-pink-600 hover:to-rose-600 text-white text-xs shadow-lg"
+                                  className="w-full bg-gradient-to-r from-pink-500 to-rose-500 text-white text-xs"
                                 >
                                   Xem ngay
                                   <ArrowRight className="w-3 h-3 ml-1" />
                                 </Button>
                               </div>
-
-                              <div className="space-y-2">
-                                <NavigationMenuLink
-                                  href="/templates?featured=true"
-                                  className="block p-3 rounded-xl hover:bg-gradient-to-r hover:from-orange-50 hover:to-yellow-50 border border-transparent hover:border-orange-200 transition-all hover:shadow-sm"
-                                >
-                                  <div className="flex items-center gap-2">
-                                    <div className="p-1 rounded-lg bg-gradient-to-br from-orange-50 to-orange-100 border border-orange-200">
-                                      <TrendingUp className="w-4 h-4 text-orange-500" />
-                                    </div>
-                                    <span className="text-sm font-medium">
-                                      Trending Templates
-                                    </span>
-                                  </div>
-                                </NavigationMenuLink>
-                                <NavigationMenuLink
-                                  href="/templates?new=true"
-                                  className="block p-3 rounded-xl hover:bg-gradient-to-r hover:from-blue-50 hover:to-sky-50 border border-transparent hover:border-blue-200 transition-all hover:shadow-sm"
-                                >
-                                  <div className="flex items-center gap-2">
-                                    <div className="p-1 rounded-lg bg-gradient-to-br from-blue-50 to-blue-100 border border-blue-200">
-                                      <Clock className="w-4 h-4 text-blue-500" />
-                                    </div>
-                                    <span className="text-sm font-medium">
-                                      Recently Added
-                                    </span>
-                                  </div>
-                                </NavigationMenuLink>
-                              </div>
                             </div>
                           </div>
 
                           {/* Bottom CTA */}
-                          <div className="mt-6 pt-4 border-t border-pink-200/50 bg-gradient-to-r from-pink-50/50 to-rose-50/50 rounded-lg px-4 py-3">
+                          <div className="mt-6 pt-4 border-t border-pink-200/50">
                             <div className="flex items-center justify-between">
                               <div className="flex items-center gap-2 text-sm text-pink-700">
-                                <div className="p-1 rounded-full bg-green-100">
-                                  <CheckCircle className="w-4 h-4 text-green-500" />
-                                </div>
+                                <CheckCircle className="w-4 h-4 text-green-500" />
                                 <span className="font-medium">
                                   2,500+ Templates available
                                 </span>
@@ -625,11 +529,11 @@ const Header: React.FC = () => {
                               <Button
                                 variant="outline"
                                 size="sm"
-                                className="border-pink-300 hover:bg-pink-50"
+                                className="border-pink-300"
                                 asChild
                               >
                                 <Link to="/templates">
-                                  View All Templates
+                                  View All
                                   <ArrowRight className="w-4 h-4 ml-1" />
                                 </Link>
                               </Button>
@@ -639,237 +543,118 @@ const Header: React.FC = () => {
                       </NavigationMenuContent>
                     </NavigationMenuItem>
 
-                    {/* E-books với ENHANCED SUBMENU */}
+                    {/* E-books Menu */}
                     <NavigationMenuItem>
-                      <NavigationMenuTrigger className="h-10 px-4 rounded-lg font-medium hover:bg-pink-100/70 transition-colors flex items-center gap-2">
+                      <NavigationMenuTrigger className="h-10 px-4 rounded-lg font-medium hover:bg-pink-100/70 transition-colors flex items-center gap-2 bg-gradient-to-r from-pink-50 to-rose-50">
                         <BookOpen className="w-4 h-4" />
                         E-books
-                        <Badge className="bg-green-500 text-white text-xs px-2 py-0.5 hover:bg-green-600 transition-colors">
+                        <Badge className="bg-green-500 text-white text-xs px-2 py-0.5">
                           New
                         </Badge>
                       </NavigationMenuTrigger>
                       <NavigationMenuContent className="z-[9999]">
-                        <div className="w-[600px] p-6 bg-gradient-to-br from-white via-purple-50/30 to-indigo-50/30 shadow-2xl rounded-xl border border-purple-200/50 backdrop-blur-sm">
+                        <div className="w-[600px] p-6 bg-gradient-to-br from-pink-50 via-rose-50 to-red-50 shadow-2xl rounded-xl border border-pink-200/50">
                           <div className="grid grid-cols-3 gap-6">
-                            {/* Development với ENHANCED BACKGROUNDS */}
+                            {/* Development */}
                             <div className="space-y-3">
-                              <h4 className="font-semibold text-sm text-purple-600 flex items-center gap-2">
-                                <div className="p-1.5 rounded-lg bg-purple-100">
-                                  <Code className="w-4 h-4 text-purple-600" />
-                                </div>
+                              <h4 className="font-semibold text-sm text-purple-600">
                                 Development
                               </h4>
                               {[
                                 {
                                   name: "React Mastery",
-                                  icon: Code,
                                   href: "/ebooks?category=react",
-                                  color:
-                                    "bg-gradient-to-br from-blue-50 to-blue-100",
-                                  iconColor: "text-blue-600",
-                                  borderColor: "border-blue-200",
                                 },
                                 {
                                   name: "JavaScript Guide",
-                                  icon: Zap,
-                                  href: "/ebooks?category=javascript",
-                                  color:
-                                    "bg-gradient-to-br from-yellow-50 to-yellow-100",
-                                  iconColor: "text-yellow-600",
-                                  borderColor: "border-yellow-200",
+                                  href: "/ebooks?category=js",
                                 },
                                 {
                                   name: "Node.js Handbook",
-                                  icon: Database,
-                                  href: "/ebooks?category=nodejs",
-                                  color:
-                                    "bg-gradient-to-br from-green-50 to-green-100",
-                                  iconColor: "text-green-600",
-                                  borderColor: "border-green-200",
+                                  href: "/ebooks?category=node",
                                 },
                                 {
                                   name: "TypeScript Pro",
-                                  icon: Shield,
-                                  href: "/ebooks?category=typescript",
-                                  color:
-                                    "bg-gradient-to-br from-indigo-50 to-indigo-100",
-                                  iconColor: "text-indigo-600",
-                                  borderColor: "border-indigo-200",
+                                  href: "/ebooks?category=ts",
                                 },
                               ].map((item) => (
                                 <NavigationMenuLink
                                   key={item.name}
                                   href={item.href}
-                                  className={`flex items-center space-x-3 p-3 rounded-xl hover:bg-gradient-to-r hover:from-purple-50 hover:to-indigo-50 transition-all duration-300 border border-transparent hover:${item.borderColor} hover:shadow-sm`}
+                                  className="block p-3 rounded-xl hover:bg-white/70 transition-all"
                                 >
-                                  <div
-                                    className={`p-2 rounded-lg ${item.color} shadow-sm border ${item.borderColor}`}
-                                  >
-                                    <item.icon
-                                      className={`w-4 h-4 ${item.iconColor}`}
-                                    />
-                                  </div>
-                                  <span className="font-medium text-sm text-gray-700">
-                                    {item.name}
-                                  </span>
+                                  {item.name}
                                 </NavigationMenuLink>
                               ))}
                             </div>
 
-                            {/* Design với ENHANCED BACKGROUNDS */}
+                            {/* Design */}
                             <div className="space-y-3">
-                              <h4 className="font-semibold text-sm text-purple-600 flex items-center gap-2">
-                                <div className="p-1.5 rounded-lg bg-purple-100">
-                                  <Palette className="w-4 h-4 text-purple-600" />
-                                </div>
+                              <h4 className="font-semibold text-sm text-purple-600">
                                 Design & UX
                               </h4>
                               {[
                                 {
                                   name: "Design Systems",
-                                  icon: Palette,
-                                  href: "/ebooks?category=design-systems",
-                                  color:
-                                    "bg-gradient-to-br from-pink-50 to-pink-100",
-                                  iconColor: "text-pink-600",
-                                  borderColor: "border-pink-200",
+                                  href: "/ebooks?category=design",
                                 },
                                 {
                                   name: "UI/UX Principles",
-                                  icon: Sparkles,
-                                  href: "/ebooks?category=uiux",
-                                  color:
-                                    "bg-gradient-to-br from-purple-50 to-purple-100",
-                                  iconColor: "text-purple-600",
-                                  borderColor: "border-purple-200",
+                                  href: "/ebooks?category=ux",
                                 },
                                 {
                                   name: "Color Theory",
-                                  icon: Palette,
                                   href: "/ebooks?category=color",
-                                  color:
-                                    "bg-gradient-to-br from-orange-50 to-orange-100",
-                                  iconColor: "text-orange-600",
-                                  borderColor: "border-orange-200",
                                 },
                                 {
                                   name: "Typography",
-                                  icon: FileText,
                                   href: "/ebooks?category=typography",
-                                  color:
-                                    "bg-gradient-to-br from-gray-50 to-gray-100",
-                                  iconColor: "text-gray-600",
-                                  borderColor: "border-gray-200",
                                 },
                               ].map((item) => (
                                 <NavigationMenuLink
                                   key={item.name}
                                   href={item.href}
-                                  className={`flex items-center space-x-3 p-3 rounded-xl hover:bg-gradient-to-r hover:from-purple-50 hover:to-indigo-50 transition-all duration-300 border border-transparent hover:${item.borderColor} hover:shadow-sm`}
+                                  className="block p-3 rounded-xl hover:bg-white/70 transition-all"
                                 >
-                                  <div
-                                    className={`p-2 rounded-lg ${item.color} shadow-sm border ${item.borderColor}`}
-                                  >
-                                    <item.icon
-                                      className={`w-4 h-4 ${item.iconColor}`}
-                                    />
-                                  </div>
-                                  <span className="font-medium text-sm text-gray-700">
-                                    {item.name}
-                                  </span>
+                                  {item.name}
                                 </NavigationMenuLink>
                               ))}
                             </div>
 
-                            {/* Business với ENHANCED DESIGN */}
+                            {/* Business */}
                             <div className="space-y-3">
-                              <h4 className="font-semibold text-sm text-purple-600 flex items-center gap-2">
-                                <div className="p-1.5 rounded-lg bg-purple-100">
-                                  <TrendingUp className="w-4 h-4 text-purple-600" />
-                                </div>
+                              <h4 className="font-semibold text-sm text-purple-600">
                                 Business
                               </h4>
-                              <div className="bg-gradient-to-br from-purple-100 via-indigo-100 to-purple-200 p-4 rounded-xl border border-purple-200 shadow-sm">
+                              <div className="bg-gradient-to-br from-purple-100 to-purple-200 p-4 rounded-xl">
                                 <div className="flex items-center gap-2 mb-2">
-                                  <div className="p-1 rounded-full bg-white shadow-sm">
-                                    <Crown className="w-3 h-3 text-purple-600" />
-                                  </div>
-                                  <span className="font-semibold text-sm text-purple-700">
+                                  <Crown className="w-3 h-3 text-purple-600" />
+                                  <span className="font-semibold text-sm">
                                     Bestseller
                                   </span>
                                 </div>
                                 <p className="text-xs text-purple-600 mb-3">
-                                  Complete Guide to Building SaaS Products
+                                  Building SaaS Products
                                 </p>
                                 <Button
                                   size="sm"
-                                  className="w-full bg-gradient-to-r from-purple-500 to-indigo-500 hover:from-purple-600 hover:to-indigo-600 text-white text-xs shadow-lg"
+                                  className="w-full bg-purple-500 text-white text-xs"
                                 >
-                                  Download Now
+                                  Download
                                   <Download className="w-3 h-3 ml-1" />
                                 </Button>
-                              </div>
-
-                              <div className="space-y-2">
-                                <NavigationMenuLink
-                                  href="/ebooks?category=marketing"
-                                  className="block p-3 rounded-xl hover:bg-gradient-to-r hover:from-green-50 hover:to-emerald-50 border border-transparent hover:border-green-200 transition-all hover:shadow-sm"
-                                >
-                                  <div className="flex items-center gap-2">
-                                    <div className="p-1 rounded-lg bg-gradient-to-br from-green-50 to-green-100 border border-green-200">
-                                      <TrendingUp className="w-4 h-4 text-green-500" />
-                                    </div>
-                                    <span className="text-sm font-medium">
-                                      Marketing
-                                    </span>
-                                  </div>
-                                </NavigationMenuLink>
-                                <NavigationMenuLink
-                                  href="/ebooks?category=startup"
-                                  className="block p-3 rounded-xl hover:bg-gradient-to-r hover:from-orange-50 hover:to-red-50 border border-transparent hover:border-orange-200 transition-all hover:shadow-sm"
-                                >
-                                  <div className="flex items-center gap-2">
-                                    <div className="p-1 rounded-lg bg-gradient-to-br from-orange-50 to-orange-100 border border-orange-200">
-                                      <Zap className="w-4 h-4 text-orange-500" />
-                                    </div>
-                                    <span className="text-sm font-medium">
-                                      Startup Guide
-                                    </span>
-                                  </div>
-                                </NavigationMenuLink>
                               </div>
                             </div>
                           </div>
 
-                          {/* Bottom Stats */}
-                          <div className="mt-6 pt-4 border-t border-purple-200/50 bg-gradient-to-r from-purple-50/50 to-indigo-50/50 rounded-lg px-4 py-3">
+                          <div className="mt-6 pt-4 border-t border-pink-200/50">
                             <div className="flex items-center justify-between">
-                              <div className="flex items-center gap-4">
-                                <div className="flex items-center gap-2 text-sm text-purple-700">
-                                  <div className="p-1 rounded-full bg-purple-100">
-                                    <BookOpen className="w-4 h-4 text-purple-500" />
-                                  </div>
-                                  <span className="font-medium">
-                                    1,200+ E-books
-                                  </span>
-                                </div>
-                                <div className="flex items-center gap-2 text-sm text-purple-700">
-                                  <div className="p-1 rounded-full bg-green-100">
-                                    <Download className="w-4 h-4 text-green-500" />
-                                  </div>
-                                  <span className="font-medium">
-                                    50K+ Downloads
-                                  </span>
-                                </div>
-                              </div>
-                              <Button
-                                variant="outline"
-                                size="sm"
-                                className="border-purple-300 hover:bg-purple-50"
-                                asChild
-                              >
+                              <span className="text-sm text-purple-700 font-medium">
+                                1,200+ E-books • 50K+ Downloads
+                              </span>
+                              <Button variant="outline" size="sm" asChild>
                                 <Link to="/ebooks">
-                                  Browse All E-books
+                                  Browse All
                                   <ArrowRight className="w-4 h-4 ml-1" />
                                 </Link>
                               </Button>
@@ -879,28 +664,36 @@ const Header: React.FC = () => {
                       </NavigationMenuContent>
                     </NavigationMenuItem>
 
-                    {/* Simple Links */}
                     <NavigationMenuItem>
                       <NavigationMenuLink
-                        className="inline-flex h-10 w-max items-center justify-center rounded-lg px-4 py-2 text-sm font-medium transition-colors hover:bg-pink-100/70"
+                        className="inline-flex h-10 w-max items-center justify-center rounded-lg px-4 py-2 text-sm font-medium transition-colors hover:bg-pink-100/70 bg-gradient-to-r from-pink-50 to-rose-50"
                         href="/pricing"
                       >
                         <Tag className="w-4 h-4 mr-2" />
-                        Pricing
+                        Bảng giá
                       </NavigationMenuLink>
                     </NavigationMenuItem>
 
                     <NavigationMenuItem>
                       <NavigationMenuLink
-                        className="inline-flex h-10 w-max items-center justify-center rounded-lg px-4 py-2 text-sm font-medium transition-colors hover:bg-pink-100/70"
+                        className="inline-flex h-10 w-max items-center justify-center rounded-lg px-4 py-2 text-sm font-medium transition-colors hover:bg-pink-100/70 bg-gradient-to-r from-pink-50 to-rose-50"
                         href="/blog"
                       >
                         <MessageCircle className="w-4 h-4 mr-2" />
-                        Blog
+                        Bài viết
                       </NavigationMenuLink>
                     </NavigationMenuItem>
 
-                    {/* Admin Panel - Conditional */}
+                    <NavigationMenuItem>
+                      <NavigationMenuLink
+                        className="inline-flex h-10 w-max items-center justify-center rounded-lg px-4 py-2 text-sm font-medium transition-colors hover:bg-pink-100/70 bg-gradient-to-r from-pink-50 to-rose-50"
+                        href="/contact"
+                      >
+                        <Phone className="w-4 h-4 mr-2" />
+                        Liên hệ
+                      </NavigationMenuLink>
+                    </NavigationMenuItem>
+
                     {user && isAdmin(user) && (
                       <NavigationMenuItem>
                         <NavigationMenuLink
@@ -908,7 +701,7 @@ const Header: React.FC = () => {
                           href="/admin"
                         >
                           <Shield className="w-4 h-4 mr-2" />
-                          Admin Panel
+                          Admin
                           <Badge className="ml-2 bg-pink-200 text-pink-800 text-xs px-2 py-0">
                             <Crown className="w-3 h-3" />
                           </Badge>
@@ -919,22 +712,17 @@ const Header: React.FC = () => {
                 </NavigationMenu>
               </div>
 
-              {/* Action Buttons - RIGHT SIDE */}
+              {/* Action Buttons */}
               <div className="flex items-center space-x-2">
-                {/* Search Icon Button */}
                 <Button
                   variant="ghost"
                   size="sm"
-                  className="p-2 hover:bg-pink-100/70 relative group"
+                  className="p-2 hover:bg-pink-100/70"
                   onClick={openSearchModal}
                 >
                   <Search className="w-5 h-5" />
-                  <span className="absolute -bottom-8 left-1/2 transform -translate-x-1/2 text-xs text-muted-foreground opacity-0 group-hover:opacity-100 transition-opacity whitespace-nowrap">
-                    Ctrl+K
-                  </span>
                 </Button>
 
-                {/* Wishlist */}
                 <Button
                   variant="ghost"
                   size="sm"
@@ -951,7 +739,6 @@ const Header: React.FC = () => {
                   </Link>
                 </Button>
 
-                {/* Cart */}
                 <Button
                   variant="ghost"
                   size="sm"
@@ -968,65 +755,231 @@ const Header: React.FC = () => {
                   </Link>
                 </Button>
 
-                {/* User Menu or Auth */}
                 {user ? (
                   <DropdownMenu>
                     <DropdownMenuTrigger asChild>
                       <Button
                         variant="ghost"
-                        className="relative h-8 w-8 rounded-full"
+                        className="relative h-10 w-10 rounded-full border-2 border-pink-200 hover:border-pink-300 transition-all"
                       >
-                        <Avatar className="h-8 w-8">
+                        <Avatar className="h-10 w-10">
                           <AvatarImage src={user.avatar} alt={user.name} />
-                          <AvatarFallback className="bg-gradient-to-br from-pink-500 via-rose-500 to-red-500 text-white text-xs">
+                          <AvatarFallback className="bg-gradient-to-br from-pink-400 via-orange-400 to-yellow-400 text-white text-sm font-bold">
                             {getInitials(user.name)}
                           </AvatarFallback>
                         </Avatar>
+                        {/* Online Indicator */}
+                        <div className="absolute bottom-0 right-0 w-3 h-3 bg-green-500 border-2 border-white rounded-full" />
                       </Button>
                     </DropdownMenuTrigger>
-                    <DropdownMenuContent className="w-56" align="end">
-                      <DropdownMenuLabel>
-                        <div className="flex flex-col space-y-1">
-                          <p className="text-sm font-medium">{user.name}</p>
-                          <p className="text-xs text-muted-foreground">
-                            {user.email}
-                          </p>
+
+                    <DropdownMenuContent
+                      className="w-72 p-0 bg-gradient-to-br from-white via-pink-50/50 to-blue-50/50 border-2 border-pink-200/50 shadow-2xl rounded-2xl overflow-hidden"
+                      align="end"
+                      sideOffset={8}
+                    >
+                      {/* User Info Header */}
+                      <div className="relative p-4 bg-gradient-to-r from-pink-100 via-orange-50 to-yellow-50 border-b border-pink-200/50">
+                        <div className="flex items-center space-x-3">
+                          <Avatar className="h-12 w-12 ring-2 ring-white shadow-md">
+                            <AvatarImage src={user.avatar} alt={user.name} />
+                            <AvatarFallback className="bg-gradient-to-br from-pink-400 via-orange-400 to-yellow-400 text-white font-bold">
+                              {getInitials(user.name)}
+                            </AvatarFallback>
+                          </Avatar>
+                          <div className="flex-1 min-w-0">
+                            <p className="text-sm font-bold text-slate-900 truncate flex items-center gap-2">
+                              {user.name}
+                              {isAdmin(user) && (
+                                <Badge className="bg-gradient-to-r from-pink-400 to-orange-400 text-white text-xs px-2 py-0.5">
+                                  <Crown className="w-3 h-3 mr-1" />
+                                  Admin
+                                </Badge>
+                              )}
+                            </p>
+                            <p className="text-xs text-slate-600 truncate mt-0.5">
+                              {user.email}
+                            </p>
+                          </div>
                         </div>
-                      </DropdownMenuLabel>
-                      <DropdownMenuSeparator />
+                      </div>
 
-                      {isAdmin(user) && (
-                        <>
-                          <DropdownMenuItem asChild>
-                            <Link to="/admin">
-                              <Shield className="mr-2 h-4 w-4" />
-                              Admin Panel
-                            </Link>
-                          </DropdownMenuItem>
-                          <DropdownMenuSeparator />
-                        </>
-                      )}
+                      {/* Menu Items */}
+                      <div className="p-2">
+                        {isAdmin(user) && (
+                          <>
+                            <DropdownMenuItem
+                              asChild
+                              className="cursor-pointer rounded-xl px-3 py-2.5 focus:bg-gradient-to-r focus:from-pink-50 focus:to-orange-50 transition-all"
+                            >
+                              <Link to="/admin" className="flex items-center">
+                                <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-pink-400 to-orange-400 flex items-center justify-center mr-3 shadow-sm">
+                                  <Shield className="w-4 h-4 text-white" />
+                                </div>
+                                <div className="flex-1">
+                                  <p className="text-sm font-semibold text-slate-900">
+                                    Quản trị viên
+                                  </p>
+                                  <p className="text-xs text-slate-500">
+                                    Bảng điều khiển admin
+                                  </p>
+                                </div>
+                                <ArrowRight className="w-4 h-4 text-slate-400" />
+                              </Link>
+                            </DropdownMenuItem>
+                            <DropdownMenuSeparator className="my-2 bg-pink-100" />
+                          </>
+                        )}
 
-                      <DropdownMenuItem asChild>
-                        <Link to="/profile">
-                          <User className="mr-2 h-4 w-4" />
-                          Profile
-                        </Link>
-                      </DropdownMenuItem>
+                        <DropdownMenuItem
+                          asChild
+                          className="cursor-pointer rounded-xl px-3 py-2.5 focus:bg-gradient-to-r focus:from-pink-50 focus:to-orange-50 transition-all"
+                        >
+                          <Link to="/profile" className="flex items-center">
+                            <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-blue-400 to-cyan-400 flex items-center justify-center mr-3 shadow-sm">
+                              <User className="w-4 h-4 text-white" />
+                            </div>
+                            <div className="flex-1">
+                              <p className="text-sm font-semibold text-slate-900">
+                                Hồ sơ cá nhân
+                              </p>
+                              <p className="text-xs text-slate-500">
+                                Xem và chỉnh sửa thông tin
+                              </p>
+                            </div>
+                          </Link>
+                        </DropdownMenuItem>
 
-                      <DropdownMenuItem asChild>
-                        <Link to="/my-orders">
-                          <Package className="mr-2 h-4 w-4" />
-                          Orders
-                        </Link>
-                      </DropdownMenuItem>
+                        <DropdownMenuItem
+                          asChild
+                          className="cursor-pointer rounded-xl px-3 py-2.5 focus:bg-gradient-to-r focus:from-pink-50 focus:to-orange-50 transition-all"
+                        >
+                          <Link to="/my-orders" className="flex items-center">
+                            <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-purple-400 to-pink-400 flex items-center justify-center mr-3 shadow-sm">
+                              <Package className="w-4 h-4 text-white" />
+                            </div>
+                            <div className="flex-1">
+                              <p className="text-sm font-semibold text-slate-900">
+                                Đơn hàng của tôi
+                              </p>
+                              <p className="text-xs text-slate-500">
+                                Lịch sử mua hàng
+                              </p>
+                            </div>
+                            {totalItems > 0 && (
+                              <Badge className="bg-pink-500 text-white text-xs">
+                                {totalItems}
+                              </Badge>
+                            )}
+                          </Link>
+                        </DropdownMenuItem>
 
-                      <DropdownMenuSeparator />
+                        <DropdownMenuItem
+                          asChild
+                          className="cursor-pointer rounded-xl px-3 py-2.5 focus:bg-gradient-to-r focus:from-pink-50 focus:to-orange-50 transition-all"
+                        >
+                          <Link to="/wishlist" className="flex items-center">
+                            <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-rose-400 to-red-400 flex items-center justify-center mr-3 shadow-sm">
+                              <Heart className="w-4 h-4 text-white" />
+                            </div>
+                            <div className="flex-1">
+                              <p className="text-sm font-semibold text-slate-900">
+                                Danh sách yêu thích
+                              </p>
+                              <p className="text-xs text-slate-500">
+                                Sản phẩm đã lưu
+                              </p>
+                            </div>
+                            {totalWishlistItems > 0 && (
+                              <Badge className="bg-rose-500 text-white text-xs">
+                                {totalWishlistItems}
+                              </Badge>
+                            )}
+                          </Link>
+                        </DropdownMenuItem>
 
-                      <DropdownMenuItem onClick={handleLogout}>
-                        <LogOut className="mr-2 h-4 w-4" />
-                        Log out
-                      </DropdownMenuItem>
+                        <DropdownMenuItem
+                          asChild
+                          className="cursor-pointer rounded-xl px-3 py-2.5 focus:bg-gradient-to-r focus:from-pink-50 focus:to-orange-50 transition-all"
+                        >
+                          <Link to="/downloads" className="flex items-center">
+                            <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-emerald-400 to-teal-400 flex items-center justify-center mr-3 shadow-sm">
+                              <Download className="w-4 h-4 text-white" />
+                            </div>
+                            <div className="flex-1">
+                              <p className="text-sm font-semibold text-slate-900">
+                                Tải xuống
+                              </p>
+                              <p className="text-xs text-slate-500">
+                                Sản phẩm đã mua
+                              </p>
+                            </div>
+                          </Link>
+                        </DropdownMenuItem>
+
+                        <DropdownMenuItem
+                          asChild
+                          className="cursor-pointer rounded-xl px-3 py-2.5 focus:bg-gradient-to-r focus:from-pink-50 focus:to-orange-50 transition-all"
+                        >
+                          <Link to="/settings" className="flex items-center">
+                            <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-slate-400 to-gray-400 flex items-center justify-center mr-3 shadow-sm">
+                              <Settings className="w-4 h-4 text-white" />
+                            </div>
+                            <div className="flex-1">
+                              <p className="text-sm font-semibold text-slate-900">
+                                Cài đặt
+                              </p>
+                              <p className="text-xs text-slate-500">
+                                Tùy chỉnh tài khoản
+                              </p>
+                            </div>
+                          </Link>
+                        </DropdownMenuItem>
+                      </div>
+
+                      <DropdownMenuSeparator className="my-0 bg-pink-200" />
+
+                      {/* Logout Button */}
+                      <div className="p-2">
+                        <DropdownMenuItem
+                          onClick={handleLogout}
+                          className="cursor-pointer rounded-xl px-3 py-2.5 focus:bg-red-50 transition-all text-red-600 font-semibold"
+                        >
+                          <div className="w-8 h-8 rounded-lg bg-red-100 flex items-center justify-center mr-3">
+                            <LogOut className="w-4 h-4 text-red-600" />
+                          </div>
+                          <div className="flex-1">
+                            <p className="text-sm font-semibold">Đăng xuất</p>
+                            <p className="text-xs text-red-500">
+                              Thoát khỏi tài khoản
+                            </p>
+                          </div>
+                        </DropdownMenuItem>
+                      </div>
+
+                      {/* Footer Stats */}
+                      <div className="p-3 bg-gradient-to-r from-pink-50 to-orange-50 border-t border-pink-200/50">
+                        <div className="grid grid-cols-3 gap-2 text-center">
+                          <div>
+                            <p className="text-xs font-bold text-slate-900">
+                              {totalItems}
+                            </p>
+                            <p className="text-xs text-slate-500">Giỏ hàng</p>
+                          </div>
+                          <div>
+                            <p className="text-xs font-bold text-slate-900">
+                              {totalWishlistItems}
+                            </p>
+                            <p className="text-xs text-slate-500">Yêu thích</p>
+                          </div>
+                          <div>
+                            <p className="text-xs font-bold text-slate-900">
+                              0
+                            </p>
+                            <p className="text-xs text-slate-500">Thông báo</p>
+                          </div>
+                        </div>
+                      </div>
                     </DropdownMenuContent>
                   </DropdownMenu>
                 ) : (
@@ -1034,14 +987,14 @@ const Header: React.FC = () => {
                     <Button
                       variant="ghost"
                       size="sm"
-                      className="hidden sm:flex text-sm px-3 hover:bg-pink-100/70"
+                      className="hidden sm:flex text-sm px-3 hover:bg-pink-100/70 font-medium"
                       asChild
                     >
                       <Link to="/auth/login">Đăng nhập</Link>
                     </Button>
                     <Button
                       size="sm"
-                      className="bg-gradient-to-r from-pink-500 via-rose-500 to-red-500 hover:from-pink-600 hover:via-rose-600 hover:to-red-600 text-white text-sm px-4 h-9 shadow-md"
+                      className="bg-gradient-to-r from-pink-400 via-orange-400 to-yellow-400 hover:from-pink-500 hover:via-orange-500 hover:to-yellow-500 text-white text-sm px-4 h-9 font-semibold shadow-lg"
                       asChild
                     >
                       <Link to="/auth/register">Đăng ký</Link>
@@ -1055,45 +1008,36 @@ const Header: React.FC = () => {
                   onOpenChange={setIsMobileMenuOpen}
                 >
                   <SheetTrigger asChild>
-                    <Button
-                      variant="ghost"
-                      size="sm"
-                      className="lg:hidden p-2 hover:bg-pink-100/70"
-                    >
+                    <Button variant="ghost" size="sm" className="lg:hidden p-2">
                       <Menu className="w-5 h-5" />
                     </Button>
                   </SheetTrigger>
                   <SheetContent
                     side="right"
-                    className="w-80 bg-gradient-to-br from-pink-50 via-white to-rose-50 border-l border-pink-200/50"
+                    className="w-80 bg-gradient-to-br from-pink-50 to-rose-50"
                   >
-                    <SheetHeader className="bg-gradient-to-r from-pink-100 to-rose-100 -mx-6 -mt-6 px-6 pt-6 pb-4 border-b border-pink-200/50">
-                      <SheetTitle className="text-transparent bg-gradient-to-r from-pink-600 via-rose-600 to-red-600 bg-clip-text flex items-center gap-2">
-                        <LayoutTemplate className="w-5 h-5 text-pink-600" />
+                    <SheetHeader>
+                      <SheetTitle className="text-transparent bg-gradient-to-r from-pink-600 to-red-600 bg-clip-text">
                         Template Market
                       </SheetTitle>
                     </SheetHeader>
 
-                    {/* Mobile menu content */}
                     <div className="mt-6 space-y-4">
                       <Button
                         variant="outline"
-                        className="w-full justify-start bg-gradient-to-r from-pink-50 to-rose-50 border-pink-200 hover:from-pink-100 hover:to-rose-100"
+                        className="w-full justify-start"
                         onClick={() => {
                           setIsMobileMenuOpen(false);
                           openSearchModal();
                         }}
                       >
-                        <Search className="w-4 h-4 mr-3 text-pink-600" />
-                        <span>Tìm kiếm</span>
-                        <Badge className="ml-auto bg-pink-200 text-pink-800 text-xs">
-                          Ctrl+K
-                        </Badge>
+                        <Search className="w-4 h-4 mr-3" />
+                        Tìm kiếm
                       </Button>
 
                       <Link
                         to="/templates"
-                        className="flex items-center space-x-3 p-3 rounded-lg hover:bg-gradient-to-r hover:from-pink-50 hover:to-rose-50 transition-all duration-300 border border-transparent hover:border-pink-200"
+                        className="flex items-center space-x-3 p-3 rounded-lg hover:bg-pink-50"
                         onClick={() => setIsMobileMenuOpen(false)}
                       >
                         <Package className="w-5 h-5 text-pink-600" />
@@ -1102,9 +1046,10 @@ const Header: React.FC = () => {
                           Hot
                         </Badge>
                       </Link>
+
                       <Link
                         to="/ebooks"
-                        className="flex items-center space-x-3 p-3 rounded-lg hover:bg-gradient-to-r hover:from-pink-50 hover:to-rose-50 transition-all duration-300 border border-transparent hover:border-pink-200"
+                        className="flex items-center space-x-3 p-3 rounded-lg hover:bg-pink-50"
                         onClick={() => setIsMobileMenuOpen(false)}
                       >
                         <BookOpen className="w-5 h-5 text-pink-600" />
@@ -1113,41 +1058,39 @@ const Header: React.FC = () => {
                           New
                         </Badge>
                       </Link>
+
                       <Link
                         to="/pricing"
-                        className="flex items-center space-x-3 p-3 rounded-lg hover:bg-gradient-to-r hover:from-pink-50 hover:to-rose-50 transition-all duration-300 border border-transparent hover:border-pink-200"
+                        className="flex items-center space-x-3 p-3 rounded-lg hover:bg-pink-50"
                         onClick={() => setIsMobileMenuOpen(false)}
                       >
                         <Tag className="w-5 h-5 text-pink-600" />
                         <span>Pricing</span>
                       </Link>
+
                       <Link
                         to="/blog"
-                        className="flex items-center space-x-3 p-3 rounded-lg hover:bg-gradient-to-r hover:from-pink-50 hover:to-rose-50 transition-all duration-300 border border-transparent hover:border-pink-200"
+                        className="flex items-center space-x-3 p-3 rounded-lg hover:bg-pink-50"
                         onClick={() => setIsMobileMenuOpen(false)}
                       >
                         <MessageCircle className="w-5 h-5 text-pink-600" />
                         <span>Blog</span>
                       </Link>
+
                       {user && isAdmin(user) && (
                         <Link
                           to="/admin"
-                          className="flex items-center space-x-3 p-3 rounded-lg hover:bg-gradient-to-r hover:from-pink-50 hover:to-rose-50 transition-all duration-300 border border-transparent hover:border-pink-200"
+                          className="flex items-center space-x-3 p-3 rounded-lg hover:bg-pink-50"
                           onClick={() => setIsMobileMenuOpen(false)}
                         >
                           <Shield className="w-5 h-5 text-pink-600" />
                           <span>Admin Panel</span>
-                          <Badge className="bg-pink-200 text-pink-800 text-xs ml-auto">
-                            <Crown className="w-3 h-3" />
-                          </Badge>
                         </Link>
                       )}
 
-                      {/* Contact Info - Mobile Only */}
                       <div className="mt-8 pt-4 border-t border-pink-200/50">
-                        <p className="text-xs text-pink-600 font-semibold mb-3 flex items-center gap-2">
-                          <Phone className="w-3 h-3" />
-                          Liên hệ hỗ trợ:
+                        <p className="text-xs text-pink-600 font-semibold mb-3">
+                          Liên hệ:
                         </p>
                         <div className="space-y-2 text-sm text-gray-600">
                           <div className="flex items-center gap-2">
@@ -1160,41 +1103,28 @@ const Header: React.FC = () => {
                           </div>
                         </div>
 
-                        {/* Social Links - Mobile */}
                         <div className="flex items-center gap-3 mt-4">
                           {[
                             {
                               icon: Facebook,
                               href: "#",
-                              color:
-                                "text-blue-600 bg-blue-50 hover:bg-blue-100",
+                              color: "text-blue-600",
                             },
                             {
                               icon: Instagram,
                               href: "#",
-                              color:
-                                "text-pink-600 bg-pink-50 hover:bg-pink-100",
+                              color: "text-pink-600",
                             },
-                            {
-                              icon: Twitter,
-                              href: "#",
-                              color: "text-sky-600 bg-sky-50 hover:bg-sky-100",
-                            },
-                            {
-                              icon: Youtube,
-                              href: "#",
-                              color: "text-red-600 bg-red-50 hover:bg-red-100",
-                            },
+                            { icon: Twitter, href: "#", color: "text-sky-600" },
+                            { icon: Youtube, href: "#", color: "text-red-600" },
                           ].map((social, index) => (
-                            <motion.a
+                            <a
                               key={index}
                               href={social.href}
-                              whileHover={{ scale: 1.1 }}
-                              whileTap={{ scale: 0.9 }}
-                              className={`p-2 rounded-lg ${social.color} transition-all shadow-sm`}
+                              className={`p-2 rounded-lg bg-white shadow-sm ${social.color}`}
                             >
                               <social.icon className="w-4 h-4" />
-                            </motion.a>
+                            </a>
                           ))}
                         </div>
                       </div>
@@ -1206,6 +1136,9 @@ const Header: React.FC = () => {
           </div>
         </div>
       </div>
+
+      {/* ✅ SPACER ĐỂ NỘI DUNG KHÔNG BỊ CHE BỞI HEADER */}
+      <div className="h-32 lg:h-32" />
     </>
   );
 };

@@ -597,7 +597,7 @@ const Home: React.FC = () => {
       <main className="relative z-10">
         {/* ===== HERO SECTION CHUYÊN NGHIỆP ===== */}
         <section
-          className={`relative px-4 py-12 sm:py-20 lg:py-24 bg-gradient-to-br ${sectionBackgrounds.hero} overflow-hidden min-h-screen flex items-center`}
+          className={`relative px-4 py-12 sm:py-20 lg:py-24 bg-gradient-to-br ${sectionBackgrounds.hero} overflow-hidden min-h-screen 2xl:min-h-0 flex items-center`}
           id="hero"
           data-animate
           style={{

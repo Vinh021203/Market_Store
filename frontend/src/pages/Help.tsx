@@ -1,11 +1,11 @@
-import React, { useState, useEffect, useCallback } from "react";
+import React, { useState, useCallback, useMemo } from "react";
 import { Helmet } from "react-helmet-async";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
+import { Input } from "@/components/ui/input";
 import { Separator } from "@/components/ui/separator";
-import { Progress } from "@/components/ui/progress";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import {
   Accordion,
   AccordionContent,
@@ -13,60 +13,52 @@ import {
   AccordionTrigger,
 } from "@/components/ui/accordion";
 import {
-  HelpCircle,
   Search,
-  MessageSquare,
-  FileText,
-  CreditCard,
-  Download,
-  Settings,
-  User,
-  ShoppingCart,
-  Lock,
-  Mail,
-  Phone,
-  Clock,
-  CheckCircle,
-  ExternalLink,
   BookOpen,
   Video,
-  MessageCircle,
-  ChevronRight,
-  Star,
-  ThumbsUp,
-  Users,
-  Zap,
-  Award,
-  HeartHandshake,
-  Shield,
-  Globe,
-  Smartphone,
-  Monitor,
-  Headphones,
-  LifeBuoy,
-  TrendingUp,
-  Calendar,
-  Gift,
+  FileText,
+  MessageSquare,
+  HelpCircle,
   Lightbulb,
-  Rocket,
-  Target,
-  Coffee,
-  Cpu,
-  Database,
+  Wrench,
+  Download,
   Code,
   Palette,
-  Layers,
-  Eye,
-  MousePointer,
-  ArrowUp,
-  ChevronDown,
-  Filter,
-  Bookmark,
-  Share2,
-  Copy,
+  Settings,
+  Zap,
+  Shield,
+  Globe,
+  Users,
+  Star,
   Heart,
-  PlayCircle,
+  Sparkles,
+  Crown,
+  Gift,
+  Rocket,
+  Eye,
+  Target,
   ArrowRight,
+  ArrowUp,
+  Award,
+  CheckCircle,
+  AlertCircle,
+  Info,
+  ExternalLink,
+  Play,
+  Clock,
+  TrendingUp,
+  Package,
+  Database,
+  Terminal,
+  Layers,
+  Box,
+  GitBranch,
+  Book,
+  GraduationCap,
+  Headphones,
+  Mail,
+  Phone,
+  MessageCircle,
 } from "lucide-react";
 import {
   motion,
@@ -76,615 +68,703 @@ import {
 } from "framer-motion";
 import { toast } from "@/hooks/use-toast";
 
+// ============================================
+// SOFT PINK THEME
+// ============================================
+const softPinkTheme = {
+  pageBackground: "from-pink-50/70 via-rose-50/60 to-red-50/50",
+  primaryGradient: "from-pink-500 via-rose-500 to-red-500",
+  secondaryGradient: "from-rose-400 via-pink-500 to-red-400",
+  heroText: "from-pink-700 via-rose-600 to-red-600",
+  accentText: "from-rose-600 via-pink-600 to-red-600",
+  glow: "shadow-pink-200/60 shadow-2xl",
+  softGlow: "shadow-pink-200/40 shadow-lg",
+};
+
+// ============================================
+// STAR BACKGROUND PATTERN
+// ============================================
+const StarBackgroundPattern = () => (
+  <svg className="absolute inset-0 w-full h-full" style={{ opacity: 0.08 }}>
+    <defs>
+      <pattern
+        id="starPattern"
+        x="0"
+        y="0"
+        width="200"
+        height="200"
+        patternUnits="userSpaceOnUse"
+      >
+        <g transform="translate(50, 50)">
+          <path
+            d="M 0,-30 L 7,-10 L 30,-10 L 12,5 L 19,25 L 0,12 L -19,25 L -12,5 L -30,-10 L -7,-10 Z"
+            fill="url(#starGradient1)"
+            opacity="0.6"
+          />
+        </g>
+        <g transform="translate(150, 120)">
+          <path
+            d="M 0,-20 L 5,-7 L 20,-7 L 8,3 L 13,17 L 0,8 L -13,17 L -8,3 L -20,-7 L -5,-7 Z"
+            fill="url(#starGradient2)"
+            opacity="0.5"
+          />
+        </g>
+        <g transform="translate(30, 150)">
+          <path
+            d="M 0,-12 L 3,-4 L 12,-4 L 5,2 L 8,10 L 0,5 L -8,10 L -5,2 L -12,-4 L -3,-4 Z"
+            fill="url(#starGradient3)"
+            opacity="0.4"
+          />
+        </g>
+        <g transform="translate(100, 30)">
+          <circle
+            cx="0"
+            cy="0"
+            r="3"
+            fill="url(#starGradient4)"
+            opacity="0.6"
+          />
+          <path
+            d="M 0,-8 L 1,-2 L 8,0 L 1,2 L 0,8 L -1,2 L -8,0 L -1,-2 Z"
+            fill="url(#starGradient4)"
+            opacity="0.3"
+          />
+        </g>
+        <g transform="translate(170, 70)">
+          <path
+            d="M 0,-18 L 4,-6 L 18,-6 L 7,3 L 11,15 L 0,7 L -11,15 L -7,3 L -18,-6 L -4,-6 Z"
+            fill="url(#starGradient1)"
+            opacity="0.5"
+          />
+        </g>
+      </pattern>
+      <linearGradient id="starGradient1" x1="0%" y1="0%" x2="100%" y2="100%">
+        <stop offset="0%" style={{ stopColor: "#FDE68A", stopOpacity: 1 }} />
+        <stop offset="50%" style={{ stopColor: "#FCA5A5", stopOpacity: 1 }} />
+        <stop offset="100%" style={{ stopColor: "#FBCFE8", stopOpacity: 1 }} />
+      </linearGradient>
+      <linearGradient id="starGradient2" x1="0%" y1="0%" x2="100%" y2="100%">
+        <stop offset="0%" style={{ stopColor: "#FBCFE8", stopOpacity: 1 }} />
+        <stop offset="50%" style={{ stopColor: "#FCA5A5", stopOpacity: 1 }} />
+        <stop offset="100%" style={{ stopColor: "#FECACA", stopOpacity: 1 }} />
+      </linearGradient>
+      <linearGradient id="starGradient3" x1="0%" y1="0%" x2="100%" y2="100%">
+        <stop offset="0%" style={{ stopColor: "#FEF3C7", stopOpacity: 1 }} />
+        <stop offset="50%" style={{ stopColor: "#FBCFE8", stopOpacity: 1 }} />
+        <stop offset="100%" style={{ stopColor: "#FCA5A5", stopOpacity: 1 }} />
+      </linearGradient>
+      <linearGradient id="starGradient4" x1="0%" y1="0%" x2="100%" y2="100%">
+        <stop offset="0%" style={{ stopColor: "#FDE68A", stopOpacity: 1 }} />
+        <stop offset="100%" style={{ stopColor: "#FBCFE8", stopOpacity: 1 }} />
+      </linearGradient>
+    </defs>
+    <rect width="100%" height="100%" fill="url(#starPattern)" />
+  </svg>
+);
+
+// ============================================
+// FLOATING ICONS
+// ============================================
+const FloatingIcons = () => {
+  const icons = [
+    {
+      Icon: BookOpen,
+      color: "from-pink-50 to-rose-100",
+      position: "top-10 right-20",
+    },
+    {
+      Icon: HelpCircle,
+      color: "from-rose-50 to-red-100",
+      position: "top-32 left-10",
+    },
+    {
+      Icon: Video,
+      color: "from-red-50 to-pink-100",
+      position: "bottom-20 right-10",
+    },
+    {
+      Icon: Lightbulb,
+      color: "from-pink-100 to-rose-50",
+      position: "bottom-32 left-20",
+    },
+    {
+      Icon: Code,
+      color: "from-rose-100 to-pink-50",
+      position: "top-1/2 right-1/4",
+    },
+    {
+      Icon: Wrench,
+      color: "from-red-50 to-rose-100",
+      position: "top-1/3 left-1/3",
+    },
+    {
+      Icon: Rocket,
+      color: "from-pink-50 to-red-100",
+      position: "bottom-1/3 right-1/3",
+    },
+    {
+      Icon: Star,
+      color: "from-rose-50 to-pink-100",
+      position: "top-2/3 left-1/4",
+    },
+    {
+      Icon: Heart,
+      color: "from-red-100 to-rose-50",
+      position: "top-1/4 right-1/2",
+    },
+    {
+      Icon: Sparkles,
+      color: "from-pink-100 to-red-50",
+      position: "bottom-1/4 left-1/2",
+    },
+    {
+      Icon: Crown,
+      color: "from-rose-100 to-red-50",
+      position: "top-3/4 right-20",
+    },
+    {
+      Icon: Gift,
+      color: "from-pink-50 to-rose-100",
+      position: "bottom-40 left-10",
+    },
+    {
+      Icon: Target,
+      color: "from-red-50 to-pink-50",
+      position: "top-40 right-40",
+    },
+    {
+      Icon: Zap,
+      color: "from-rose-50 to-red-50",
+      position: "bottom-1/2 right-10",
+    },
+    {
+      Icon: Award,
+      color: "from-pink-100 to-rose-100",
+      position: "top-1/2 left-10",
+    },
+    {
+      Icon: Globe,
+      color: "from-red-100 to-pink-100",
+      position: "bottom-1/4 right-1/4",
+    },
+  ];
+
+  return (
+    <div className="fixed inset-0 overflow-hidden pointer-events-none z-0">
+      {icons.map((item, i) => (
+        <motion.div
+          key={i}
+          className={`absolute ${item.position}`}
+          initial={{ opacity: 0, scale: 0 }}
+          animate={{
+            y: [0, -30, 0],
+            rotate: [0, 15, -15, 0],
+            opacity: [0.1, 0.3, 0.1],
+            scale: [1, 1.2, 1],
+          }}
+          transition={{
+            duration: 8 + i * 2,
+            repeat: Infinity,
+            delay: i * 0.8,
+            ease: "easeInOut",
+          }}
+        >
+          <motion.div
+            className={`p-4 rounded-full bg-gradient-to-r ${item.color} backdrop-blur-sm shadow-lg`}
+            whileHover={{ scale: 1.5, rotate: 30 }}
+          >
+            <item.Icon className="w-8 h-8 text-pink-300/50" />
+          </motion.div>
+        </motion.div>
+      ))}
+    </div>
+  );
+};
+
+// ============================================
+// MAIN COMPONENT
+// ============================================
 const Help: React.FC = () => {
   const [searchTerm, setSearchTerm] = useState("");
   const [selectedCategory, setSelectedCategory] = useState("all");
-  const [expandedFaq, setExpandedFaq] = useState<string | null>(null);
-  const [scrollY, setScrollY] = useState(0);
-  const [scrollProgress, setScrollProgress] = useState(0);
   const [showFloatingNav, setShowFloatingNav] = useState(false);
-  const [activeTab, setActiveTab] = useState("popular");
+  const [scrollProgress, setScrollProgress] = useState(0);
 
   const { scrollYProgress } = useScroll();
   const headerY = useTransform(scrollYProgress, [0, 0.2], [0, -50]);
   const headerOpacity = useTransform(scrollYProgress, [0, 0.2], [1, 0.8]);
 
-  // ✅ Enhanced Color Schemes
-  const colorSchemes = {
-    primary: {
-      gradient: "from-cyan-500 via-blue-500 to-indigo-500",
-      bg: "from-cyan-50/80 to-blue-50/80",
-      darkBg: "from-cyan-900/30 to-blue-900/30",
-      accent: "text-cyan-600",
-    },
-    success: {
-      gradient: "from-emerald-500 via-teal-500 to-cyan-500",
-      bg: "from-emerald-50/80 to-cyan-50/80",
-      darkBg: "from-emerald-900/30 to-cyan-900/30",
-      accent: "text-emerald-600",
-    },
-    info: {
-      gradient: "from-indigo-500 via-purple-500 to-blue-500",
-      bg: "from-indigo-50/80 to-purple-50/80",
-      darkBg: "from-indigo-900/30 to-purple-900/30",
-      accent: "text-indigo-600",
-    },
-    warning: {
-      gradient: "from-amber-500 via-orange-500 to-red-500",
-      bg: "from-amber-50/80 to-orange-50/80",
-      darkBg: "from-amber-900/30 to-orange-900/30",
-      accent: "text-amber-600",
-    },
-  };
-
-  // ✅ Scroll Effects
-  useEffect(() => {
+  React.useEffect(() => {
     const handleScroll = () => {
-      setScrollY(window.scrollY);
       setShowFloatingNav(window.scrollY > 500);
-
       const totalHeight =
         document.documentElement.scrollHeight - window.innerHeight;
       const progress = (window.scrollY / totalHeight) * 100;
       setScrollProgress(Math.min(progress, 100));
     };
-    window.addEventListener("scroll", handleScroll);
+    window.addEventListener("scroll", handleScroll, { passive: true });
     return () => window.removeEventListener("scroll", handleScroll);
   }, []);
 
-  const categories = [
+  const stats = [
     {
-      id: "account",
-      icon: User,
-      title: "Tài khoản & Hồ sơ",
-      description: "Đăng ký, đăng nhập, quản lý profile",
-      count: 18,
-      color: colorSchemes.primary.gradient,
-      bgColor: colorSchemes.primary.bg,
-      darkBg: colorSchemes.primary.darkBg,
-      topics: [
-        "Tạo tài khoản",
-        "Đăng nhập",
-        "Quên mật khẩu",
-        "Cập nhật thông tin",
-        "Xóa tài khoản",
-      ],
-    },
-    {
-      id: "purchase",
-      icon: ShoppingCart,
-      title: "Mua hàng & Thanh toán",
-      description: "Đặt hàng, thanh toán, hóa đơn, ưu đãi",
-      count: 25,
-      color: colorSchemes.success.gradient,
-      bgColor: colorSchemes.success.bg,
-      darkBg: colorSchemes.success.darkBg,
-      topics: [
-        "Phương thức thanh toán",
-        "Mã giảm giá",
-        "Hóa đơn",
-        "Lỗi thanh toán",
-        "Combo deals",
-      ],
-    },
-    {
-      id: "download",
-      icon: Download,
-      title: "Tải xuống & Cài đặt",
-      description: "Download, setup, hướng dẫn sử dụng",
-      count: 32,
-      color: colorSchemes.info.gradient,
-      bgColor: colorSchemes.info.bg,
-      darkBg: colorSchemes.info.darkBg,
-      topics: [
-        "Cách download",
-        "Giải nén file",
-        "Cài đặt",
-        "Cấu hình",
-        "Troubleshooting",
-      ],
-    },
-    {
-      id: "refund",
-      icon: CreditCard,
-      title: "Hoàn tiền & Bảo hành",
-      description: "Chính sách hoàn tiền, đổi trả, bảo hành",
-      count: 12,
-      color: colorSchemes.warning.gradient,
-      bgColor: colorSchemes.warning.bg,
-      darkBg: colorSchemes.warning.darkBg,
-      topics: [
-        "Điều kiện hoàn tiền",
-        "Quy trình đổi trả",
-        "Thời gian xử lý",
-        "Bảo hành",
-        "Khiếu nại",
-      ],
-    },
-    {
-      id: "customization",
-      icon: Settings,
-      title: "Tùy chỉnh & Phát triển",
-      description: "Custom code, modification, advanced",
-      count: 28,
-      color: colorSchemes.primary.gradient,
-      bgColor: colorSchemes.primary.bg,
-      darkBg: colorSchemes.primary.darkBg,
-      topics: [
-        "Edit HTML/CSS",
-        "JavaScript custom",
-        "PHP modification",
-        "Database setup",
-        "API integration",
-      ],
-    },
-    {
-      id: "security",
-      icon: Lock,
-      title: "Bảo mật & Quyền riêng tư",
-      description: "SSL, bảo mật, privacy, GDPR",
-      count: 15,
-      color: colorSchemes.info.gradient,
-      bgColor: colorSchemes.info.bg,
-      darkBg: colorSchemes.info.darkBg,
-      topics: [
-        "Bảo mật website",
-        "SSL certificate",
-        "Privacy policy",
-        "GDPR compliance",
-        "Data protection",
-      ],
-    },
-  ];
-
-  const popularArticles = [
-    {
-      title: "🚀 Hướng dẫn tải xuống và cài đặt template hoàn chỉnh",
-      views: "45.2K",
-      rating: 4.9,
-      category: "Tải xuống",
-      readTime: "8 phút",
-      lastUpdated: "2 ngày trước",
-      difficulty: "Dễ",
-      tags: ["Setup", "Installation", "Beginner"],
-      thumbnail: "🎨",
-    },
-    {
-      title: "💳 Tất cả về thanh toán: VNPay, MoMo, Banking và thẻ quốc tế",
-      views: "32.8K",
-      rating: 4.8,
-      category: "Thanh toán",
-      readTime: "12 phút",
-      lastUpdated: "1 tuần trước",
-      difficulty: "Dễ",
-      tags: ["Payment", "VNPay", "MoMo", "Banking"],
-      thumbnail: "💰",
-    },
-    {
-      title: "🔄 Chính sách hoàn tiền chi tiết và quy trình xử lý",
-      views: "28.7K",
-      rating: 4.7,
-      category: "Hoàn tiền",
-      readTime: "6 phút",
-      lastUpdated: "3 ngày trước",
-      difficulty: "Dễ",
-      tags: ["Refund", "Policy", "Process"],
-      thumbnail: "🔄",
-    },
-    {
-      title: "🎨 Tùy chỉnh template: HTML, CSS, JavaScript advanced",
-      views: "24.9K",
-      rating: 4.8,
-      category: "Tùy chỉnh",
-      readTime: "25 phút",
-      lastUpdated: "1 ngày trước",
-      difficulty: "Khó",
-      tags: ["HTML", "CSS", "JavaScript", "Advanced"],
-      thumbnail: "⚙️",
-    },
-    {
-      title: "🔧 Khắc phục 20+ lỗi thường gặp khi sử dụng templates",
-      views: "19.3K",
-      rating: 4.6,
-      category: "Khắc phục",
-      readTime: "15 phút",
-      lastUpdated: "4 ngày trước",
-      difficulty: "Trung bình",
-      tags: ["Troubleshooting", "Bugs", "Fixes"],
-      thumbnail: "🔧",
-    },
-    {
-      title: "📱 Responsive design: Tối ưu template cho mobile",
-      views: "16.8K",
-      rating: 4.9,
-      category: "Mobile",
-      readTime: "18 phút",
-      lastUpdated: "5 ngày trước",
-      difficulty: "Trung bình",
-      tags: ["Responsive", "Mobile", "Optimization"],
-      thumbnail: "📱",
-    },
-  ];
-
-  const quickGuides = [
-    {
-      icon: BookOpen,
-      title: "📚 Quick Start Guide",
-      description: "Bắt đầu từ zero đến hero trong 10 phút",
-      link: "/quick-start",
-      color: colorSchemes.primary.gradient,
-      time: "10 phút",
-      level: "Beginner",
+      icon: FileText,
+      value: "500+",
+      label: "Bài viết",
+      color: "text-pink-600",
     },
     {
       icon: Video,
-      title: "🎥 Video Tutorials",
-      description: "50+ video hướng dẫn chi tiết từng bước",
-      link: "/video-tutorials",
-      color: colorSchemes.info.gradient,
-      time: "2-15 phút",
-      level: "All levels",
+      value: "150+",
+      label: "Video tutorials",
+      color: "text-rose-600",
+    },
+    { icon: Users, value: "50K+", label: "Thành viên", color: "text-red-600" },
+    {
+      icon: MessageSquare,
+      value: "24/7",
+      label: "Hỗ trợ",
+      color: "text-pink-700",
+    },
+  ];
+
+  const popularTopics = [
+    {
+      icon: Rocket,
+      title: "Bắt đầu nhanh",
+      description: "Hướng dẫn cài đặt và setup ban đầu",
+      articles: 25,
+      color: "from-pink-500 to-rose-500",
+      link: "#getting-started",
     },
     {
-      icon: MessageCircle,
-      title: "💬 Live Chat 24/7",
-      description: "Chat trực tiếp với expert, giải đáp tức thì",
-      link: "/live-chat",
-      color: colorSchemes.success.gradient,
-      time: "< 30 giây",
-      level: "Instant help",
+      icon: Download,
+      title: "Tải xuống & Cài đặt",
+      description: "Download templates và cài đặt local",
+      articles: 18,
+      color: "from-rose-500 to-red-500",
+      link: "#installation",
+    },
+    {
+      icon: Palette,
+      title: "Tùy chỉnh & Styling",
+      description: "Customize colors, fonts, layouts",
+      articles: 32,
+      color: "from-red-500 to-pink-500",
+      link: "#customization",
     },
     {
       icon: Code,
-      title: "💻 Code Examples",
-      description: "Library 500+ code snippets và examples",
-      link: "/code-examples",
-      color: colorSchemes.warning.gradient,
-      time: "1-5 phút",
-      level: "Developer",
+      title: "Lập trình",
+      description: "Code examples, APIs, integration",
+      articles: 45,
+      color: "from-pink-600 to-rose-600",
+      link: "#development",
+    },
+    {
+      icon: Wrench,
+      title: "Troubleshooting",
+      description: "Giải quyết các vấn đề thường gặp",
+      articles: 28,
+      color: "from-rose-600 to-red-600",
+      link: "#troubleshooting",
+    },
+    {
+      icon: Shield,
+      title: "Bảo mật",
+      description: "Security best practices & guidelines",
+      articles: 15,
+      color: "from-red-600 to-pink-600",
+      link: "#security",
     },
   ];
 
-  const contactOptions = [
+  const videoTutorials = [
     {
-      icon: MessageSquare,
-      title: "💬 Live Chat",
-      description: "Chat với AI Bot & Human Expert",
-      time: "< 30 giây",
-      action: "Bắt đầu chat",
-      color: colorSchemes.success.gradient,
-      availability: "24/7",
-      satisfaction: "98.5%",
+      id: 1,
+      title: "Getting Started với Template Market",
+      description:
+        "Video giới thiệu toàn diện về platform và các tính năng chính",
+      duration: "15:30",
+      views: "25K",
+      thumbnail:
+        "https://via.placeholder.com/400x225/ec4899/ffffff?text=Getting+Started",
+      level: "Beginner",
     },
     {
-      icon: Mail,
-      title: "📧 Email Premium",
-      description: "support@templatemarket.vn",
-      time: "< 1 giờ",
-      action: "Gửi email",
-      color: colorSchemes.primary.gradient,
-      availability: "24/7",
-      satisfaction: "96.8%",
+      id: 2,
+      title: "Cài đặt Template trong 10 phút",
+      description: "Hướng dẫn chi tiết từng bước cài đặt template từ đầu",
+      duration: "10:45",
+      views: "18K",
+      thumbnail:
+        "https://via.placeholder.com/400x225/f43f5e/ffffff?text=Installation",
+      level: "Beginner",
     },
     {
-      icon: Phone,
-      title: "📞 Hotline VIP",
-      description: "+84 971 386 588",
-      time: "Ngay lập tức",
-      action: "Gọi ngay",
-      color: colorSchemes.info.gradient,
-      availability: "6AM - 12PM",
-      satisfaction: "99.2%",
+      id: 3,
+      title: "Customize Colors & Themes",
+      description: "Học cách thay đổi màu sắc, font chữ và theme",
+      duration: "20:15",
+      views: "32K",
+      thumbnail:
+        "https://via.placeholder.com/400x225/fb7185/ffffff?text=Customization",
+      level: "Intermediate",
     },
     {
-      icon: Headphones,
-      title: "🎧 Video Call",
-      description: "Screen sharing & voice support",
-      time: "Book slot",
-      action: "Đặt lịch",
-      color: colorSchemes.warning.gradient,
-      availability: "9AM - 9PM",
-      satisfaction: "99.8%",
+      id: 4,
+      title: "Advanced Component Development",
+      description: "Xây dựng components phức tạp và tái sử dụng",
+      duration: "35:20",
+      views: "15K",
+      thumbnail:
+        "https://via.placeholder.com/400x225/f472b6/ffffff?text=Advanced",
+      level: "Advanced",
     },
   ];
 
-  const stats = [
+  const gettingStartedGuides = [
+    {
+      icon: Download,
+      title: "Tải xuống template",
+      description: "Hướng dẫn tải và extract template files",
+      time: "5 phút",
+      difficulty: "Dễ",
+    },
+    {
+      icon: Terminal,
+      title: "Cài đặt dependencies",
+      description: "Install Node.js, npm packages và setup môi trường",
+      time: "10 phút",
+      difficulty: "Dễ",
+    },
+    {
+      icon: Settings,
+      title: "Cấu hình project",
+      description: "Config environment variables và settings",
+      time: "8 phút",
+      difficulty: "Trung bình",
+    },
+    {
+      icon: Rocket,
+      title: "Chạy development server",
+      description: "Start local dev server và xem live preview",
+      time: "3 phút",
+      difficulty: "Dễ",
+    },
+    {
+      icon: Palette,
+      title: "Customize giao diện",
+      description: "Thay đổi colors, fonts, logos theo brand",
+      time: "15 phút",
+      difficulty: "Trung bình",
+    },
+    {
+      icon: Package,
+      title: "Build & Deploy",
+      description: "Production build và deploy lên hosting",
+      time: "12 phút",
+      difficulty: "Trung bình",
+    },
+  ];
+
+  const faqs = [
+    {
+      category: "Chung",
+      questions: [
+        {
+          q: "Template Market là gì?",
+          a: "Template Market là marketplace lớn nhất Việt Nam cung cấp các template website, UI kits, themes chất lượng cao cho developers và designers. Chúng tôi có hơn 5000+ templates cho mọi nhu cầu từ landing pages, admin dashboards, e-commerce đến mobile apps.",
+        },
+        {
+          q: "Tôi cần kiến thức gì để sử dụng templates?",
+          a: "Tùy vào template, bạn có thể cần: HTML/CSS cơ bản cho static templates, JavaScript/React/Vue cho modern frameworks, hoặc WordPress/PHP cho CMS themes. Mỗi template có requirements chi tiết trong documentation.",
+        },
+        {
+          q: "Có hỗ trợ bản quyền commercial không?",
+          a: "Có! Tất cả templates đều có commercial license. Bạn có thể sử dụng cho unlimited projects, client work, SaaS products. License đi kèm với mỗi purchase và không có phí thêm.",
+        },
+      ],
+    },
+    {
+      category: "Tải xuống & Cài đặt",
+      questions: [
+        {
+          q: "Làm sao để tải template sau khi mua?",
+          a: "Sau khi thanh toán thành công, vào Dashboard > My Purchases, click Download button bên cạnh template. File zip sẽ được tải về máy. Link download có hiệu lực 30 ngày và unlimited downloads.",
+        },
+        {
+          q: "Template bao gồm những file gì?",
+          a: "Mỗi template bao gồm: Source code đầy đủ, Assets (images, icons, fonts), Documentation PDF/HTML, License file. Một số templates premium còn có PSD/Figma design files và video tutorials.",
+        },
+        {
+          q: "Cần tools gì để chạy template?",
+          a: "Thông thường cần: Text editor (VS Code, Sublime), Node.js & npm (cho React/Vue templates), Git (optional), Browser hiện đại. Specific requirements được list trong readme file.",
+        },
+      ],
+    },
+    {
+      category: "Customization",
+      questions: [
+        {
+          q: "Làm sao để thay đổi màu sắc?",
+          a: "Hầu hết templates sử dụng CSS variables hoặc SASS variables. Tìm file colors.css hoặc _variables.scss, thay đổi color values theo brand của bạn. Một số templates có built-in theme customizer trong admin panel.",
+        },
+        {
+          q: "Có thể thêm trang mới không?",
+          a: "Có! Clone existing page file, rename, modify content. Nhớ update routing (React Router, Vue Router) và navigation menu. Documentation có hướng dẫn chi tiết về folder structure và naming conventions.",
+        },
+        {
+          q: "Làm sao để thay logo và favicon?",
+          a: "Logo thường ở /public/images/logo.png hoặc /assets/images/. Thay file giữ nguyên tên hoặc update path trong header component. Favicon ở /public/favicon.ico, replace với icon 16x16 hoặc 32x32 pixels.",
+        },
+      ],
+    },
+    {
+      category: "Troubleshooting",
+      questions: [
+        {
+          q: "Template không chạy sau khi cài đặt?",
+          a: "Thử: (1) Kiểm tra Node version (cần >= 14), (2) Xóa node_modules và package-lock.json, chạy npm install lại, (3) Check console logs cho errors, (4) Verify port 3000 không bị conflict. Nếu vẫn lỗi, contact support với error logs.",
+        },
+        {
+          q: "Build production bị lỗi?",
+          a: "Common issues: (1) Environment variables chưa set, (2) Image paths không đúng, (3) Dependencies version conflicts. Run npm run build --verbose để see detailed errors. Check build logs và fix theo error messages.",
+        },
+        {
+          q: "Responsive layout bị lỗi trên mobile?",
+          a: "Kiểm tra: (1) Viewport meta tag trong HTML, (2) CSS media queries, (3) Flex/Grid layouts, (4) Image max-width settings. Test với browser DevTools responsive mode. Một số components cần thêm mobile-specific styles.",
+        },
+      ],
+    },
+  ];
+
+  const docsCategories = [
+    {
+      icon: Rocket,
+      title: "Getting Started",
+      description: "Quick start guides và tutorials",
+      articles: [
+        "Giới thiệu Template Market",
+        "Cài đặt môi trường dev",
+        "First project setup",
+        "Understanding folder structure",
+        "Configuration files explained",
+      ],
+    },
+    {
+      icon: Palette,
+      title: "Customization",
+      description: "Tùy chỉnh theme và components",
+      articles: [
+        "Thay đổi colors và typography",
+        "Custom logo và branding",
+        "Layout modifications",
+        "Component styling guide",
+        "Theme variants setup",
+      ],
+    },
+    {
+      icon: Code,
+      title: "Development",
+      description: "Coding guidelines và best practices",
+      articles: [
+        "Component architecture",
+        "State management patterns",
+        "API integration guide",
+        "Form handling & validation",
+        "Routing & navigation",
+      ],
+    },
+    {
+      icon: Package,
+      title: "Deployment",
+      description: "Build và deploy production",
+      articles: [
+        "Production build process",
+        "Environment variables setup",
+        "Deploy to Vercel/Netlify",
+        "CDN configuration",
+        "Performance optimization",
+      ],
+    },
+  ];
+
+  const communityResources = [
+    {
+      icon: MessageCircle,
+      title: "Community Forum",
+      description: "Thảo luận với 50K+ developers",
+      members: "50,234",
+      posts: "125K+",
+      color: "from-pink-500 to-rose-500",
+    },
     {
       icon: Users,
-      value: "50K+",
-      label: "Khách hàng hài lòng",
-      color: "text-cyan-600",
+      title: "Discord Server",
+      description: "Real-time chat và support",
+      members: "25,891",
+      posts: "Active 24/7",
+      color: "from-rose-500 to-red-500",
     },
     {
-      icon: Clock,
-      value: "< 5 min",
-      label: "Thời gian phản hồi",
-      color: "text-emerald-600",
+      icon: Video,
+      title: "YouTube Channel",
+      description: "Video tutorials và walkthroughs",
+      members: "234K",
+      posts: "500+ videos",
+      color: "from-red-500 to-pink-500",
     },
     {
-      icon: Star,
-      value: "4.9/5",
-      label: "Đánh giá dịch vụ",
-      color: "text-amber-600",
-    },
-    {
-      icon: Award,
-      value: "99.8%",
-      label: "Tỷ lệ giải quyết",
-      color: "text-indigo-600",
+      icon: BookOpen,
+      title: "Blog",
+      description: "Tips, tricks và best practices",
+      members: "Weekly",
+      posts: "250+ articles",
+      color: "from-pink-600 to-rose-600",
     },
   ];
 
-  const systemStatus = [
-    { name: "🌐 Website", status: "online", uptime: "99.9%" },
-    { name: "🔌 API Services", status: "online", uptime: "99.8%" },
-    { name: "💾 Download System", status: "online", uptime: "99.9%" },
-    { name: "💳 Payment Gateway", status: "online", uptime: "99.7%" },
-    { name: "☁️ CDN Network", status: "online", uptime: "99.9%" },
-    { name: "📧 Email System", status: "online", uptime: "99.8%" },
-  ];
-
-  const faqData = [
-    {
-      id: "faq1",
-      question: "🚀 Làm thế nào để download template sau khi mua?",
-      answer: `Sau khi thanh toán thành công, bạn có thể download template theo các bước sau:
-
-**Cách 1: Qua Email**
-1. Check email xác nhận đặt hàng
-2. Click vào link download trong email
-3. File sẽ được tải xuống tự động
-
-**Cách 2: Qua tài khoản**
-1. Đăng nhập vào tài khoản
-2. Vào mục "My Downloads" 
-3. Click "Download Now" bên cạnh sản phẩm
-
-**Cách 3: Qua Dashboard**
-1. Truy cập dashboard.templatemarket.vn
-2. Xem lịch sử mua hàng
-3. Download unlimited lần trong 12 tháng
-
-💡 **Tips**: File download có thể lên đến 100MB, đảm bảo kết nối internet ổn định.`,
-      category: "download",
-    },
-    {
-      id: "faq2",
-      question: "💳 Tôi có thể thanh toán bằng những phương thức nào?",
-      answer: `Template Market hỗ trợ đa dạng phương thức thanh toán tiện lợi:
-
-**💎 Ví điện tử**
-• MoMo (Ưu đãi -5%)
-• ZaloPay 
-• ShopeePay
-• VNPay QR
-
-**🏦 Ngân hàng**
-• Internet Banking (38+ ngân hàng)
-• ATM Card (Visa, Master, JCB)
-• Chuyển khoản trực tiếp
-
-**🌍 Quốc tế**
-• Visa/Mastercard
-• PayPal (Coming soon)
-• Stripe
-
-**🎁 Khuyến mãi đặc biệt**
-• Giảm 10% khi thanh toán qua MoMo
-• Cashback 2% cho thành viên VIP
-• Miễn phí ship với đơn > 500K`,
-      category: "payment",
-    },
-    {
-      id: "faq3",
-      question: "🔄 Chính sách hoàn tiền như thế nào?",
-      answer: `Chúng tôi cam kết chính sách hoàn tiền rõ ràng và công bằng:
-
-**✅ Điều kiện hoàn tiền**
-• Sản phẩm không như mô tả
-• Lỗi kỹ thuật không thể khắc phục
-• Trùng lặp đơn hàng do lỗi hệ thống
-
-**⏰ Thời gian**
-• Yêu cầu hoàn tiền: Trong 7 ngày
-• Xử lý: 2-3 ngày làm việc
-• Nhận tiền: 3-7 ngày tùy ngân hàng
-
-**📝 Quy trình**
-1. Gửi yêu cầu qua email/chat
-2. Cung cấp mã đơn hàng
-3. Team review trong 24h
-4. Xác nhận và tiến hành hoàn tiền
-
-**💡 Lưu ý**: Không hoàn tiền với digital products đã download thành công trừ lỗi kỹ thuật.`,
-      category: "refund",
-    },
-  ];
-
-  const filteredCategories = categories.filter(
-    (category) =>
-      category.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      category.description.toLowerCase().includes(searchTerm.toLowerCase()),
-  );
-
-  const getDifficultyColor = (difficulty: string) => {
-    switch (difficulty) {
-      case "Dễ":
-        return "text-green-600 bg-green-100";
-      case "Trung bình":
-        return "text-amber-600 bg-amber-100";
-      case "Khó":
-        return "text-red-600 bg-red-100";
-      default:
-        return "text-gray-600 bg-gray-100";
+  const handleSearch = useCallback(() => {
+    if (searchTerm.trim()) {
+      toast({
+        title: "Đang tìm kiếm...",
+        description: `Tìm kiếm cho: "${searchTerm}"`,
+      });
     }
-  };
+  }, [searchTerm]);
 
-  // ✅ Reading Progress Component
-  const ReadingProgress: React.FC = () => (
-    <div className="fixed top-0 left-0 w-full h-1 bg-gray-200 dark:bg-gray-700 z-50">
+  const ReadingProgress = () => (
+    <div className="fixed top-0 left-0 w-full h-1 bg-gray-200 z-50">
       <motion.div
-        className="h-full bg-gradient-to-r from-cyan-500 to-indigo-500"
+        className={`h-full bg-gradient-to-r ${softPinkTheme.primaryGradient}`}
         style={{ width: `${scrollProgress}%` }}
-        initial={{ width: 0 }}
-        animate={{ width: `${scrollProgress}%` }}
-        transition={{ duration: 0.1 }}
       />
     </div>
   );
 
-  // ✅ Floating Navigation
-  const FloatingNav: React.FC = () => (
+  const FloatingNav = () => (
     <AnimatePresence>
       {showFloatingNav && (
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           exit={{ opacity: 0, y: 20 }}
-          className="fixed bottom-6 right-6 z-40"
+          className="fixed bottom-8 right-8 z-40"
         >
-          <Card className="bg-white/95 dark:bg-gray-800/95 backdrop-blur-lg border-0 shadow-2xl">
-            <CardContent className="p-4">
-              <div className="flex items-center space-x-3">
-                <Button
-                  size="sm"
-                  variant="outline"
-                  onClick={() =>
-                    window.scrollTo({ top: 0, behavior: "smooth" })
-                  }
-                  className="bg-gradient-to-r from-cyan-500 to-blue-500 text-white border-0 hover:from-cyan-600 hover:to-blue-600"
-                >
-                  <ArrowUp className="w-4 h-4" />
-                </Button>
-                <div className="text-sm text-gray-700 dark:text-gray-300 font-medium">
-                  {Math.round(scrollProgress)}% đã đọc
-                </div>
-                <Progress value={scrollProgress} className="w-20" />
-              </div>
-            </CardContent>
-          </Card>
+          <Button
+            onClick={() => window.scrollTo({ top: 0, behavior: "smooth" })}
+            className={`bg-gradient-to-r ${softPinkTheme.primaryGradient} text-white w-12 h-12 rounded-full`}
+          >
+            <ArrowUp className="w-5 h-5" />
+          </Button>
         </motion.div>
       )}
     </AnimatePresence>
   );
 
-  const handleSupportAction = (action: string) => {
-    toast({
-      title: "🚀 Đang kết nối...",
-      description: `Bạn sẽ được chuyển đến ${action} trong giây lát.`,
-    });
-  };
-
   return (
     <>
       <Helmet>
-        <title>🆘 Trung tâm trợ giúp | Template Market - Hỗ trợ 24/7</title>
+        <title>Trung tâm trợ giúp | Template Market - Tài liệu & Hỗ trợ</title>
         <meta
           name="description"
-          content="Trung tâm trợ giúp toàn diện của Template Market. Tìm câu trả lời tức thì, hướng dẫn chi tiết, video tutorials và hỗ trợ live chat 24/7."
+          content="Trung tâm trợ giúp Template Market. 500+ bài viết, 150+ video tutorials, FAQs, troubleshooting guides. Hỗ trợ 24/7."
         />
         <meta
           name="keywords"
-          content="trung tâm trợ giúp, help center, hỗ trợ, FAQ, hướng dẫn, template market"
+          content="help center, support, documentation, tutorials, faq, template market, guides"
         />
-        <link rel="canonical" href="https://templatemarket.vn/help" />
+        <link rel="canonical" href="https://templatemarket.com/help" />
       </Helmet>
 
       <ReadingProgress />
       <FloatingNav />
 
-      <div className="min-h-screen bg-gradient-to-br from-cyan-50 via-blue-50 to-indigo-100 dark:from-slate-900 dark:via-cyan-900/20 dark:to-indigo-900/30">
-        {/* ✅ Enhanced Hero Section */}
+      <div
+        className={`min-h-screen bg-gradient-to-br ${softPinkTheme.pageBackground} overflow-hidden relative`}
+      >
+        <div className="fixed inset-0 z-0">
+          <StarBackgroundPattern />
+        </div>
+        <FloatingIcons />
+
+        {/* HERO */}
         <motion.section
-          className="relative py-20 lg:py-32 overflow-hidden"
+          className="relative py-20 lg:py-32 overflow-hidden z-10"
           style={{ y: headerY, opacity: headerOpacity }}
         >
           <div className="container relative z-10 px-4 mx-auto text-center">
             <motion.div
               initial={{ opacity: 0, y: 40 }}
               animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.8, ease: "easeOut" }}
               className="max-w-5xl mx-auto"
             >
-              {/* Logo & Icon */}
               <motion.div
-                whileHover={{ scale: 1.1, rotate: 10 }}
-                className="flex items-center justify-center w-28 h-28 mx-auto mb-8 bg-gradient-to-br from-cyan-500 via-blue-500 to-indigo-500 rounded-3xl shadow-2xl"
+                whileHover={{ scale: 1.1, rotate: 5 }}
+                className={`flex items-center justify-center w-28 h-28 mx-auto mb-8 bg-gradient-to-r ${softPinkTheme.primaryGradient} rounded-3xl ${softPinkTheme.glow}`}
               >
                 <HelpCircle className="w-14 h-14 text-white" />
               </motion.div>
 
-              {/* Title */}
-              <h1 className="mb-8 text-5xl lg:text-7xl font-bold leading-tight">
-                <span className="text-transparent bg-gradient-to-r from-cyan-600 via-blue-600 to-indigo-600 bg-clip-text">
+              <h1 className="mb-8 text-5xl lg:text-7xl font-bold">
+                <span
+                  className={`text-transparent bg-gradient-to-r ${softPinkTheme.heroText} bg-clip-text`}
+                >
                   Trung tâm trợ giúp
                 </span>
                 <br />
-                <span className="text-2xl lg:text-3xl font-medium text-gray-700 dark:text-gray-300">
-                  Giải đáp mọi thắc mắc của bạn
+                <span className="text-2xl lg:text-3xl font-medium text-gray-700">
+                  Chúng tôi ở đây để giúp bạn
                 </span>
               </h1>
 
-              {/* Subtitle */}
-              <p className="mb-12 text-xl lg:text-2xl text-gray-600 dark:text-gray-400 leading-relaxed max-w-4xl mx-auto">
-                Tìm câu trả lời nhanh chóng với
-                <span className="text-transparent bg-gradient-to-r from-cyan-600 to-blue-600 bg-clip-text font-semibold">
-                  {" "}
-                  hệ thống hỗ trợ thông minh{" "}
-                </span>
-                và
-                <span className="text-transparent bg-gradient-to-r from-emerald-600 to-teal-600 bg-clip-text font-semibold">
-                  {" "}
-                  đội ngũ expert 24/7{" "}
-                </span>
+              <p className="mb-12 text-xl lg:text-2xl text-gray-600 max-w-4xl mx-auto">
+                Tìm câu trả lời, tutorials, guides và mọi thứ bạn cần để thành
+                công
               </p>
 
-              {/* ✅ Enhanced Search Bar */}
-              <motion.div
-                initial={{ opacity: 0, scale: 0.9 }}
-                animate={{ opacity: 1, scale: 1 }}
-                transition={{ delay: 0.3 }}
-                className="relative max-w-3xl mx-auto mb-12"
-              >
-                <div className="absolute inset-0 bg-gradient-to-r from-cyan-400 to-indigo-500 rounded-2xl blur-lg opacity-20 animate-pulse"></div>
+              {/* SEARCH */}
+              <div className="max-w-3xl mx-auto mb-12">
                 <div className="relative">
-                  <Search className="absolute left-6 top-1/2 transform -translate-y-1/2 w-6 h-6 text-gray-500 z-10" />
+                  <Search className="absolute left-6 top-1/2 transform -translate-y-1/2 w-6 h-6 text-gray-400" />
                   <Input
-                    placeholder="🔍 Tìm kiếm câu hỏi, hướng dẫn, video tutorials..."
+                    type="text"
+                    placeholder="Tìm kiếm bài viết, tutorials, FAQs..."
                     value={searchTerm}
                     onChange={(e) => setSearchTerm(e.target.value)}
-                    className="pl-16 pr-6 py-6 text-lg bg-white/90 dark:bg-slate-800/90 backdrop-blur-md border-0 shadow-xl rounded-2xl focus:ring-4 focus:ring-cyan-200 dark:focus:ring-cyan-800 transition-all duration-300 text-gray-800 dark:text-gray-200"
+                    onKeyPress={(e) => e.key === "Enter" && handleSearch()}
+                    className="pl-16 pr-32 py-6 text-lg rounded-2xl border-2 border-gray-200 focus:border-pink-500"
                   />
-                  <div className="absolute right-4 top-1/2 transform -translate-y-1/2">
-                    <Button
-                      size="sm"
-                      className="bg-gradient-to-r from-cyan-500 to-indigo-600 hover:from-cyan-600 hover:to-indigo-700 shadow-lg text-white border-0"
-                    >
-                      <Zap className="w-4 h-4 mr-2" />
-                      AI Search
-                    </Button>
-                  </div>
+                  <Button
+                    onClick={handleSearch}
+                    className={`absolute right-2 top-1/2 transform -translate-y-1/2 bg-gradient-to-r ${softPinkTheme.primaryGradient} text-white px-6`}
+                  >
+                    Tìm kiếm
+                  </Button>
                 </div>
-              </motion.div>
+              </div>
 
-              {/* Stats Grid */}
+              {/* STATS */}
               <div className="grid grid-cols-2 lg:grid-cols-4 gap-6">
                 {stats.map((stat, index) => (
                   <motion.div
                     key={index}
                     initial={{ opacity: 0, y: 30 }}
                     animate={{ opacity: 1, y: 0 }}
-                    transition={{ delay: 0.2 + index * 0.1, duration: 0.6 }}
+                    transition={{ delay: 0.2 + index * 0.1 }}
                     whileHover={{ y: -10, scale: 1.05 }}
-                    className="bg-white/90 backdrop-blur-lg rounded-2xl p-6 shadow-xl border border-white/40 hover:shadow-2xl transition-all duration-300"
+                    className="bg-white/60 backdrop-blur-lg rounded-2xl p-6 shadow-lg border border-white/60"
                   >
                     <stat.icon
                       className={`w-8 h-8 mx-auto mb-3 ${stat.color}`}
                     />
-                    <div className="text-2xl lg:text-3xl font-bold text-gray-800 dark:text-white mb-2">
+                    <div
+                      className={`text-3xl font-bold mb-2 text-transparent bg-gradient-to-r ${softPinkTheme.heroText} bg-clip-text`}
+                    >
                       {stat.value}
                     </div>
-                    <div className="text-sm text-gray-600 dark:text-gray-400 font-medium">
+                    <div className="text-sm text-gray-600 font-medium">
                       {stat.label}
                     </div>
                   </motion.div>
@@ -692,44 +772,11 @@ const Help: React.FC = () => {
               </div>
             </motion.div>
           </div>
-
-          {/* Enhanced Background Elements */}
-          <div className="absolute inset-0 overflow-hidden pointer-events-none">
-            {Array.from({ length: 12 }).map((_, i) => (
-              <motion.div
-                key={i}
-                animate={{
-                  x: [0, 100, 0],
-                  y: [0, -60, 0],
-                  opacity: [0.1, 0.4, 0.1],
-                  scale: [1, 1.5, 1],
-                }}
-                transition={{
-                  duration: 15 + i * 2,
-                  repeat: Infinity,
-                  delay: i * 1.5,
-                  ease: "easeInOut",
-                }}
-                className={`absolute w-32 h-32 rounded-full blur-2xl mix-blend-multiply ${
-                  i % 4 === 0
-                    ? "bg-cyan-300/40"
-                    : i % 4 === 1
-                      ? "bg-blue-300/40"
-                      : i % 4 === 2
-                        ? "bg-indigo-300/40"
-                        : "bg-purple-300/40"
-                }`}
-                style={{
-                  top: `${5 + (i % 4) * 25}%`,
-                  left: `${3 + (i % 3) * 35}%`,
-                }}
-              />
-            ))}
-          </div>
         </motion.section>
 
-        <div className="container px-4 pb-20 mx-auto">
-          {/* ✅ Enhanced Quick Access Guides */}
+        {/* MAIN CONTENT */}
+        <div className="container relative z-10 px-4 mx-auto max-w-7xl pb-20">
+          {/* POPULAR TOPICS */}
           <motion.section
             initial={{ opacity: 0, y: 30 }}
             whileInView={{ opacity: 1, y: 0 }}
@@ -737,67 +784,53 @@ const Help: React.FC = () => {
             className="mb-20"
           >
             <div className="text-center mb-12">
-              <h2 className="text-4xl font-bold mb-4 text-gray-800 dark:text-gray-100">
-                🚀 Bắt đầu ngay
+              <h2 className="text-4xl font-bold mb-4 text-gray-800">
+                Chủ đề phổ biến
               </h2>
-              <p className="text-xl text-gray-600 dark:text-gray-400">
-                Các hướng dẫn nhanh để bạn có thể sử dụng ngay lập tức
+              <p className="text-xl text-gray-600">
+                Các tài liệu được tìm kiếm nhiều nhất
               </p>
             </div>
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
-              {quickGuides.map((guide, index) => (
-                <motion.div
+
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+              {popularTopics.map((topic, index) => (
+                <motion.a
                   key={index}
+                  href={topic.link}
                   initial={{ opacity: 0, y: 20 }}
                   whileInView={{ opacity: 1, y: 0 }}
                   viewport={{ once: true }}
                   transition={{ delay: index * 0.1 }}
-                  whileHover={{ y: -10, scale: 1.02 }}
+                  whileHover={{ y: -10, scale: 1.03 }}
+                  className="block"
                 >
-                  <Card className="group h-full transition-all duration-500 hover:shadow-2xl bg-white/80 dark:bg-slate-800/80 backdrop-blur-sm border-0 overflow-hidden">
-                    <div className={`h-2 bg-gradient-to-r ${guide.color}`} />
-                    <CardContent className="p-8 text-center">
-                      <motion.div
-                        whileHover={{ scale: 1.2, rotate: 5 }}
-                        className={`flex items-center justify-center w-20 h-20 mx-auto mb-6 bg-gradient-to-r ${guide.color} rounded-2xl shadow-xl`}
+                  <Card className="h-full bg-white/60 backdrop-blur-xl border border-white/60 shadow-lg hover:shadow-xl transition-all">
+                    <CardContent className="p-6">
+                      <div
+                        className={`w-14 h-14 rounded-xl bg-gradient-to-r ${topic.color} flex items-center justify-center mb-4`}
                       >
-                        <guide.icon className="w-10 h-10 text-white" />
-                      </motion.div>
-                      <h3 className="mb-4 text-xl font-bold text-gray-800 dark:text-gray-100">
-                        {guide.title}
-                      </h3>
-                      <p className="mb-6 text-gray-600 dark:text-gray-400 leading-relaxed">
-                        {guide.description}
-                      </p>
-                      <div className="flex justify-between items-center mb-6 text-sm">
-                        <Badge
-                          variant="outline"
-                          className="bg-cyan-50 text-cyan-700 border-cyan-200"
-                        >
-                          ⏱️ {guide.time}
-                        </Badge>
-                        <Badge
-                          variant="outline"
-                          className="bg-emerald-50 text-emerald-700 border-emerald-200"
-                        >
-                          📊 {guide.level}
-                        </Badge>
+                        <topic.icon className="w-7 h-7 text-white" />
                       </div>
-                      <Button
-                        className={`w-full bg-gradient-to-r ${guide.color} hover:shadow-lg transition-all duration-300 text-white border-0`}
-                        onClick={() => handleSupportAction(guide.title)}
+                      <h3 className="text-xl font-bold mb-2 text-gray-800">
+                        {topic.title}
+                      </h3>
+                      <p className="text-gray-600 mb-4 leading-relaxed">
+                        {topic.description}
+                      </p>
+                      <Badge
+                        variant="outline"
+                        className="bg-pink-100 text-pink-700"
                       >
-                        Bắt đầu ngay
-                        <ChevronRight className="w-4 h-4 ml-2" />
-                      </Button>
+                        {topic.articles} bài viết
+                      </Badge>
                     </CardContent>
                   </Card>
-                </motion.div>
+                </motion.a>
               ))}
             </div>
           </motion.section>
 
-          {/* ✅ Enhanced Categories */}
+          {/* VIDEO TUTORIALS */}
           <motion.section
             initial={{ opacity: 0, y: 30 }}
             whileInView={{ opacity: 1, y: 0 }}
@@ -805,169 +838,68 @@ const Help: React.FC = () => {
             className="mb-20"
           >
             <div className="text-center mb-12">
-              <h2 className="text-4xl font-bold mb-4 text-gray-800 dark:text-gray-100">
-                📚 Danh mục hỗ trợ
+              <h2 className="text-4xl font-bold mb-4 text-gray-800">
+                Video Tutorials
               </h2>
-              <p className="text-xl text-gray-600 dark:text-gray-400">
-                Tìm câu trả lời theo từng chủ đề cụ thể
+              <p className="text-xl text-gray-600">
+                Học qua video hướng dẫn chi tiết
               </p>
             </div>
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-              {filteredCategories.map((category, index) => (
+
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+              {videoTutorials.map((video, index) => (
                 <motion.div
-                  key={category.id}
-                  initial={{ opacity: 0, scale: 0.9 }}
+                  key={video.id}
+                  initial={{ opacity: 0, scale: 0.95 }}
                   whileInView={{ opacity: 1, scale: 1 }}
                   viewport={{ once: true }}
                   transition={{ delay: index * 0.1 }}
-                  whileHover={{ y: -10, scale: 1.02 }}
-                  onClick={() => setSelectedCategory(category.id)}
-                  className="cursor-pointer"
+                  whileHover={{ y: -10 }}
                 >
-                  <Card
-                    className={`group h-full transition-all duration-500 hover:shadow-2xl bg-gradient-to-br ${category.bgColor} dark:bg-gradient-to-br ${category.darkBg} backdrop-blur-sm border-0 overflow-hidden`}
-                  >
-                    <CardContent className="p-8">
-                      <div className="flex items-start justify-between mb-6">
-                        <motion.div
-                          whileHover={{ scale: 1.2, rotate: 10 }}
-                          className={`flex items-center justify-center w-16 h-16 bg-gradient-to-r ${category.color} rounded-2xl shadow-lg`}
-                        >
-                          <category.icon className="w-8 h-8 text-white" />
-                        </motion.div>
-                        <Badge
-                          variant="secondary"
-                          className="bg-white/90 text-gray-700 text-lg px-3 py-1"
-                        >
-                          {category.count}
-                        </Badge>
-                      </div>
-
-                      <h3 className="text-xl font-bold mb-3 text-gray-800 dark:text-gray-100">
-                        {category.title}
-                      </h3>
-                      <p className="text-gray-600 dark:text-gray-400 mb-6 leading-relaxed">
-                        {category.description}
-                      </p>
-
-                      <div className="space-y-2 mb-6">
-                        {category.topics
-                          .slice(0, 3)
-                          .map((topic, topicIndex) => (
-                            <div
-                              key={topicIndex}
-                              className="flex items-center text-sm text-gray-600 dark:text-gray-400"
-                            >
-                              <CheckCircle className="w-3 h-3 mr-2 text-emerald-500" />
-                              {topic}
-                            </div>
-                          ))}
-                      </div>
-
-                      <Button
-                        variant="ghost"
-                        size="sm"
-                        className="p-0 text-cyan-600 dark:text-cyan-400 hover:text-cyan-800 dark:hover:text-cyan-300 font-semibold group-hover:translate-x-1 transition-all duration-300"
-                      >
-                        Xem tất cả
-                        <ChevronRight className="w-4 h-4 ml-1" />
-                      </Button>
-                    </CardContent>
-                  </Card>
-                </motion.div>
-              ))}
-            </div>
-          </motion.section>
-
-          {/* ✅ Enhanced Popular Articles */}
-          <motion.section
-            initial={{ opacity: 0, y: 30 }}
-            whileInView={{ opacity: 1, y: 0 }}
-            viewport={{ once: true }}
-            className="mb-20"
-          >
-            <div className="text-center mb-12">
-              <h2 className="text-4xl font-bold mb-4 text-gray-800 dark:text-gray-100">
-                🔥 Bài viết phổ biến
-              </h2>
-              <p className="text-xl text-gray-600 dark:text-gray-400">
-                Những hướng dẫn được đọc nhiều nhất và đánh giá cao
-              </p>
-            </div>
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-              {popularArticles.map((article, index) => (
-                <motion.div
-                  key={index}
-                  initial={{ opacity: 0, y: 20 }}
-                  whileInView={{ opacity: 1, y: 0 }}
-                  viewport={{ once: true }}
-                  transition={{ delay: index * 0.1 }}
-                  whileHover={{ y: -10, scale: 1.02 }}
-                >
-                  <Card className="group h-full transition-all duration-500 hover:shadow-2xl bg-white/80 dark:bg-slate-800/80 backdrop-blur-sm border-0">
-                    <CardContent className="p-6">
-                      <div className="flex items-center gap-4 mb-4">
-                        <div className="text-3xl">{article.thumbnail}</div>
-                        <div className="flex-1">
-                          <h3 className="text-lg font-bold mb-2 group-hover:text-cyan-600 dark:group-hover:text-cyan-400 transition-colors leading-tight text-gray-800 dark:text-gray-100">
-                            {article.title}
-                          </h3>
+                  <Card className="bg-white/60 backdrop-blur-xl border border-white/60 shadow-lg overflow-hidden group">
+                    <div className="relative">
+                      <img
+                        src={video.thumbnail}
+                        alt={video.title}
+                        className="w-full h-56 object-cover"
+                      />
+                      <div className="absolute inset-0 bg-black/40 group-hover:bg-black/60 transition-all flex items-center justify-center">
+                        <div className="w-16 h-16 rounded-full bg-white/90 flex items-center justify-center group-hover:scale-110 transition-transform">
+                          <Play className="w-8 h-8 text-pink-600 ml-1" />
                         </div>
                       </div>
-
-                      <div className="flex flex-wrap items-center gap-3 text-sm text-gray-600 dark:text-gray-400 mb-4">
+                      <Badge className="absolute top-4 right-4 bg-black/70 text-white">
+                        {video.duration}
+                      </Badge>
+                    </div>
+                    <CardContent className="p-6">
+                      <div className="flex items-center gap-2 mb-3">
                         <Badge
                           variant="outline"
-                          className="bg-cyan-50 text-cyan-700 border-cyan-200"
+                          className={`text-xs ${
+                            video.level === "Beginner"
+                              ? "bg-green-100 text-green-700"
+                              : video.level === "Intermediate"
+                                ? "bg-blue-100 text-blue-700"
+                                : "bg-purple-100 text-purple-700"
+                          }`}
                         >
-                          {article.category}
+                          {video.level}
                         </Badge>
-                        <div className="flex items-center gap-1">
-                          <Clock className="w-3 h-3" />
-                          {article.readTime}
-                        </div>
-                        <div className="flex items-center gap-1">
-                          <Calendar className="w-3 h-3" />
-                          {article.lastUpdated}
-                        </div>
-                      </div>
-
-                      <div className="flex flex-wrap gap-2 mb-4">
-                        {article.tags.slice(0, 3).map((tag, tagIndex) => (
-                          <Badge
-                            key={tagIndex}
-                            variant="secondary"
-                            className="text-xs bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-300"
-                          >
-                            {tag}
-                          </Badge>
-                        ))}
-                      </div>
-
-                      <div className="flex items-center justify-between">
-                        <div className="flex items-center gap-4 text-sm">
-                          <div className="flex items-center gap-1 text-emerald-600">
-                            <Users className="w-4 h-4" />
-                            <span className="font-semibold">
-                              {article.views}
-                            </span>
-                          </div>
-                          <div className="flex items-center gap-1 text-amber-600">
-                            <Star className="w-4 h-4 fill-current" />
-                            <span className="font-semibold">
-                              {article.rating}
-                            </span>
-                          </div>
-                        </div>
-
-                        <Button
-                          size="sm"
-                          className="bg-gradient-to-r from-cyan-500 to-blue-600 text-white border-0 hover:shadow-lg"
+                        <Badge
+                          variant="outline"
+                          className="text-xs bg-gray-100 text-gray-700"
                         >
-                          <PlayCircle className="w-4 h-4 mr-2" />
-                          Đọc ngay
-                        </Button>
+                          <Eye className="w-3 h-3 mr-1" />
+                          {video.views} views
+                        </Badge>
                       </div>
+                      <h3 className="text-xl font-bold mb-2 text-gray-800">
+                        {video.title}
+                      </h3>
+                      <p className="text-gray-600 text-sm">
+                        {video.description}
+                      </p>
                     </CardContent>
                   </Card>
                 </motion.div>
@@ -975,50 +907,70 @@ const Help: React.FC = () => {
             </div>
           </motion.section>
 
-          {/* ✅ FAQ Section */}
+          {/* GETTING STARTED */}
           <motion.section
             initial={{ opacity: 0, y: 30 }}
             whileInView={{ opacity: 1, y: 0 }}
             viewport={{ once: true }}
             className="mb-20"
           >
-            <div className="text-center mb-12">
-              <h2 className="text-4xl font-bold mb-4 text-gray-800 dark:text-gray-100">
-                ❓ Câu hỏi thường gặp
-              </h2>
-              <p className="text-xl text-gray-600 dark:text-gray-400">
-                Những câu hỏi được hỏi nhiều nhất và câu trả lời chi tiết
-              </p>
-            </div>
-            <Card className="bg-white/80 dark:bg-slate-800/80 backdrop-blur-sm border-0 shadow-xl">
-              <CardContent className="p-8">
-                <Accordion type="single" collapsible className="space-y-4">
-                  {faqData.map((faq, index) => (
-                    <AccordionItem
-                      key={faq.id}
-                      value={faq.id}
-                      className="border border-gray-200 dark:border-gray-700 rounded-xl px-6 data-[state=open]:shadow-lg transition-all duration-300 bg-white/60 dark:bg-slate-700/60"
+            <Card className="bg-white/60 backdrop-blur-xl border border-white/60 shadow-lg">
+              <CardHeader>
+                <CardTitle className="text-3xl font-bold text-gray-800 flex items-center gap-3">
+                  <Rocket className="w-8 h-8 text-pink-600" />
+                  Getting Started Guide
+                </CardTitle>
+                <p className="text-gray-600 mt-2">
+                  6 bước để bắt đầu với template của bạn
+                </p>
+              </CardHeader>
+              <CardContent>
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                  {gettingStartedGuides.map((guide, index) => (
+                    <motion.div
+                      key={index}
+                      initial={{ opacity: 0, y: 20 }}
+                      whileInView={{ opacity: 1, y: 0 }}
+                      viewport={{ once: true }}
+                      transition={{ delay: index * 0.1 }}
+                      whileHover={{ y: -5 }}
+                      className="p-6 bg-gradient-to-br from-pink-50 to-rose-50 rounded-xl border border-pink-200 cursor-pointer"
                     >
-                      <AccordionTrigger className="text-left hover:no-underline py-6">
-                        <span className="text-lg font-semibold text-gray-800 dark:text-gray-200">
-                          {faq.question}
-                        </span>
-                      </AccordionTrigger>
-                      <AccordionContent className="pb-6">
-                        <div className="prose prose-cyan max-w-none">
-                          <div className="whitespace-pre-line text-gray-600 dark:text-gray-400 leading-relaxed">
-                            {faq.answer}
-                          </div>
-                        </div>
-                      </AccordionContent>
-                    </AccordionItem>
+                      <div className="w-12 h-12 bg-pink-100 rounded-xl flex items-center justify-center mb-4">
+                        <guide.icon className="w-6 h-6 text-pink-600" />
+                      </div>
+                      <div className="flex items-center gap-2 mb-2">
+                        <Badge className="text-xs bg-pink-600 text-white">
+                          Bước {index + 1}
+                        </Badge>
+                        <Badge variant="outline" className="text-xs">
+                          {guide.time}
+                        </Badge>
+                        <Badge
+                          variant="outline"
+                          className={`text-xs ${
+                            guide.difficulty === "Dễ"
+                              ? "bg-green-100 text-green-700"
+                              : "bg-orange-100 text-orange-700"
+                          }`}
+                        >
+                          {guide.difficulty}
+                        </Badge>
+                      </div>
+                      <h3 className="font-bold text-gray-800 mb-2">
+                        {guide.title}
+                      </h3>
+                      <p className="text-sm text-gray-600">
+                        {guide.description}
+                      </p>
+                    </motion.div>
                   ))}
-                </Accordion>
+                </div>
               </CardContent>
             </Card>
           </motion.section>
 
-          {/* ✅ Enhanced Contact Support */}
+          {/* DOCUMENTATION */}
           <motion.section
             initial={{ opacity: 0, y: 30 }}
             whileInView={{ opacity: 1, y: 0 }}
@@ -1026,65 +978,172 @@ const Help: React.FC = () => {
             className="mb-20"
           >
             <div className="text-center mb-12">
-              <h2 className="text-4xl font-bold mb-4 text-gray-800 dark:text-gray-100">
-                🤝 Liên hệ hỗ trợ
+              <h2 className="text-4xl font-bold mb-4 text-gray-800">
+                Documentation
               </h2>
-              <p className="text-xl text-gray-600 dark:text-gray-400 max-w-2xl mx-auto">
-                Không tìm thấy câu trả lời? Đội ngũ chuyên gia của chúng tôi
-                luôn sẵn sàng hỗ trợ bạn với nhiều kênh liên lạc tiện lợi.
+              <p className="text-xl text-gray-600">
+                Tài liệu kỹ thuật chi tiết
               </p>
             </div>
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
-              {contactOptions.map((option, index) => (
+
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+              {docsCategories.map((category, index) => (
                 <motion.div
                   key={index}
                   initial={{ opacity: 0, y: 20 }}
                   whileInView={{ opacity: 1, y: 0 }}
                   viewport={{ once: true }}
                   transition={{ delay: index * 0.1 }}
+                  whileHover={{ y: -10 }}
+                >
+                  <Card className="h-full bg-white/60 backdrop-blur-xl border border-white/60 shadow-lg hover:shadow-xl transition-all">
+                    <CardContent className="p-6">
+                      <category.icon className="w-10 h-10 text-pink-600 mb-4" />
+                      <h3 className="text-xl font-bold mb-2 text-gray-800">
+                        {category.title}
+                      </h3>
+                      <p className="text-gray-600 text-sm mb-4">
+                        {category.description}
+                      </p>
+                      <Separator className="my-4" />
+                      <div className="space-y-2">
+                        {category.articles.map((article, idx) => (
+                          <a
+                            key={idx}
+                            href="#"
+                            className="flex items-center gap-2 text-sm text-gray-700 hover:text-pink-600 transition-colors"
+                          >
+                            <ArrowRight className="w-4 h-4 flex-shrink-0" />
+                            <span>{article}</span>
+                          </a>
+                        ))}
+                      </div>
+                    </CardContent>
+                  </Card>
+                </motion.div>
+              ))}
+            </div>
+          </motion.section>
+
+          {/* FAQ */}
+          <motion.section
+            initial={{ opacity: 0, y: 30 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true }}
+            className="mb-20"
+          >
+            <Card className="bg-white/60 backdrop-blur-xl border border-white/60 shadow-lg">
+              <CardHeader>
+                <CardTitle className="text-3xl font-bold text-gray-800 flex items-center gap-3">
+                  <HelpCircle className="w-8 h-8 text-pink-600" />
+                  Câu hỏi thường gặp
+                </CardTitle>
+                <p className="text-gray-600 mt-2">
+                  Câu trả lời cho những câu hỏi phổ biến nhất
+                </p>
+              </CardHeader>
+              <CardContent>
+                <Tabs defaultValue="Chung" className="w-full">
+                  <TabsList className="grid w-full grid-cols-4 bg-pink-100/50 mb-8">
+                    {faqs.map((category) => (
+                      <TabsTrigger
+                        key={category.category}
+                        value={category.category}
+                      >
+                        {category.category}
+                      </TabsTrigger>
+                    ))}
+                  </TabsList>
+                  {faqs.map((category) => (
+                    <TabsContent
+                      key={category.category}
+                      value={category.category}
+                    >
+                      <Accordion
+                        type="single"
+                        collapsible
+                        className="space-y-4"
+                      >
+                        {category.questions.map((faq, index) => (
+                          <AccordionItem
+                            key={index}
+                            value={`faq-${index}`}
+                            className="border border-pink-200 rounded-xl px-6"
+                          >
+                            <AccordionTrigger className="text-left hover:no-underline py-6">
+                              <span className="text-lg font-semibold text-gray-800">
+                                {faq.q}
+                              </span>
+                            </AccordionTrigger>
+                            <AccordionContent className="pb-6">
+                              <p className="text-gray-600 leading-relaxed">
+                                {faq.a}
+                              </p>
+                            </AccordionContent>
+                          </AccordionItem>
+                        ))}
+                      </Accordion>
+                    </TabsContent>
+                  ))}
+                </Tabs>
+              </CardContent>
+            </Card>
+          </motion.section>
+
+          {/* COMMUNITY */}
+          <motion.section
+            initial={{ opacity: 0, y: 30 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true }}
+            className="mb-20"
+          >
+            <div className="text-center mb-12">
+              <h2 className="text-4xl font-bold mb-4 text-gray-800">
+                Community Resources
+              </h2>
+              <p className="text-xl text-gray-600">
+                Kết nối với cộng đồng developers
+              </p>
+            </div>
+
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+              {communityResources.map((resource, index) => (
+                <motion.div
+                  key={index}
+                  initial={{ opacity: 0, scale: 0.95 }}
+                  whileInView={{ opacity: 1, scale: 1 }}
+                  viewport={{ once: true }}
+                  transition={{ delay: index * 0.1 }}
                   whileHover={{ y: -10, scale: 1.05 }}
                 >
-                  <Card className="group h-full transition-all duration-500 hover:shadow-2xl bg-white/80 dark:bg-slate-800/80 backdrop-blur-sm border-0">
-                    <CardContent className="p-8 text-center">
-                      <motion.div
-                        whileHover={{ scale: 1.2, rotate: 10 }}
-                        className={`flex items-center justify-center w-20 h-20 mx-auto mb-6 bg-gradient-to-r ${option.color} rounded-2xl shadow-xl`}
+                  <Card className="h-full bg-white/60 backdrop-blur-xl border border-white/60 shadow-lg text-center">
+                    <CardContent className="p-6">
+                      <div
+                        className={`w-16 h-16 mx-auto mb-4 rounded-xl bg-gradient-to-r ${resource.color} flex items-center justify-center`}
                       >
-                        <option.icon className="w-10 h-10 text-white" />
-                      </motion.div>
-                      <h3 className="mb-3 text-xl font-bold text-gray-800 dark:text-gray-100">
-                        {option.title}
+                        <resource.icon className="w-8 h-8 text-white" />
+                      </div>
+                      <h3 className="text-xl font-bold mb-2 text-gray-800">
+                        {resource.title}
                       </h3>
-                      <p className="mb-4 text-gray-600 dark:text-gray-400">
-                        {option.description}
+                      <p className="text-gray-600 text-sm mb-4">
+                        {resource.description}
                       </p>
-
-                      <div className="space-y-2 mb-6 text-sm">
-                        <div className="flex items-center justify-center gap-2">
-                          <Clock className="w-4 h-4 text-cyan-500" />
-                          <span className="text-gray-600 dark:text-gray-400">
-                            Phản hồi {option.time}
+                      <div className="space-y-2">
+                        <div className="flex items-center justify-center gap-2 text-sm">
+                          <Users className="w-4 h-4 text-pink-600" />
+                          <span className="font-semibold">
+                            {resource.members}
                           </span>
                         </div>
-                        <div className="flex items-center justify-center gap-2">
-                          <Users className="w-4 h-4 text-emerald-500" />
-                          <span className="text-gray-600 dark:text-gray-400">
-                            {option.availability}
-                          </span>
-                        </div>
-                        <div className="flex items-center justify-center gap-2">
-                          <Star className="w-4 h-4 text-amber-500" />
-                          <span className="text-gray-600 dark:text-gray-400">
-                            {option.satisfaction} hài lòng
-                          </span>
+                        <div className="text-xs text-gray-500">
+                          {resource.posts}
                         </div>
                       </div>
-
                       <Button
-                        className={`w-full bg-gradient-to-r ${option.color} hover:shadow-lg transition-all duration-300 text-white border-0`}
-                        onClick={() => handleSupportAction(option.action)}
+                        className={`w-full mt-4 bg-gradient-to-r ${softPinkTheme.primaryGradient} text-white`}
                       >
-                        {option.action}
+                        Tham gia ngay
                         <ArrowRight className="w-4 h-4 ml-2" />
                       </Button>
                     </CardContent>
@@ -1092,74 +1151,6 @@ const Help: React.FC = () => {
                 </motion.div>
               ))}
             </div>
-          </motion.section>
-
-          {/* ✅ Enhanced System Status */}
-          <motion.section
-            initial={{ opacity: 0, y: 30 }}
-            whileInView={{ opacity: 1, y: 0 }}
-            viewport={{ once: true }}
-          >
-            <Card className="bg-gradient-to-br from-emerald-50/90 via-teal-50/90 to-cyan-50/90 dark:from-emerald-900/20 dark:via-teal-900/20 dark:to-cyan-900/20 border-0 shadow-2xl">
-              <CardContent className="p-10">
-                <div className="text-center mb-10">
-                  <motion.div
-                    animate={{ rotate: [0, 360] }}
-                    transition={{
-                      duration: 20,
-                      repeat: Infinity,
-                      ease: "linear",
-                    }}
-                    className="flex items-center justify-center w-20 h-20 mx-auto mb-6 bg-gradient-to-r from-emerald-500 to-teal-600 rounded-full shadow-2xl"
-                  >
-                    <CheckCircle className="w-10 h-10 text-white" />
-                  </motion.div>
-                  <h3 className="mb-4 text-3xl font-bold text-emerald-800 dark:text-emerald-200">
-                    🟢 Tất cả hệ thống hoạt động bình thường
-                  </h3>
-                  <p className="text-emerald-700 dark:text-emerald-300 text-lg mb-6">
-                    Mọi dịch vụ đang vận hành ổn định với hiệu suất cao. Thời
-                    gian phản hồi trung bình:
-                    <span className="font-bold"> 50ms</span>
-                  </p>
-                </div>
-
-                <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-4">
-                  {systemStatus.map((system, index) => (
-                    <motion.div
-                      key={index}
-                      initial={{ opacity: 0, scale: 0.8 }}
-                      whileInView={{ opacity: 1, scale: 1 }}
-                      viewport={{ once: true }}
-                      transition={{ delay: index * 0.1 }}
-                      className="text-center bg-white/70 dark:bg-gray-800/70 backdrop-blur-sm rounded-xl p-4 shadow-md"
-                    >
-                      <div className="flex items-center justify-center mb-3">
-                        <div className="w-3 h-3 bg-emerald-500 rounded-full animate-pulse shadow-md"></div>
-                      </div>
-                      <div className="text-sm font-semibold text-gray-800 dark:text-gray-200 mb-1">
-                        {system.name}
-                      </div>
-                      <div className="text-xs text-emerald-600 dark:text-emerald-400 font-medium">
-                        {system.uptime} uptime
-                      </div>
-                    </motion.div>
-                  ))}
-                </div>
-
-                <div className="mt-8 text-center">
-                  <Button
-                    variant="outline"
-                    className="bg-white/70 hover:bg-white/90 border-emerald-300 text-emerald-700 hover:text-emerald-800"
-                    onClick={() => handleSupportAction("Trạng thái hệ thống")}
-                  >
-                    <Globe className="w-4 h-4 mr-2" />
-                    Xem trạng thái chi tiết
-                    <ExternalLink className="w-4 h-4 ml-2" />
-                  </Button>
-                </div>
-              </CardContent>
-            </Card>
           </motion.section>
         </div>
       </div>

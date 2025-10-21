@@ -54,57 +54,33 @@ interface ChatbotProps {
   onToggle: () => void;
 }
 
-// 🎨 SOFTPINKTHEME COLOR SCHEME - GIỐNG TEMPLATES
-const softPinkTheme = {
-  // Primary gradients - Pink-Orange-Yellow
-  primaryGradient: "from-pink-400 via-orange-400 to-yellow-400",
-  secondaryGradient: "from-pink-500 via-orange-500 to-yellow-500",
-  accentGradient: "from-orange-500 via-pink-500 to-yellow-500",
+// 🎨 VIBRANT THEME
+const vibrantTheme = {
+  mainBackground: "from-pink-100 via-orange-100 to-yellow-100",
+  glassBackground: "from-white/90 via-pink-50/80 to-orange-50/70",
+  sectionBackground: "from-pink-100/90 via-orange-100/80 to-yellow-100/90",
+  buttonGradient: "from-pink-500 via-orange-500 to-yellow-500",
+  buttonHover: "from-pink-600 via-orange-600 to-yellow-600",
+  primaryText: "from-pink-700 via-orange-700 to-yellow-700",
+  border: "border-pink-300/50",
+  glow: "shadow-pink-400/60 shadow-2xl",
+  softGlow: "shadow-pink-300/50 shadow-lg",
 
-  // Background tones
-  pageBackground: "from-pink-50 via-blue-50 to-yellow-50",
-  sectionBackground: "from-pink-50/80 via-blue-50/60 to-yellow-50/80",
-
-  // Glass & Cards
-  glassCard: "from-white/95 via-pink-50/60 to-blue-50/40 backdrop-blur-xl",
-  neoCard: "bg-gradient-to-br from-white/95 via-pink-50/60 to-blue-50/40",
-  floatingCard: "from-white/90 via-pink-50/60 to-blue-50/40",
-
-  // Text colors
-  heroText: "from-pink-600 via-blue-600 to-orange-600",
-  primaryText: "from-pink-600 via-blue-600 to-orange-600",
-  accentText: "from-orange-500 via-pink-500 to-yellow-500",
-
-  // Effects
-  glow: "shadow-pink-200/60 shadow-2xl",
-  neonGlow: "shadow-rose-300/50 shadow-xl",
-  softGlow: "shadow-pink-200/40 shadow-lg",
-
-  // Dynamic colors for components
   dynamicColors: {
     user: {
-      gradient: "from-pink-400 via-orange-400 to-yellow-400",
-      hoverGradient: "from-pink-500 via-orange-500 to-yellow-500",
-      background: "from-pink-50/90 to-orange-50/70",
-      border: "border-pink-200",
-      text: "text-pink-600",
-      glow: "shadow-pink-400/30",
+      gradient: "from-pink-500 via-orange-500 to-yellow-500",
+      iconBg: "from-pink-200 to-orange-300",
+      iconColor: "text-pink-700",
     },
     bot: {
-      gradient: "from-blue-400 via-cyan-500 to-blue-500",
-      hoverGradient: "from-blue-500 via-cyan-600 to-blue-600",
-      background: "from-blue-50/90 to-cyan-50/70",
-      border: "border-blue-200",
-      text: "text-blue-600",
-      glow: "shadow-blue-400/30",
+      gradient: "from-blue-500 via-cyan-600 to-blue-600",
+      iconBg: "from-blue-200 to-cyan-300",
+      iconColor: "text-blue-700",
     },
     admin: {
-      gradient: "from-emerald-400 via-green-500 to-emerald-500",
-      hoverGradient: "from-emerald-500 via-green-600 to-emerald-600",
-      background: "from-emerald-50/90 to-green-50/70",
-      border: "border-emerald-200",
-      text: "text-emerald-600",
-      glow: "shadow-emerald-400/30",
+      gradient: "from-emerald-500 via-green-600 to-emerald-600",
+      iconBg: "from-green-200 to-emerald-300",
+      iconColor: "text-emerald-700",
     },
   },
 };
@@ -120,7 +96,6 @@ const Chatbot: React.FC<ChatbotProps> = ({ isOpen, onToggle }) => {
   const [showQuickReplies, setShowQuickReplies] = useState(true);
   const messagesEndRef = useRef<HTMLDivElement>(null);
 
-  // Responsive detection
   const [windowSize, setWindowSize] = useState({
     width: typeof window !== "undefined" ? window.innerWidth : 1024,
     height: typeof window !== "undefined" ? window.innerHeight : 768,
@@ -141,49 +116,61 @@ const Chatbot: React.FC<ChatbotProps> = ({ isOpen, onToggle }) => {
   const isMobile = windowSize.width < 768;
   const isTablet = windowSize.width >= 768 && windowSize.width < 1024;
 
-  // 🎨 SOFTPINKTHEME Quick Replies
+  // 🎨 IMPROVED Quick Replies - ĐỒNG ĐỀU VỚI ICON ĐẸP
   const quickReplies = [
     {
       id: 1,
       text: "Bảng giá",
       icon: DollarSign,
       detail: "Xem giá templates từ 99k-999k",
-      color: softPinkTheme.dynamicColors.user.gradient, // Pink-orange-yellow
+      iconBg: "from-pink-200 to-pink-300",
+      iconColor: "text-pink-700",
+      borderColor: "border-pink-300",
     },
     {
       id: 2,
       text: "Templates",
       icon: Sparkles,
-      detail: "2,500+ mẫu website chất lượng cao",
-      color: "from-blue-400 via-cyan-500 to-blue-500", // Blue variation
+      detail: "2,500+ mẫu chất lượng",
+      iconBg: "from-blue-200 to-cyan-300",
+      iconColor: "text-blue-700",
+      borderColor: "border-blue-300",
     },
     {
       id: 3,
       text: "Thanh toán",
       icon: Crown,
       detail: "VNPay, MoMo, Banking an toàn",
-      color: "from-yellow-400 via-orange-500 to-yellow-500", // Yellow variation
+      iconBg: "from-yellow-200 to-yellow-300",
+      iconColor: "text-yellow-700",
+      borderColor: "border-yellow-300",
     },
     {
       id: 4,
       text: "Download",
       icon: Download,
       detail: "Cách tải file sau khi mua",
-      color: "from-pink-500 via-rose-400 to-pink-400", // Pink variation
+      iconBg: "from-rose-200 to-rose-300",
+      iconColor: "text-rose-700",
+      borderColor: "border-rose-300",
     },
     {
       id: 5,
       text: "Hỗ trợ",
       icon: Settings,
       detail: "Cài đặt & customization",
-      color: "from-orange-400 via-yellow-400 to-orange-400", // Orange variation
+      iconBg: "from-orange-200 to-orange-300",
+      iconColor: "text-orange-700",
+      borderColor: "border-orange-300",
     },
     {
       id: 6,
       text: "Chat Admin",
       icon: UserCheck,
       detail: "Kết nối trực tiếp với admin",
-      color: softPinkTheme.dynamicColors.admin.gradient, // Admin green
+      iconBg: "from-green-200 to-emerald-300",
+      iconColor: "text-emerald-700",
+      borderColor: "border-emerald-300",
     },
   ];
 
@@ -195,14 +182,12 @@ const Chatbot: React.FC<ChatbotProps> = ({ isOpen, onToggle }) => {
     scrollToBottom();
   }, [messages]);
 
-  // Initialize chat session
   useEffect(() => {
     if (isOpen && user) {
       initializeChatSession();
     }
   }, [isOpen, user]);
 
-  // Real-time subscription
   useEffect(() => {
     if (chatSession) {
       const subscription = supabase
@@ -559,7 +544,6 @@ Admin sẽ join chat ngay! 👨‍💼✨`;
     }
   };
 
-  // Compact sizing - Optimized for mobile
   const getChatDimensions = () => {
     if (isMobile) {
       return {
@@ -590,7 +574,7 @@ Admin sẽ join chat ngay! 👨‍💼✨`;
 
   return (
     <>
-      {/* 🎨 SOFTPINKTHEME Chat Toggle Button */}
+      {/* Toggle Button */}
       <motion.div
         className="fixed z-[100]"
         style={{
@@ -600,34 +584,26 @@ Admin sẽ join chat ngay! 👨‍💼✨`;
         whileHover={{ scale: 1.1 }}
         whileTap={{ scale: 0.95 }}
       >
-        {/* 🎨 SOFTPINKTHEME Glow effect */}
         <div
-          className={`absolute inset-0 rounded-full opacity-60 bg-gradient-to-r ${softPinkTheme.primaryGradient} blur-xl animate-pulse`}
+          className={`absolute inset-0 rounded-full opacity-60 bg-gradient-to-r ${vibrantTheme.buttonGradient} blur-xl animate-pulse`}
         />
 
         <Button
           onClick={onToggle}
           className={cn(
-            `relative rounded-full ${softPinkTheme.glow} bg-gradient-to-r ${softPinkTheme.primaryGradient} hover:bg-gradient-to-r hover:${softPinkTheme.secondaryGradient} border-2 border-white/30 overflow-hidden group transition-all duration-300`,
+            `relative rounded-full ${vibrantTheme.glow} bg-gradient-to-r ${vibrantTheme.buttonGradient} hover:bg-gradient-to-r hover:${vibrantTheme.buttonHover} border-2 border-white shadow-xl overflow-hidden group transition-all duration-300`,
             isMobile ? "w-14 h-14" : "w-16 h-16",
           )}
           size="icon"
         >
-          {/* 🎨 SOFTPINKTHEME Background animation */}
-          <div
-            className={`absolute inset-0 transition-opacity duration-300 opacity-0 bg-gradient-to-r ${softPinkTheme.accentGradient} group-hover:opacity-100`}
-          />
-
-          {/* Admin connection indicator */}
           {isConnectedToAdmin && (
-            <div className="absolute flex items-center justify-center w-6 h-6 bg-emerald-400 rounded-full -top-1 -right-1 animate-bounce shadow-lg border-2 border-white">
+            <div className="absolute flex items-center justify-center w-6 h-6 bg-emerald-500 rounded-full -top-1 -right-1 animate-bounce shadow-xl border-2 border-white">
               <UserCheck className="w-3 h-3 text-white" />
             </div>
           )}
 
-          {/* New message indicator */}
-          <div className="absolute flex items-center justify-center w-5 h-5 bg-yellow-400 rounded-full -top-1 -left-1 animate-pulse shadow-lg border-2 border-white">
-            <Gift className="w-2.5 h-2.5 text-orange-600" />
+          <div className="absolute flex items-center justify-center w-5 h-5 bg-yellow-500 rounded-full -top-1 -left-1 animate-pulse shadow-xl border-2 border-white">
+            <Gift className="w-2.5 h-2.5 text-white" />
           </div>
 
           <AnimatePresence mode="wait">
@@ -666,14 +642,13 @@ Admin sẽ join chat ngay! 👨‍💼✨`;
             )}
           </AnimatePresence>
 
-          {/* Ripple effect */}
           <div className="absolute inset-0 rounded-full">
             <div className="absolute inset-0 transition-all duration-500 scale-0 rounded-full bg-white/30 group-hover:scale-100 group-hover:opacity-0" />
           </div>
         </Button>
       </motion.div>
 
-      {/* 🎨 SOFTPINKTHEME Chat Window */}
+      {/* Chat Window */}
       <AnimatePresence>
         {isOpen && (
           <motion.div
@@ -690,36 +665,44 @@ Admin sẽ join chat ngay! 👨‍💼✨`;
             }}
           >
             <Card
-              className={`flex flex-col h-full border-0 ${softPinkTheme.glow} overflow-hidden relative`}
+              className={`flex flex-col h-full border-0 ${vibrantTheme.glow} overflow-hidden relative`}
             >
-              {/* 🎨 SOFTPINKTHEME Background gradients */}
               <div
-                className={`absolute inset-0 bg-gradient-to-br ${softPinkTheme.primaryGradient}`}
+                className={`absolute inset-0 bg-gradient-to-br ${vibrantTheme.mainBackground}`}
               />
-              <div className="absolute inset-0 bg-gradient-to-t from-pink-500/20 via-orange-500/10 to-transparent" />
+              <div className="absolute inset-0 bg-gradient-to-t from-orange-200/30 via-transparent to-transparent" />
 
-              {/* 🎨 SOFTPINKTHEME Decorative elements */}
-              <div className="absolute top-4 right-4 w-12 h-12 bg-yellow-300/20 rounded-full blur-xl animate-pulse" />
-              <div className="absolute bottom-6 left-4 w-8 h-8 bg-pink-300/20 rounded-full blur-lg animate-pulse" />
-              <div className="absolute top-1/2 right-2 w-6 h-6 bg-orange-300/20 rounded-full blur-md animate-pulse" />
+              <div className="absolute top-4 right-4 w-16 h-16 bg-pink-300/40 rounded-full blur-2xl animate-pulse" />
+              <div className="absolute bottom-6 left-4 w-12 h-12 bg-orange-300/40 rounded-full blur-xl animate-pulse" />
+              <div className="absolute top-1/2 right-2 w-8 h-8 bg-yellow-300/40 rounded-full blur-lg animate-pulse" />
 
               {/* Header */}
-              <CardHeader className="flex-shrink-0 p-4 text-white relative z-10">
+              <CardHeader className="flex-shrink-0 p-4 relative z-10">
                 <div className="flex items-center justify-between">
                   <div className="flex items-center gap-3">
-                    <div
-                      className={`flex items-center justify-center w-10 h-10 rounded-full bg-white/20 backdrop-blur-md ${softPinkTheme.softGlow} border border-white/30`}
+                    <motion.div
+                      animate={{
+                        scale: [1, 1.05, 1],
+                        rotate: [0, 5, -5, 0],
+                      }}
+                      transition={{
+                        duration: 3,
+                        repeat: Infinity,
+                        ease: "easeInOut",
+                      }}
+                      className={`flex items-center justify-center w-12 h-12 rounded-2xl bg-gradient-to-br ${isConnectedToAdmin ? vibrantTheme.dynamicColors.admin.iconBg : vibrantTheme.dynamicColors.bot.iconBg} ${vibrantTheme.softGlow} shadow-lg border-2 border-white/50`}
                     >
                       {isConnectedToAdmin ? (
-                        <Headphones className="w-5 h-5" />
+                        <Headphones className="w-6 h-6 text-emerald-700" />
                       ) : (
-                        <Bot className="w-5 h-5" />
+                        <Bot className="w-6 h-6 text-blue-700" />
                       )}
-                    </div>
+                    </motion.div>
                     <div>
                       <CardTitle
                         className={cn(
-                          "font-bold drop-shadow-lg text-white",
+                          "font-bold text-transparent bg-gradient-to-r bg-clip-text",
+                          vibrantTheme.primaryText,
                           isMobile ? "text-base" : "text-lg",
                         )}
                       >
@@ -728,13 +711,13 @@ Admin sẽ join chat ngay! 👨‍💼✨`;
                           : "🤖 AI Assistant"}
                       </CardTitle>
                       <div className="flex items-center gap-2">
-                        <p className="text-sm opacity-90 drop-shadow-md">
+                        <p className="text-sm font-medium text-slate-700">
                           {isConnectedToAdmin
                             ? "⚡ Admin đang online"
                             : "💬 AI hỗ trợ 24/7"}
                         </p>
                         {isConnectedToAdmin && (
-                          <div className="w-2.5 h-2.5 bg-emerald-300 rounded-full animate-pulse shadow-lg" />
+                          <div className="w-2.5 h-2.5 bg-emerald-500 rounded-full animate-pulse shadow-md" />
                         )}
                       </div>
                     </div>
@@ -745,7 +728,7 @@ Admin sẽ join chat ngay! 👨‍💼✨`;
                         variant="ghost"
                         size="sm"
                         onClick={() => setIsMinimized(!isMinimized)}
-                        className="p-0 text-white w-8 h-8 hover:bg-white/20 rounded-full backdrop-blur-md"
+                        className="p-0 text-slate-700 w-8 h-8 hover:bg-orange-200 rounded-full"
                       >
                         {isMinimized ? (
                           <Maximize2 className="w-4 h-4" />
@@ -758,7 +741,7 @@ Admin sẽ join chat ngay! 👨‍💼✨`;
                       variant="ghost"
                       size="sm"
                       onClick={onToggle}
-                      className="p-0 text-white w-8 h-8 hover:bg-white/20 rounded-full backdrop-blur-md"
+                      className="p-0 text-slate-700 w-8 h-8 hover:bg-orange-200 rounded-full"
                     >
                       <X className="w-4 h-4" />
                     </Button>
@@ -776,7 +759,7 @@ Admin sẽ join chat ngay! 👨‍💼✨`;
                     className="flex flex-col flex-1 min-h-0 relative z-10"
                   >
                     <CardContent
-                      className={`flex flex-col flex-1 min-h-0 p-0 bg-gradient-to-br ${softPinkTheme.glassCard}`}
+                      className={`flex flex-col flex-1 min-h-0 p-0 bg-gradient-to-br ${vibrantTheme.glassBackground}`}
                     >
                       {/* Messages Area */}
                       <div className="flex-1 overflow-hidden">
@@ -785,7 +768,7 @@ Admin sẽ join chat ngay! 👨‍💼✨`;
                           style={{
                             scrollbarWidth: "thin",
                             scrollbarColor:
-                              "rgba(236, 72, 153, 0.3) transparent",
+                              "rgba(236, 72, 153, 0.4) transparent",
                           }}
                         >
                           <style>{`
@@ -796,12 +779,12 @@ Admin sẽ join chat ngay! 👨‍💼✨`;
                               background: transparent;
                             }
                             div::-webkit-scrollbar-thumb {
-                              background-color: rgba(236, 72, 153, 0.3);
+                              background-color: rgba(236, 72, 153, 0.4);
                               border-radius: 3px;
                               border: none;
                             }
                             div::-webkit-scrollbar-thumb:hover {
-                              background-color: rgba(236, 72, 153, 0.5);
+                              background-color: rgba(236, 72, 153, 0.6);
                             }
                           `}</style>
 
@@ -826,38 +809,40 @@ Admin sẽ join chat ngay! 👨‍💼✨`;
                                     : "flex-row",
                                 )}
                               >
-                                <div
+                                <motion.div
+                                  whileHover={{ scale: 1.1, rotate: 360 }}
+                                  transition={{ duration: 0.5 }}
                                   className={cn(
-                                    "w-8 h-8 rounded-full flex items-center justify-center flex-shrink-0 shadow-lg",
+                                    "w-10 h-10 rounded-xl flex items-center justify-center flex-shrink-0 shadow-lg border-2 border-white/50",
                                     message.sender === "user"
-                                      ? `bg-gradient-to-r ${softPinkTheme.dynamicColors.user.gradient} text-white`
+                                      ? `bg-gradient-to-br ${vibrantTheme.dynamicColors.user.iconBg}`
                                       : message.sender === "admin"
-                                        ? `bg-gradient-to-r ${softPinkTheme.dynamicColors.admin.gradient} text-white`
-                                        : `bg-gradient-to-r ${softPinkTheme.dynamicColors.bot.gradient} text-white`,
+                                        ? `bg-gradient-to-br ${vibrantTheme.dynamicColors.admin.iconBg}`
+                                        : `bg-gradient-to-br ${vibrantTheme.dynamicColors.bot.iconBg}`,
                                   )}
                                 >
                                   {message.sender === "user" ? (
-                                    <User className="w-4 h-4" />
+                                    <User className="w-5 h-5 text-pink-700" />
                                   ) : message.sender === "admin" ? (
-                                    <Headphones className="w-4 h-4" />
+                                    <Headphones className="w-5 h-5 text-emerald-700" />
                                   ) : (
-                                    <Bot className="w-4 h-4" />
+                                    <Bot className="w-5 h-5 text-blue-700" />
                                   )}
-                                </div>
+                                </motion.div>
                                 <div
                                   className={cn(
-                                    "px-4 py-3 rounded-2xl shadow-lg backdrop-blur-md",
+                                    "px-4 py-3 rounded-2xl shadow-lg backdrop-blur-sm border-2",
                                     message.sender === "user"
-                                      ? `bg-gradient-to-r ${softPinkTheme.dynamicColors.user.gradient} text-white`
+                                      ? `bg-gradient-to-r ${vibrantTheme.dynamicColors.user.gradient} text-white border-white/30`
                                       : message.sender === "admin"
-                                        ? `bg-gradient-to-r ${softPinkTheme.dynamicColors.admin.gradient} text-white`
-                                        : `bg-white/95 text-gray-800 border border-gray-200/50`,
+                                        ? `bg-gradient-to-r ${vibrantTheme.dynamicColors.admin.gradient} text-white border-white/30`
+                                        : `bg-white/95 text-gray-800 border-pink-200`,
                                   )}
                                 >
-                                  <div className="text-sm leading-relaxed whitespace-pre-wrap">
+                                  <div className="text-sm leading-relaxed whitespace-pre-wrap font-medium">
                                     {message.text}
                                   </div>
-                                  <p className="mt-2 text-xs opacity-75">
+                                  <p className="mt-2 text-xs opacity-75 font-medium">
                                     {message.timestamp.toLocaleTimeString(
                                       "vi-VN",
                                       {
@@ -871,7 +856,6 @@ Admin sẽ join chat ngay! 👨‍💼✨`;
                             </motion.div>
                           ))}
 
-                          {/* 🎨 SOFTPINKTHEME Typing indicator */}
                           {isTyping && (
                             <motion.div
                               initial={{ opacity: 0, y: 15 }}
@@ -880,16 +864,16 @@ Admin sẽ join chat ngay! 👨‍💼✨`;
                             >
                               <div className="flex items-start gap-3">
                                 <div
-                                  className={`flex items-center justify-center w-8 h-8 rounded-full bg-gradient-to-r ${softPinkTheme.dynamicColors.bot.gradient} text-white shadow-lg`}
+                                  className={`flex items-center justify-center w-10 h-10 rounded-xl bg-gradient-to-br ${vibrantTheme.dynamicColors.bot.iconBg} shadow-lg border-2 border-white/50`}
                                 >
-                                  <Bot className="w-4 h-4" />
+                                  <Bot className="w-5 h-5 text-blue-700" />
                                 </div>
-                                <div className="px-4 py-3 bg-white/95 rounded-2xl shadow-lg backdrop-blur-md border border-gray-200/50">
+                                <div className="px-4 py-3 bg-white/95 rounded-2xl shadow-lg backdrop-blur-sm border-2 border-pink-200">
                                   <div className="flex gap-1.5">
                                     {[0, 1, 2].map((i) => (
                                       <div
                                         key={i}
-                                        className="w-2 h-2 bg-pink-400 rounded-full animate-bounce"
+                                        className="w-2.5 h-2.5 bg-pink-500 rounded-full animate-bounce"
                                         style={{
                                           animationDelay: `${i * 150}ms`,
                                         }}
@@ -904,56 +888,75 @@ Admin sẽ join chat ngay! 👨‍💼✨`;
                         </div>
                       </div>
 
-                      {/* 🎨 SOFTPINKTHEME Quick replies */}
+                      {/* ✅ IMPROVED Quick Replies - ĐỒNG ĐỀU */}
                       {showQuickReplies && messages.length <= 1 && (
                         <motion.div
                           initial={{ opacity: 0, y: 20 }}
                           animate={{ opacity: 1, y: 0 }}
                           transition={{ delay: 0.5 }}
-                          className={`flex-shrink-0 p-4 bg-gradient-to-r ${softPinkTheme.sectionBackground} border-t border-pink-200/50`}
+                          className={`flex-shrink-0 p-4 bg-gradient-to-r ${vibrantTheme.sectionBackground} ${vibrantTheme.border} border-t-2`}
                         >
                           <div className="flex items-center gap-2 mb-3">
-                            <Zap className="w-4 h-4 text-pink-600" />
-                            <p className="text-sm font-semibold text-gray-800">
-                              Câu hỏi phổ biến:
+                            <Zap className="w-5 h-5 text-orange-600" />
+                            <p className="text-sm font-bold text-gray-800">
+                              ⚡ Câu hỏi phổ biến:
                             </p>
                           </div>
-                          <div className="grid grid-cols-2 gap-2">
+
+                          {/* ✅ GRID ĐỒNG ĐỀU 2 COLUMNS */}
+                          <div className="grid grid-cols-2 gap-3">
                             {quickReplies.map((reply) => (
-                              <Button
+                              <motion.div
                                 key={reply.id}
-                                variant="outline"
-                                size="sm"
-                                onClick={() => handleQuickReply(reply.text)}
-                                className={`justify-start h-auto p-3 text-left bg-white/90 hover:bg-white hover:${softPinkTheme.softGlow} transition-all duration-200 border-pink-200/50 hover:border-pink-300`}
+                                whileHover={{ scale: 1.03 }}
+                                whileTap={{ scale: 0.97 }}
                               >
-                                <div className="w-full">
-                                  <div className="flex items-center gap-2 mb-1">
-                                    <div
-                                      className={cn(
-                                        "w-5 h-5 rounded-lg flex items-center justify-center bg-gradient-to-r",
-                                        reply.color,
-                                      )}
-                                    >
-                                      <reply.icon className="w-3 h-3 text-white" />
+                                <Button
+                                  variant="outline"
+                                  size="sm"
+                                  onClick={() => handleQuickReply(reply.text)}
+                                  className={cn(
+                                    "w-full h-auto p-3 text-left bg-white hover:bg-white hover:shadow-lg transition-all duration-200 border-2 shadow-md rounded-xl",
+                                    reply.borderColor,
+                                    `hover:${reply.borderColor}`,
+                                  )}
+                                >
+                                  <div className="flex flex-col gap-2 w-full">
+                                    <div className="flex items-center gap-2">
+                                      {/* ✅ ICON ĐỒNG ĐỀU */}
+                                      <motion.div
+                                        whileHover={{ rotate: 360 }}
+                                        transition={{ duration: 0.5 }}
+                                        className={cn(
+                                          "w-8 h-8 rounded-lg flex items-center justify-center bg-gradient-to-br shadow-sm flex-shrink-0",
+                                          reply.iconBg,
+                                        )}
+                                      >
+                                        <reply.icon
+                                          className={cn(
+                                            "w-4 h-4",
+                                            reply.iconColor,
+                                          )}
+                                        />
+                                      </motion.div>
+                                      <span className="text-sm font-bold text-gray-800 leading-tight">
+                                        {reply.text}
+                                      </span>
                                     </div>
-                                    <span className="text-sm font-medium text-gray-800 truncate">
-                                      {reply.text}
-                                    </span>
+                                    <p className="text-xs text-gray-600 leading-tight font-medium pl-0">
+                                      {reply.detail}
+                                    </p>
                                   </div>
-                                  <p className="text-xs text-gray-600 line-clamp-2 leading-tight">
-                                    {reply.detail}
-                                  </p>
-                                </div>
-                              </Button>
+                                </Button>
+                              </motion.div>
                             ))}
                           </div>
                         </motion.div>
                       )}
 
-                      {/* 🎨 SOFTPINKTHEME Input area */}
+                      {/* Input area */}
                       <div
-                        className={`flex-shrink-0 p-4 bg-gradient-to-r ${softPinkTheme.sectionBackground} border-t border-pink-200/50`}
+                        className={`flex-shrink-0 p-4 bg-gradient-to-r ${vibrantTheme.sectionBackground} ${vibrantTheme.border} border-t-2`}
                       >
                         <div className="flex gap-3 mb-3">
                           <div className="relative flex-1">
@@ -966,7 +969,7 @@ Admin sẽ join chat ngay! 👨‍💼✨`;
                                   ? "💬 Tin nhắn tới admin..."
                                   : "💭 Nhập câu hỏi của bạn..."
                               }
-                              className="text-sm bg-white/95 border-pink-300/50 focus:border-pink-400 focus:ring-pink-400/50 rounded-xl"
+                              className="text-sm font-medium bg-white border-2 border-pink-300 focus:border-orange-400 focus:ring-orange-400/50 rounded-xl shadow-sm"
                               disabled={isTyping}
                             />
                           </div>
@@ -974,7 +977,7 @@ Admin sẽ join chat ngay! 👨‍💼✨`;
                             onClick={handleSendMessage}
                             disabled={!inputValue.trim() || isTyping}
                             size="sm"
-                            className={`px-4 bg-gradient-to-r ${softPinkTheme.primaryGradient} hover:bg-gradient-to-r hover:${softPinkTheme.secondaryGradient} ${softPinkTheme.softGlow} rounded-xl`}
+                            className={`px-4 bg-gradient-to-r ${vibrantTheme.buttonGradient} hover:bg-gradient-to-r hover:${vibrantTheme.buttonHover} ${vibrantTheme.softGlow} rounded-xl text-white shadow-lg border-2 border-white/50`}
                           >
                             {isTyping ? (
                               <Loader2 className="w-4 h-4 animate-spin" />
@@ -987,31 +990,30 @@ Admin sẽ join chat ngay! 👨‍💼✨`;
                         {/* Footer Info */}
                         <div className="space-y-2">
                           {!isConnectedToAdmin && (
-                            <div className="flex items-center gap-2 text-xs text-gray-700">
-                              <Shield className="w-3 h-3 text-green-500 flex-shrink-0" />
+                            <div className="flex items-center gap-2 text-xs font-medium text-gray-800">
+                              <Shield className="w-3.5 h-3.5 text-green-600 flex-shrink-0" />
                               <span className="line-clamp-1">
                                 💡 Click "Chat Admin" để được hỗ trợ trực tiếp
-                                bởi chuyên gia
                               </span>
                             </div>
                           )}
 
-                          <div className="flex items-center justify-between text-xs text-gray-600">
+                          <div className="flex items-center justify-between text-xs font-medium text-gray-700">
                             <div className="flex items-center gap-3">
                               <div className="flex items-center gap-1">
-                                <Clock className="w-3 h-3 flex-shrink-0" />
+                                <Clock className="w-3.5 h-3.5 flex-shrink-0 text-pink-600" />
                                 <span>24/7</span>
                               </div>
                               <div className="flex items-center gap-1">
-                                <Star className="w-3 h-3 text-yellow-500 flex-shrink-0" />
+                                <Star className="w-3.5 h-3.5 text-yellow-600 fill-current flex-shrink-0" />
                                 <span>4.9★</span>
                               </div>
                               <div className="flex items-center gap-1">
-                                <Heart className="w-3 h-3 text-pink-500 flex-shrink-0" />
+                                <Heart className="w-3.5 h-3.5 text-pink-600 fill-current flex-shrink-0" />
                                 <span>50K+</span>
                               </div>
                             </div>
-                            <span className="text-pink-600 font-semibold text-xs">
+                            <span className="text-pink-700 font-bold text-xs">
                               Template Market AI
                             </span>
                           </div>

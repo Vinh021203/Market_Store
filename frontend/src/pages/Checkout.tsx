@@ -627,14 +627,167 @@ const Checkout: React.FC = () => {
     return (
       <>
         <Helmet>
-          <title>
-            🔒 Thanh toán đơn hàng #{currentOrder.id?.slice(0, 8)} | Template
-            Market
-          </title>
+          {/* Basic Meta Tags */}
+          <title>{pageTitle}</title>
+          <meta name="description" content={pageDescription} />
+
+          {/* Keywords */}
           <meta
-            name="description"
-            content={`Hoàn tất thanh toán đơn hàng với tổng giá trị ${formatPrice(finalPrice)}. An toàn và bảo mật.`}
+            name="keywords"
+            content="checkout, thanh toán, mã giảm giá, VietQR, payment link, credit card, PayPal, chuyển khoản, template market, mua template, mua ebook, thanh toán an toàn, giỏ hàng, đặt hàng"
           />
+
+          {/* Canonical URL */}
+          <link rel="canonical" href="https://templatemarket.vn/checkout" />
+
+          {/* Open Graph / Facebook */}
+          <meta property="og:type" content="website" />
+          <meta
+            property="og:url"
+            content="https://templatemarket.vn/checkout"
+          />
+          <meta property="og:title" content={pageTitle} />
+          <meta property="og:description" content={pageDescription} />
+          <meta
+            property="og:image"
+            content="https://templatemarket.vn/og-checkout.jpg"
+          />
+          <meta property="og:site_name" content="Template Market" />
+          <meta property="og:locale" content="vi_VN" />
+
+          {/* Twitter Card */}
+          <meta name="twitter:card" content="summary_large_image" />
+          <meta
+            name="twitter:url"
+            content="https://templatemarket.vn/checkout"
+          />
+          <meta name="twitter:title" content={pageTitle} />
+          <meta name="twitter:description" content={pageDescription} />
+          <meta
+            name="twitter:image"
+            content="https://templatemarket.vn/twitter-checkout.jpg"
+          />
+
+          {/* Additional Meta Tags */}
+          <meta name="robots" content="noindex, nofollow" />
+          <meta name="author" content="Template Market" />
+          <meta
+            name="viewport"
+            content="width=device-width, initial-scale=1.0"
+          />
+          <meta httpEquiv="Content-Type" content="text/html; charset=utf-8" />
+
+          {/* Security Headers */}
+          <meta httpEquiv="X-Content-Type-Options" content="nosniff" />
+          <meta httpEquiv="X-Frame-Options" content="DENY" />
+          <meta httpEquiv="X-XSS-Protection" content="1; mode=block" />
+
+          {/* Theme Color */}
+          <meta name="theme-color" content="#a855f7" />
+          <meta name="msapplication-TileColor" content="#a855f7" />
+
+          {/* Apple Touch Icon */}
+          <link
+            rel="apple-touch-icon"
+            sizes="180x180"
+            href="/apple-touch-icon.png"
+          />
+
+          {/* Structured Data - BreadcrumbList */}
+          <script type="application/ld+json">
+            {JSON.stringify({
+              "@context": "https://schema.org",
+              "@type": "BreadcrumbList",
+              itemListElement: [
+                {
+                  "@type": "ListItem",
+                  position: 1,
+                  name: "Trang chủ",
+                  item: "https://templatemarket.vn",
+                },
+                {
+                  "@type": "ListItem",
+                  position: 2,
+                  name: "Giỏ hàng",
+                  item: "https://templatemarket.vn/cart",
+                },
+                {
+                  "@type": "ListItem",
+                  position: 3,
+                  name: "Thanh toán",
+                  item: "https://templatemarket.vn/checkout",
+                },
+              ],
+            })}
+          </script>
+
+          {/* Structured Data - WebPage */}
+          <script type="application/ld+json">
+            {JSON.stringify({
+              "@context": "https://schema.org",
+              "@type": "WebPage",
+              name: "Thanh toán - Template Market",
+              description: pageDescription,
+              url: "https://templatemarket.vn/checkout",
+              isPartOf: {
+                "@type": "WebSite",
+                name: "Template Market",
+                url: "https://templatemarket.vn",
+              },
+            })}
+          </script>
+
+          {/* Structured Data - Order (when items exist) */}
+          {items.length > 0 && (
+            <script type="application/ld+json">
+              {JSON.stringify({
+                "@context": "https://schema.org",
+                "@type": "Order",
+                orderNumber: `DRAFT-${Date.now()}`,
+                orderStatus: "OrderProcessing",
+                orderDate: new Date().toISOString(),
+                customer: {
+                  "@type": "Person",
+                  name: user?.name || "Guest",
+                  email: user?.email || "",
+                },
+                acceptedOffer: items.map((item) => ({
+                  "@type": "Offer",
+                  itemOffered: {
+                    "@type": "Product",
+                    name: item.product.title,
+                    image: item.product.image,
+                    description: item.product.description,
+                  },
+                  price: item.product.price,
+                  priceCurrency: "VND",
+                  availability: "https://schema.org/InStock",
+                })),
+                price: formatPrice(finalPrice),
+                priceCurrency: "VND",
+                discount: appliedDiscount
+                  ? {
+                      "@type": "DiscountOffer",
+                      name: appliedDiscount.name,
+                      discountCode: appliedDiscount.code,
+                      discountAmount: discountAmount,
+                    }
+                  : undefined,
+              })}
+            </script>
+          )}
+
+          {/* Preconnect to external resources */}
+          <link rel="preconnect" href="https://fonts.googleapis.com" />
+          <link
+            rel="preconnect"
+            href="https://fonts.gstatic.com"
+            crossOrigin="anonymous"
+          />
+
+          {/* DNS Prefetch */}
+          <link rel="dns-prefetch" href="https://api.templatemarket.vn" />
+          <link rel="dns-prefetch" href="https://cdn.templatemarket.vn" />
         </Helmet>
 
         <ReadingProgress />
@@ -982,34 +1135,47 @@ const Checkout: React.FC = () => {
             </div>
           </motion.div>
 
-          {/* Progress Steps */}
+          {/* Progress Steps - REDESIGNED WITH HOME COLORS */}
           <motion.div
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: 0.2 }}
             className="flex items-center justify-center mb-8 space-x-4"
           >
+            {/* Step 1 - Active */}
             <div className="flex items-center space-x-2">
-              <div className="flex items-center justify-center w-8 h-8 rounded-full bg-gradient-to-r from-purple-500 to-magenta-500">
+              <div className="flex items-center justify-center w-8 h-8 rounded-full bg-gradient-to-r from-pink-400 via-orange-400 to-yellow-400 shadow-lg">
                 <span className="text-sm font-bold text-white">1</span>
               </div>
-              <span className="text-sm font-medium text-purple-600">
+              <span className="text-sm font-medium text-pink-600">
                 Thông tin
               </span>
             </div>
-            <div className="w-12 h-0.5 bg-gray-300"></div>
+
+            {/* Connector 1 */}
+            <div className="w-12 h-0.5 bg-gradient-to-r from-pink-300 to-gray-300"></div>
+
+            {/* Step 2 - Inactive */}
             <div className="flex items-center space-x-2">
-              <div className="flex items-center justify-center w-8 h-8 bg-gray-300 rounded-full">
+              <div className="flex items-center justify-center w-8 h-8 bg-gray-200 rounded-full border-2 border-gray-300">
                 <span className="text-sm font-bold text-gray-500">2</span>
               </div>
-              <span className="text-sm text-gray-500">Thanh toán</span>
+              <span className="text-sm text-gray-500 font-medium">
+                Thanh toán
+              </span>
             </div>
+
+            {/* Connector 2 */}
             <div className="w-12 h-0.5 bg-gray-300"></div>
+
+            {/* Step 3 - Inactive */}
             <div className="flex items-center space-x-2">
-              <div className="flex items-center justify-center w-8 h-8 bg-gray-300 rounded-full">
+              <div className="flex items-center justify-center w-8 h-8 bg-gray-200 rounded-full border-2 border-gray-300">
                 <span className="text-sm font-bold text-gray-500">3</span>
               </div>
-              <span className="text-sm text-gray-500">Hoàn tất</span>
+              <span className="text-sm text-gray-500 font-medium">
+                Hoàn tất
+              </span>
             </div>
           </motion.div>
 
@@ -1242,26 +1408,26 @@ const Checkout: React.FC = () => {
                   </Card>
                 </motion.div>
 
-                {/* ✅ ENHANCED DISCOUNT SECTION */}
+                {/* ✅ ENHANCED DISCOUNT SECTION - REDESIGNED WITH HOME COLORS */}
                 <motion.div
                   initial={{ opacity: 0, y: 20 }}
                   animate={{ opacity: 1, y: 0 }}
                   transition={{ delay: 0.4 }}
                 >
-                  <Card className="border-0 shadow-xl bg-gradient-to-br from-white/95 via-magenta-50/80 to-rose-50/80 dark:from-slate-800/95 dark:via-magenta-900/20 dark:to-rose-900/20 backdrop-blur-xl rounded-3xl overflow-hidden">
+                  <Card className="border-0 shadow-xl bg-gradient-to-br from-white/95 via-pink-50/80 to-blue-50/80 backdrop-blur-xl rounded-3xl overflow-hidden">
                     <CardHeader className="pb-4">
                       <CardTitle className="flex items-center space-x-3">
                         <motion.div
                           whileHover={{ scale: 1.1, rotate: 10 }}
-                          className="flex items-center justify-center w-12 h-12 rounded-2xl bg-gradient-to-r from-magenta-500 to-rose-600 shadow-lg"
+                          className="flex items-center justify-center w-12 h-12 rounded-2xl bg-gradient-to-r from-pink-400 via-orange-400 to-yellow-400 shadow-lg"
                         >
                           <Gift className="w-6 h-6 text-white" />
                         </motion.div>
                         <div>
-                          <span className="text-xl lg:text-2xl text-transparent bg-gradient-to-r from-magenta-600 to-rose-600 bg-clip-text font-bold">
+                          <span className="text-xl lg:text-2xl text-transparent bg-gradient-to-r from-pink-600 via-orange-500 to-yellow-600 bg-clip-text font-bold">
                             Mã giảm giá
                           </span>
-                          <p className="text-sm text-magenta-700/80 dark:text-magenta-300/80 mt-1">
+                          <p className="text-sm text-slate-600 mt-1">
                             Áp dụng mã để tiết kiệm thêm
                           </p>
                         </div>
@@ -1274,7 +1440,7 @@ const Checkout: React.FC = () => {
                         <motion.div
                           initial={{ scale: 0.95, opacity: 0 }}
                           animate={{ scale: 1, opacity: 1 }}
-                          className="relative p-6 border-2 border-emerald-300 dark:border-emerald-700 rounded-2xl bg-gradient-to-r from-emerald-50 via-teal-50 to-cyan-50 dark:from-emerald-900/20 dark:via-teal-900/20 dark:to-cyan-900/20 overflow-hidden"
+                          className="relative p-6 border-2 border-emerald-300 rounded-2xl bg-gradient-to-r from-emerald-50 via-teal-50 to-cyan-50 overflow-hidden"
                         >
                           <div className="absolute inset-0 opacity-10">
                             <div className="w-full h-full bg-gradient-to-br from-emerald-400 to-teal-400"></div>
@@ -1296,19 +1462,19 @@ const Checkout: React.FC = () => {
                               </motion.div>
                               <div>
                                 <div className="flex items-center space-x-3 mb-2">
-                                  <span className="font-bold text-lg text-emerald-800 dark:text-emerald-300 font-mono">
+                                  <span className="font-bold text-lg text-emerald-800 font-mono">
                                     {appliedDiscount.code}
                                   </span>
-                                  <Badge className="text-emerald-800 bg-emerald-200 dark:bg-emerald-900/50 dark:text-emerald-300 border-emerald-300 dark:border-emerald-700 font-semibold">
+                                  <Badge className="text-emerald-800 bg-emerald-200 border-emerald-300 font-semibold">
                                     {formatDiscountValue(appliedDiscount)}
                                   </Badge>
                                 </div>
-                                <p className="text-sm text-emerald-700 dark:text-emerald-400 mb-1 font-medium">
+                                <p className="text-sm text-emerald-700 mb-1 font-medium">
                                   {appliedDiscount.name}
                                 </p>
                                 <div className="flex items-center space-x-2">
-                                  <Save className="w-4 h-4 text-emerald-600 dark:text-emerald-400" />
-                                  <span className="text-sm font-bold text-emerald-600 dark:text-emerald-400">
+                                  <Save className="w-4 h-4 text-emerald-600" />
+                                  <span className="text-sm font-bold text-emerald-600">
                                     Tiết kiệm: {formatPrice(discountAmount)}
                                   </span>
                                 </div>
@@ -1322,7 +1488,7 @@ const Checkout: React.FC = () => {
                                 variant="ghost"
                                 size="sm"
                                 onClick={handleRemoveCoupon}
-                                className="text-red-500 hover:text-red-600 hover:bg-red-100 dark:hover:bg-red-900/20 rounded-2xl p-2 transition-all duration-200"
+                                className="text-red-500 hover:text-red-600 hover:bg-red-100 rounded-2xl p-2 transition-all duration-200"
                               >
                                 <X className="w-5 h-5" />
                               </Button>
@@ -1348,13 +1514,13 @@ const Checkout: React.FC = () => {
                                       handleApplyCoupon();
                                     }
                                   }}
-                                  className={`h-12 pl-12 pr-4 text-sm font-mono uppercase bg-white/90 dark:bg-slate-800/90 border-2 rounded-2xl focus:ring-2 focus:ring-magenta-500/20 transition-all duration-200 text-gray-800 dark:text-gray-200 ${
+                                  className={`h-12 pl-12 pr-4 text-sm font-mono uppercase bg-white/90 border-2 rounded-2xl focus:ring-2 focus:ring-pink-500/20 transition-all duration-200 text-gray-800 ${
                                     discountError
-                                      ? "border-red-300 dark:border-red-700 bg-red-50 dark:bg-red-900/20 focus:border-red-400"
-                                      : "border-magenta-200/50 dark:border-magenta-700/50 focus:border-magenta-400 dark:focus:border-magenta-500"
+                                      ? "border-red-300 bg-red-50 focus:border-red-400"
+                                      : "border-pink-200/50 focus:border-pink-400"
                                   }`}
                                 />
-                                <Tag className="absolute left-4 top-1/2 transform -translate-y-1/2 w-4 h-4 text-magenta-600 dark:text-magenta-400" />
+                                <Tag className="absolute left-4 top-1/2 transform -translate-y-1/2 w-4 h-4 text-pink-600" />
                               </div>
                               <motion.div
                                 whileHover={{ scale: 1.05 }}
@@ -1366,7 +1532,7 @@ const Checkout: React.FC = () => {
                                   disabled={
                                     !couponCode.trim() || isApplyingDiscount
                                   }
-                                  className="h-12 px-6 bg-gradient-to-r from-magenta-500 to-rose-600 hover:from-magenta-600 hover:to-rose-700 disabled:from-gray-400 disabled:to-gray-500 rounded-2xl shadow-lg font-semibold text-white border-0 transition-all duration-200"
+                                  className="h-12 px-6 bg-gradient-to-r from-pink-400 via-orange-400 to-yellow-400 hover:from-pink-500 hover:via-orange-500 hover:to-yellow-500 disabled:from-gray-400 disabled:to-gray-500 rounded-2xl shadow-lg font-semibold text-white border-0 transition-all duration-200"
                                 >
                                   {isApplyingDiscount ? (
                                     <motion.div
@@ -1395,9 +1561,9 @@ const Checkout: React.FC = () => {
                                   initial={{ opacity: 0, y: -10, height: 0 }}
                                   animate={{ opacity: 1, y: 0, height: "auto" }}
                                   exit={{ opacity: 0, y: -10, height: 0 }}
-                                  className="mt-3 p-3 bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 rounded-xl"
+                                  className="mt-3 p-3 bg-red-50 border border-red-200 rounded-xl"
                                 >
-                                  <p className="flex items-center space-x-2 text-sm text-red-600 dark:text-red-400">
+                                  <p className="flex items-center space-x-2 text-sm text-red-600">
                                     <AlertTriangle className="w-4 h-4 flex-shrink-0" />
                                     <span>{discountError}</span>
                                   </p>
@@ -1417,8 +1583,8 @@ const Checkout: React.FC = () => {
                           className="space-y-4"
                         >
                           <div className="flex items-center space-x-2">
-                            <Sparkles className="w-5 h-5 text-magenta-600 dark:text-magenta-400" />
-                            <span className="text-sm font-semibold text-magenta-800 dark:text-magenta-300">
+                            <Sparkles className="w-5 h-5 text-pink-600" />
+                            <span className="text-sm font-semibold text-slate-800">
                               Mã giảm giá đang có:
                             </span>
                           </div>
@@ -1452,8 +1618,8 @@ const Checkout: React.FC = () => {
                                     disabled={!validation.isValid}
                                     className={`w-full h-auto p-4 rounded-2xl border-2 transition-all duration-200 ${
                                       validation.isValid
-                                        ? "border-magenta-200 dark:border-magenta-700 hover:border-magenta-300 dark:hover:border-magenta-600 hover:bg-gradient-to-r hover:from-magenta-50 hover:to-rose-50 dark:hover:from-magenta-900/20 dark:hover:to-rose-900/20"
-                                        : "border-gray-200 dark:border-gray-700 opacity-50 cursor-not-allowed"
+                                        ? "border-pink-200 hover:border-pink-300 hover:bg-gradient-to-r hover:from-pink-50 hover:to-orange-50"
+                                        : "border-gray-200 opacity-50 cursor-not-allowed"
                                     }`}
                                   >
                                     <div className="flex items-center justify-between w-full">
@@ -1463,8 +1629,8 @@ const Checkout: React.FC = () => {
                                             variant="secondary"
                                             className={`text-xs font-semibold ${
                                               discount.type === "percent"
-                                                ? "bg-blue-100 dark:bg-blue-900/30 text-blue-800 dark:text-blue-300 border-blue-200 dark:border-blue-700"
-                                                : "bg-emerald-100 dark:bg-emerald-900/30 text-emerald-800 dark:text-emerald-300 border-emerald-200 dark:border-emerald-700"
+                                                ? "bg-blue-100 text-blue-800 border-blue-200"
+                                                : "bg-emerald-100 text-emerald-800 border-emerald-200"
                                             }`}
                                           >
                                             {discount.type === "percent" ? (
@@ -1474,21 +1640,21 @@ const Checkout: React.FC = () => {
                                             )}
                                             {formatDiscountValue(discount)}
                                           </Badge>
-                                          <span className="font-mono text-sm font-bold dark:text-gray-200">
+                                          <span className="font-mono text-sm font-bold">
                                             {discount.code}
                                           </span>
                                         </div>
-                                        <p className="text-xs text-gray-600 dark:text-gray-400 leading-relaxed">
+                                        <p className="text-xs text-gray-600 leading-relaxed">
                                           {discount.name}
                                         </p>
                                         {!validation.isValid && (
-                                          <p className="text-xs text-red-500 dark:text-red-400 leading-relaxed">
+                                          <p className="text-xs text-red-500 leading-relaxed">
                                             {validation.reason}
                                           </p>
                                         )}
                                       </div>
                                       {validation.isValid && (
-                                        <div className="flex items-center space-x-1 text-magenta-600 dark:text-magenta-400">
+                                        <div className="flex items-center space-x-1 text-pink-600">
                                           <TrendingUp className="w-4 h-4" />
                                         </div>
                                       )}
@@ -1506,25 +1672,25 @@ const Checkout: React.FC = () => {
                         initial={{ opacity: 0 }}
                         animate={{ opacity: 1 }}
                         transition={{ delay: 0.4 }}
-                        className="p-4 rounded-2xl bg-gradient-to-r from-magenta-100/60 to-rose-100/60 dark:from-magenta-900/20 dark:to-rose-900/20 border border-magenta-200/50 dark:border-magenta-700/50"
+                        className="p-4 rounded-2xl bg-gradient-to-r from-pink-100/60 via-orange-50/60 to-yellow-100/60 border border-pink-200/50"
                       >
                         <div className="flex items-center space-x-2 mb-3">
-                          <Info className="w-4 h-4 text-magenta-600 dark:text-magenta-400" />
-                          <span className="text-sm font-semibold text-magenta-800 dark:text-magenta-300">
+                          <Info className="w-4 h-4 text-pink-600" />
+                          <span className="text-sm font-semibold text-slate-800">
                             Thông tin mã giảm giá:
                           </span>
                         </div>
-                        <div className="text-xs text-magenta-700/80 dark:text-magenta-400/80 space-y-1.5 leading-relaxed">
+                        <div className="text-xs text-slate-700 space-y-1.5 leading-relaxed">
                           <div className="flex items-start space-x-2">
-                            <div className="w-1 h-1 bg-magenta-500 rounded-full mt-2 flex-shrink-0"></div>
+                            <div className="w-1 h-1 bg-pink-500 rounded-full mt-2 flex-shrink-0"></div>
                             <p>Mỗi đơn hàng chỉ áp dụng được 1 mã giảm giá</p>
                           </div>
                           <div className="flex items-start space-x-2">
-                            <div className="w-1 h-1 bg-magenta-500 rounded-full mt-2 flex-shrink-0"></div>
+                            <div className="w-1 h-1 bg-pink-500 rounded-full mt-2 flex-shrink-0"></div>
                             <p>Mã giảm giá không áp dụng cho phí vận chuyển</p>
                           </div>
                           <div className="flex items-start space-x-2">
-                            <div className="w-1 h-1 bg-magenta-500 rounded-full mt-2 flex-shrink-0"></div>
+                            <div className="w-1 h-1 bg-pink-500 rounded-full mt-2 flex-shrink-0"></div>
                             <p>Một số mã có điều kiện đơn hàng tối thiểu</p>
                           </div>
                         </div>

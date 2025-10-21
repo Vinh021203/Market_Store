@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useCallback } from "react";
 import { Helmet } from "react-helmet-async";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -8,6 +8,13 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Label } from "@/components/ui/label";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 import {
   Accordion,
   AccordionContent,
@@ -37,121 +44,305 @@ import {
   PlayCircle,
   Clock,
   Search,
-  Filter,
-  ChevronRight,
   Star,
-  ThumbsUp,
-  Eye,
-  Activity,
-  Cpu,
-  Server,
-  Monitor,
-  Smartphone,
-  Layers,
+  Heart,
+  Sparkles,
+  Crown,
+  Gift,
+  Rocket,
+  Target,
+  ArrowRight,
+  ArrowUp,
   Package,
+  Award,
+  Activity,
+  Server,
   Webhook,
   Bug,
   Info,
-  HelpCircle,
   MessageSquare,
-  Plus,
-  Minus,
-  ArrowRight,
-  CheckIcon,
-  XIcon,
-  AlertCircleIcon,
-  Lightbulb,
-  Target,
-  Award,
-  Rocket,
-  RefreshCw,
   Send,
-  Edit,
-  Trash2,
-  Upload,
-  Calendar,
   TrendingUp,
   BarChart3,
-  PieChart,
-  Volume2,
-  VolumeX,
-  MousePointer,
-  Fingerprint,
-  CreditCard,
   ShoppingCart,
-  UserPlus,
-  UserMinus,
-  LogIn,
-  LogOut,
-  Home,
-  Archive,
-  Folder,
-  File,
-  Image,
-  Video,
-  Music,
+  CreditCard,
+  RefreshCw,
+  Edit,
+  Trash2,
+  Eye,
+  XCircle,
 } from "lucide-react";
-import { motion, AnimatePresence } from "framer-motion";
+import {
+  motion,
+  AnimatePresence,
+  useScroll,
+  useTransform,
+} from "framer-motion";
+import { toast } from "@/hooks/use-toast";
 
-const APIDocumentation: React.FC = () => {
-  const [copiedCode, setCopiedCode] = useState<string | null>(null);
+// ============================================
+// SOFT PINK THEME
+// ============================================
+const softPinkTheme = {
+  pageBackground: "from-pink-50/70 via-rose-50/60 to-red-50/50",
+  primaryGradient: "from-pink-500 via-rose-500 to-red-500",
+  secondaryGradient: "from-rose-400 via-pink-500 to-red-400",
+  heroText: "from-pink-700 via-rose-600 to-red-600",
+  accentText: "from-rose-600 via-pink-600 to-red-600",
+  glow: "shadow-pink-200/60 shadow-2xl",
+  softGlow: "shadow-pink-200/40 shadow-lg",
+};
+
+// ============================================
+// STAR BACKGROUND PATTERN
+// ============================================
+const StarBackgroundPattern = () => (
+  <svg className="absolute inset-0 w-full h-full" style={{ opacity: 0.08 }}>
+    <defs>
+      <pattern
+        id="starPattern"
+        x="0"
+        y="0"
+        width="200"
+        height="200"
+        patternUnits="userSpaceOnUse"
+      >
+        <g transform="translate(50, 50)">
+          <path
+            d="M 0,-30 L 7,-10 L 30,-10 L 12,5 L 19,25 L 0,12 L -19,25 L -12,5 L -30,-10 L -7,-10 Z"
+            fill="url(#starGradient1)"
+            opacity="0.6"
+          />
+        </g>
+        <g transform="translate(150, 120)">
+          <path
+            d="M 0,-20 L 5,-7 L 20,-7 L 8,3 L 13,17 L 0,8 L -13,17 L -8,3 L -20,-7 L -5,-7 Z"
+            fill="url(#starGradient2)"
+            opacity="0.5"
+          />
+        </g>
+        <g transform="translate(30, 150)">
+          <path
+            d="M 0,-12 L 3,-4 L 12,-4 L 5,2 L 8,10 L 0,5 L -8,10 L -5,2 L -12,-4 L -3,-4 Z"
+            fill="url(#starGradient3)"
+            opacity="0.4"
+          />
+        </g>
+        <g transform="translate(100, 30)">
+          <circle
+            cx="0"
+            cy="0"
+            r="3"
+            fill="url(#starGradient4)"
+            opacity="0.6"
+          />
+          <path
+            d="M 0,-8 L 1,-2 L 8,0 L 1,2 L 0,8 L -1,2 L -8,0 L -1,-2 Z"
+            fill="url(#starGradient4)"
+            opacity="0.3"
+          />
+        </g>
+        <g transform="translate(170, 70)">
+          <path
+            d="M 0,-18 L 4,-6 L 18,-6 L 7,3 L 11,15 L 0,7 L -11,15 L -7,3 L -18,-6 L -4,-6 Z"
+            fill="url(#starGradient1)"
+            opacity="0.5"
+          />
+        </g>
+      </pattern>
+      <linearGradient id="starGradient1" x1="0%" y1="0%" x2="100%" y2="100%">
+        <stop offset="0%" style={{ stopColor: "#FDE68A", stopOpacity: 1 }} />
+        <stop offset="50%" style={{ stopColor: "#FCA5A5", stopOpacity: 1 }} />
+        <stop offset="100%" style={{ stopColor: "#FBCFE8", stopOpacity: 1 }} />
+      </linearGradient>
+      <linearGradient id="starGradient2" x1="0%" y1="0%" x2="100%" y2="100%">
+        <stop offset="0%" style={{ stopColor: "#FBCFE8", stopOpacity: 1 }} />
+        <stop offset="50%" style={{ stopColor: "#FCA5A5", stopOpacity: 1 }} />
+        <stop offset="100%" style={{ stopColor: "#FECACA", stopOpacity: 1 }} />
+      </linearGradient>
+      <linearGradient id="starGradient3" x1="0%" y1="0%" x2="100%" y2="100%">
+        <stop offset="0%" style={{ stopColor: "#FEF3C7", stopOpacity: 1 }} />
+        <stop offset="50%" style={{ stopColor: "#FBCFE8", stopOpacity: 1 }} />
+        <stop offset="100%" style={{ stopColor: "#FCA5A5", stopOpacity: 1 }} />
+      </linearGradient>
+      <linearGradient id="starGradient4" x1="0%" y1="0%" x2="100%" y2="100%">
+        <stop offset="0%" style={{ stopColor: "#FDE68A", stopOpacity: 1 }} />
+        <stop offset="100%" style={{ stopColor: "#FBCFE8", stopOpacity: 1 }} />
+      </linearGradient>
+    </defs>
+    <rect width="100%" height="100%" fill="url(#starPattern)" />
+  </svg>
+);
+
+// ============================================
+// FLOATING ICONS
+// ============================================
+const FloatingIcons = () => {
+  const icons = [
+    {
+      Icon: Code,
+      color: "from-pink-50 to-rose-100",
+      position: "top-10 right-20",
+    },
+    { Icon: Key, color: "from-rose-50 to-red-100", position: "top-32 left-10" },
+    {
+      Icon: Database,
+      color: "from-red-50 to-pink-100",
+      position: "bottom-20 right-10",
+    },
+    {
+      Icon: Shield,
+      color: "from-pink-100 to-rose-50",
+      position: "bottom-32 left-20",
+    },
+    {
+      Icon: Terminal,
+      color: "from-rose-100 to-pink-50",
+      position: "top-1/2 right-1/4",
+    },
+    {
+      Icon: Globe,
+      color: "from-red-50 to-rose-100",
+      position: "top-1/3 left-1/3",
+    },
+    {
+      Icon: Zap,
+      color: "from-pink-50 to-red-100",
+      position: "bottom-1/3 right-1/3",
+    },
+    {
+      Icon: Lock,
+      color: "from-rose-50 to-pink-100",
+      position: "top-2/3 left-1/4",
+    },
+    {
+      Icon: Star,
+      color: "from-red-100 to-rose-50",
+      position: "top-1/4 right-1/2",
+    },
+    {
+      Icon: Heart,
+      color: "from-pink-100 to-red-50",
+      position: "bottom-1/4 left-1/2",
+    },
+    {
+      Icon: Sparkles,
+      color: "from-rose-100 to-red-50",
+      position: "top-3/4 right-20",
+    },
+    {
+      Icon: Crown,
+      color: "from-pink-50 to-rose-100",
+      position: "bottom-40 left-10",
+    },
+    {
+      Icon: Gift,
+      color: "from-red-50 to-pink-50",
+      position: "top-40 right-40",
+    },
+    {
+      Icon: Rocket,
+      color: "from-rose-50 to-red-50",
+      position: "bottom-1/2 right-10",
+    },
+    {
+      Icon: Target,
+      color: "from-pink-100 to-rose-100",
+      position: "top-1/2 left-10",
+    },
+    {
+      Icon: Package,
+      color: "from-red-100 to-pink-100",
+      position: "bottom-1/4 right-1/4",
+    },
+  ];
+
+  return (
+    <div className="fixed inset-0 overflow-hidden pointer-events-none z-0">
+      {icons.map((item, i) => (
+        <motion.div
+          key={i}
+          className={`absolute ${item.position}`}
+          initial={{ opacity: 0, scale: 0 }}
+          animate={{
+            y: [0, -30, 0],
+            rotate: [0, 15, -15, 0],
+            opacity: [0.1, 0.3, 0.1],
+            scale: [1, 1.2, 1],
+          }}
+          transition={{
+            duration: 8 + i * 2,
+            repeat: Infinity,
+            delay: i * 0.8,
+            ease: "easeInOut",
+          }}
+        >
+          <motion.div
+            className={`p-4 rounded-full bg-gradient-to-r ${item.color} backdrop-blur-sm shadow-lg`}
+            whileHover={{ scale: 1.5, rotate: 30 }}
+          >
+            <item.Icon className="w-8 h-8 text-pink-300/50" />
+          </motion.div>
+        </motion.div>
+      ))}
+    </div>
+  );
+};
+
+// ============================================
+// MAIN COMPONENT
+// ============================================
+const API: React.FC = () => {
   const [selectedEndpoint, setSelectedEndpoint] = useState("auth");
   const [selectedLanguage, setSelectedLanguage] = useState("javascript");
   const [searchTerm, setSearchTerm] = useState("");
-  const [filterCategory, setFilterCategory] = useState("all");
-  const [activeSection, setActiveSection] = useState("overview");
-  const [testRequestBody, setTestRequestBody] = useState("");
+  const [testApiKey, setTestApiKey] = useState("");
+  const [testEndpoint, setTestEndpoint] = useState("");
   const [testResponse, setTestResponse] = useState("");
   const [isTestLoading, setIsTestLoading] = useState(false);
-  const [feedbackForm, setFeedbackForm] = useState({
-    name: "",
-    email: "",
-    message: "",
-  });
-  const [showFeedbackSuccess, setShowFeedbackSuccess] = useState(false);
-  const [expandedFaq, setExpandedFaq] = useState<string | null>(null);
-  const [scrollY, setScrollY] = useState(0);
+  const [copiedCode, setCopiedCode] = useState<string | null>(null);
+  const [showFloatingNav, setShowFloatingNav] = useState(false);
+  const [scrollProgress, setScrollProgress] = useState(0);
+
+  const { scrollYProgress } = useScroll();
+  const headerY = useTransform(scrollYProgress, [0, 0.2], [0, -50]);
+  const headerOpacity = useTransform(scrollYProgress, [0, 0.2], [1, 0.8]);
 
   useEffect(() => {
-    const handleScroll = () => setScrollY(window.scrollY);
-    window.addEventListener("scroll", handleScroll);
+    const handleScroll = () => {
+      setShowFloatingNav(window.scrollY > 500);
+      const totalHeight =
+        document.documentElement.scrollHeight - window.innerHeight;
+      const progress = (window.scrollY / totalHeight) * 100;
+      setScrollProgress(Math.min(progress, 100));
+    };
+    window.addEventListener("scroll", handleScroll, { passive: true });
     return () => window.removeEventListener("scroll", handleScroll);
   }, []);
 
   const stats = [
-    {
-      icon: Activity,
-      value: "99.9%",
-      label: "Uptime",
-      color: "text-green-600",
-    },
+    { icon: Activity, value: "99.9%", label: "Uptime", color: "text-pink-600" },
     {
       icon: Zap,
-      value: "<200ms",
-      label: "Response Time",
-      color: "text-blue-600",
+      value: "< 100ms",
+      label: "Response time",
+      color: "text-rose-600",
     },
+    { icon: Users, value: "50K+", label: "Developers", color: "text-red-600" },
     {
-      icon: Users,
-      value: "50K+",
-      label: "Developers",
-      color: "text-purple-600",
-    },
-    {
-      icon: Globe,
-      value: "195+",
-      label: "Countries",
-      color: "text-orange-600",
+      icon: Database,
+      value: "1M+",
+      label: "API calls/ngày",
+      color: "text-pink-700",
     },
   ];
 
   const apiFeatures = [
     {
       icon: Shield,
-      title: "🔐 Bảo mật cao cấp",
+      title: "Bảo mật cao cấp",
       description:
         "JWT Authentication, OAuth 2.0, API key với rate limiting thông minh",
-      color: "from-green-500 to-emerald-400",
       features: [
         "JWT Tokens",
         "OAuth 2.0",
@@ -162,38 +353,35 @@ const APIDocumentation: React.FC = () => {
     },
     {
       icon: Zap,
-      title: "⚡ Hiệu suất vượt trội",
+      title: "Hiệu suất vượt trội",
       description:
-        "Response time < 200ms, uptime 99.9%, CDN global, auto-scaling",
-      color: "from-blue-500 to-cyan-400",
+        "Response time < 100ms, uptime 99.9%, CDN global, auto-scaling",
       features: [
         "Global CDN",
         "Auto-scaling",
-        "Caching",
+        "Redis Caching",
         "Load Balancing",
         "Monitoring 24/7",
       ],
     },
     {
       icon: Globe,
-      title: "🌍 RESTful chuẩn",
+      title: "RESTful chuẩn",
       description:
         "Tuân thủ chuẩn REST, HTTP methods, status codes, pagination",
-      color: "from-purple-500 to-pink-400",
       features: [
         "REST Standards",
         "HTTP Methods",
         "Status Codes",
         "Pagination",
-        "Filtering",
+        "Filtering & Sorting",
       ],
     },
     {
       icon: Database,
-      title: "📊 Real-time data",
+      title: "Real-time data",
       description:
         "WebSocket connections, live updates, event streaming, push notifications",
-      color: "from-orange-500 to-red-400",
       features: [
         "WebSockets",
         "Live Updates",
@@ -207,33 +395,32 @@ const APIDocumentation: React.FC = () => {
   const endpoints = [
     {
       id: "auth",
-      category: "🔐 Authentication",
+      category: "Xác thực",
       icon: Lock,
-      color: "text-green-600",
-      description: "User authentication, registration, token management",
-      endpoints: [
+      description: "Xác thực người dùng, đăng ký, quản lý token",
+      methods: [
         {
           method: "POST",
           path: "/api/v1/auth/login",
-          title: "User Login",
+          title: "Đăng nhập",
           description: "Đăng nhập và lấy access token với refresh token",
+          headers: [
+            { name: "Content-Type", value: "application/json", required: true },
+            { name: "X-API-Key", value: "your-api-key", required: true },
+          ],
           params: [
             {
               name: "email",
               type: "string",
               required: true,
-              description: "User email address",
+              description: "Email người dùng",
             },
             {
               name: "password",
               type: "string",
               required: true,
-              description: "User password (min 8 chars)",
+              description: "Mật khẩu (tối thiểu 8 ký tự)",
             },
-          ],
-          headers: [
-            { name: "Content-Type", value: "application/json", required: true },
-            { name: "X-API-Key", value: "your-api-key", required: true },
           ],
           requestBody: `{
   "email": "user@example.com",
@@ -248,7 +435,7 @@ const APIDocumentation: React.FC = () => {
     "user": {
       "id": 12345,
       "email": "user@example.com",
-      "name": "John Doe",
+      "name": "Nguyễn Văn A",
       "role": "user",
       "verified": true,
       "created_at": "2024-01-15T10:30:00Z"
@@ -259,78 +446,69 @@ const APIDocumentation: React.FC = () => {
             {
               code: 400,
               message: "Bad Request",
-              description: "Invalid email or password format",
+              description: "Email hoặc password không hợp lệ",
             },
             {
               code: 401,
               message: "Unauthorized",
-              description: "Invalid credentials",
+              description: "Thông tin đăng nhập sai",
             },
             {
               code: 429,
               message: "Too Many Requests",
-              description: "Rate limit exceeded",
-            },
-          ],
-          examples: [
-            {
-              title: "Successful Login",
-              request: `curl -X POST https://api.templatemarket.com/v1/auth/login \\
-  -H "Content-Type: application/json" \\
-  -H "X-API-Key: your-api-key" \\
-  -d '{"email": "user@example.com", "password": "password123"}'`,
+              description: "Vượt quá giới hạn request",
             },
           ],
         },
         {
           method: "POST",
           path: "/api/v1/auth/register",
-          title: "User Registration",
+          title: "Đăng ký tài khoản",
           description: "Đăng ký tài khoản mới với xác thực email",
+          headers: [
+            { name: "Content-Type", value: "application/json", required: true },
+            { name: "X-API-Key", value: "your-api-key", required: true },
+          ],
           params: [
             {
               name: "email",
               type: "string",
               required: true,
-              description: "Valid email address",
+              description: "Địa chỉ email hợp lệ",
             },
             {
               name: "password",
               type: "string",
               required: true,
-              description: "Password (min 8 chars, 1 uppercase, 1 number)",
+              description: "Mật khẩu (min 8 chars, 1 chữ hoa, 1 số)",
             },
             {
               name: "name",
               type: "string",
               required: true,
-              description: "Full name (min 2 chars)",
+              description: "Họ tên đầy đủ (min 2 chars)",
             },
             {
               name: "phone",
               type: "string",
               required: false,
-              description: "Phone number with country code",
+              description: "Số điện thoại có mã quốc gia",
             },
-          ],
-          headers: [
-            { name: "Content-Type", value: "application/json", required: true },
-            { name: "X-API-Key", value: "your-api-key", required: true },
           ],
           requestBody: `{
   "email": "newuser@example.com",
   "password": "SecurePass123!",
-  "name": "Jane Doe",
+  "name": "Trần Thị B",
   "phone": "+84971386588"
 }`,
           response: `{
   "success": true,
-  "message": "User created successfully. Please check your email for verification.",
+  "message": "Tài khoản đã được tạo. Vui lòng kiểm tra email để xác thực.",
   "data": {
     "user": {
       "id": 12346,
       "email": "newuser@example.com",
-      "name": "Jane Doe",
+      "name": "Trần Thị B",
       "phone": "+84971386588",
       "role": "user",
       "verified": false,
@@ -342,43 +520,34 @@ const APIDocumentation: React.FC = () => {
             {
               code: 400,
               message: "Bad Request",
-              description: "Invalid input data or email already exists",
+              description: "Dữ liệu không hợp lệ hoặc email đã tồn tại",
             },
             {
               code: 422,
               message: "Unprocessable Entity",
-              description: "Validation failed",
-            },
-          ],
-          examples: [
-            {
-              title: "User Registration",
-              request: `curl -X POST https://api.templatemarket.com/v1/auth/register \\
-  -H "Content-Type: application/json" \\
-  -H "X-API-Key: your-api-key" \\
-  -d '{"email": "user@example.com", "password": "Pass123!", "name": "John Doe"}'`,
+              description: "Validation thất bại",
             },
           ],
         },
         {
           method: "POST",
           path: "/api/v1/auth/refresh",
-          title: "Refresh Token",
+          title: "Làm mới token",
           description: "Làm mới access token bằng refresh token",
-          params: [
-            {
-              name: "refresh_token",
-              type: "string",
-              required: true,
-              description: "Valid refresh token",
-            },
-          ],
           headers: [
             { name: "Content-Type", value: "application/json", required: true },
             {
               name: "Authorization",
               value: "Bearer refresh-token",
               required: true,
+            },
+          ],
+          params: [
+            {
+              name: "refresh_token",
+              type: "string",
+              required: true,
+              description: "Refresh token hợp lệ",
             },
           ],
           requestBody: `{
@@ -395,15 +564,7 @@ const APIDocumentation: React.FC = () => {
             {
               code: 401,
               message: "Unauthorized",
-              description: "Invalid or expired refresh token",
-            },
-          ],
-          examples: [
-            {
-              title: "Refresh Token",
-              request: `curl -X POST https://api.templatemarket.com/v1/auth/refresh \\
-  -H "Authorization: Bearer refresh-token" \\
-  -d '{"refresh_token": "your-refresh-token"}'`,
+              description: "Refresh token không hợp lệ hoặc đã hết hạn",
             },
           ],
         },
@@ -411,71 +572,70 @@ const APIDocumentation: React.FC = () => {
     },
     {
       id: "products",
-      category: "📦 Products",
-      icon: Database,
-      color: "text-blue-600",
-      description: "Product management, search, categories, reviews",
-      endpoints: [
+      category: "Sản phẩm",
+      icon: Package,
+      description: "Quản lý sản phẩm, tìm kiếm, danh mục, đánh giá",
+      methods: [
         {
           method: "GET",
           path: "/api/v1/products",
-          title: "Get Products List",
+          title: "Lấy danh sách sản phẩm",
           description: "Lấy danh sách sản phẩm với phân trang và filter",
-          params: [
-            {
-              name: "page",
-              type: "integer",
-              required: false,
-              description: "Page number (default: 1)",
-            },
-            {
-              name: "limit",
-              type: "integer",
-              required: false,
-              description: "Items per page (default: 20, max: 100)",
-            },
-            {
-              name: "category",
-              type: "string",
-              required: false,
-              description: "Filter by category slug",
-            },
-            {
-              name: "search",
-              type: "string",
-              required: false,
-              description: "Search in name and description",
-            },
-            {
-              name: "sort",
-              type: "string",
-              required: false,
-              description: "Sort by: name, price, created_at, popularity",
-            },
-            {
-              name: "order",
-              type: "string",
-              required: false,
-              description: "Order: asc, desc (default: desc)",
-            },
-            {
-              name: "price_min",
-              type: "number",
-              required: false,
-              description: "Minimum price filter",
-            },
-            {
-              name: "price_max",
-              type: "number",
-              required: false,
-              description: "Maximum price filter",
-            },
-          ],
           headers: [
             {
               name: "Authorization",
               value: "Bearer your-token",
               required: true,
+            },
+          ],
+          params: [
+            {
+              name: "page",
+              type: "integer",
+              required: false,
+              description: "Số trang (mặc định: 1)",
+            },
+            {
+              name: "limit",
+              type: "integer",
+              required: false,
+              description: "Số sản phẩm mỗi trang (mặc định: 20, max: 100)",
+            },
+            {
+              name: "category",
+              type: "string",
+              required: false,
+              description: "Lọc theo category slug",
+            },
+            {
+              name: "search",
+              type: "string",
+              required: false,
+              description: "Tìm kiếm trong tên và mô tả",
+            },
+            {
+              name: "sort",
+              type: "string",
+              required: false,
+              description: "Sắp xếp: name, price, created_at, popularity",
+            },
+            {
+              name: "order",
+              type: "string",
+              required: false,
+              description: "Thứ tự: asc, desc (mặc định: desc)",
+            },
+            {
+              name: "price_min",
+              type: "number",
+              required: false,
+              description: "Giá tối thiểu",
+            },
+            {
+              name: "price_max",
+              type: "number",
+              required: false,
+              description: "Giá tối đa",
             },
           ],
           response: `{
@@ -490,6 +650,7 @@ const APIDocumentation: React.FC = () => {
         "price": 49.99,
         "original_price": 79.99,
         "currency": "USD",
+        "discount_percentage": 37,
         "category": {
           "id": 5,
           "name": "React Templates",
@@ -501,6 +662,7 @@ const APIDocumentation: React.FC = () => {
         "downloads": 15420,
         "rating": 4.8,
         "reviews_count": 234,
+        "featured": true,
         "created_at": "2024-01-10T08:30:00Z",
         "updated_at": "2024-01-15T14:20:00Z"
       }
@@ -516,9 +678,11 @@ const APIDocumentation: React.FC = () => {
     "filters": {
       "categories": [
         {"id": 1, "name": "React Templates", "count": 45},
-        {"id": 2, "name": "Vue Templates", "count": 32}
+        {"id": 2, "name": "Vue Templates", "count": 32},
+        {"id": 3, "name": "Angular Templates", "count": 28}
       ],
-      "price_range": {"min": 9.99, "max": 199.99}
+      "price_range": {"min": 9.99, "max": 199.99},
+      "tags": ["react", "vue", "angular", "dashboard", "landing", "ecommerce"]
     }
   }
 }`,
@@ -526,40 +690,33 @@ const APIDocumentation: React.FC = () => {
             {
               code: 400,
               message: "Bad Request",
-              description: "Invalid query parameters",
+              description: "Tham số query không hợp lệ",
             },
             {
               code: 401,
               message: "Unauthorized",
-              description: "Missing or invalid token",
-            },
-          ],
-          examples: [
-            {
-              title: "Get Products with Filters",
-              request: `curl -X GET "https://api.templatemarket.com/v1/products?page=1&limit=10&category=react&sort=popularity" \\
-  -H "Authorization: Bearer your-token"`,
+              description: "Token bị thiếu hoặc không hợp lệ",
             },
           ],
         },
         {
           method: "GET",
           path: "/api/v1/products/{id}",
-          title: "Get Product Details",
-          description: "Lấy chi tiết sản phẩm theo ID",
+          title: "Lấy chi tiết sản phẩm",
+          description: "Lấy thông tin chi tiết của sản phẩm theo ID",
+          headers: [
+            {
+              name: "Authorization",
+              value: "Bearer your-token",
+              required: true,
+            },
+          ],
           params: [
             {
               name: "id",
               type: "integer",
               required: true,
               description: "Product ID",
-            },
-          ],
-          headers: [
-            {
-              name: "Authorization",
-              value: "Bearer your-token",
-              required: true,
             },
           ],
           response: `{
@@ -569,41 +726,90 @@ const APIDocumentation: React.FC = () => {
     "name": "Premium React Dashboard",
     "slug": "premium-react-dashboard",
     "description": "A comprehensive React admin dashboard template...",
-    "long_description": "This premium React dashboard template includes...",
+    "long_description": "This premium React dashboard template includes over 50+ components, dark/light theme support, multiple layouts, and full TypeScript support. Perfect for building modern admin panels, SaaS applications, and data visualization tools.",
     "price": 49.99,
     "original_price": 79.99,
     "currency": "USD",
     "category": {
       "id": 5,
       "name": "React Templates",
-      "slug": "react-templates"
+      "slug": "react-templates",
+      "description": "Professional React templates for modern web applications"
     },
     "author": {
       "id": 100,
       "name": "Template Studio",
-      "avatar": "https://cdn.templatemarket.com/avatars/author-100.jpg"
+      "username": "templatestudio",
+      "avatar": "https://cdn.templatemarket.com/avatars/author-100.jpg",
+      "verified": true,
+      "total_products": 25,
+      "total_sales": 5420,
+      "member_since": "2022-03-15T00:00:00Z"
     },
-    "tags": ["react", "dashboard", "admin", "responsive"],
+    "tags": ["react", "dashboard", "admin", "responsive", "typescript"],
     "images": [
       "https://cdn.templatemarket.com/images/product-1-1.jpg",
-      "https://cdn.templatemarket.com/images/product-1-2.jpg"
+      "https://cdn.templatemarket.com/images/product-1-2.jpg",
+      "https://cdn.templatemarket.com/images/product-1-3.jpg",
+      "https://cdn.templatemarket.com/images/product-1-4.jpg"
     ],
     "files": [
-      {"name": "source.zip", "size": "25.4 MB", "type": "application/zip"}
+      {
+        "name": "source-code.zip",
+        "size": "25.4 MB",
+        "type": "application/zip",
+        "includes": ["React source", "Components", "Assets", "Documentation"]
+      },
+      {
+        "name": "documentation.pdf",
+        "size": "2.1 MB",
+        "type": "application/pdf"
+      }
     ],
     "features": [
-      "Responsive design",
-      "Dark/Light theme",
-      "30+ components",
-      "TypeScript support"
+      "Responsive design cho mọi thiết bị",
+      "Dark/Light theme với smooth transitions",
+      "50+ pre-built components",
+      "Full TypeScript support",
+      "Multiple dashboard layouts",
+      "Advanced charts & graphs",
+      "Authentication pages",
+      "Form validation với React Hook Form",
+      "API integration examples",
+      "Comprehensive documentation"
     ],
     "requirements": {
       "node": ">=14.0.0",
-      "react": ">=17.0.0"
+      "react": ">=17.0.0",
+      "npm": ">=6.0.0"
+    },
+    "compatibility": {
+      "browsers": ["Chrome 90+", "Firefox 88+", "Safari 14+", "Edge 90+"],
+      "mobile": true,
+      "tablet": true
     },
     "downloads": 15420,
     "rating": 4.8,
     "reviews_count": 234,
+    "changelog": [
+      {
+        "version": "2.1.0",
+        "date": "2024-01-15",
+        "changes": ["Added 5 new dashboard layouts", "Performance improvements", "Bug fixes"]
+      },
+      {
+        "version": "2.0.0",
+        "date": "2024-01-01",
+        "changes": ["Complete UI redesign", "TypeScript migration", "New component library"]
+      }
+    ],
+    "license": {
+      "type": "Standard",
+      "commercial_use": true,
+      "redistribution": false,
+      "support_period": "12 months",
+      "updates": "Lifetime"
+    },
     "created_at": "2024-01-10T08:30:00Z",
     "updated_at": "2024-01-15T14:20:00Z"
   }
@@ -612,19 +818,12 @@ const APIDocumentation: React.FC = () => {
             {
               code: 404,
               message: "Not Found",
-              description: "Product not found",
+              description: "Không tìm thấy sản phẩm",
             },
             {
               code: 401,
               message: "Unauthorized",
-              description: "Missing or invalid token",
-            },
-          ],
-          examples: [
-            {
-              title: "Get Product by ID",
-              request: `curl -X GET https://api.templatemarket.com/v1/products/123 \\
-  -H "Authorization: Bearer your-token"`,
+              description: "Token bị thiếu hoặc không hợp lệ",
             },
           ],
         },
@@ -632,41 +831,40 @@ const APIDocumentation: React.FC = () => {
     },
     {
       id: "orders",
-      category: "🛒 Orders",
+      category: "Đơn hàng",
       icon: ShoppingCart,
-      color: "text-purple-600",
-      description: "Order management, purchases, downloads",
-      endpoints: [
+      description: "Quản lý đơn hàng, mua hàng, tải xuống",
+      methods: [
         {
           method: "GET",
           path: "/api/v1/orders",
-          title: "Get Orders",
-          description: "Lấy danh sách đơn hàng của user",
-          params: [
-            {
-              name: "page",
-              type: "integer",
-              required: false,
-              description: "Page number",
-            },
-            {
-              name: "limit",
-              type: "integer",
-              required: false,
-              description: "Items per page",
-            },
-            {
-              name: "status",
-              type: "string",
-              required: false,
-              description: "Filter by status: pending, completed, failed",
-            },
-          ],
+          title: "Lấy danh sách đơn hàng",
+          description: "Lấy tất cả đơn hàng của user hiện tại",
           headers: [
             {
               name: "Authorization",
               value: "Bearer your-token",
               required: true,
+            },
+          ],
+          params: [
+            {
+              name: "page",
+              type: "integer",
+              required: false,
+              description: "Số trang",
+            },
+            {
+              name: "limit",
+              type: "integer",
+              required: false,
+              description: "Số đơn hàng mỗi trang",
+            },
+            {
+              name: "status",
+              type: "string",
+              required: false,
+              description: "Lọc theo trạng thái: pending, completed, failed",
             },
           ],
           response: `{
@@ -683,17 +881,21 @@ const APIDocumentation: React.FC = () => {
             "product_id": 1,
             "name": "Premium React Dashboard",
             "price": 49.99,
-            "quantity": 1
+            "quantity": 1,
+            "download_url": "https://downloads.templatemarket.com/..."
           }
         ],
         "payment_method": "stripe",
+        "payment_id": "pi_3MaBC1234567890",
+        "invoice_url": "https://invoices.templatemarket.com/...",
         "created_at": "2024-01-15T10:30:00Z",
         "completed_at": "2024-01-15T10:31:15Z"
       }
     ],
     "pagination": {
       "current_page": 1,
-      "total": 25
+      "total": 25,
+      "per_page": 20
     }
   }
 }`,
@@ -701,36 +903,15 @@ const APIDocumentation: React.FC = () => {
             {
               code: 401,
               message: "Unauthorized",
-              description: "Missing or invalid token",
-            },
-          ],
-          examples: [
-            {
-              title: "Get User Orders",
-              request: `curl -X GET "https://api.templatemarket.com/v1/orders?status=completed" \\
-  -H "Authorization: Bearer your-token"`,
+              description: "Token bị thiếu hoặc không hợp lệ",
             },
           ],
         },
         {
           method: "POST",
           path: "/api/v1/orders",
-          title: "Create Order",
-          description: "Tạo đơn hàng mới",
-          params: [
-            {
-              name: "products",
-              type: "array",
-              required: true,
-              description: "Array of product IDs and quantities",
-            },
-            {
-              name: "payment_method",
-              type: "string",
-              required: true,
-              description: "Payment method: stripe, paypal, crypto",
-            },
-          ],
+          title: "Tạo đơn hàng mới",
+          description: "Tạo đơn hàng mới và khởi tạo thanh toán",
           headers: [
             {
               name: "Authorization",
@@ -739,6 +920,20 @@ const APIDocumentation: React.FC = () => {
             },
             { name: "Content-Type", value: "application/json", required: true },
           ],
+          params: [
+            {
+              name: "products",
+              type: "array",
+              required: true,
+              description: "Mảng sản phẩm với ID và số lượng",
+            },
+            {
+              name: "payment_method",
+              type: "string",
+              required: true,
+              description: "Phương thức thanh toán: stripe, paypal, crypto",
+            },
+          ],
           requestBody: `{
   "products": [
     {"id": 1, "quantity": 1},
@@ -746,42 +941,43 @@ const APIDocumentation: React.FC = () => {
   ],
   "payment_method": "stripe",
   "billing_info": {
-    "name": "John Doe",
-    "email": "john@example.com",
-    "address": "123 Main St",
-    "city": "New York",
-    "country": "US"
-  }
+    "name": "Nguyễn Văn A",
+    "email": "nguyenvana@example.com",
+    "address": "123 Đường ABC",
+    "city": "Hà Nội",
+    "country": "VN",
+    "postal_code": "100000"
+  },
+  "coupon_code": "NEWYEAR2024"
 }`,
           response: `{
   "success": true,
   "data": {
     "order_id": "ORD-2024-001235",
     "total": 149.97,
+    "discount": 15.00,
+    "final_total": 134.97,
     "currency": "USD",
     "payment_url": "https://checkout.stripe.com/pay/cs_test_...",
-    "expires_at": "2024-01-15T11:30:00Z"
+    "expires_at": "2024-01-15T11:30:00Z",
+    "status": "pending"
   }
 }`,
           errors: [
             {
               code: 400,
               message: "Bad Request",
-              description: "Invalid product IDs or quantities",
+              description: "ID sản phẩm hoặc số lượng không hợp lệ",
             },
             {
               code: 401,
               message: "Unauthorized",
-              description: "Missing or invalid token",
+              description: "Token bị thiếu hoặc không hợp lệ",
             },
-          ],
-          examples: [
             {
-              title: "Create New Order",
-              request: `curl -X POST https://api.templatemarket.com/v1/orders \\
-  -H "Authorization: Bearer your-token" \\
-  -H "Content-Type: application/json" \\
-  -d '{"products": [{"id": 1, "quantity": 1}], "payment_method": "stripe"}'`,
+              code: 402,
+              message: "Payment Required",
+              description: "Thanh toán thất bại",
             },
           ],
         },
@@ -789,17 +985,15 @@ const APIDocumentation: React.FC = () => {
     },
     {
       id: "users",
-      category: "👤 Users",
+      category: "Người dùng",
       icon: Users,
-      color: "text-orange-600",
-      description: "User profile, settings, preferences",
-      endpoints: [
+      description: "Hồ sơ người dùng, cài đặt, tùy chọn",
+      methods: [
         {
           method: "GET",
           path: "/api/v1/users/profile",
-          title: "Get Profile",
+          title: "Lấy thông tin profile",
           description: "Lấy thông tin profile của user hiện tại",
-          params: [],
           headers: [
             {
               name: "Authorization",
@@ -807,12 +1001,13 @@ const APIDocumentation: React.FC = () => {
               required: true,
             },
           ],
+          params: [],
           response: `{
   "success": true,
   "data": {
     "id": 12345,
     "email": "user@example.com",
-    "name": "John Doe",
+    "name": "Nguyễn Văn A",
     "avatar": "https://cdn.templatemarket.com/avatars/12345.jpg",
     "phone": "+84971386588",
     "role": "user",
@@ -820,12 +1015,20 @@ const APIDocumentation: React.FC = () => {
     "preferences": {
       "newsletter": true,
       "notifications": true,
-      "theme": "dark"
+      "theme": "dark",
+      "language": "vi"
     },
     "stats": {
       "purchases": 15,
       "downloads": 45,
-      "reviews": 8
+      "reviews": 8,
+      "wishlist_items": 12
+    },
+    "billing_info": {
+      "address": "123 Đường ABC",
+      "city": "Hà Nội",
+      "country": "VN",
+      "postal_code": "100000"
     },
     "created_at": "2023-06-15T09:20:00Z",
     "last_login": "2024-01-15T10:30:00Z"
@@ -835,42 +1038,15 @@ const APIDocumentation: React.FC = () => {
             {
               code: 401,
               message: "Unauthorized",
-              description: "Missing or invalid token",
-            },
-          ],
-          examples: [
-            {
-              title: "Get User Profile",
-              request: `curl -X GET https://api.templatemarket.com/v1/users/profile \\
-  -H "Authorization: Bearer your-token"`,
+              description: "Token bị thiếu hoặc không hợp lệ",
             },
           ],
         },
         {
           method: "PUT",
           path: "/api/v1/users/profile",
-          title: "Update Profile",
-          description: "Cập nhật thông tin profile",
-          params: [
-            {
-              name: "name",
-              type: "string",
-              required: false,
-              description: "Full name",
-            },
-            {
-              name: "phone",
-              type: "string",
-              required: false,
-              description: "Phone number",
-            },
-            {
-              name: "preferences",
-              type: "object",
-              required: false,
-              description: "User preferences",
-            },
-          ],
+          title: "Cập nhật profile",
+          description: "Cập nhật thông tin profile người dùng",
           headers: [
             {
               name: "Authorization",
@@ -879,27 +1055,55 @@ const APIDocumentation: React.FC = () => {
             },
             { name: "Content-Type", value: "application/json", required: true },
           ],
+          params: [
+            {
+              name: "name",
+              type: "string",
+              required: false,
+              description: "Họ tên đầy đủ",
+            },
+            {
+              name: "phone",
+              type: "string",
+              required: false,
+              description: "Số điện thoại",
+            },
+            {
+              name: "preferences",
+              type: "object",
+              required: false,
+              description: "Tùy chọn người dùng",
+            },
+          ],
           requestBody: `{
-  "name": "John Smith",
+  "name": "Nguyễn Văn B",
   "phone": "+84971386588",
   "preferences": {
     "newsletter": false,
     "notifications": true,
-    "theme": "light"
+    "theme": "light",
+    "language": "vi"
+  },
+  "billing_info": {
+    "address": "456 Đường XYZ",
+    "city": "TP.HCM",
+    "country": "VN",
+    "postal_code": "700000"
   }
 }`,
           response: `{
   "success": true,
-  "message": "Profile updated successfully",
+  "message": "Profile đã được cập nhật thành công",
   "data": {
     "id": 12345,
     "email": "user@example.com",
-    "name": "John Smith",
+    "name": "Nguyễn Văn B",
     "phone": "+84971386588",
     "preferences": {
       "newsletter": false,
       "notifications": true,
-      "theme": "light"
+      "theme": "light",
+      "language": "vi"
     },
     "updated_at": "2024-01-15T14:30:00Z"
   }
@@ -908,21 +1112,12 @@ const APIDocumentation: React.FC = () => {
             {
               code: 400,
               message: "Bad Request",
-              description: "Invalid input data",
+              description: "Dữ liệu đầu vào không hợp lệ",
             },
             {
               code: 401,
               message: "Unauthorized",
-              description: "Missing or invalid token",
-            },
-          ],
-          examples: [
-            {
-              title: "Update User Profile",
-              request: `curl -X PUT https://api.templatemarket.com/v1/users/profile \\
-  -H "Authorization: Bearer your-token" \\
-  -H "Content-Type: application/json" \\
-  -d '{"name": "John Smith", "phone": "+84971386588"}'`,
+              description: "Token bị thiếu hoặc không hợp lệ",
             },
           ],
         },
@@ -942,7 +1137,6 @@ class TemplateMarketAPI {
     this.token = null;
   }
 
-  // Helper method for making requests
   async makeRequest(endpoint, options = {}) {
     const url = \`\${this.baseURL}\${endpoint}\`;
     const headers = {
@@ -955,13 +1149,8 @@ class TemplateMarketAPI {
       headers.Authorization = \`Bearer \${this.token}\`;
     }
 
-    const config = {
-      headers,
-      ...options
-    };
-
     try {
-      const response = await fetch(url, config);
+      const response = await fetch(url, { headers, ...options });
       const data = await response.json();
       
       if (!response.ok) {
@@ -981,7 +1170,6 @@ class TemplateMarketAPI {
       method: 'POST',
       body: JSON.stringify({ email, password })
     });
-    
     this.token = data.data.token;
     return data;
   }
@@ -993,6 +1181,15 @@ class TemplateMarketAPI {
     });
   }
 
+  async refreshToken(refreshToken) {
+    const data = await this.makeRequest('/auth/refresh', {
+      method: 'POST',
+      body: JSON.stringify({ refresh_token: refreshToken })
+    });
+    this.token = data.data.token;
+    return data;
+  }
+
   // Products
   async getProducts(params = {}) {
     const queryParams = new URLSearchParams(params);
@@ -1001,6 +1198,10 @@ class TemplateMarketAPI {
 
   async getProduct(id) {
     return await this.makeRequest(\`/products/\${id}\`);
+  }
+
+  async searchProducts(query, filters = {}) {
+    return await this.getProducts({ search: query, ...filters });
   }
 
   // Orders
@@ -1019,7 +1220,11 @@ class TemplateMarketAPI {
     return await this.makeRequest(\`/orders?\${queryParams}\`);
   }
 
-  // User Profile
+  async getOrder(orderId) {
+    return await this.makeRequest(\`/orders/\${orderId}\`);
+  }
+
+  // User
   async getProfile() {
     return await this.makeRequest('/users/profile');
   }
@@ -1030,17 +1235,37 @@ class TemplateMarketAPI {
       body: JSON.stringify(data)
     });
   }
+
+  async getDownloads() {
+    return await this.makeRequest('/users/downloads');
+  }
 }
 
 // Usage Example
 const api = new TemplateMarketAPI('your-api-key');
 
-// Login and get products
 async function example() {
   try {
+    // Login
     await api.login('user@example.com', 'password123');
-    const products = await api.getProducts({ category: 'react', limit: 10 });
+    
+    // Get products
+    const products = await api.getProducts({ 
+      category: 'react', 
+      limit: 10,
+      sort: 'popularity' 
+    });
     console.log('Products:', products.data.products);
+    
+    // Create order
+    const order = await api.createOrder([
+      { id: 1, quantity: 1 }
+    ], 'stripe');
+    console.log('Order created:', order.data.order_id);
+    
+    // Get profile
+    const profile = await api.getProfile();
+    console.log('User:', profile.data.name);
   } catch (error) {
     console.error('Error:', error.message);
   }
@@ -1062,7 +1287,13 @@ class TemplateMarketAPI:
             'X-API-Key': api_key
         })
     
-    def _make_request(self, method: str, endpoint: str, data: Dict = None, params: Dict = None) -> Dict:
+    def _make_request(
+        self, 
+        method: str, 
+        endpoint: str, 
+        data: Dict = None, 
+        params: Dict = None
+    ) -> Dict:
         """Helper method for making API requests"""
         url = f"{self.base_url}{endpoint}"
         
@@ -1125,12 +1356,24 @@ class TemplateMarketAPI:
         return self.get_products(**params)
     
     # Order methods
-    def create_order(self, products: List[Dict], payment_method: str) -> Dict:
+    def create_order(
+        self, 
+        products: List[Dict], 
+        payment_method: str,
+        billing_info: Dict = None,
+        coupon_code: str = None
+    ) -> Dict:
         """Create new order"""
-        return self._make_request('POST', '/orders', {
+        payload = {
             'products': products,
             'payment_method': payment_method
-        })
+        }
+        if billing_info:
+            payload['billing_info'] = billing_info
+        if coupon_code:
+            payload['coupon_code'] = coupon_code
+            
+        return self._make_request('POST', '/orders', payload)
     
     def get_orders(self, **params) -> Dict:
         """Get user orders"""
@@ -1163,17 +1406,42 @@ if __name__ == "__main__":
         login_result = api.login('user@example.com', 'your-password')
         print(f"Login successful: {login_result['data']['user']['name']}")
         
-        # Get products
-        products = api.get_products(category='react', limit=10, sort='popularity')
+        # Get products with filters
+        products = api.get_products(
+            category='react',
+            limit=10,
+            sort='popularity',
+            order='desc'
+        )
         print(f"Found {products['data']['pagination']['total']} products")
         
-        # Search products
+        # Search for specific products
         search_results = api.search_products('dashboard', category='react')
         print(f"Search found {len(search_results['data']['products'])} results")
+        
+        # Create an order
+        order = api.create_order(
+            products=[{'id': 1, 'quantity': 1}],
+            payment_method='stripe',
+            billing_info={
+                'name': 'Nguyễn Văn A',
+                'email': 'nguyenvana@example.com',
+                'city': 'Hà Nội',
+                'country': 'VN'
+            }
+        )
+        print(f"Order created: {order['data']['order_id']}")
         
         # Get user profile
         profile = api.get_profile()
         print(f"User: {profile['data']['name']} ({profile['data']['email']})")
+        
+        # Update profile
+        updated = api.update_profile(
+            name='Nguyễn Văn B',
+            preferences={'theme': 'dark', 'language': 'vi'}
+        )
+        print(f"Profile updated: {updated['message']}")
         
     except Exception as e:
         print(f"Error: {e}")`,
@@ -1204,7 +1472,8 @@ curl -X POST "$BASE_URL/auth/register" \\
   -d '{
     "email": "newuser@example.com",
     "password": "SecurePass123!",
-    "name": "John Doe"
+    "name": "Nguyễn Văn A",
+    "phone": "+84971386588"
   }'
 
 # Refresh token
@@ -1231,8 +1500,8 @@ curl -X GET "$BASE_URL/products?search=dashboard&category=react&price_min=10&pri
 curl -X GET "$BASE_URL/products/123" \\
   -H "Authorization: Bearer your_access_token"
 
-# Get product with reviews
-curl -X GET "$BASE_URL/products/123?include=reviews,author,files" \\
+# Get product with full details
+curl -X GET "$BASE_URL/products/123?include=reviews,author,files,changelog" \\
   -H "Authorization: Bearer your_access_token"
 
 # ================================
@@ -1250,12 +1519,14 @@ curl -X POST "$BASE_URL/orders" \\
     ],
     "payment_method": "stripe",
     "billing_info": {
-      "name": "John Doe",
-      "email": "john@example.com",
-      "address": "123 Main St",
-      "city": "New York",
-      "country": "US"
-    }
+      "name": "Nguyễn Văn A",
+      "email": "nguyenvana@example.com",
+      "address": "123 Đường ABC",
+      "city": "Hà Nội",
+      "country": "VN",
+      "postal_code": "100000"
+    },
+    "coupon_code": "NEWYEAR2024"
   }'
 
 # Get user orders
@@ -1284,12 +1555,18 @@ curl -X PUT "$BASE_URL/users/profile" \\
   -H "Content-Type: application/json" \\
   -H "Authorization: Bearer your_access_token" \\
   -d '{
-    "name": "John Smith",
-    "phone": "+1234567890",
+    "name": "Nguyễn Văn B",
+    "phone": "+84971386588",
     "preferences": {
-      "newsletter": true,
-      "notifications": false,
-      "theme": "dark"
+      "newsletter": false,
+      "notifications": true,
+      "theme": "dark",
+      "language": "vi"
+    },
+    "billing_info": {
+      "address": "456 Đường XYZ",
+      "city": "TP.HCM",
+      "country": "VN"
     }
   }'
 
@@ -1315,1612 +1592,936 @@ curl -X GET "$BASE_URL/users/profile" \\
 curl -X POST "$BASE_URL/auth/login" \\
   -H "Content-Type: application/json" \\
   -H "X-API-Key: $API_KEY" \\
-  -d '{"email": "user@example.com", "password": "wrong_password"}' \\
-  -w "HTTP Status: %{http_code}\\nRate Limit Remaining: %{header_X-RateLimit-Remaining}\\n"`,
+  -d '{...}' \\
+  -w "HTTP Status: %{http_code}\\nRate Limit Remaining: %{header_X-RateLimit-Remaining}\\n"
+
+# Get rate limit info
+curl -X GET "$BASE_URL/rate-limit" \\
+  -H "Authorization: Bearer your_access_token"`,
   };
+
+  const statusCodes = [
+    {
+      code: 200,
+      message: "OK",
+      description: "Request thành công",
+      color: "text-green-600",
+    },
+    {
+      code: 201,
+      message: "Created",
+      description: "Tạo resource thành công",
+      color: "text-green-600",
+    },
+    {
+      code: 400,
+      message: "Bad Request",
+      description: "Tham số request không hợp lệ",
+      color: "text-orange-600",
+    },
+    {
+      code: 401,
+      message: "Unauthorized",
+      description: "Yêu cầu xác thực",
+      color: "text-red-600",
+    },
+    {
+      code: 403,
+      message: "Forbidden",
+      description: "Không đủ quyền truy cập",
+      color: "text-red-600",
+    },
+    {
+      code: 404,
+      message: "Not Found",
+      description: "Không tìm thấy resource",
+      color: "text-orange-600",
+    },
+    {
+      code: 422,
+      message: "Unprocessable Entity",
+      description: "Lỗi validation",
+      color: "text-orange-600",
+    },
+    {
+      code: 429,
+      message: "Too Many Requests",
+      description: "Vượt rate limit",
+      color: "text-red-600",
+    },
+    {
+      code: 500,
+      message: "Internal Server Error",
+      description: "Lỗi server",
+      color: "text-red-600",
+    },
+    {
+      code: 503,
+      message: "Service Unavailable",
+      description: "Dịch vụ tạm thời không khả dụng",
+      color: "text-red-600",
+    },
+  ];
 
   const rateLimits = [
     {
       tier: "Free",
-      requests: "1,000/month",
+      requests: "1,000/tháng",
+      price: "Miễn phí",
       features: ["Basic endpoints", "Email support", "Community access"],
-      price: "Free",
-      popular: false,
-      limits: {
-        requests_per_hour: 100,
-        requests_per_month: 1000,
-        concurrent_requests: 5,
-      },
+      limits: { hour: "100", month: "1,000", concurrent: "5" },
     },
     {
       tier: "Developer",
-      requests: "50,000/month",
+      requests: "50,000/tháng",
+      price: "$19/tháng",
+      popular: true,
       features: [
         "All endpoints",
         "Webhooks",
         "Priority support",
         "Analytics dashboard",
       ],
-      price: "$19/month",
-      popular: true,
-      limits: {
-        requests_per_hour: 2500,
-        requests_per_month: 50000,
-        concurrent_requests: 20,
-      },
+      limits: { hour: "2,500", month: "50,000", concurrent: "20" },
     },
     {
       tier: "Business",
-      requests: "200,000/month",
+      requests: "200,000/tháng",
+      price: "$49/tháng",
       features: [
         "Everything in Developer",
         "Custom integrations",
         "SLA guarantee",
         "Dedicated support",
       ],
-      price: "$49/month",
-      popular: false,
-      limits: {
-        requests_per_hour: 10000,
-        requests_per_month: 200000,
-        concurrent_requests: 50,
-      },
+      limits: { hour: "10,000", month: "200,000", concurrent: "50" },
     },
     {
       tier: "Enterprise",
       requests: "Unlimited",
+      price: "Liên hệ",
       features: [
         "Everything in Business",
         "On-premise deployment",
         "Custom SLA",
         "24/7 phone support",
       ],
-      price: "Contact us",
-      popular: false,
       limits: {
-        requests_per_hour: "Unlimited",
-        requests_per_month: "Unlimited",
-        concurrent_requests: "Unlimited",
+        hour: "Unlimited",
+        month: "Unlimited",
+        concurrent: "Unlimited",
       },
-    },
-  ];
-
-  const statusCodes = [
-    { code: 200, message: "OK", description: "Request successful" },
-    {
-      code: 201,
-      message: "Created",
-      description: "Resource created successfully",
-    },
-    {
-      code: 400,
-      message: "Bad Request",
-      description: "Invalid request parameters",
-    },
-    {
-      code: 401,
-      message: "Unauthorized",
-      description: "Authentication required",
-    },
-    {
-      code: 403,
-      message: "Forbidden",
-      description: "Insufficient permissions",
-    },
-    { code: 404, message: "Not Found", description: "Resource not found" },
-    {
-      code: 422,
-      message: "Unprocessable Entity",
-      description: "Validation errors",
-    },
-    {
-      code: 429,
-      message: "Too Many Requests",
-      description: "Rate limit exceeded",
-    },
-    {
-      code: 500,
-      message: "Internal Server Error",
-      description: "Server error occurred",
-    },
-    {
-      code: 503,
-      message: "Service Unavailable",
-      description: "Service temporarily unavailable",
     },
   ];
 
   const faqs = [
     {
-      id: "faq-1",
       question: "Làm sao để lấy API key?",
       answer:
-        "Đăng nhập vào tài khoản Template Market, vào phần Developer Settings, và tạo API key mới. Bạn có thể tạo nhiều keys cho các ứng dụng khác nhau và quản lý permissions cho từng key.",
+        "Đăng nhập vào dashboard tại https://dashboard.templatemarket.com, vào phần Settings > API Keys, sau đó click 'Generate New Key'. Lưu key an toàn vì nó chỉ hiển thị một lần duy nhất. Bạn có thể tạo nhiều keys và revoke bất cứ lúc nào.",
     },
     {
-      id: "faq-2",
-      question: "API có rate limit không?",
+      question: "Rate limit là bao nhiêu?",
       answer:
-        "Có, mỗi gói có rate limit khác nhau. Gói Free: 100 requests/hour, Developer: 2,500/hour. Bạn có thể xem rate limit còn lại trong response headers: X-RateLimit-Remaining.",
+        "Mỗi tier có rate limit khác nhau: Free tier: 100 requests/giờ, Developer: 2,500 requests/giờ, Business: 10,000 requests/giờ, Enterprise: Unlimited. Headers trả về bao gồm X-RateLimit-Remaining và X-RateLimit-Reset để bạn track usage.",
     },
     {
-      id: "faq-3",
-      question: "Có thể test API miễn phí không?",
-      answer:
-        "Có, bạn có thể đăng ký gói Free để test API với 1,000 requests/month. Không cần thẻ tín dụng, chỉ cần email xác thực.",
-    },
-    {
-      id: "faq-4",
       question: "API có hỗ trợ webhooks không?",
       answer:
-        "Có, từ gói Developer trở lên có hỗ trợ webhooks cho các events: order.completed, user.registered, product.updated. Bạn có thể configure trong dashboard.",
+        "Có, từ Developer tier trở lên bạn có thể set up webhooks để nhận thông báo real-time về các events như: new_purchase, download_complete, payment_failed, refund_processed. Configure webhooks trong dashboard Settings.",
     },
     {
-      id: "faq-5",
-      question: "Làm sao xử lý lỗi 401 Unauthorized?",
+      question: "Làm sao để test API?",
       answer:
-        "Lỗi 401 thường do: 1) API key không đúng, 2) Token hết hạn, 3) Thiếu header Authorization. Hãy kiểm tra token và làm mới nếu cần.",
+        "Bạn có thể sử dụng API tester ngay trên trang này, hoặc dùng công cụ như Postman, Insomnia, HTTPie. Chúng tôi cũng cung cấp Sandbox environment tại https://sandbox-api.templatemarket.com để test mà không ảnh hưởng production data.",
+    },
+    {
+      question: "Token expires sau bao lâu?",
+      answer:
+        "Access token có thời hạn 1 giờ, Refresh token có thời hạn 30 ngày. Bạn nên implement auto-refresh logic trong app để maintain session. Response sẽ trả về expires_in field để bạn biết thời gian còn lại.",
+    },
+    {
+      question: "API có support CORS không?",
+      answer:
+        "Có, API support CORS cho tất cả origins được whitelist trong dashboard settings. Bạn có thể thêm multiple domains. Headers CORS bao gồm Access-Control-Allow-Origin, Access-Control-Allow-Methods, Access-Control-Allow-Headers.",
+    },
+    {
+      question: "Làm sao để handle errors?",
+      answer:
+        "Tất cả errors trả về format chuẩn với structure: {success: false, error: {code, message, details}}. HTTP status codes tuân theo chuẩn RESTful. Check status code và parse error object để handle appropriately trong app.",
+    },
+    {
+      question: "API có versioning không?",
+      answer:
+        "Có, hiện tại đang ở v1. URL pattern: /api/v1/... Khi có breaking changes, chúng tôi sẽ release v2 và maintain v1 ít nhất 12 tháng. Bạn sẽ nhận email notification trước khi có major version changes.",
     },
   ];
 
-  const changelog = [
-    {
-      version: "v1.3.0",
-      date: "2024-01-15",
-      type: "major",
-      changes: [
-        "Added WebSocket support for real-time updates",
-        "New webhook endpoints for order events",
-        "Improved error handling with detailed error codes",
-        "Added product reviews API endpoints",
-      ],
-    },
-    {
-      version: "v1.2.5",
-      date: "2024-01-10",
-      type: "minor",
-      changes: [
-        "Fixed pagination bug in products endpoint",
-        "Added new filter options for products",
-        "Improved API response times by 25%",
-        "Updated authentication token expiry to 24 hours",
-      ],
-    },
-    {
-      version: "v1.2.0",
-      date: "2024-01-05",
-      type: "major",
-      changes: [
-        "Added user profile management endpoints",
-        "Implemented OAuth 2.0 authentication",
-        "Added support for multiple payment methods",
-        "Introduced API versioning",
-      ],
-    },
-  ];
-
-  const copyToClipboard = (text: string, id: string) => {
-    navigator.clipboard.writeText(text);
+  const copyToClipboard = useCallback((code: string, id: string) => {
+    navigator.clipboard.writeText(code);
     setCopiedCode(id);
+    toast({
+      title: "Đã copy!",
+      description: "Code đã được copy vào clipboard",
+    });
     setTimeout(() => setCopiedCode(null), 2000);
-  };
+  }, []);
 
-  const handleTestRequest = async () => {
+  const handleTestAPI = useCallback(async () => {
+    if (!testApiKey || !testEndpoint) {
+      toast({
+        title: "Lỗi",
+        description: "Vui lòng nhập API key và endpoint",
+        variant: "destructive",
+      });
+      return;
+    }
+
     setIsTestLoading(true);
+    setTestResponse("Đang gửi request...");
+
+    // Simulate API call
     setTimeout(() => {
       setTestResponse(`{
   "success": true,
-  "data": {
-    "message": "Test request successful",
-    "timestamp": "${new Date().toISOString()}"
-  }
+  "message": "Test thành công",
+  "timestamp": "${new Date().toISOString()}",
+  "endpoint": "${testEndpoint}",
+  "rate_limit": {
+    "remaining": 999,
+    "limit": 1000,
+    "reset_at": "${new Date(Date.now() + 3600000).toISOString()}"
+  },
+  "response_time": "87ms"
 }`);
       setIsTestLoading(false);
+      toast({ title: "Thành công!", description: "API test hoàn tất" });
     }, 1500);
-  };
+  }, [testApiKey, testEndpoint]);
 
-  const handleFeedbackSubmit = (e: React.FormEvent) => {
-    e.preventDefault();
-    setShowFeedbackSuccess(true);
-    setFeedbackForm({ name: "", email: "", message: "" });
-    setTimeout(() => setShowFeedbackSuccess(false), 3000);
-  };
+  const ReadingProgress = () => (
+    <div className="fixed top-0 left-0 w-full h-1 bg-gray-200 z-50">
+      <motion.div
+        className={`h-full bg-gradient-to-r ${softPinkTheme.primaryGradient}`}
+        style={{ width: `${scrollProgress}%` }}
+      />
+    </div>
+  );
 
-  const filteredEndpoints = endpoints
-    .filter(
-      (category) => filterCategory === "all" || category.id === filterCategory,
-    )
-    .map((category) => ({
-      ...category,
-      endpoints: category.endpoints.filter(
-        (endpoint) =>
-          endpoint.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
-          endpoint.description
-            .toLowerCase()
-            .includes(searchTerm.toLowerCase()) ||
-          endpoint.path.toLowerCase().includes(searchTerm.toLowerCase()),
-      ),
-    }))
-    .filter((category) => category.endpoints.length > 0);
+  const FloatingNav = () => (
+    <AnimatePresence>
+      {showFloatingNav && (
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          exit={{ opacity: 0, y: 20 }}
+          className="fixed bottom-8 right-8 z-40"
+        >
+          <Button
+            onClick={() => window.scrollTo({ top: 0, behavior: "smooth" })}
+            className={`bg-gradient-to-r ${softPinkTheme.primaryGradient} text-white w-12 h-12 rounded-full`}
+          >
+            <ArrowUp className="w-5 h-5" />
+          </Button>
+        </motion.div>
+      )}
+    </AnimatePresence>
+  );
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-50 via-blue-50 to-purple-50 dark:from-slate-900 dark:via-slate-800 dark:to-purple-900">
+    <>
       <Helmet>
         <title>
-          🚀 API Documentation v1.3 | Template Market - Complete Developer Guide
+          API Documentation | Template Market - RESTful API cho Developers
         </title>
         <meta
           name="description"
-          content="Comprehensive API documentation for Template Market. RESTful API, OAuth 2.0, code examples, live testing, error handling, and developer tools."
+          content="Tài liệu API đầy đủ của Template Market. RESTful API, authentication, endpoints, code examples JavaScript/Python/cURL, webhooks, rate limits."
         />
+        <meta
+          name="keywords"
+          content="api documentation, rest api, template market api, developer docs, authentication, webhooks"
+        />
+        <link rel="canonical" href="https://templatemarket.com/api" />
       </Helmet>
 
-      {/* Enhanced Hero Section */}
-      <section className="relative py-24 overflow-hidden">
-        <div className="container relative z-10 px-4 mx-auto text-center">
-          <motion.div
-            initial={{ opacity: 0, y: 40 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.8 }}
-            className="max-w-5xl mx-auto"
-          >
+      <ReadingProgress />
+      <FloatingNav />
+
+      <div
+        className={`min-h-screen bg-gradient-to-br ${softPinkTheme.pageBackground} overflow-hidden relative`}
+      >
+        <div className="fixed inset-0 z-0">
+          <StarBackgroundPattern />
+        </div>
+        <FloatingIcons />
+
+        {/* HERO */}
+        <motion.section
+          className="relative py-20 lg:py-32 overflow-hidden z-10"
+          style={{ y: headerY, opacity: headerOpacity }}
+        >
+          <div className="container relative z-10 px-4 mx-auto text-center">
             <motion.div
-              whileHover={{ scale: 1.05, rotate: 5 }}
-              className="flex items-center justify-center w-28 h-28 mx-auto mb-8 bg-gradient-to-r from-indigo-500 via-purple-500 to-pink-500 rounded-full shadow-2xl"
+              initial={{ opacity: 0, y: 40 }}
+              animate={{ opacity: 1, y: 0 }}
+              className="max-w-5xl mx-auto"
             >
-              <Code className="w-14 h-14 text-white" />
-            </motion.div>
-
-            <h1 className="mb-8 text-5xl font-bold md:text-7xl leading-tight">
-              <span className="text-transparent bg-gradient-to-r from-indigo-600 via-purple-600 to-pink-500 bg-clip-text">
-                API Documentation
-              </span>
-              <br />
-              <span className="text-2xl md:text-3xl font-medium text-muted-foreground">
-                Build powerful integrations with Template Market
-              </span>
-            </h1>
-
-            <p className="mb-12 text-xl md:text-2xl text-muted-foreground leading-relaxed max-w-3xl mx-auto">
-              Comprehensive RESTful API with
-              <span className="text-transparent bg-gradient-to-r from-indigo-600 to-purple-600 bg-clip-text font-semibold">
-                {" "}
-                OAuth 2.0 authentication
-              </span>
-              ,
-              <span className="text-transparent bg-gradient-to-r from-purple-600 to-pink-600 bg-clip-text font-semibold">
-                {" "}
-                real-time webhooks
-              </span>
-              , and
-              <span className="text-transparent bg-gradient-to-r from-pink-600 to-red-600 bg-clip-text font-semibold">
-                {" "}
-                enterprise-grade security
-              </span>
-            </p>
-
-            <div className="flex flex-wrap items-center justify-center gap-4 mb-12">
-              <Badge
-                variant="secondary"
-                className="px-6 py-3 text-base bg-white/80 backdrop-blur-sm shadow-lg"
-              >
-                <Zap className="w-5 h-5 mr-3 text-indigo-600" />
-                REST API v1.3
-              </Badge>
-              <Badge
-                variant="secondary"
-                className="px-6 py-3 text-base bg-white/80 backdrop-blur-sm shadow-lg"
-              >
-                <Shield className="w-5 h-5 mr-3 text-green-600" />
-                OAuth 2.0 + JWT
-              </Badge>
-              <Badge
-                variant="secondary"
-                className="px-6 py-3 text-base bg-white/80 backdrop-blur-sm shadow-lg"
-              >
-                <Globe className="w-5 h-5 mr-3 text-blue-600" />
-                JSON API
-              </Badge>
-              <Badge
-                variant="secondary"
-                className="px-6 py-3 text-base bg-white/80 backdrop-blur-sm shadow-lg"
-              >
-                <Webhook className="w-5 h-5 mr-3 text-purple-600" />
-                Webhooks
-              </Badge>
-            </div>
-
-            {/* Stats Grid */}
-            <div className="grid grid-cols-2 md:grid-cols-4 gap-6">
-              {stats.map((stat, index) => (
-                <motion.div
-                  key={index}
-                  initial={{ opacity: 0, y: 20 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  transition={{ delay: 0.2 * index }}
-                  whileHover={{ scale: 1.05 }}
-                  className="bg-white/80 backdrop-blur-sm rounded-2xl p-6 shadow-lg border border-white/20 hover:shadow-xl transition-all duration-300"
-                >
-                  <stat.icon className={`w-8 h-8 mx-auto mb-3 ${stat.color}`} />
-                  <div className="text-3xl font-bold text-gray-800 mb-2">
-                    {stat.value}
-                  </div>
-                  <div className="text-sm text-muted-foreground">
-                    {stat.label}
-                  </div>
-                </motion.div>
-              ))}
-            </div>
-          </motion.div>
-        </div>
-
-        {/* Enhanced Background Elements */}
-        <div className="absolute inset-0 overflow-hidden">
-          {[...Array(8)].map((_, i) => (
-            <motion.div
-              key={i}
-              animate={{
-                x: [0, 50, 0],
-                y: [0, -30, 0],
-                opacity: [0.1, 0.3, 0.1],
-                scale: [1, 1.2, 1],
-              }}
-              transition={{
-                duration: 10 + i * 2,
-                repeat: Infinity,
-                delay: i * 2,
-              }}
-              className={`absolute w-32 h-32 rounded-full blur-xl mix-blend-multiply ${
-                i % 4 === 0
-                  ? "bg-indigo-300"
-                  : i % 4 === 1
-                    ? "bg-purple-300"
-                    : i % 4 === 2
-                      ? "bg-pink-300"
-                      : "bg-blue-300"
-              }`}
-              style={{
-                top: `${10 + i * 12}%`,
-                left: `${5 + i * 12}%`,
-              }}
-            />
-          ))}
-        </div>
-      </section>
-
-      <div className="container px-4 pb-20 mx-auto">
-        {/* Enhanced API Features Grid */}
-        <motion.section
-          initial={{ opacity: 0, y: 30 }}
-          whileInView={{ opacity: 1, y: 0 }}
-          viewport={{ once: true }}
-          className="mb-20"
-        >
-          <div className="text-center mb-12">
-            <h2 className="text-4xl font-bold mb-4">🚀 API Features</h2>
-            <p className="text-xl text-muted-foreground">
-              Everything you need to build powerful integrations
-            </p>
-          </div>
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
-            {apiFeatures.map((feature, index) => (
               <motion.div
-                key={index}
-                initial={{ opacity: 0, y: 20 }}
-                whileInView={{ opacity: 1, y: 0 }}
-                viewport={{ once: true }}
-                transition={{ delay: index * 0.1 }}
-                whileHover={{ y: -10, scale: 1.02 }}
+                whileHover={{ scale: 1.1, rotate: 5 }}
+                className={`flex items-center justify-center w-28 h-28 mx-auto mb-8 bg-gradient-to-r ${softPinkTheme.primaryGradient} rounded-3xl ${softPinkTheme.glow}`}
               >
-                <Card className="h-full bg-white/80 dark:bg-slate-800/80 backdrop-blur-sm border-0 shadow-xl overflow-hidden">
-                  <div className={`h-2 bg-gradient-to-r ${feature.color}`} />
-                  <CardContent className="p-8">
-                    <div className="flex items-start gap-6">
-                      <motion.div
-                        whileHover={{ scale: 1.1, rotate: 5 }}
-                        className={`flex items-center justify-center w-16 h-16 bg-gradient-to-r ${feature.color} rounded-2xl shadow-lg`}
-                      >
-                        <feature.icon className="w-8 h-8 text-white" />
-                      </motion.div>
-                      <div className="flex-1">
-                        <h3 className="text-xl font-bold mb-3">
-                          {feature.title}
-                        </h3>
-                        <p className="text-muted-foreground mb-4 leading-relaxed">
-                          {feature.description}
-                        </p>
-                        <div className="space-y-2">
-                          {feature.features.map((item, idx) => (
-                            <div
-                              key={idx}
-                              className="flex items-center gap-2 text-sm"
-                            >
-                              <CheckCircle className="w-4 h-4 text-green-500" />
-                              <span>{item}</span>
-                            </div>
-                          ))}
-                        </div>
-                      </div>
-                    </div>
-                  </CardContent>
-                </Card>
+                <Code className="w-14 h-14 text-white" />
               </motion.div>
-            ))}
-          </div>
-        </motion.section>
 
-        {/* Enhanced Quick Start */}
-        <motion.section
-          initial={{ opacity: 0, y: 30 }}
-          whileInView={{ opacity: 1, y: 0 }}
-          viewport={{ once: true }}
-          className="mb-20"
-        >
-          <Card className="bg-gradient-to-r from-indigo-50 to-purple-50 dark:from-indigo-900/20 dark:to-purple-900/20 border-0 shadow-2xl">
-            <CardHeader>
-              <CardTitle className="flex items-center space-x-3 text-2xl">
-                <PlayCircle className="w-8 h-8 text-indigo-600" />
-                <span>🚀 Quick Start Guide</span>
-              </CardTitle>
-            </CardHeader>
-            <CardContent className="space-y-8">
-              <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
-                {[
-                  {
-                    icon: Key,
-                    step: "1",
-                    title: "Get API Key",
-                    description:
-                      "Sign up and generate your API key in Developer Settings",
-                    color: "bg-indigo-500",
-                  },
-                  {
-                    icon: Send,
-                    step: "2",
-                    title: "Make Request",
-                    description: "Send authenticated requests to our endpoints",
-                    color: "bg-purple-500",
-                  },
-                  {
-                    icon: CheckCircle,
-                    step: "3",
-                    title: "Handle Response",
-                    description:
-                      "Process JSON responses and handle errors gracefully",
-                    color: "bg-green-500",
-                  },
-                ].map((step, index) => (
+              <h1 className="mb-8 text-5xl lg:text-7xl font-bold">
+                <span
+                  className={`text-transparent bg-gradient-to-r ${softPinkTheme.heroText} bg-clip-text`}
+                >
+                  API Documentation
+                </span>
+                <br />
+                <span className="text-2xl lg:text-3xl font-medium text-gray-700">
+                  RESTful API cho developers
+                </span>
+              </h1>
+
+              <p className="mb-12 text-xl lg:text-2xl text-gray-600 max-w-4xl mx-auto">
+                Tích hợp mạnh mẽ với Template Market API - Đơn giản, nhanh chóng
+                và đáng tin cậy
+              </p>
+
+              {/* BADGES */}
+              <div className="flex flex-wrap justify-center gap-4 mb-12">
+                <Badge
+                  className={`px-6 py-3 text-base bg-gradient-to-r ${softPinkTheme.primaryGradient} text-white border-0`}
+                >
+                  <Zap className="w-5 h-5 mr-2" />
+                  RESTful API
+                </Badge>
+                <Badge
+                  className={`px-6 py-3 text-base bg-gradient-to-r ${softPinkTheme.secondaryGradient} text-white border-0`}
+                >
+                  <Shield className="w-5 h-5 mr-2" />
+                  Secure OAuth2
+                </Badge>
+                <Badge className="px-6 py-3 text-base bg-white/40 backdrop-blur-md border border-white/60">
+                  <BookOpen className="w-5 h-5 mr-2 text-red-600" />
+                  <span className="font-semibold text-gray-800">Full Docs</span>
+                </Badge>
+              </div>
+
+              {/* STATS */}
+              <div className="grid grid-cols-2 lg:grid-cols-4 gap-6">
+                {stats.map((stat, index) => (
                   <motion.div
                     key={index}
-                    initial={{ opacity: 0, x: -20 }}
-                    whileInView={{ opacity: 1, x: 0 }}
-                    viewport={{ once: true }}
-                    transition={{ delay: index * 0.2 }}
-                    className="flex items-start space-x-4"
+                    initial={{ opacity: 0, y: 30 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    transition={{ delay: 0.2 + index * 0.1 }}
+                    whileHover={{ y: -10, scale: 1.05 }}
+                    className="bg-white/60 backdrop-blur-lg rounded-2xl p-6 shadow-lg border border-white/60"
                   >
+                    <stat.icon
+                      className={`w-8 h-8 mx-auto mb-3 ${stat.color}`}
+                    />
                     <div
-                      className={`flex items-center justify-center w-12 h-12 ${step.color} text-white text-lg font-bold rounded-xl shadow-lg`}
+                      className={`text-3xl font-bold mb-2 text-transparent bg-gradient-to-r ${softPinkTheme.heroText} bg-clip-text`}
                     >
-                      {step.step}
+                      {stat.value}
                     </div>
-                    <div className="flex-1">
-                      <div className="flex items-center gap-3 mb-2">
-                        <step.icon className="w-5 h-5 text-gray-600" />
-                        <h4 className="font-bold text-lg">{step.title}</h4>
-                      </div>
-                      <p className="text-muted-foreground leading-relaxed">
-                        {step.description}
-                      </p>
+                    <div className="text-sm text-gray-600 font-medium">
+                      {stat.label}
                     </div>
                   </motion.div>
                 ))}
               </div>
-
-              <Separator />
-
-              <div className="space-y-6">
-                <h4 className="text-xl font-bold flex items-center gap-2">
-                  <Terminal className="w-6 h-6 text-indigo-600" />
-                  Base URL & Authentication
-                </h4>
-                <div className="bg-slate-900 text-green-400 p-6 rounded-xl font-mono">
-                  <div className="flex items-center justify-between mb-4">
-                    <span className="text-indigo-300">Base URL:</span>
-                    <Button
-                      variant="ghost"
-                      size="sm"
-                      onClick={() =>
-                        copyToClipboard(
-                          "https://api.templatemarket.com/v1",
-                          "base-url",
-                        )
-                      }
-                      className="text-gray-400 hover:text-white"
-                    >
-                      {copiedCode === "base-url" ? (
-                        <CheckCircle className="w-4 h-4" />
-                      ) : (
-                        <Copy className="w-4 h-4" />
-                      )}
-                    </Button>
-                  </div>
-                  <code className="block mb-4">
-                    https://api.templatemarket.com/v1
-                  </code>
-                  <div className="text-indigo-300 mb-2">Required Headers:</div>
-                  <code className="block">X-API-Key: your_api_key_here</code>
-                  <code className="block">
-                    Authorization: Bearer your_jwt_token
-                  </code>
-                </div>
-              </div>
-            </CardContent>
-          </Card>
+            </motion.div>
+          </div>
         </motion.section>
 
-        {/* Enhanced Search & Filter */}
-        <motion.section
-          initial={{ opacity: 0, y: 30 }}
-          whileInView={{ opacity: 1, y: 0 }}
-          viewport={{ once: true }}
-          className="mb-16"
-        >
-          <div className="text-center mb-8">
-            <h2 className="text-4xl font-bold mb-4">📖 API Reference</h2>
-            <p className="text-xl text-muted-foreground">
-              Comprehensive documentation for all endpoints
-            </p>
-          </div>
-          <Card className="bg-white/80 border-0 shadow-xl mb-8">
-            <CardContent className="p-6">
-              <div className="flex flex-col md:flex-row gap-4">
-                <div className="flex-1">
-                  <Label
-                    htmlFor="search"
-                    className="text-sm font-medium mb-2 block"
-                  >
-                    Search Endpoints
-                  </Label>
-                  <div className="relative">
-                    <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 w-4 h-4 text-muted-foreground" />
-                    <Input
-                      id="search"
-                      placeholder="Search endpoints, methods, or descriptions..."
-                      value={searchTerm}
-                      onChange={(e) => setSearchTerm(e.target.value)}
-                      className="pl-10"
-                    />
-                  </div>
-                </div>
-                <div className="md:w-64">
-                  <Label
-                    htmlFor="filter"
-                    className="text-sm font-medium mb-2 block"
-                  >
-                    Filter by Category
-                  </Label>
-                  <select
-                    id="filter"
-                    value={filterCategory}
-                    onChange={(e) => setFilterCategory(e.target.value)}
-                    className="w-full px-3 py-2 border border-gray-300 rounded-md bg-white"
-                  >
-                    <option value="all">All Categories</option>
-                    {endpoints.map((category) => (
-                      <option key={category.id} value={category.id}>
-                        {category.category}
-                      </option>
-                    ))}
-                  </select>
-                </div>
-              </div>
-            </CardContent>
-          </Card>
-        </motion.section>
-
-        {/* Enhanced API Endpoints */}
-        <section className="mb-20">
-          <div className="space-y-12">
-            {filteredEndpoints.map((category, categoryIndex) => (
-              <motion.div
-                key={category.id}
-                initial={{ opacity: 0, x: -30 }}
-                whileInView={{ opacity: 1, x: 0 }}
-                viewport={{ once: true }}
-                transition={{ delay: categoryIndex * 0.1 }}
-                id={`category-${category.id}`}
-              >
-                <Card className="bg-white/80 border-0 shadow-2xl overflow-hidden">
-                  <div className="h-1 bg-gradient-to-r from-indigo-400 to-purple-600" />
-                  <CardHeader className="bg-gradient-to-r from-gray-50 to-blue-50 dark:from-gray-800 dark:to-blue-900">
-                    <CardTitle className="flex items-center gap-4 text-2xl">
-                      <div
-                        className={`p-3 bg-gradient-to-r from-indigo-500 to-purple-600 rounded-xl shadow-lg`}
-                      >
-                        <category.icon className="w-8 h-8 text-white" />
-                      </div>
-                      <div>
-                        <div className="text-3xl font-bold">
-                          {category.category}
-                        </div>
-                        <div className="text-base text-muted-foreground font-normal mt-1">
-                          {category.description}
-                        </div>
-                      </div>
-                    </CardTitle>
-                  </CardHeader>
-                  <CardContent className="p-0">
-                    <div className="space-y-8 p-8">
-                      {category.endpoints.map((endpoint, endpointIndex) => (
-                        <motion.div
-                          key={endpointIndex}
-                          initial={{ opacity: 0, y: 20 }}
-                          whileInView={{ opacity: 1, y: 0 }}
-                          viewport={{ once: true }}
-                          transition={{ delay: endpointIndex * 0.1 }}
-                          className="border border-gray-200 rounded-xl shadow-md p-8 bg-gradient-to-br from-slate-50 to-indigo-50 dark:from-slate-900 dark:to-indigo-950"
-                        >
-                          {/* Endpoint Header */}
-                          <div className="flex flex-wrap items-center gap-4 mb-6">
-                            <Badge
-                              variant={
-                                endpoint.method === "GET"
-                                  ? "secondary"
-                                  : endpoint.method === "POST"
-                                    ? "default"
-                                    : endpoint.method === "PUT"
-                                      ? "outline"
-                                      : "destructive"
-                              }
-                              className="text-sm px-3 py-1 font-mono"
-                            >
-                              {endpoint.method}
-                            </Badge>
-                            <code className="bg-slate-200 dark:bg-slate-700 px-4 py-2 rounded-lg font-mono text-sm flex-1 min-w-0">
-                              {endpoint.path}
-                            </code>
-                          </div>
-
-                          <div className="mb-6">
-                            <h4 className="text-xl font-bold mb-2">
-                              {endpoint.title}
-                            </h4>
-                            <p className="text-muted-foreground leading-relaxed">
-                              {endpoint.description}
-                            </p>
-                          </div>
-
-                          {/* Request Details */}
-                          <Tabs defaultValue="params" className="w-full">
-                            <TabsList className="grid grid-cols-4 mb-6">
-                              <TabsTrigger value="params">
-                                Parameters
-                              </TabsTrigger>
-                              <TabsTrigger value="headers">Headers</TabsTrigger>
-                              <TabsTrigger value="request">Request</TabsTrigger>
-                              <TabsTrigger value="response">
-                                Response
-                              </TabsTrigger>
-                            </TabsList>
-
-                            <TabsContent value="params" className="space-y-4">
-                              {endpoint.params && endpoint.params.length > 0 ? (
-                                <div className="overflow-x-auto">
-                                  <table className="w-full border-collapse">
-                                    <thead>
-                                      <tr className="border-b">
-                                        <th className="text-left p-3 font-semibold">
-                                          Parameter
-                                        </th>
-                                        <th className="text-left p-3 font-semibold">
-                                          Type
-                                        </th>
-                                        <th className="text-left p-3 font-semibold">
-                                          Required
-                                        </th>
-                                        <th className="text-left p-3 font-semibold">
-                                          Description
-                                        </th>
-                                      </tr>
-                                    </thead>
-                                    <tbody>
-                                      {endpoint.params.map((param, idx) => (
-                                        <tr
-                                          key={idx}
-                                          className="border-b hover:bg-gray-50"
-                                        >
-                                          <td className="p-3 font-mono text-sm">
-                                            {param.name}
-                                          </td>
-                                          <td className="p-3">
-                                            <Badge variant="outline">
-                                              {param.type}
-                                            </Badge>
-                                          </td>
-                                          <td className="p-3">
-                                            {param.required ? (
-                                              <Badge className="bg-red-100 text-red-800">
-                                                Required
-                                              </Badge>
-                                            ) : (
-                                              <Badge variant="secondary">
-                                                Optional
-                                              </Badge>
-                                            )}
-                                          </td>
-                                          <td className="p-3 text-sm">
-                                            {param.description}
-                                          </td>
-                                        </tr>
-                                      ))}
-                                    </tbody>
-                                  </table>
-                                </div>
-                              ) : (
-                                <p className="text-muted-foreground">
-                                  No parameters required
-                                </p>
-                              )}
-                            </TabsContent>
-
-                            <TabsContent value="headers" className="space-y-4">
-                              {endpoint.headers &&
-                              endpoint.headers.length > 0 ? (
-                                <div className="overflow-x-auto">
-                                  <table className="w-full border-collapse">
-                                    <thead>
-                                      <tr className="border-b">
-                                        <th className="text-left p-3 font-semibold">
-                                          Header
-                                        </th>
-                                        <th className="text-left p-3 font-semibold">
-                                          Value
-                                        </th>
-                                        <th className="text-left p-3 font-semibold">
-                                          Required
-                                        </th>
-                                      </tr>
-                                    </thead>
-                                    <tbody>
-                                      {endpoint.headers.map((header, idx) => (
-                                        <tr
-                                          key={idx}
-                                          className="border-b hover:bg-gray-50"
-                                        >
-                                          <td className="p-3 font-mono text-sm">
-                                            {header.name}
-                                          </td>
-                                          <td className="p-3 font-mono text-sm text-blue-600">
-                                            {header.value}
-                                          </td>
-                                          <td className="p-3">
-                                            {header.required ? (
-                                              <Badge className="bg-red-100 text-red-800">
-                                                Required
-                                              </Badge>
-                                            ) : (
-                                              <Badge variant="secondary">
-                                                Optional
-                                              </Badge>
-                                            )}
-                                          </td>
-                                        </tr>
-                                      ))}
-                                    </tbody>
-                                  </table>
-                                </div>
-                              ) : (
-                                <p className="text-muted-foreground">
-                                  No special headers required
-                                </p>
-                              )}
-                            </TabsContent>
-
-                            <TabsContent value="request" className="space-y-4">
-                              {endpoint.requestBody ? (
-                                <div className="relative">
-                                  <div className="flex items-center justify-between mb-2">
-                                    <Label className="font-semibold">
-                                      Request Body (JSON)
-                                    </Label>
-                                    <Button
-                                      variant="ghost"
-                                      size="sm"
-                                      onClick={() =>
-                                        copyToClipboard(
-                                          endpoint.requestBody || "",
-                                          `request-${endpointIndex}`,
-                                        )
-                                      }
-                                    >
-                                      {copiedCode ===
-                                      `request-${endpointIndex}` ? (
-                                        <CheckCircle className="w-4 h-4" />
-                                      ) : (
-                                        <Copy className="w-4 h-4" />
-                                      )}
-                                    </Button>
-                                  </div>
-                                  <div className="bg-slate-900 text-green-400 p-6 rounded-lg font-mono text-sm overflow-x-auto">
-                                    <pre>{endpoint.requestBody}</pre>
-                                  </div>
-                                </div>
-                              ) : (
-                                <p className="text-muted-foreground">
-                                  No request body required
-                                </p>
-                              )}
-                            </TabsContent>
-
-                            <TabsContent value="response" className="space-y-4">
-                              <div className="relative">
-                                <div className="flex items-center justify-between mb-2">
-                                  <Label className="font-semibold">
-                                    Response (JSON)
-                                  </Label>
-                                  <Button
-                                    variant="ghost"
-                                    size="sm"
-                                    onClick={() =>
-                                      copyToClipboard(
-                                        endpoint.response,
-                                        `response-${endpointIndex}`,
-                                      )
-                                    }
-                                  >
-                                    {copiedCode ===
-                                    `response-${endpointIndex}` ? (
-                                      <CheckCircle className="w-4 h-4" />
-                                    ) : (
-                                      <Copy className="w-4 h-4" />
-                                    )}
-                                  </Button>
-                                </div>
-                                <div className="bg-slate-900 text-green-400 p-6 rounded-lg font-mono text-sm overflow-x-auto">
-                                  <pre>{endpoint.response}</pre>
-                                </div>
-                              </div>
-                            </TabsContent>
-                          </Tabs>
-
-                          {/* Error Codes */}
-                          {endpoint.errors && endpoint.errors.length > 0 && (
-                            <div className="mt-8">
-                              <h5 className="font-bold mb-4 flex items-center gap-2">
-                                <AlertTriangle className="w-5 h-5 text-orange-500" />
-                                Possible Error Responses
-                              </h5>
-                              <div className="grid gap-3">
-                                {endpoint.errors.map((error, idx) => (
-                                  <div
-                                    key={idx}
-                                    className="flex items-start gap-3 p-4 bg-red-50 border border-red-200 rounded-lg"
-                                  >
-                                    <Badge
-                                      variant="destructive"
-                                      className="font-mono"
-                                    >
-                                      {error.code}
-                                    </Badge>
-                                    <div>
-                                      <div className="font-semibold text-red-800">
-                                        {error.message}
-                                      </div>
-                                      <div className="text-sm text-red-600">
-                                        {error.description}
-                                      </div>
-                                    </div>
-                                  </div>
-                                ))}
-                              </div>
-                            </div>
-                          )}
-
-                          {/* Code Examples */}
-                          {endpoint.examples &&
-                            endpoint.examples.length > 0 && (
-                              <div className="mt-8">
-                                <h5 className="font-bold mb-4 flex items-center gap-2">
-                                  <Code className="w-5 h-5 text-blue-500" />
-                                  Example Request
-                                </h5>
-                                {endpoint.examples.map((example, idx) => (
-                                  <div key={idx} className="mb-4">
-                                    <div className="flex items-center justify-between mb-2">
-                                      <Label className="font-medium">
-                                        {example.title}
-                                      </Label>
-                                      <Button
-                                        variant="ghost"
-                                        size="sm"
-                                        onClick={() =>
-                                          copyToClipboard(
-                                            example.request,
-                                            `example-${endpointIndex}-${idx}`,
-                                          )
-                                        }
-                                      >
-                                        {copiedCode ===
-                                        `example-${endpointIndex}-${idx}` ? (
-                                          <CheckCircle className="w-4 h-4" />
-                                        ) : (
-                                          <Copy className="w-4 h-4" />
-                                        )}
-                                      </Button>
-                                    </div>
-                                    <div className="bg-slate-900 text-orange-300 p-4 rounded-lg font-mono text-sm overflow-x-auto">
-                                      <pre>{example.request}</pre>
-                                    </div>
-                                  </div>
-                                ))}
-                              </div>
-                            )}
-                        </motion.div>
-                      ))}
-                    </div>
-                  </CardContent>
-                </Card>
-              </motion.div>
-            ))}
-          </div>
-        </section>
-
-        {/* Live API Tester */}
-        <motion.section
-          initial={{ opacity: 0, y: 30 }}
-          whileInView={{ opacity: 1, y: 0 }}
-          viewport={{ once: true }}
-          className="mb-20"
-        >
-          <Card className="bg-gradient-to-r from-green-50 to-blue-50 dark:from-green-900/20 dark:to-blue-900/20 border-0 shadow-2xl">
-            <CardHeader>
-              <CardTitle className="flex items-center gap-3 text-2xl">
-                <PlayCircle className="w-8 h-8 text-green-600" />
-                🧪 Live API Tester
-              </CardTitle>
-            </CardHeader>
-            <CardContent className="space-y-6">
-              <p className="text-muted-foreground">
-                Test API endpoints directly from the documentation with real
-                requests
+        {/* MAIN CONTENT */}
+        <div className="container relative z-10 px-4 mx-auto max-w-7xl pb-20">
+          {/* API FEATURES */}
+          <motion.section
+            initial={{ opacity: 0, y: 30 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true }}
+            className="mb-20"
+          >
+            <div className="text-center mb-12">
+              <h2 className="text-4xl font-bold mb-4 text-gray-800">
+                Tính năng API
+              </h2>
+              <p className="text-xl text-gray-600">
+                Những gì làm API của chúng tôi đặc biệt
               </p>
-              <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-                <div>
-                  <Label
-                    htmlFor="test-endpoint"
-                    className="font-semibold mb-2 block"
-                  >
-                    Select Endpoint
-                  </Label>
-                  <select
-                    id="test-endpoint"
-                    className="w-full px-3 py-2 border border-gray-300 rounded-md bg-white"
-                    defaultValue="auth/login"
-                  >
-                    <option value="auth/login">POST /auth/login</option>
-                    <option value="products">GET /products</option>
-                    <option value="users/profile">GET /users/profile</option>
-                  </select>
-                </div>
-                <div>
-                  <Label htmlFor="api-key" className="font-semibold mb-2 block">
-                    API Key
-                  </Label>
-                  <Input
-                    id="api-key"
-                    placeholder="Enter your API key"
-                    type="password"
-                  />
-                </div>
-              </div>
-              <div>
-                <Label
-                  htmlFor="request-body"
-                  className="font-semibold mb-2 block"
-                >
-                  Request Body (JSON)
-                </Label>
-                <Textarea
-                  id="request-body"
-                  placeholder='{"email": "user@example.com", "password": "password123"}'
-                  value={testRequestBody}
-                  onChange={(e) => setTestRequestBody(e.target.value)}
-                  className="font-mono"
-                  rows={6}
-                />
-              </div>
-              <div className="flex gap-4">
-                <Button
-                  onClick={handleTestRequest}
-                  disabled={isTestLoading}
-                  className="bg-gradient-to-r from-green-500 to-blue-600"
-                >
-                  {isTestLoading ? (
-                    <RefreshCw className="w-4 h-4 mr-2 animate-spin" />
-                  ) : (
-                    <Send className="w-4 h-4 mr-2" />
-                  )}
-                  {isTestLoading ? "Sending..." : "Send Request"}
-                </Button>
-                <Button
-                  variant="outline"
-                  onClick={() => {
-                    setTestResponse("");
-                    setTestRequestBody("");
-                  }}
-                >
-                  <Trash2 className="w-4 h-4 mr-2" />
-                  Clear
-                </Button>
-              </div>
-              {testResponse && (
-                <div>
-                  <Label className="font-semibold mb-2 block">Response</Label>
-                  <div className="bg-slate-900 text-green-400 p-6 rounded-lg font-mono text-sm overflow-x-auto">
-                    <pre>{testResponse}</pre>
-                  </div>
-                </div>
-              )}
-            </CardContent>
-          </Card>
-        </motion.section>
+            </div>
 
-        {/* Code Examples */}
-        <motion.section
-          initial={{ opacity: 0, y: 30 }}
-          whileInView={{ opacity: 1, y: 0 }}
-          viewport={{ once: true }}
-          className="mb-20"
-        >
-          <div className="text-center mb-12">
-            <h2 className="text-4xl font-bold mb-4">💻 Code Examples</h2>
-            <p className="text-xl text-muted-foreground">
-              Ready-to-use code snippets in multiple programming languages
-            </p>
-          </div>
-          <Card className="bg-white/80 border-0 shadow-2xl">
-            <CardContent className="p-0">
-              <Tabs
-                value={selectedLanguage}
-                onValueChange={setSelectedLanguage}
-                className="w-full"
-              >
-                <TabsList className="grid w-full grid-cols-3 rounded-none">
-                  <TabsTrigger value="javascript" className="text-lg py-4">
-                    <Code className="w-5 h-5 mr-2" />
-                    JavaScript
-                  </TabsTrigger>
-                  <TabsTrigger value="python" className="text-lg py-4">
-                    <Database className="w-5 h-5 mr-2" />
-                    Python
-                  </TabsTrigger>
-                  <TabsTrigger value="curl" className="text-lg py-4">
-                    <Terminal className="w-5 h-5 mr-2" />
-                    cURL
-                  </TabsTrigger>
-                </TabsList>
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
+              {apiFeatures.map((feature, index) => (
+                <motion.div
+                  key={index}
+                  initial={{ opacity: 0, y: 20 }}
+                  whileInView={{ opacity: 1, y: 0 }}
+                  viewport={{ once: true }}
+                  transition={{ delay: index * 0.1 }}
+                  whileHover={{ y: -10, scale: 1.03 }}
+                >
+                  <Card className="h-full bg-white/60 backdrop-blur-xl border border-white/60 shadow-lg">
+                    <CardContent className="p-6">
+                      <div className="w-14 h-14 rounded-xl bg-pink-100 flex items-center justify-center mb-4">
+                        <feature.icon className="w-7 h-7 text-pink-600" />
+                      </div>
+                      <h3 className="text-xl font-bold mb-3 text-gray-800">
+                        {feature.title}
+                      </h3>
+                      <p className="text-gray-600 mb-4 leading-relaxed">
+                        {feature.description}
+                      </p>
+                      <div className="space-y-2">
+                        {feature.features.map((item, idx) => (
+                          <div key={idx} className="flex items-center gap-2">
+                            <CheckCircle className="w-4 h-4 text-green-600 flex-shrink-0" />
+                            <span className="text-sm text-gray-700">
+                              {item}
+                            </span>
+                          </div>
+                        ))}
+                      </div>
+                    </CardContent>
+                  </Card>
+                </motion.div>
+              ))}
+            </div>
+          </motion.section>
 
-                {Object.entries(codeExamples).map(([language, code]) => (
-                  <TabsContent key={language} value={language} className="mt-0">
-                    <div className="relative">
-                      <div className="flex items-center justify-between p-4 bg-slate-800 text-white">
-                        <div className="flex items-center gap-2">
-                          <div className="w-3 h-3 bg-red-500 rounded-full"></div>
-                          <div className="w-3 h-3 bg-yellow-500 rounded-full"></div>
-                          <div className="w-3 h-3 bg-green-500 rounded-full"></div>
-                          <span className="ml-4 font-mono text-sm">
-                            {language === "javascript"
-                              ? "api-client.js"
-                              : language === "python"
-                                ? "api_client.py"
-                                : "api_requests.sh"}
-                          </span>
-                        </div>
+          {/* QUICK START */}
+          <motion.section
+            initial={{ opacity: 0, y: 30 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true }}
+            className="mb-20"
+          >
+            <Card className="bg-white/60 backdrop-blur-xl border border-white/60 shadow-lg">
+              <CardHeader>
+                <CardTitle className="text-3xl font-bold text-gray-800 flex items-center gap-3">
+                  <Rocket className="w-8 h-8 text-pink-600" />
+                  Quick Start
+                </CardTitle>
+                <p className="text-gray-600 mt-2">
+                  Bắt đầu với API trong 5 phút
+                </p>
+              </CardHeader>
+              <CardContent>
+                <Tabs
+                  defaultValue="javascript"
+                  className="w-full"
+                  onValueChange={setSelectedLanguage}
+                >
+                  <TabsList className="grid w-full grid-cols-3 bg-pink-100/50">
+                    <TabsTrigger value="javascript">JavaScript</TabsTrigger>
+                    <TabsTrigger value="python">Python</TabsTrigger>
+                    <TabsTrigger value="curl">cURL</TabsTrigger>
+                  </TabsList>
+                  {Object.entries(codeExamples).map(([lang, code]) => (
+                    <TabsContent key={lang} value={lang}>
+                      <div className="relative">
+                        <pre className="bg-gray-900 text-gray-100 p-6 rounded-xl overflow-x-auto max-h-96">
+                          <code className="text-sm">{code}</code>
+                        </pre>
                         <Button
-                          variant="ghost"
                           size="sm"
-                          onClick={() => copyToClipboard(code, language)}
-                          className="text-gray-400 hover:text-white"
+                          onClick={() =>
+                            copyToClipboard(code, `quickstart-${lang}`)
+                          }
+                          className="absolute top-4 right-4 bg-white/20 hover:bg-white/30"
                         >
-                          {copiedCode === language ? (
+                          {copiedCode === `quickstart-${lang}` ? (
                             <CheckCircle className="w-4 h-4" />
                           ) : (
                             <Copy className="w-4 h-4" />
                           )}
                         </Button>
                       </div>
-                      <div className="bg-slate-900 text-green-400 p-6 overflow-x-auto max-h-96">
-                        <pre className="text-sm leading-relaxed">
-                          <code>{code}</code>
-                        </pre>
-                      </div>
-                    </div>
-                  </TabsContent>
-                ))}
-              </Tabs>
-            </CardContent>
-          </Card>
-        </motion.section>
+                    </TabsContent>
+                  ))}
+                </Tabs>
+              </CardContent>
+            </Card>
+          </motion.section>
 
-        {/* Status Codes */}
-        <motion.section
-          initial={{ opacity: 0, y: 30 }}
-          whileInView={{ opacity: 1, y: 0 }}
-          viewport={{ once: true }}
-          className="mb-20"
-        >
-          <div className="text-center mb-12">
-            <h2 className="text-4xl font-bold mb-4">📊 HTTP Status Codes</h2>
-            <p className="text-xl text-muted-foreground">
-              Understanding API response codes and their meanings
-            </p>
-          </div>
-          <Card className="bg-white/80 border-0 shadow-2xl">
-            <CardContent className="p-8">
-              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                {statusCodes.map((status, index) => (
-                  <motion.div
-                    key={status.code}
-                    initial={{ opacity: 0, scale: 0.9 }}
-                    whileInView={{ opacity: 1, scale: 1 }}
-                    viewport={{ once: true }}
-                    transition={{ delay: index * 0.1 }}
-                    whileHover={{ scale: 1.05 }}
-                    className={`p-4 rounded-lg border-2 ${
-                      status.code < 300
-                        ? "bg-green-50 border-green-200"
-                        : status.code < 400
-                          ? "bg-blue-50 border-blue-200"
-                          : status.code < 500
-                            ? "bg-orange-50 border-orange-200"
-                            : "bg-red-50 border-red-200"
-                    }`}
+          {/* ENDPOINTS */}
+          <motion.section
+            initial={{ opacity: 0, y: 30 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true }}
+            className="mb-20"
+          >
+            <div className="text-center mb-12">
+              <h2 className="text-4xl font-bold mb-4 text-gray-800">
+                API Endpoints
+              </h2>
+              <p className="text-xl text-gray-600">
+                Tất cả endpoints có sẵn với documentation đầy đủ
+              </p>
+            </div>
+
+            <Tabs
+              defaultValue="auth"
+              className="w-full"
+              onValueChange={setSelectedEndpoint}
+            >
+              <TabsList className="grid w-full grid-cols-4 bg-pink-100/50 mb-8">
+                {endpoints.map((endpoint) => (
+                  <TabsTrigger
+                    key={endpoint.id}
+                    value={endpoint.id}
+                    className="flex items-center gap-2"
                   >
-                    <div className="flex items-center gap-3 mb-2">
+                    <endpoint.icon className="w-4 h-4" />
+                    {endpoint.category}
+                  </TabsTrigger>
+                ))}
+              </TabsList>
+
+              {endpoints.map((endpoint) => (
+                <TabsContent key={endpoint.id} value={endpoint.id}>
+                  <div className="space-y-6">
+                    {endpoint.methods.map((method, idx) => (
+                      <Card
+                        key={idx}
+                        className="bg-white/60 backdrop-blur-xl border border-white/60 shadow-lg"
+                      >
+                        <CardContent className="p-6">
+                          <div className="flex items-start justify-between mb-4">
+                            <div className="flex-1">
+                              <div className="flex items-center gap-3 mb-2">
+                                <Badge
+                                  className={`${method.method === "GET" ? "bg-green-500" : method.method === "POST" ? "bg-blue-500" : method.method === "PUT" ? "bg-orange-500" : "bg-red-500"} text-white`}
+                                >
+                                  {method.method}
+                                </Badge>
+                                <code className="text-lg font-mono text-gray-800">
+                                  {method.path}
+                                </code>
+                              </div>
+                              <h3 className="text-xl font-bold text-gray-800 mb-2">
+                                {method.title}
+                              </h3>
+                              <p className="text-gray-600">
+                                {method.description}
+                              </p>
+                            </div>
+                          </div>
+
+                          <Separator className="my-6" />
+
+                          <Accordion
+                            type="single"
+                            collapsible
+                            className="space-y-4"
+                          >
+                            <AccordionItem
+                              value="headers"
+                              className="border border-pink-200 rounded-xl px-6"
+                            >
+                              <AccordionTrigger>Headers</AccordionTrigger>
+                              <AccordionContent>
+                                <div className="space-y-2">
+                                  {method.headers.map((header, hidx) => (
+                                    <div
+                                      key={hidx}
+                                      className="flex items-center gap-3 p-3 bg-gray-50 rounded-lg"
+                                    >
+                                      <code className="font-mono text-sm text-pink-600">
+                                        {header.name}
+                                      </code>
+                                      <span className="text-gray-400">:</span>
+                                      <code className="font-mono text-sm text-gray-700">
+                                        {header.value}
+                                      </code>
+                                      {header.required && (
+                                        <Badge className="bg-red-100 text-red-700 text-xs">
+                                          Bắt buộc
+                                        </Badge>
+                                      )}
+                                    </div>
+                                  ))}
+                                </div>
+                              </AccordionContent>
+                            </AccordionItem>
+
+                            <AccordionItem
+                              value="params"
+                              className="border border-pink-200 rounded-xl px-6"
+                            >
+                              <AccordionTrigger>Parameters</AccordionTrigger>
+                              <AccordionContent>
+                                <div className="space-y-2">
+                                  {method.params.map((param, pidx) => (
+                                    <div
+                                      key={pidx}
+                                      className="flex items-start gap-3 p-3 bg-gray-50 rounded-lg"
+                                    >
+                                      <code className="font-mono text-sm text-pink-600">
+                                        {param.name}
+                                      </code>
+                                      <Badge
+                                        variant="outline"
+                                        className="text-xs"
+                                      >
+                                        {param.type}
+                                      </Badge>
+                                      {param.required && (
+                                        <Badge className="bg-red-100 text-red-700 text-xs">
+                                          Bắt buộc
+                                        </Badge>
+                                      )}
+                                      <span className="text-sm text-gray-600 flex-1">
+                                        {param.description}
+                                      </span>
+                                    </div>
+                                  ))}
+                                </div>
+                              </AccordionContent>
+                            </AccordionItem>
+
+                            {method.requestBody && (
+                              <AccordionItem
+                                value="request"
+                                className="border border-pink-200 rounded-xl px-6"
+                              >
+                                <AccordionTrigger>
+                                  Request Body
+                                </AccordionTrigger>
+                                <AccordionContent>
+                                  <div className="relative">
+                                    <pre className="bg-gray-900 text-gray-100 p-4 rounded-xl overflow-x-auto text-sm">
+                                      <code>{method.requestBody}</code>
+                                    </pre>
+                                    <Button
+                                      size="sm"
+                                      onClick={() =>
+                                        copyToClipboard(
+                                          method.requestBody!,
+                                          `request-${idx}`,
+                                        )
+                                      }
+                                      className="absolute top-2 right-2 bg-white/20 hover:bg-white/30"
+                                    >
+                                      {copiedCode === `request-${idx}` ? (
+                                        <CheckCircle className="w-4 h-4" />
+                                      ) : (
+                                        <Copy className="w-4 h-4" />
+                                      )}
+                                    </Button>
+                                  </div>
+                                </AccordionContent>
+                              </AccordionItem>
+                            )}
+
+                            <AccordionItem
+                              value="response"
+                              className="border border-pink-200 rounded-xl px-6"
+                            >
+                              <AccordionTrigger>Response</AccordionTrigger>
+                              <AccordionContent>
+                                <div className="relative">
+                                  <pre className="bg-gray-900 text-gray-100 p-4 rounded-xl overflow-x-auto text-sm max-h-96">
+                                    <code>{method.response}</code>
+                                  </pre>
+                                  <Button
+                                    size="sm"
+                                    onClick={() =>
+                                      copyToClipboard(
+                                        method.response,
+                                        `response-${idx}`,
+                                      )
+                                    }
+                                    className="absolute top-2 right-2 bg-white/20 hover:bg-white/30"
+                                  >
+                                    {copiedCode === `response-${idx}` ? (
+                                      <CheckCircle className="w-4 h-4" />
+                                    ) : (
+                                      <Copy className="w-4 h-4" />
+                                    )}
+                                  </Button>
+                                </div>
+                              </AccordionContent>
+                            </AccordionItem>
+
+                            <AccordionItem
+                              value="errors"
+                              className="border border-pink-200 rounded-xl px-6"
+                            >
+                              <AccordionTrigger>Errors</AccordionTrigger>
+                              <AccordionContent>
+                                <div className="space-y-2">
+                                  {method.errors.map((error, eidx) => (
+                                    <div
+                                      key={eidx}
+                                      className="flex items-start gap-3 p-3 bg-red-50 rounded-lg border border-red-200"
+                                    >
+                                      <Badge className="bg-red-500 text-white">
+                                        {error.code}
+                                      </Badge>
+                                      <div className="flex-1">
+                                        <div className="font-semibold text-red-800">
+                                          {error.message}
+                                        </div>
+                                        <div className="text-sm text-gray-600">
+                                          {error.description}
+                                        </div>
+                                      </div>
+                                    </div>
+                                  ))}
+                                </div>
+                              </AccordionContent>
+                            </AccordionItem>
+                          </Accordion>
+                        </CardContent>
+                      </Card>
+                    ))}
+                  </div>
+                </TabsContent>
+              ))}
+            </Tabs>
+          </motion.section>
+
+          {/* API TESTER */}
+          <motion.section
+            initial={{ opacity: 0, y: 30 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true }}
+            className="mb-20"
+          >
+            <Card className="bg-white/60 backdrop-blur-xl border border-white/60 shadow-lg">
+              <CardHeader>
+                <CardTitle className="text-3xl font-bold text-gray-800 flex items-center gap-3">
+                  <PlayCircle className="w-8 h-8 text-pink-600" />
+                  API Tester
+                </CardTitle>
+                <p className="text-gray-600 mt-2">
+                  Test API trực tiếp từ browser
+                </p>
+              </CardHeader>
+              <CardContent className="space-y-6">
+                <div>
+                  <Label htmlFor="api-key">API Key</Label>
+                  <Input
+                    id="api-key"
+                    type="password"
+                    placeholder="Nhập API key của bạn"
+                    value={testApiKey}
+                    onChange={(e) => setTestApiKey(e.target.value)}
+                  />
+                </div>
+
+                <div>
+                  <Label htmlFor="endpoint">Endpoint</Label>
+                  <Input
+                    id="endpoint"
+                    placeholder="/api/v1/products"
+                    value={testEndpoint}
+                    onChange={(e) => setTestEndpoint(e.target.value)}
+                  />
+                </div>
+
+                <Button
+                  onClick={handleTestAPI}
+                  disabled={isTestLoading}
+                  className={`w-full bg-gradient-to-r ${softPinkTheme.primaryGradient} text-white`}
+                >
+                  {isTestLoading ? (
+                    <RefreshCw className="w-5 h-5 mr-2 animate-spin" />
+                  ) : (
+                    <PlayCircle className="w-5 h-5 mr-2" />
+                  )}
+                  Test API
+                </Button>
+
+                {testResponse && (
+                  <div>
+                    <Label>Response:</Label>
+                    <pre className="bg-gray-900 text-gray-100 p-4 rounded-xl overflow-x-auto text-sm mt-2">
+                      <code>{testResponse}</code>
+                    </pre>
+                  </div>
+                )}
+              </CardContent>
+            </Card>
+          </motion.section>
+
+          {/* STATUS CODES */}
+          <motion.section
+            initial={{ opacity: 0, y: 30 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true }}
+            className="mb-20"
+          >
+            <Card className="bg-white/60 backdrop-blur-xl border border-white/60 shadow-lg">
+              <CardHeader>
+                <CardTitle className="text-3xl font-bold text-gray-800">
+                  HTTP Status Codes
+                </CardTitle>
+                <p className="text-gray-600 mt-2">
+                  Các mã trạng thái HTTP được sử dụng
+                </p>
+              </CardHeader>
+              <CardContent>
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  {statusCodes.map((status, index) => (
+                    <div
+                      key={index}
+                      className="flex items-start gap-3 p-4 bg-gray-50 rounded-lg border border-gray-200"
+                    >
                       <Badge
-                        variant={
-                          status.code < 300
-                            ? "default"
-                            : status.code < 400
-                              ? "secondary"
-                              : status.code < 500
-                                ? "outline"
-                                : "destructive"
-                        }
-                        className="font-mono text-lg px-3 py-1"
+                        className={`${status.color} bg-gray-100 border border-gray-300`}
                       >
                         {status.code}
                       </Badge>
-                      <span className="font-bold">{status.message}</span>
-                    </div>
-                    <p className="text-sm text-muted-foreground">
-                      {status.description}
-                    </p>
-                  </motion.div>
-                ))}
-              </div>
-            </CardContent>
-          </Card>
-        </motion.section>
-
-        {/* Rate Limits & Pricing */}
-        <motion.section
-          initial={{ opacity: 0, y: 30 }}
-          whileInView={{ opacity: 1, y: 0 }}
-          viewport={{ once: true }}
-          className="mb-20"
-        >
-          <div className="text-center mb-12">
-            <h2 className="text-4xl font-bold mb-4">
-              ⚡ Rate Limits & Pricing
-            </h2>
-            <p className="text-xl text-muted-foreground">
-              Choose the perfect plan for your integration needs
-            </p>
-          </div>
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
-            {rateLimits.map((plan, index) => (
-              <motion.div
-                key={plan.tier}
-                initial={{ opacity: 0, y: 20 }}
-                whileInView={{ opacity: 1, y: 0 }}
-                viewport={{ once: true }}
-                transition={{ delay: index * 0.1 }}
-                whileHover={{ y: -10, scale: 1.02 }}
-              >
-                <Card
-                  className={`text-center h-full bg-white/80 border-0 shadow-xl overflow-hidden ${
-                    plan.popular ? "ring-2 ring-indigo-500 scale-105" : ""
-                  }`}
-                >
-                  {plan.popular && (
-                    <div className="bg-gradient-to-r from-indigo-500 to-purple-600 text-white py-2">
-                      <Badge className="bg-white text-indigo-600">
-                        Most Popular
-                      </Badge>
-                    </div>
-                  )}
-                  <CardHeader className="pb-4">
-                    <CardTitle className="text-2xl">{plan.tier}</CardTitle>
-                    <div className="text-3xl font-bold text-indigo-600 mb-2">
-                      {plan.price}
-                    </div>
-                    <div className="text-sm text-muted-foreground">
-                      {plan.requests}
-                    </div>
-                  </CardHeader>
-                  <CardContent className="space-y-6">
-                    <div className="space-y-3">
-                      {plan.features.map((feature, idx) => (
-                        <div
-                          key={idx}
-                          className="flex items-center gap-2 text-sm"
-                        >
-                          <CheckCircle className="w-4 h-4 text-green-500 flex-shrink-0" />
-                          <span>{feature}</span>
+                      <div className="flex-1">
+                        <div className="font-semibold text-gray-800">
+                          {status.message}
                         </div>
-                      ))}
-                    </div>
-
-                    <Separator />
-
-                    <div className="space-y-2 text-xs text-muted-foreground">
-                      <div className="flex justify-between">
-                        <span>Requests/Hour:</span>
-                        <span className="font-mono">
-                          {plan.limits.requests_per_hour}
-                        </span>
-                      </div>
-                      <div className="flex justify-between">
-                        <span>Requests/Month:</span>
-                        <span className="font-mono">
-                          {plan.limits.requests_per_month}
-                        </span>
-                      </div>
-                      <div className="flex justify-between">
-                        <span>Concurrent:</span>
-                        <span className="font-mono">
-                          {plan.limits.concurrent_requests}
-                        </span>
+                        <div className="text-sm text-gray-600">
+                          {status.description}
+                        </div>
                       </div>
                     </div>
+                  ))}
+                </div>
+              </CardContent>
+            </Card>
+          </motion.section>
 
-                    <Button
-                      variant={plan.popular ? "default" : "outline"}
-                      className={`w-full ${plan.popular ? "bg-gradient-to-r from-indigo-500 to-purple-600" : ""}`}
+          {/* RATE LIMITS */}
+          <motion.section
+            initial={{ opacity: 0, y: 30 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true }}
+            className="mb-20"
+          >
+            <Card className="bg-white/60 backdrop-blur-xl border border-white/60 shadow-lg">
+              <CardHeader>
+                <CardTitle className="text-3xl font-bold text-gray-800">
+                  Rate Limits & Pricing
+                </CardTitle>
+                <p className="text-gray-600 mt-2">
+                  Chọn plan phù hợp với nhu cầu của bạn
+                </p>
+              </CardHeader>
+              <CardContent>
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+                  {rateLimits.map((limit, index) => (
+                    <div
+                      key={index}
+                      className={`p-6 rounded-xl border-2 ${limit.popular ? "border-pink-500 bg-pink-50/50" : "border-gray-200 bg-white/50"} relative`}
                     >
-                      {plan.tier === "Enterprise"
-                        ? "Contact Sales"
-                        : "Get Started"}
-                    </Button>
-                  </CardContent>
-                </Card>
-              </motion.div>
-            ))}
-          </div>
-        </motion.section>
-
-        {/* FAQ Section */}
-        <motion.section
-          initial={{ opacity: 0, y: 30 }}
-          whileInView={{ opacity: 1, y: 0 }}
-          viewport={{ once: true }}
-          className="mb-20"
-        >
-          <div className="text-center mb-12">
-            <h2 className="text-4xl font-bold mb-4">
-              ❓ Frequently Asked Questions
-            </h2>
-            <p className="text-xl text-muted-foreground">
-              Get answers to common API integration questions
-            </p>
-          </div>
-          <Card className="bg-white/80 border-0 shadow-2xl">
-            <CardContent className="p-8">
-              <Accordion type="single" collapsible className="w-full space-y-4">
-                {faqs.map((faq, index) => (
-                  <AccordionItem
-                    key={faq.id}
-                    value={faq.id}
-                    className="border border-gray-200 rounded-xl px-6 data-[state=open]:shadow-lg transition-all duration-300"
-                  >
-                    <AccordionTrigger className="text-left hover:no-underline py-6">
-                      <div className="flex items-center gap-3">
-                        <div className="w-8 h-8 bg-gradient-to-r from-indigo-500 to-purple-600 rounded-full flex items-center justify-center text-white font-bold text-sm">
-                          {index + 1}
-                        </div>
-                        <span className="text-lg font-semibold">
-                          {faq.question}
-                        </span>
-                      </div>
-                    </AccordionTrigger>
-                    <AccordionContent className="pb-6">
-                      <div className="ml-11 text-muted-foreground leading-relaxed">
-                        {faq.answer}
-                      </div>
-                    </AccordionContent>
-                  </AccordionItem>
-                ))}
-              </Accordion>
-            </CardContent>
-          </Card>
-        </motion.section>
-
-        {/* Changelog */}
-        <motion.section
-          initial={{ opacity: 0, y: 30 }}
-          whileInView={{ opacity: 1, y: 0 }}
-          viewport={{ once: true }}
-          className="mb-20"
-        >
-          <div className="text-center mb-12">
-            <h2 className="text-4xl font-bold mb-4">📋 Changelog</h2>
-            <p className="text-xl text-muted-foreground">
-              Stay updated with the latest API improvements and features
-            </p>
-          </div>
-          <Card className="bg-white/80 border-0 shadow-2xl">
-            <CardContent className="p-8">
-              <div className="space-y-8">
-                {changelog.map((version, index) => (
-                  <motion.div
-                    key={version.version}
-                    initial={{ opacity: 0, x: -20 }}
-                    whileInView={{ opacity: 1, x: 0 }}
-                    viewport={{ once: true }}
-                    transition={{ delay: index * 0.1 }}
-                    className="flex gap-6"
-                  >
-                    <div className="flex flex-col items-center">
-                      <div
-                        className={`w-12 h-12 rounded-full flex items-center justify-center ${
-                          version.type === "major"
-                            ? "bg-gradient-to-r from-green-500 to-emerald-400"
-                            : "bg-gradient-to-r from-blue-500 to-cyan-400"
-                        } text-white font-bold`}
-                      >
-                        {version.version.split(".")[1]}
-                      </div>
-                      {index < changelog.length - 1 && (
-                        <div className="w-0.5 h-16 bg-gray-300 mt-4"></div>
-                      )}
-                    </div>
-                    <div className="flex-1">
-                      <div className="flex items-center gap-3 mb-2">
-                        <h3 className="text-xl font-bold">{version.version}</h3>
-                        <Badge
-                          variant={
-                            version.type === "major" ? "default" : "secondary"
-                          }
-                        >
-                          {version.type}
+                      {limit.popular && (
+                        <Badge className="absolute -top-3 left-1/2 -translate-x-1/2 bg-pink-500 text-white">
+                          Phổ biến nhất
                         </Badge>
-                        <span className="text-sm text-muted-foreground">
-                          {version.date}
-                        </span>
+                      )}
+                      <div className="text-center mb-6">
+                        <h3 className="text-2xl font-bold mb-2">
+                          {limit.tier}
+                        </h3>
+                        <div className="text-3xl font-bold text-pink-600 mb-2">
+                          {limit.price}
+                        </div>
+                        <div className="text-sm text-gray-600">
+                          {limit.requests}
+                        </div>
                       </div>
-                      <div className="space-y-2">
-                        {version.changes.map((change, idx) => (
-                          <div key={idx} className="flex items-start gap-2">
-                            <CheckCircle className="w-4 h-4 text-green-500 mt-0.5 flex-shrink-0" />
-                            <span className="text-sm text-muted-foreground">
-                              {change}
+                      <div className="space-y-3 mb-6">
+                        {limit.features.map((feature, fidx) => (
+                          <div key={fidx} className="flex items-center gap-2">
+                            <CheckCircle className="w-4 h-4 text-green-600 flex-shrink-0" />
+                            <span className="text-sm text-gray-700">
+                              {feature}
                             </span>
                           </div>
                         ))}
                       </div>
+                      <div className="space-y-2 text-sm">
+                        <div className="flex justify-between">
+                          <span className="text-gray-600">Requests/giờ:</span>
+                          <span className="font-semibold">
+                            {limit.limits.hour}
+                          </span>
+                        </div>
+                        <div className="flex justify-between">
+                          <span className="text-gray-600">Requests/tháng:</span>
+                          <span className="font-semibold">
+                            {limit.limits.month}
+                          </span>
+                        </div>
+                        <div className="flex justify-between">
+                          <span className="text-gray-600">Concurrent:</span>
+                          <span className="font-semibold">
+                            {limit.limits.concurrent}
+                          </span>
+                        </div>
+                      </div>
+                      <Button
+                        className={`w-full mt-6 ${limit.popular ? `bg-gradient-to-r ${softPinkTheme.primaryGradient} text-white` : "bg-gray-200 text-gray-800"}`}
+                      >
+                        {limit.tier === "Free"
+                          ? "Bắt đầu miễn phí"
+                          : limit.tier === "Enterprise"
+                            ? "Liên hệ sales"
+                            : "Nâng cấp"}
+                      </Button>
                     </div>
-                  </motion.div>
-                ))}
-              </div>
-            </CardContent>
-          </Card>
-        </motion.section>
-
-        {/* Feedback Form */}
-        <motion.section
-          initial={{ opacity: 0, y: 30 }}
-          whileInView={{ opacity: 1, y: 0 }}
-          viewport={{ once: true }}
-          className="mb-20"
-        >
-          <Card className="bg-gradient-to-r from-purple-50 to-pink-50 dark:from-purple-900/20 dark:to-pink-900/20 border-0 shadow-2xl">
-            <CardHeader>
-              <CardTitle className="flex items-center gap-3 text-2xl">
-                <MessageSquare className="w-8 h-8 text-purple-600" />
-                💬 Documentation Feedback
-              </CardTitle>
-            </CardHeader>
-            <CardContent>
-              <p className="text-muted-foreground mb-6">
-                Help us improve this documentation. Your feedback is valuable to
-                us!
-              </p>
-              {showFeedbackSuccess ? (
-                <motion.div
-                  initial={{ opacity: 0, scale: 0.9 }}
-                  animate={{ opacity: 1, scale: 1 }}
-                  className="text-center py-8"
-                >
-                  <CheckCircle className="w-16 h-16 text-green-500 mx-auto mb-4" />
-                  <h3 className="text-xl font-bold text-green-800 mb-2">
-                    Thank you!
-                  </h3>
-                  <p className="text-green-600">
-                    Your feedback has been submitted successfully.
-                  </p>
-                </motion.div>
-              ) : (
-                <form onSubmit={handleFeedbackSubmit} className="space-y-6">
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                    <div>
-                      <Label htmlFor="feedback-name">Name</Label>
-                      <Input
-                        id="feedback-name"
-                        value={feedbackForm.name}
-                        onChange={(e) =>
-                          setFeedbackForm({
-                            ...feedbackForm,
-                            name: e.target.value,
-                          })
-                        }
-                        required
-                      />
-                    </div>
-                    <div>
-                      <Label htmlFor="feedback-email">Email</Label>
-                      <Input
-                        id="feedback-email"
-                        type="email"
-                        value={feedbackForm.email}
-                        onChange={(e) =>
-                          setFeedbackForm({
-                            ...feedbackForm,
-                            email: e.target.value,
-                          })
-                        }
-                        required
-                      />
-                    </div>
-                  </div>
-                  <div>
-                    <Label htmlFor="feedback-message">Message</Label>
-                    <Textarea
-                      id="feedback-message"
-                      rows={4}
-                      placeholder="Tell us what you think about this documentation..."
-                      value={feedbackForm.message}
-                      onChange={(e) =>
-                        setFeedbackForm({
-                          ...feedbackForm,
-                          message: e.target.value,
-                        })
-                      }
-                      required
-                    />
-                  </div>
-                  <Button
-                    type="submit"
-                    className="bg-gradient-to-r from-purple-500 to-pink-600"
-                  >
-                    <Send className="w-4 h-4 mr-2" />
-                    Send Feedback
-                  </Button>
-                </form>
-              )}
-            </CardContent>
-          </Card>
-        </motion.section>
-
-        {/* Support Channels */}
-        <motion.section
-          initial={{ opacity: 0, y: 30 }}
-          whileInView={{ opacity: 1, y: 0 }}
-          viewport={{ once: true }}
-        >
-          <Card className="bg-gradient-to-r from-slate-50 to-blue-50 dark:from-slate-900 dark:to-blue-900 border-0 shadow-2xl">
-            <CardContent className="p-10 text-center">
-              <h2 className="text-4xl font-bold mb-4">🛠️ Developer Support</h2>
-              <p className="text-xl text-muted-foreground mb-12 max-w-2xl mx-auto">
-                Our expert development team is here to help you integrate our
-                API successfully. Choose the support channel that works best for
-                you.
-              </p>
-              <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
-                {[
-                  {
-                    icon: Mail,
-                    title: "📧 Email Support",
-                    description: "api@templatemarket.com",
-                    detail: "Technical questions, integration help",
-                    response: "< 4 hours",
-                    color: "from-blue-500 to-cyan-400",
-                  },
-                  {
-                    icon: Github,
-                    title: "🐛 GitHub Issues",
-                    description: "github.com/templatemarket/api",
-                    detail: "Bug reports, feature requests",
-                    response: "Community driven",
-                    color: "from-purple-500 to-pink-400",
-                  },
-                  {
-                    icon: BookOpen,
-                    title: "📚 Developer Docs",
-                    description: "docs.templatemarket.com",
-                    detail: "Comprehensive guides, tutorials",
-                    response: "Self-service",
-                    color: "from-green-500 to-emerald-400",
-                  },
-                ].map((support, index) => (
-                  <motion.div
-                    key={index}
-                    initial={{ opacity: 0, y: 20 }}
-                    whileInView={{ opacity: 1, y: 0 }}
-                    viewport={{ once: true }}
-                    transition={{ delay: index * 0.1 }}
-                    whileHover={{ y: -10, scale: 1.05 }}
-                    className="group"
-                  >
-                    <Card className="h-full bg-white/80 border-0 shadow-lg hover:shadow-2xl transition-all duration-300">
-                      <CardContent className="p-8">
-                        <motion.div
-                          whileHover={{ scale: 1.1, rotate: 5 }}
-                          className={`w-16 h-16 mx-auto mb-6 bg-gradient-to-r ${support.color} rounded-2xl shadow-xl flex items-center justify-center group-hover:shadow-2xl transition-all duration-300`}
-                        >
-                          <support.icon className="w-8 h-8 text-white" />
-                        </motion.div>
-                        <h4 className="text-xl font-bold mb-3">
-                          {support.title}
-                        </h4>
-                        <p className="text-blue-600 font-mono text-sm mb-3">
-                          {support.description}
-                        </p>
-                        <p className="text-muted-foreground text-sm mb-4">
-                          {support.detail}
-                        </p>
-                        <Badge variant="outline" className="mb-6">
-                          Response: {support.response}
-                        </Badge>
-                        <Button
-                          variant="outline"
-                          className="w-full group-hover:bg-gradient-to-r group-hover:from-blue-500 group-hover:to-purple-600 group-hover:text-white transition-all duration-300"
-                        >
-                          <ExternalLink className="w-4 h-4 mr-2" />
-                          Get Help
-                        </Button>
-                      </CardContent>
-                    </Card>
-                  </motion.div>
-                ))}
-              </div>
-
-              <Separator className="my-12" />
-
-              <div className="text-center">
-                <h3 className="text-2xl font-bold mb-6">
-                  🚀 Ready to get started?
-                </h3>
-                <div className="flex flex-col sm:flex-row gap-4 justify-center">
-                  <Button
-                    size="lg"
-                    className="bg-gradient-to-r from-indigo-500 to-purple-600 hover:shadow-lg"
-                  >
-                    <Key className="w-5 h-5 mr-2" />
-                    Get API Key
-                  </Button>
-                  <Button size="lg" variant="outline">
-                    <BookOpen className="w-5 h-5 mr-2" />
-                    View Examples
-                  </Button>
+                  ))}
                 </div>
-              </div>
-            </CardContent>
-          </Card>
-        </motion.section>
+              </CardContent>
+            </Card>
+          </motion.section>
+
+          {/* FAQ */}
+          <motion.section
+            initial={{ opacity: 0, y: 30 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true }}
+          >
+            <Card className="bg-white/60 backdrop-blur-xl border border-white/60 shadow-lg">
+              <CardHeader>
+                <CardTitle className="text-3xl font-bold text-gray-800">
+                  FAQ
+                </CardTitle>
+                <p className="text-gray-600 mt-2">Câu hỏi thường gặp về API</p>
+              </CardHeader>
+              <CardContent>
+                <Accordion type="single" collapsible className="space-y-4">
+                  {faqs.map((faq, index) => (
+                    <AccordionItem
+                      key={index}
+                      value={`faq-${index}`}
+                      className="border border-pink-200 rounded-xl px-6"
+                    >
+                      <AccordionTrigger className="text-left hover:no-underline py-6">
+                        <span className="text-lg font-semibold text-gray-800">
+                          {faq.question}
+                        </span>
+                      </AccordionTrigger>
+                      <AccordionContent className="pb-6">
+                        <p className="text-gray-600 leading-relaxed">
+                          {faq.answer}
+                        </p>
+                      </AccordionContent>
+                    </AccordionItem>
+                  ))}
+                </Accordion>
+              </CardContent>
+            </Card>
+          </motion.section>
+        </div>
       </div>
-    </div>
+    </>
   );
 };
 
-export default APIDocumentation;
+export default API;

@@ -389,7 +389,7 @@ const Cart: React.FC = () => {
         <ReadingProgress />
         <FloatingNav />
 
-        <div className="min-h-screen bg-gradient-to-br from-purple-50 via-magenta-50 to-rose-100 dark:from-slate-900 dark:via-purple-900/20 dark:to-magenta-900/30">
+        <div className="bg-gradient-to-br from-purple-50 via-magenta-50 to-rose-100 dark:from-slate-900 dark:via-purple-900/20 dark:to-magenta-900/30">
           {/* Enhanced Floating Elements */}
           <div className="fixed inset-0 overflow-hidden pointer-events-none">
             {[ShoppingCart, Package, Gift, Heart, Crown].map((Icon, i) => (
@@ -487,7 +487,7 @@ const Cart: React.FC = () => {
       <ReadingProgress />
       <FloatingNav />
 
-      <div className="min-h-screen bg-gradient-to-br from-purple-50 via-magenta-50 to-rose-100 dark:from-slate-900 dark:via-purple-900/20 dark:to-magenta-900/30">
+      <div className="bg-gradient-to-br from-purple-50 via-magenta-50 to-rose-100 dark:from-slate-900 dark:via-purple-900/20 dark:to-magenta-900/30">
         {/* Enhanced Floating Elements */}
         <div className="fixed inset-0 overflow-hidden pointer-events-none">
           {[Code, Palette, Gift, Crown, Gem, Sparkles].map((Icon, i) => (
@@ -628,7 +628,7 @@ const Cart: React.FC = () => {
                       }`}
                       style={{ animationDelay: `${index * 150}ms` }}
                     >
-                      <Card className="transition-all duration-300 border-0 shadow-lg bg-gradient-to-r from-white/95 to-purple-50/80 dark:from-slate-800/95 dark:to-purple-900/20 hover:shadow-xl rounded-3xl backdrop-blur-sm">
+                      <Card className="transition-all duration-300 border-0 shadow-lg bg-gradient-to-r from-white/95 to-pink-50/80 hover:shadow-xl rounded-3xl backdrop-blur-sm">
                         <CardContent className="p-6">
                           <div className="flex gap-6">
                             {/* Product Image */}
@@ -650,7 +650,7 @@ const Cart: React.FC = () => {
                             <div className="flex-1 space-y-3">
                               <div className="flex items-start justify-between">
                                 <div className="space-y-2 flex-1">
-                                  <h3 className="text-lg lg:text-xl font-semibold transition-colors line-clamp-2 hover:text-purple-700 dark:text-gray-100 dark:hover:text-purple-300">
+                                  <h3 className="text-lg lg:text-xl font-semibold transition-colors line-clamp-2 hover:text-pink-600 text-slate-900">
                                     <Link
                                       to={`/product/${item.product.id}`}
                                       className="hover:underline"
@@ -663,8 +663,8 @@ const Cart: React.FC = () => {
                                       variant="outline"
                                       className={`text-xs ${
                                         item.product.category === "template"
-                                          ? "bg-blue-50 dark:bg-blue-900/30 text-blue-700 dark:text-blue-300 border-blue-200 dark:border-blue-700"
-                                          : "bg-green-50 dark:bg-green-900/30 text-green-700 dark:text-green-300 border-green-200 dark:border-green-700"
+                                          ? "bg-blue-50 text-blue-700 border-blue-200"
+                                          : "bg-green-50 text-green-700 border-green-200"
                                       }`}
                                     >
                                       {item.product.category === "template" ? (
@@ -677,7 +677,7 @@ const Cart: React.FC = () => {
                                         : "E-book"}
                                     </Badge>
                                     {item.product.isFeatured && (
-                                      <Badge className="text-amber-800 bg-amber-100 dark:bg-amber-900/30 dark:text-amber-300 border-amber-300 dark:border-amber-700">
+                                      <Badge className="text-amber-800 bg-amber-100 border-amber-300">
                                         <Crown className="w-3 h-3 mr-1" />
                                         Nổi bật
                                       </Badge>
@@ -698,7 +698,7 @@ const Cart: React.FC = () => {
                                         item.product.title,
                                       )
                                     }
-                                    className="p-2 text-red-500 transition-colors hover:text-red-600 hover:bg-red-50 dark:hover:bg-red-900/20 rounded-2xl"
+                                    className="p-2 text-red-500 transition-colors hover:text-red-600 hover:bg-red-50 rounded-2xl"
                                   >
                                     <Trash2 className="w-4 h-4" />
                                   </Button>
@@ -708,10 +708,10 @@ const Cart: React.FC = () => {
                               {/* Quantity and Price */}
                               <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
                                 <div className="flex items-center space-x-3">
-                                  <span className="text-sm text-purple-700/80 dark:text-purple-300/80 font-medium">
+                                  <span className="text-sm text-slate-600 font-medium">
                                     Số lượng:
                                   </span>
-                                  <div className="flex items-center space-x-1 border border-purple-200 dark:border-purple-700 rounded-2xl bg-white/80 dark:bg-slate-800/80 shadow-sm">
+                                  <div className="flex items-center space-x-1 border border-pink-200 rounded-2xl bg-white/80 shadow-sm">
                                     <motion.div whileTap={{ scale: 0.9 }}>
                                       <Button
                                         variant="ghost"
@@ -724,12 +724,12 @@ const Cart: React.FC = () => {
                                           )
                                         }
                                         disabled={item.quantity <= 1}
-                                        className="w-8 h-8 p-0 hover:bg-red-50 dark:hover:bg-red-900/20 rounded-xl"
+                                        className="w-8 h-8 p-0 hover:bg-red-50 rounded-xl"
                                       >
                                         <Minus className="w-3 h-3" />
                                       </Button>
                                     </motion.div>
-                                    <span className="px-3 py-1 text-sm font-semibold min-w-[2.5rem] text-center dark:text-gray-200">
+                                    <span className="px-3 py-1 text-sm font-semibold min-w-[2.5rem] text-center text-slate-900">
                                       {item.quantity}
                                     </span>
                                     <motion.div whileTap={{ scale: 0.9 }}>
@@ -743,7 +743,7 @@ const Cart: React.FC = () => {
                                             item.product.title,
                                           )
                                         }
-                                        className="w-8 h-8 p-0 hover:bg-green-50 dark:hover:bg-green-900/20 rounded-xl"
+                                        className="w-8 h-8 p-0 hover:bg-green-50 rounded-xl"
                                       >
                                         <Plus className="w-3 h-3" />
                                       </Button>
@@ -752,13 +752,13 @@ const Cart: React.FC = () => {
                                 </div>
 
                                 <div className="space-y-1 text-right">
-                                  <div className="text-lg lg:text-xl font-bold text-transparent bg-gradient-to-r from-purple-600 to-magenta-600 bg-clip-text">
+                                  <div className="text-lg lg:text-xl font-bold text-transparent bg-gradient-to-r from-pink-600 via-orange-500 to-yellow-600 bg-clip-text">
                                     {formatPrice(
                                       item.product.price * item.quantity,
                                     )}
                                   </div>
                                   {item.product.originalPrice && (
-                                    <div className="text-sm line-through text-gray-500 dark:text-gray-400">
+                                    <div className="text-sm line-through text-gray-500">
                                       {formatPrice(
                                         item.product.originalPrice *
                                           item.quantity,
@@ -766,7 +766,7 @@ const Cart: React.FC = () => {
                                     </div>
                                   )}
                                   {item.quantity > 1 && (
-                                    <div className="text-xs text-purple-600/70 dark:text-purple-400/70">
+                                    <div className="text-xs text-slate-600">
                                       {formatPrice(item.product.price)} ×{" "}
                                       {item.quantity}
                                     </div>
@@ -775,7 +775,7 @@ const Cart: React.FC = () => {
                               </div>
 
                               {/* Product Features */}
-                              <div className="flex flex-wrap items-center gap-4 text-xs text-purple-600/70 dark:text-purple-400/70">
+                              <div className="flex flex-wrap items-center gap-4 text-xs text-slate-600">
                                 <div className="flex items-center space-x-1">
                                   <Shield className="w-3 h-3" />
                                   <span>Bảo hành trọn đời</span>
@@ -798,26 +798,26 @@ const Cart: React.FC = () => {
                 </AnimatePresence>
               </div>
 
-              {/* ✅ REDESIGNED ENHANCED DISCOUNT SECTION */}
+              {/* ✅ REDESIGNED DISCOUNT SECTION - UNIFIED HOME COLORS */}
               <motion.div
                 initial={{ opacity: 0, y: 20 }}
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ delay: 0.3 }}
               >
-                <Card className="border-0 shadow-xl bg-gradient-to-br from-white/95 via-purple-50/80 to-magenta-50/80 dark:from-slate-800/95 dark:via-purple-900/20 dark:to-magenta-900/20 backdrop-blur-xl rounded-3xl overflow-hidden">
+                <Card className="border-0 shadow-xl bg-gradient-to-br from-white/95 via-pink-50/80 to-blue-50/80 backdrop-blur-xl rounded-3xl overflow-hidden">
                   <CardHeader className="pb-4">
                     <CardTitle className="flex items-center space-x-3">
                       <motion.div
                         whileHover={{ scale: 1.1, rotate: 10 }}
-                        className="flex items-center justify-center w-12 h-12 rounded-2xl bg-gradient-to-r from-magenta-500 to-rose-600 shadow-lg"
+                        className="flex items-center justify-center w-12 h-12 rounded-2xl bg-gradient-to-r from-pink-400 via-orange-400 to-yellow-400 shadow-lg"
                       >
                         <Gift className="w-6 h-6 text-white" />
                       </motion.div>
                       <div>
-                        <span className="text-xl lg:text-2xl text-transparent bg-gradient-to-r from-magenta-600 to-rose-600 bg-clip-text font-bold">
+                        <span className="text-xl lg:text-2xl text-transparent bg-gradient-to-r from-pink-600 via-orange-500 to-yellow-600 bg-clip-text font-bold">
                           Mã giảm giá
                         </span>
-                        <p className="text-sm text-purple-700/80 dark:text-purple-300/80 mt-1">
+                        <p className="text-sm text-slate-600 mt-1">
                           Áp dụng mã để tiết kiệm thêm
                         </p>
                       </div>
@@ -830,7 +830,7 @@ const Cart: React.FC = () => {
                       <motion.div
                         initial={{ scale: 0.95, opacity: 0 }}
                         animate={{ scale: 1, opacity: 1 }}
-                        className="relative p-6 border-2 border-emerald-300 dark:border-emerald-700 rounded-2xl bg-gradient-to-r from-emerald-50 via-teal-50 to-cyan-50 dark:from-emerald-900/20 dark:via-teal-900/20 dark:to-cyan-900/20 overflow-hidden"
+                        className="relative p-6 border-2 border-emerald-300 rounded-2xl bg-gradient-to-r from-emerald-50 via-teal-50 to-cyan-50 overflow-hidden"
                       >
                         {/* Success pattern background */}
                         <div className="absolute inset-0 opacity-10">
@@ -853,19 +853,19 @@ const Cart: React.FC = () => {
                             </motion.div>
                             <div>
                               <div className="flex items-center space-x-3 mb-2">
-                                <span className="font-bold text-lg text-emerald-800 dark:text-emerald-300 font-mono">
+                                <span className="font-bold text-lg text-emerald-800 font-mono">
                                   {appliedDiscount.code}
                                 </span>
-                                <Badge className="text-emerald-800 bg-emerald-200 dark:bg-emerald-900/50 dark:text-emerald-300 border-emerald-300 dark:border-emerald-700 font-semibold">
+                                <Badge className="text-emerald-800 bg-emerald-200 border-emerald-300 font-semibold">
                                   {formatDiscountValue(appliedDiscount)}
                                 </Badge>
                               </div>
-                              <p className="text-sm text-emerald-700 dark:text-emerald-400 mb-1 font-medium">
+                              <p className="text-sm text-emerald-700 mb-1 font-medium">
                                 {appliedDiscount.name}
                               </p>
                               <div className="flex items-center space-x-2">
-                                <Save className="w-4 h-4 text-emerald-600 dark:text-emerald-400" />
-                                <span className="text-sm font-bold text-emerald-600 dark:text-emerald-400">
+                                <Save className="w-4 h-4 text-emerald-600" />
+                                <span className="text-sm font-bold text-emerald-600">
                                   Tiết kiệm: {formatPrice(discountAmount)}
                                 </span>
                               </div>
@@ -879,7 +879,7 @@ const Cart: React.FC = () => {
                               variant="ghost"
                               size="sm"
                               onClick={handleRemoveCoupon}
-                              className="text-red-500 hover:text-red-600 hover:bg-red-100 dark:hover:bg-red-900/20 rounded-2xl p-2 transition-all duration-200"
+                              className="text-red-500 hover:text-red-600 hover:bg-red-100 rounded-2xl p-2 transition-all duration-200"
                             >
                               <X className="w-5 h-5" />
                             </Button>
@@ -904,13 +904,13 @@ const Cart: React.FC = () => {
                                     handleApplyCoupon();
                                   }
                                 }}
-                                className={`h-12 pl-12 pr-4 text-sm font-mono uppercase bg-white/90 dark:bg-slate-800/90 border-2 rounded-2xl focus:ring-2 focus:ring-purple-500/20 transition-all duration-200 ${
+                                className={`h-12 pl-12 pr-4 text-sm font-mono uppercase bg-white/90 border-2 rounded-2xl focus:ring-2 focus:ring-pink-500/20 transition-all duration-200 ${
                                   discountError
-                                    ? "border-red-300 dark:border-red-700 bg-red-50 dark:bg-red-900/20 focus:border-red-400"
-                                    : "border-purple-200/50 dark:border-purple-700/50 focus:border-purple-400 dark:focus:border-purple-500"
+                                    ? "border-red-300 bg-red-50 focus:border-red-400"
+                                    : "border-pink-200/50 focus:border-pink-400"
                                 }`}
                               />
-                              <Tag className="absolute left-4 top-1/2 transform -translate-y-1/2 w-4 h-4 text-purple-600 dark:text-purple-400" />
+                              <Tag className="absolute left-4 top-1/2 transform -translate-y-1/2 w-4 h-4 text-pink-600" />
                             </div>
                             <motion.div
                               whileHover={{ scale: 1.05 }}
@@ -921,7 +921,7 @@ const Cart: React.FC = () => {
                                 disabled={
                                   !couponCode.trim() || isApplyingDiscount
                                 }
-                                className="h-12 px-6 bg-gradient-to-r from-magenta-500 to-rose-600 hover:from-magenta-600 hover:to-rose-700 disabled:from-gray-400 disabled:to-gray-500 rounded-2xl shadow-lg font-semibold text-white border-0 transition-all duration-200"
+                                className="h-12 px-6 bg-gradient-to-r from-pink-400 via-orange-400 to-yellow-400 hover:from-pink-500 hover:via-orange-500 hover:to-yellow-500 disabled:from-gray-400 disabled:to-gray-500 rounded-2xl shadow-lg font-semibold text-white border-0 transition-all duration-200"
                               >
                                 {isApplyingDiscount ? (
                                   <motion.div
@@ -950,9 +950,9 @@ const Cart: React.FC = () => {
                                 initial={{ opacity: 0, y: -10, height: 0 }}
                                 animate={{ opacity: 1, y: 0, height: "auto" }}
                                 exit={{ opacity: 0, y: -10, height: 0 }}
-                                className="mt-3 p-3 bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 rounded-xl"
+                                className="mt-3 p-3 bg-red-50 border border-red-200 rounded-xl"
                               >
-                                <p className="flex items-center space-x-2 text-sm text-red-600 dark:text-red-400">
+                                <p className="flex items-center space-x-2 text-sm text-red-600">
                                   <AlertTriangle className="w-4 h-4 flex-shrink-0" />
                                   <span>{discountError}</span>
                                 </p>
@@ -972,8 +972,8 @@ const Cart: React.FC = () => {
                         className="space-y-4"
                       >
                         <div className="flex items-center space-x-2">
-                          <Sparkles className="w-5 h-5 text-purple-600 dark:text-purple-400" />
-                          <span className="text-sm font-semibold text-purple-800 dark:text-purple-300">
+                          <Sparkles className="w-5 h-5 text-pink-600" />
+                          <span className="text-sm font-semibold text-slate-800">
                             Mã giảm giá đang có:
                           </span>
                         </div>
@@ -1006,8 +1006,8 @@ const Cart: React.FC = () => {
                                   disabled={!validation.isValid}
                                   className={`w-full h-auto p-4 rounded-2xl border-2 transition-all duration-200 ${
                                     validation.isValid
-                                      ? "border-purple-200 dark:border-purple-700 hover:border-purple-300 dark:hover:border-purple-600 hover:bg-gradient-to-r hover:from-purple-50 hover:to-magenta-50 dark:hover:from-purple-900/20 dark:hover:to-magenta-900/20"
-                                      : "border-gray-200 dark:border-gray-700 opacity-50 cursor-not-allowed"
+                                      ? "border-pink-200 hover:border-pink-300 hover:bg-gradient-to-r hover:from-pink-50 hover:to-orange-50"
+                                      : "border-gray-200 opacity-50 cursor-not-allowed"
                                   }`}
                                 >
                                   <div className="flex items-center justify-between w-full">
@@ -1017,8 +1017,8 @@ const Cart: React.FC = () => {
                                           variant="secondary"
                                           className={`text-xs font-semibold ${
                                             discount.type === "percent"
-                                              ? "bg-blue-100 dark:bg-blue-900/30 text-blue-800 dark:text-blue-300 border-blue-200 dark:border-blue-700"
-                                              : "bg-emerald-100 dark:bg-emerald-900/30 text-emerald-800 dark:text-emerald-300 border-emerald-200 dark:border-emerald-700"
+                                              ? "bg-blue-100 text-blue-800 border-blue-200"
+                                              : "bg-emerald-100 text-emerald-800 border-emerald-200"
                                           }`}
                                         >
                                           {discount.type === "percent" ? (
@@ -1028,21 +1028,21 @@ const Cart: React.FC = () => {
                                           )}
                                           {formatDiscountValue(discount)}
                                         </Badge>
-                                        <span className="font-mono text-sm font-bold dark:text-gray-200">
+                                        <span className="font-mono text-sm font-bold">
                                           {discount.code}
                                         </span>
                                       </div>
-                                      <p className="text-xs text-gray-600 dark:text-gray-400 leading-relaxed">
+                                      <p className="text-xs text-gray-600 leading-relaxed">
                                         {discount.name}
                                       </p>
                                       {!validation.isValid && (
-                                        <p className="text-xs text-red-500 dark:text-red-400 leading-relaxed">
+                                        <p className="text-xs text-red-500 leading-relaxed">
                                           {validation.reason}
                                         </p>
                                       )}
                                     </div>
                                     {validation.isValid && (
-                                      <div className="flex items-center space-x-1 text-purple-600 dark:text-purple-400">
+                                      <div className="flex items-center space-x-1 text-pink-600">
                                         <TrendingUp className="w-4 h-4" />
                                       </div>
                                     )}
@@ -1060,25 +1060,25 @@ const Cart: React.FC = () => {
                       initial={{ opacity: 0 }}
                       animate={{ opacity: 1 }}
                       transition={{ delay: 0.4 }}
-                      className="p-4 rounded-2xl bg-gradient-to-r from-purple-100/60 to-magenta-100/60 dark:from-purple-900/20 dark:to-magenta-900/20 border border-purple-200/50 dark:border-purple-700/50"
+                      className="p-4 rounded-2xl bg-gradient-to-r from-pink-100/60 via-orange-50/60 to-yellow-100/60 border border-pink-200/50"
                     >
                       <div className="flex items-center space-x-2 mb-3">
-                        <Info className="w-4 h-4 text-purple-600 dark:text-purple-400" />
-                        <span className="text-sm font-semibold text-purple-800 dark:text-purple-300">
+                        <Info className="w-4 h-4 text-pink-600" />
+                        <span className="text-sm font-semibold text-slate-800">
                           Thông tin mã giảm giá:
                         </span>
                       </div>
-                      <div className="text-xs text-purple-700/80 dark:text-purple-400/80 space-y-1.5 leading-relaxed">
+                      <div className="text-xs text-slate-700 space-y-1.5 leading-relaxed">
                         <div className="flex items-start space-x-2">
-                          <div className="w-1 h-1 bg-purple-500 rounded-full mt-2 flex-shrink-0"></div>
+                          <div className="w-1 h-1 bg-pink-500 rounded-full mt-2 flex-shrink-0"></div>
                           <p>Mỗi đơn hàng chỉ áp dụng được 1 mã giảm giá</p>
                         </div>
                         <div className="flex items-start space-x-2">
-                          <div className="w-1 h-1 bg-purple-500 rounded-full mt-2 flex-shrink-0"></div>
+                          <div className="w-1 h-1 bg-pink-500 rounded-full mt-2 flex-shrink-0"></div>
                           <p>Mã giảm giá không áp dụng cho phí vận chuyển</p>
                         </div>
                         <div className="flex items-start space-x-2">
-                          <div className="w-1 h-1 bg-purple-500 rounded-full mt-2 flex-shrink-0"></div>
+                          <div className="w-1 h-1 bg-pink-500 rounded-full mt-2 flex-shrink-0"></div>
                           <p>Một số mã có điều kiện đơn hàng tối thiểu</p>
                         </div>
                       </div>

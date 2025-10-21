@@ -1550,7 +1550,7 @@ const Templates: React.FC = () => {
         <div className="container mx-auto px-4 relative z-10">
           {/* Enhanced Header */}
           <motion.div
-            className="text-center mb-8 sm:mb-12 pt-8 sm:pt-12 lg:pt-16"
+            className="text-center mb-8 sm:mb-12 pt-16 sm:pt-12 lg:pt-8"
             initial={{ opacity: 0, y: -80 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 1.2, ease: "easeOut" }}

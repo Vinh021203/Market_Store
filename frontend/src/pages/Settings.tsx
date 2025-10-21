@@ -243,7 +243,7 @@ const Settings: React.FC = () => {
 
   return (
     <div
-      className={`min-h-screen bg-gradient-to-br ${colorScheme.pageBackground}`}
+      className={`bg-gradient-to-br ${colorScheme.pageBackground}`}
       style={{
         backgroundImage: `radial-gradient(circle at 20% 80%, rgba(236, 72, 153, 0.04) 0%, transparent 50%),
                  radial-gradient(circle at 80% 20%, rgba(244, 63, 94, 0.04) 0%, transparent 50%),

@@ -2,7 +2,6 @@ import React, { useEffect, useState } from "react";
 import { useLocation, Link, useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
-import { Badge } from "@/components/ui/badge";
 import { motion, AnimatePresence } from "framer-motion";
 import {
   Home,
@@ -11,15 +10,20 @@ import {
   Package,
   BookOpen,
   Sparkles,
-  Coffee,
-  Code,
-  Palette,
   AlertTriangle,
   RefreshCw,
-  ExternalLink,
   MessageCircle,
   Mail,
-  Phone,
+  Heart,
+  Star,
+  Zap,
+  Gift,
+  Rocket,
+  Crown,
+  Award,
+  Code,
+  Palette,
+  Coffee,
 } from "lucide-react";
 import { toast } from "@/hooks/use-toast";
 
@@ -30,25 +34,17 @@ const NotFound: React.FC = () => {
   const [showCountdown, setShowCountdown] = useState(false);
 
   useEffect(() => {
-    // ✅ Enhanced logging với timestamp
     console.error(
       `404 Error [${new Date().toISOString()}]: User attempted to access non-existent route:`,
       location.pathname,
-      {
-        userAgent: navigator.userAgent,
-        referrer: document.referrer,
-        timestamp: Date.now(),
-      },
     );
 
-    // ✅ Show toast notification
     toast({
       title: "⚠️ Trang không tồn tại",
       description: `Đường dẫn "${location.pathname}" không được tìm thấy.`,
       variant: "destructive",
     });
 
-    // ✅ Auto redirect countdown
     const timer = setTimeout(() => {
       setShowCountdown(true);
       const countdownTimer = setInterval(() => {
@@ -68,138 +64,282 @@ const NotFound: React.FC = () => {
     return () => clearTimeout(timer);
   }, [location.pathname, navigate]);
 
+  // FLOATING ICONS - GIỮ NGUYÊN
+  const floatingIcons = [
+    {
+      icon: Package,
+      color: "text-pink-400/30",
+      x: "8%",
+      y: "12%",
+      size: "w-12 h-12",
+      delay: 0,
+    },
+    {
+      icon: Code,
+      color: "text-rose-400/30",
+      x: "88%",
+      y: "18%",
+      size: "w-10 h-10",
+      delay: 0.5,
+    },
+    {
+      icon: Sparkles,
+      color: "text-pink-300/30",
+      x: "12%",
+      y: "75%",
+      size: "w-14 h-14",
+      delay: 1,
+    },
+    {
+      icon: Heart,
+      color: "text-rose-400/30",
+      x: "85%",
+      y: "68%",
+      size: "w-11 h-11",
+      delay: 1.5,
+    },
+    {
+      icon: Star,
+      color: "text-red-400/30",
+      x: "50%",
+      y: "8%",
+      size: "w-9 h-9",
+      delay: 2,
+    },
+    {
+      icon: Zap,
+      color: "text-pink-500/30",
+      x: "18%",
+      y: "42%",
+      size: "w-10 h-10",
+      delay: 2.5,
+    },
+    {
+      icon: Gift,
+      color: "text-rose-300/30",
+      x: "78%",
+      y: "88%",
+      size: "w-12 h-12",
+      delay: 3,
+    },
+    {
+      icon: Crown,
+      color: "text-red-300/30",
+      x: "35%",
+      y: "85%",
+      size: "w-11 h-11",
+      delay: 3.5,
+    },
+    {
+      icon: Rocket,
+      color: "text-pink-400/30",
+      x: "92%",
+      y: "48%",
+      size: "w-13 h-13",
+      delay: 4,
+    },
+    {
+      icon: Award,
+      color: "text-rose-500/30",
+      x: "28%",
+      y: "22%",
+      size: "w-10 h-10",
+      delay: 4.5,
+    },
+    {
+      icon: Coffee,
+      color: "text-pink-300/30",
+      x: "65%",
+      y: "35%",
+      size: "w-9 h-9",
+      delay: 5,
+    },
+    {
+      icon: Palette,
+      color: "text-red-400/30",
+      x: "42%",
+      y: "60%",
+      size: "w-11 h-11",
+      delay: 5.5,
+    },
+  ];
+
   const quickLinks = [
     {
       title: "Templates",
-      description: "Khám phá bộ sưu tập templates",
+      description: "2,500+ mẫu website chất lượng",
       href: "/templates",
       icon: Package,
-      color: "from-blue-500 to-cyan-500",
+      iconColor: "text-pink-600",
+      iconBg: "from-pink-100 to-rose-200",
     },
     {
       title: "E-books",
-      description: "Tài liệu học tập chất lượng",
+      description: "1,200+ tài liệu học tập",
       href: "/ebooks",
       icon: BookOpen,
-      color: "from-green-500 to-emerald-500",
+      iconColor: "text-rose-600",
+      iconBg: "from-rose-100 to-red-200",
     },
     {
       title: "Blog",
       description: "Bài viết và hướng dẫn",
       href: "/blog",
       icon: MessageCircle,
-      color: "from-purple-500 to-pink-500",
+      iconColor: "text-red-600",
+      iconBg: "from-red-100 to-pink-200",
     },
     {
       title: "Liên hệ",
-      description: "Hỗ trợ và tư vấn",
+      description: "Hỗ trợ 24/7",
       href: "/contact",
       icon: Mail,
-      color: "from-orange-500 to-red-500",
+      iconColor: "text-pink-700",
+      iconBg: "from-pink-100 to-rose-100",
     },
   ];
 
   const handleRefresh = () => {
     window.location.reload();
-    toast({
-      title: "🔄 Đang tải lại trang",
-      description: "Vui lòng đợi trong giây lát...",
-    });
   };
 
   const handleGoBack = () => {
-    if (window.history.length > 1) {
-      navigate(-1);
-    } else {
-      navigate("/");
-    }
+    window.history.length > 1 ? navigate(-1) : navigate("/");
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-50 via-blue-50 to-indigo-50 dark:from-slate-900 dark:via-purple-900 dark:to-slate-900">
-      {/* Floating Elements */}
-      <div className="fixed inset-0 overflow-hidden pointer-events-none">
-        <div className="absolute top-1/4 left-1/4 animate-float">
-          <AlertTriangle className="w-8 h-8 text-red-500 opacity-20" />
-        </div>
-        <div className="absolute top-1/3 right-1/4 animate-float-delay-1">
-          <Search className="w-6 h-6 text-blue-500 opacity-20" />
-        </div>
-        <div className="absolute bottom-1/4 left-1/3 animate-float-delay-2">
-          <Coffee className="text-orange-500 w-7 h-7 opacity-20" />
-        </div>
+    <div className="relative min-h-screen overflow-hidden bg-gradient-to-br from-pink-50/70 via-rose-50/60 to-red-50/50">
+      {/* BACKGROUND PATTERNS - MÀU SOFT PINK */}
+      <div className="absolute inset-0 pointer-events-none">
+        <div className="absolute inset-0 bg-[radial-gradient(circle_at_top_right,rgba(251,207,232,0.4),transparent_50%)]" />
+        <div className="absolute inset-0 bg-[radial-gradient(circle_at_bottom_left,rgba(252,165,165,0.3),transparent_50%)]" />
+        <div className="absolute inset-0 bg-[radial-gradient(circle_at_center,rgba(254,202,202,0.3),transparent_70%)]" />
       </div>
 
-      <div className="container relative z-10 px-4 py-8 mx-auto">
-        <div className="max-w-4xl mx-auto">
-          {/* ✅ Enhanced 404 Display */}
+      {/* FLOATING ICONS - GIỮ NGUYÊN */}
+      <div className="fixed inset-0 pointer-events-none overflow-hidden">
+        {floatingIcons.map((item, index) => (
           <motion.div
-            initial={{ opacity: 0, scale: 0.8 }}
+            key={index}
+            className="absolute"
+            style={{
+              left: item.x,
+              top: item.y,
+            }}
+            initial={{ opacity: 0, scale: 0 }}
+            animate={{
+              opacity: [0.4, 0.7, 0.4],
+              scale: [1, 1.15, 1],
+              y: [0, -25, 0],
+              rotate: [0, 5, -5, 0],
+            }}
+            transition={{
+              duration: 5 + index * 0.3,
+              repeat: Infinity,
+              delay: item.delay,
+              ease: "easeInOut",
+            }}
+          >
+            <item.icon
+              className={`${item.size} ${item.color} drop-shadow-sm`}
+            />
+          </motion.div>
+        ))}
+      </div>
+
+      {/* GRADIENT OVERLAYS - MÀU SOFT PINK */}
+      <div className="fixed inset-0 pointer-events-none">
+        <div className="absolute top-0 left-0 w-96 h-96 bg-pink-200/20 rounded-full filter blur-3xl animate-pulse" />
+        <div
+          className="absolute bottom-0 right-0 w-96 h-96 bg-rose-200/20 rounded-full filter blur-3xl animate-pulse"
+          style={{ animationDelay: "1s" }}
+        />
+        <div
+          className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 w-96 h-96 bg-red-200/20 rounded-full filter blur-3xl animate-pulse"
+          style={{ animationDelay: "2s" }}
+        />
+      </div>
+
+      <div className="container relative z-10 px-4 py-16 mx-auto">
+        <div className="max-w-5xl mx-auto">
+          {/* 404 HERO */}
+          <motion.div
+            initial={{ opacity: 0, scale: 0.9 }}
             animate={{ opacity: 1, scale: 1 }}
-            transition={{ duration: 0.8, type: "spring", stiffness: 100 }}
-            className="mb-12 text-center"
+            transition={{ duration: 0.6, type: "spring" }}
+            className="mb-16 text-center"
           >
             <motion.div
-              initial={{ y: -50 }}
+              className="relative inline-block mb-8"
+              initial={{ y: -30 }}
               animate={{ y: 0 }}
-              transition={{ delay: 0.2, type: "spring", stiffness: 200 }}
-              className="relative mb-8"
+              transition={{ delay: 0.2, type: "spring", stiffness: 150 }}
             >
-              <h1 className="font-bold text-transparent text-9xl bg-gradient-to-r from-red-500 via-purple-500 to-blue-500 bg-clip-text">
+              <h1 className="relative font-black text-9xl md:text-[12rem] text-transparent bg-gradient-to-br from-pink-500 via-rose-500 to-red-500 bg-clip-text drop-shadow-2xl">
                 404
               </h1>
+
+              {/* Animated badge */}
               <motion.div
-                animate={{ rotate: 360 }}
-                transition={{ duration: 20, repeat: Infinity, ease: "linear" }}
-                className="absolute flex items-center justify-center w-16 h-16 rounded-full -top-4 -right-4 bg-gradient-to-r from-yellow-400 to-orange-500"
+                animate={{
+                  rotate: [0, 10, -10, 0],
+                  scale: [1, 1.1, 1],
+                }}
+                transition={{
+                  duration: 3,
+                  repeat: Infinity,
+                  ease: "easeInOut",
+                }}
+                className="absolute -top-8 -right-8 w-20 h-20 rounded-full bg-gradient-to-r from-pink-500 to-rose-500 flex items-center justify-center shadow-2xl"
               >
-                <Sparkles className="w-8 h-8 text-white" />
+                <Sparkles className="w-10 h-10 text-white" />
               </motion.div>
             </motion.div>
 
             <motion.div
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
-              transition={{ delay: 0.4 }}
-              className="space-y-4"
+              transition={{ delay: 0.3 }}
+              className="space-y-6 max-w-2xl mx-auto"
             >
-              <h2 className="text-3xl font-bold text-gray-800 dark:text-gray-200">
+              <h2 className="text-4xl md:text-5xl font-bold text-transparent bg-gradient-to-r from-pink-600 via-rose-600 to-red-600 bg-clip-text">
                 Oops! Trang không tồn tại
               </h2>
-              <p className="max-w-md mx-auto text-lg text-muted-foreground">
-                Trang bạn đang tìm kiếm có thể đã được di chuyển, xóa hoặc không
+              <p className="text-lg md:text-xl text-slate-600 leading-relaxed">
+                Trang bạn đang tìm kiếm có thể đã được di chuyển, xóa hoặc chưa
                 bao giờ tồn tại.
               </p>
 
+              {/* Path display */}
               <motion.div
-                initial={{ opacity: 0 }}
-                animate={{ opacity: 1 }}
-                transition={{ delay: 0.6 }}
-                className="inline-flex items-center px-4 py-2 space-x-2 border border-red-200 rounded-lg bg-red-50 dark:bg-red-900/20"
+                initial={{ opacity: 0, scale: 0.9 }}
+                animate={{ opacity: 1, scale: 1 }}
+                transition={{ delay: 0.5 }}
+                className="inline-flex items-center gap-3 px-6 py-3 bg-white/80 backdrop-blur-sm border-2 border-pink-200 rounded-2xl shadow-lg"
               >
-                <AlertTriangle className="w-4 h-4 text-red-500" />
-                <span className="font-mono text-sm text-red-700 dark:text-red-300">
+                <AlertTriangle className="w-5 h-5 text-pink-600" />
+                <span className="font-mono text-sm md:text-base text-pink-700 font-medium">
                   {location.pathname}
                 </span>
               </motion.div>
             </motion.div>
           </motion.div>
 
-          {/* ✅ Enhanced Action Buttons */}
+          {/* ACTION BUTTONS */}
           <motion.div
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: 0.8 }}
-            className="flex flex-col justify-center gap-4 mb-12 sm:flex-row"
+            transition={{ delay: 0.6 }}
+            className="flex flex-col sm:flex-row justify-center gap-4 mb-16"
           >
             <motion.div whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }}>
               <Button
                 asChild
                 size="lg"
-                className="shadow-lg bg-gradient-to-r from-blue-500 to-purple-600 hover:from-blue-600 hover:to-purple-700"
+                className="w-full sm:w-auto px-8 py-6 text-lg font-bold shadow-xl bg-gradient-to-r from-pink-500 via-rose-500 to-red-500 hover:from-pink-600 hover:via-rose-600 hover:to-red-600 text-white border-0 rounded-2xl"
               >
                 <Link to="/">
-                  <Home className="w-5 h-5 mr-2" />
+                  <Home className="w-6 h-6 mr-2" />
                   Về trang chủ
                 </Link>
               </Button>
@@ -207,115 +347,121 @@ const NotFound: React.FC = () => {
 
             <motion.div whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }}>
               <Button
-                variant="outline"
                 size="lg"
                 onClick={handleGoBack}
-                className="group"
+                className="w-full sm:w-auto px-8 py-6 text-lg font-bold bg-white hover:bg-pink-50 border-2 border-pink-300 text-slate-700 rounded-2xl shadow-lg group"
               >
-                <ArrowLeft className="w-5 h-5 mr-2 transition-transform group-hover:-translate-x-1" />
+                <ArrowLeft className="w-6 h-6 mr-2 transition-transform group-hover:-translate-x-1" />
                 Quay lại
               </Button>
             </motion.div>
 
             <motion.div whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }}>
               <Button
-                variant="outline"
                 size="lg"
                 onClick={handleRefresh}
-                className="group"
+                className="w-full sm:w-auto px-8 py-6 text-lg font-bold bg-white hover:bg-rose-50 border-2 border-rose-300 text-slate-700 rounded-2xl shadow-lg group"
               >
-                <RefreshCw className="w-5 h-5 mr-2 group-hover:animate-spin" />
+                <RefreshCw className="w-6 h-6 mr-2 group-hover:animate-spin" />
                 Tải lại
               </Button>
             </motion.div>
           </motion.div>
 
-          {/* ✅ Enhanced Quick Links */}
+          {/* QUICK LINKS */}
           <motion.div
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: 1.0 }}
-            className="mb-12"
+            transition={{ delay: 0.8 }}
+            className="mb-16"
           >
-            <div className="mb-8 text-center">
-              <h3 className="mb-4 text-2xl font-bold text-transparent bg-gradient-to-r from-green-600 to-blue-600 bg-clip-text">
+            <div className="text-center mb-10">
+              <h3 className="text-3xl md:text-4xl font-bold mb-4 text-transparent bg-gradient-to-r from-pink-600 via-rose-600 to-red-600 bg-clip-text">
                 Có thể bạn đang tìm kiếm?
               </h3>
-              <p className="text-muted-foreground">
-                Khám phá những trang phổ biến nhất của chúng tôi
+              <p className="text-lg text-slate-600">
+                Khám phá những trang phổ biến nhất
               </p>
             </div>
 
-            <div className="grid grid-cols-1 gap-6 md:grid-cols-2 lg:grid-cols-4">
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
               {quickLinks.map((link, index) => (
                 <motion.div
                   key={index}
-                  initial={{ opacity: 0, y: 20 }}
+                  initial={{ opacity: 0, y: 30 }}
                   animate={{ opacity: 1, y: 0 }}
-                  transition={{ delay: 1.2 + index * 0.1 }}
-                  whileHover={{ y: -5, scale: 1.02 }}
+                  transition={{ delay: 1 + index * 0.1 }}
+                  whileHover={{ y: -8, scale: 1.03 }}
+                  whileTap={{ scale: 0.98 }}
                 >
-                  <Card className="h-full transition-all duration-300 border-0 shadow-lg bg-gradient-to-br from-white to-gray-50 dark:from-slate-800 dark:to-slate-900 hover:shadow-xl group">
-                    <CardContent className="p-6 space-y-4 text-center">
-                      <div
-                        className={`w-12 h-12 mx-auto rounded-xl bg-gradient-to-r ${link.color} flex items-center justify-center group-hover:scale-110 transition-transform duration-300`}
-                      >
-                        <link.icon className="w-6 h-6 text-white" />
-                      </div>
-                      <div>
-                        <h4 className="mb-2 text-lg font-semibold transition-colors group-hover:text-primary">
-                          {link.title}
-                        </h4>
-                        <p className="text-sm text-muted-foreground">
-                          {link.description}
-                        </p>
-                      </div>
-                      <Button
-                        variant="outline"
-                        size="sm"
-                        asChild
-                        className="w-full transition-colors group-hover:bg-primary group-hover:text-primary-foreground"
-                      >
-                        <Link to={link.href}>
-                          Khám phá
-                          <ExternalLink className="w-3 h-3 ml-2" />
-                        </Link>
-                      </Button>
-                    </CardContent>
-                  </Card>
+                  <Link to={link.href}>
+                    <Card className="h-full bg-white/90 backdrop-blur-sm border-2 border-pink-100 hover:border-pink-300 shadow-lg hover:shadow-2xl transition-all duration-300 rounded-2xl group overflow-hidden">
+                      <CardContent className="p-6 text-center space-y-4">
+                        {/* Icon */}
+                        <div className="relative mx-auto w-16 h-16">
+                          <div
+                            className={`absolute inset-0 bg-gradient-to-r ${link.iconBg} rounded-2xl transform transition-transform group-hover:scale-110 group-hover:rotate-6 shadow-lg`}
+                          />
+                          <div className="relative w-full h-full flex items-center justify-center">
+                            <link.icon
+                              className={`w-8 h-8 ${link.iconColor}`}
+                              strokeWidth={2.5}
+                            />
+                          </div>
+                        </div>
+
+                        {/* Content */}
+                        <div>
+                          <h4 className="text-xl font-bold mb-2 text-slate-800 group-hover:text-transparent group-hover:bg-gradient-to-r group-hover:from-pink-600 group-hover:to-rose-600 group-hover:bg-clip-text transition-all">
+                            {link.title}
+                          </h4>
+                          <p className="text-sm text-slate-600 leading-relaxed">
+                            {link.description}
+                          </p>
+                        </div>
+
+                        {/* Hover indicator */}
+                        <div className="pt-2 opacity-0 group-hover:opacity-100 transition-opacity">
+                          <div className="text-sm font-semibold text-transparent bg-gradient-to-r from-pink-600 to-rose-600 bg-clip-text">
+                            Khám phá →
+                          </div>
+                        </div>
+                      </CardContent>
+                    </Card>
+                  </Link>
                 </motion.div>
               ))}
             </div>
           </motion.div>
 
-          {/* ✅ Enhanced Search Suggestion */}
+          {/* SEARCH BOX */}
           <motion.div
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: 1.4 }}
+            transition={{ delay: 1.2 }}
             className="mb-12"
           >
-            <Card className="border-0 shadow-lg bg-gradient-to-r from-white to-blue-50 dark:from-slate-800 dark:to-blue-900">
-              <CardContent className="p-8 text-center">
-                <div className="flex items-center justify-center mb-4">
-                  <div className="flex items-center justify-center w-12 h-12 rounded-full bg-gradient-to-r from-blue-500 to-purple-600">
-                    <Search className="w-6 h-6 text-white" />
+            <Card className="bg-white/90 backdrop-blur-sm border-2 border-pink-100 shadow-xl rounded-3xl overflow-hidden">
+              <CardContent className="p-8 md:p-10 text-center">
+                <div className="flex items-center justify-center mb-6">
+                  <div className="w-16 h-16 rounded-2xl bg-gradient-to-br from-pink-100 to-rose-200 flex items-center justify-center shadow-lg">
+                    <Search className="w-8 h-8 text-pink-600" />
                   </div>
                 </div>
-                <h3 className="mb-4 text-xl font-semibold">
+                <h3 className="text-2xl md:text-3xl font-bold mb-4 text-transparent bg-gradient-to-r from-pink-600 to-rose-600 bg-clip-text">
                   Tìm kiếm những gì bạn cần
                 </h3>
-                <p className="mb-6 text-muted-foreground">
+                <p className="text-lg text-slate-600 mb-8">
                   Sử dụng tính năng tìm kiếm để tìm templates, e-books hoặc bài
                   viết
                 </p>
-                <div className="max-w-md mx-auto">
-                  <div className="relative">
-                    <Search className="absolute w-4 h-4 transform -translate-y-1/2 left-3 top-1/2 text-muted-foreground" />
+                <div className="max-w-xl mx-auto">
+                  <div className="relative group">
+                    <Search className="absolute left-5 top-1/2 transform -translate-y-1/2 w-5 h-5 text-slate-400 group-focus-within:text-pink-600 transition-colors" />
                     <input
                       type="text"
-                      placeholder="Tìm kiếm..."
-                      className="w-full py-3 pl-10 pr-4 transition-all duration-300 border rounded-lg focus:ring-2 focus:ring-primary/20"
+                      placeholder="Nhập từ khóa tìm kiếm..."
+                      className="w-full py-4 pl-14 pr-5 text-lg bg-white border-2 border-pink-200 rounded-2xl focus:ring-4 focus:ring-pink-400/20 focus:border-pink-400 transition-all text-slate-700 placeholder:text-slate-400"
                       onKeyPress={(e) => {
                         if (e.key === "Enter") {
                           const query = (e.target as HTMLInputElement).value;
@@ -331,69 +477,73 @@ const NotFound: React.FC = () => {
             </Card>
           </motion.div>
 
-          {/* ✅ Enhanced Auto Redirect Countdown */}
+          {/* COUNTDOWN */}
           <AnimatePresence>
             {showCountdown && countdown > 0 && (
               <motion.div
-                initial={{ opacity: 0, scale: 0.8 }}
+                initial={{ opacity: 0, scale: 0.9 }}
                 animate={{ opacity: 1, scale: 1 }}
-                exit={{ opacity: 0, scale: 0.8 }}
+                exit={{ opacity: 0, scale: 0.9 }}
                 className="text-center"
               >
-                <Card className="inline-block border-0 shadow-lg bg-gradient-to-r from-yellow-50 to-orange-50 dark:from-yellow-900/20 dark:to-orange-900/20">
-                  <CardContent className="p-6">
-                    <div className="flex items-center space-x-3">
-                      <motion.div
-                        animate={{ rotate: 360 }}
-                        transition={{
-                          duration: 1,
-                          repeat: Infinity,
-                          ease: "linear",
-                        }}
+                <div className="inline-block bg-white/90 backdrop-blur-sm border-2 border-pink-200 rounded-2xl shadow-xl px-8 py-6">
+                  <div className="flex items-center gap-4">
+                    <motion.div
+                      animate={{ rotate: 360 }}
+                      transition={{
+                        duration: 1,
+                        repeat: Infinity,
+                        ease: "linear",
+                      }}
+                    >
+                      <RefreshCw className="w-6 h-6 text-pink-500" />
+                    </motion.div>
+                    <p className="text-lg text-slate-700">
+                      Tự động chuyển về trang chủ sau{" "}
+                      <motion.span
+                        key={countdown}
+                        initial={{ scale: 1.3, color: "#ec4899" }}
+                        animate={{ scale: 1, color: "#64748b" }}
+                        className="font-bold text-xl"
                       >
-                        <RefreshCw className="w-5 h-5 text-orange-500" />
-                      </motion.div>
-                      <div>
-                        <p className="text-sm text-muted-foreground">
-                          Tự động chuyển về trang chủ sau{" "}
-                          <motion.span
-                            key={countdown}
-                            initial={{ scale: 1.2, color: "#f97316" }}
-                            animate={{ scale: 1, color: "#6b7280" }}
-                            className="font-bold"
-                          >
-                            {countdown}
-                          </motion.span>{" "}
-                          giây
-                        </p>
-                      </div>
-                    </div>
-                  </CardContent>
-                </Card>
+                        {countdown}
+                      </motion.span>{" "}
+                      giây
+                    </p>
+                  </div>
+                </div>
               </motion.div>
             )}
           </AnimatePresence>
 
-          {/* ✅ Enhanced Help Section */}
+          {/* HELP SECTION */}
           <motion.div
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: 1.6 }}
-            className="mt-12 text-center"
+            transition={{ delay: 1.4 }}
+            className="mt-16 text-center"
           >
-            <p className="mb-4 text-muted-foreground">
+            <p className="text-lg text-slate-600 mb-6">
               Vẫn không tìm thấy những gì bạn cần?
             </p>
-            <div className="flex justify-center space-x-4">
-              <Button variant="outline" size="sm" asChild>
+            <div className="flex flex-col sm:flex-row justify-center gap-4">
+              <Button
+                size="lg"
+                asChild
+                className="bg-white hover:bg-pink-50 border-2 border-pink-300 text-slate-700 rounded-xl shadow-lg"
+              >
                 <Link to="/contact">
-                  <Mail className="w-4 h-4 mr-2" />
+                  <Mail className="w-5 h-5 mr-2" />
                   Liên hệ hỗ trợ
                 </Link>
               </Button>
-              <Button variant="outline" size="sm" asChild>
-                <a href="mailto:support@templatemarket.com">
-                  <MessageCircle className="w-4 h-4 mr-2" />
+              <Button
+                size="lg"
+                asChild
+                className="bg-white hover:bg-rose-50 border-2 border-rose-300 text-slate-700 rounded-xl shadow-lg"
+              >
+                <a href="mailto:veutong961@gmail.com">
+                  <MessageCircle className="w-5 h-5 mr-2" />
                   Gửi email
                 </a>
               </Button>

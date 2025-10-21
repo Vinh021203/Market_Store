@@ -7,6 +7,7 @@ import { Switch } from "@/components/ui/switch";
 import { Separator } from "@/components/ui/separator";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
+import { Helmet } from "react-helmet-async";
 import {
   CheckCircle2,
   X,
@@ -664,7 +665,6 @@ const ContactForm: React.FC = () => {
   );
 };
 
-// Main Pricing Component
 const Pricing: React.FC = () => {
   const [isYearly, setIsYearly] = useState(false);
   const [hoveredPlan, setHoveredPlan] = useState<string | null>(null);
@@ -996,6 +996,95 @@ const Pricing: React.FC = () => {
 
   return (
     <>
+      <Helmet>
+        <title>
+          Bảng Giá - Template Market | 50K+ Khách Hàng | Tiết Kiệm 33%
+        </title>
+        <meta
+          name="description"
+          content="Xem bảng giá Template Market: 3 gói từ 299K-2.999K VND/tháng. ✓ 200+ templates ✓ 50K+ khách hàng ✓ Tiết kiệm 33% khi đăng ký yearly ✓ Support 24/7 ✓ Hoàn tiền 30 ngày"
+        />
+        <meta
+          name="keywords"
+          content="bảng giá template, pricing plans vietnam, react templates giá, mua template website, gói template market, giá template react, template subscription vietnam"
+        />
+        <link rel="canonical" href="https://templatemarket.com/pricing" />
+
+        {/* Open Graph */}
+        <meta
+          property="og:title"
+          content="Bảng Giá Template Market | Tiết Kiệm 33%"
+        />
+        <meta
+          property="og:description"
+          content="3 gói từ 299K VND/tháng ✓ 200+ templates ✓ 50K+ khách hàng ✓ Support 24/7"
+        />
+        <meta property="og:type" content="website" />
+        <meta property="og:url" content="https://templatemarket.com/pricing" />
+        <meta
+          property="og:image"
+          content="https://templatemarket.com/og-pricing.jpg"
+        />
+
+        {/* Twitter Card */}
+        <meta name="twitter:card" content="summary_large_image" />
+        <meta
+          name="twitter:title"
+          content="Template Market Pricing | Save 33%"
+        />
+        <meta
+          name="twitter:description"
+          content="50K+ customers ✓ 200+ templates ✓ Plans from 299K VND/month"
+        />
+        <meta
+          name="twitter:image"
+          content="https://templatemarket.com/twitter-pricing.jpg"
+        />
+
+        {/* Additional SEO */}
+        <meta name="robots" content="index, follow" />
+        <meta name="author" content="Template Market Team" />
+        <meta property="og:locale" content="vi_VN" />
+        <meta property="og:site_name" content="Template Market" />
+
+        {/* Structured Data */}
+        <script type="application/ld+json">
+          {JSON.stringify({
+            "@context": "https://schema.org",
+            "@type": "Product",
+            name: "Template Market Subscription Plans",
+            description: "Premium website templates and resources",
+            offers: [
+              {
+                "@type": "Offer",
+                name: "Starter Plan",
+                price: "299000",
+                priceCurrency: "VND",
+                availability: "https://schema.org/InStock",
+              },
+              {
+                "@type": "Offer",
+                name: "Professional Plan",
+                price: "999000",
+                priceCurrency: "VND",
+                availability: "https://schema.org/InStock",
+              },
+              {
+                "@type": "Offer",
+                name: "Enterprise Plan",
+                price: "2999000",
+                priceCurrency: "VND",
+                availability: "https://schema.org/InStock",
+              },
+            ],
+            aggregateRating: {
+              "@type": "AggregateRating",
+              ratingValue: "4.9",
+              reviewCount: "50000",
+            },
+          })}
+        </script>
+      </Helmet>
       {/* ✅ EXACT HOME PAGE FLOATING BACKGROUND ELEMENTS */}
       <div className="fixed inset-0 overflow-hidden pointer-events-none z-0">
         {[

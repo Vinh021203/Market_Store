@@ -3,21 +3,6 @@ import { User, Mail, Gift, XCircle, CheckCircle } from "lucide-react";
 
 const LS_KEY = "template-market-leadform-success";
 
-// 🎨 SOFTPINKTHEME Color scheme - giống Templates
-const pastelSchemes = {
-  main: "from-pink-50 via-blue-50 to-yellow-50", // ✅ SoftPinkTheme
-  secondary: "from-pink-50/80 via-blue-50/60 to-yellow-50/80", // ✅ SoftPinkTheme
-  accent: "from-orange-50 via-pink-50 to-yellow-50", // ✅ SoftPinkTheme
-  button: "from-pink-400 via-orange-400 to-yellow-400", // ✅ SoftPinkTheme buttons
-  buttonHover: "from-pink-500 via-orange-500 to-yellow-500", // ✅ SoftPinkTheme hover
-  card: "from-white via-pink-50 to-blue-50", // ✅ SoftPinkTheme card
-  textMain: "from-pink-600 via-blue-600 to-orange-600", // ✅ SoftPinkTheme text
-  textAccent: "from-orange-500 via-pink-500 to-yellow-500", // ✅ SoftPinkTheme accent
-  iconPink: "from-pink-100 to-orange-200", // ✅ Pink icon background
-  iconBlue: "from-blue-100 to-cyan-200", // ✅ Blue icon background
-  iconYellow: "from-yellow-100 to-orange-200", // ✅ Yellow icon background
-};
-
 const LeadForm: React.FC = () => {
   const [show, setShow] = useState(false);
   const [fields, setFields] = useState({ name: "", email: "" });
@@ -25,7 +10,6 @@ const LeadForm: React.FC = () => {
   const [success, setSuccess] = useState(false);
   const [isMobile, setIsMobile] = useState(false);
 
-  // Detect mobile screen size
   useEffect(() => {
     const checkMobile = () => {
       setIsMobile(window.innerWidth < 768);
@@ -38,14 +22,14 @@ const LeadForm: React.FC = () => {
 
   useEffect(() => {
     if (!localStorage.getItem(LS_KEY)) {
-      setTimeout(() => setShow(true), 2000); // Tăng thời gian hiển thị lên 2s
+      setTimeout(() => setShow(true), 2000);
     }
   }, []);
 
   useEffect(() => {
     let timer: NodeJS.Timeout;
     if (!localStorage.getItem(LS_KEY) && !show) {
-      timer = setTimeout(() => setShow(true), 180000); // 3 phút
+      timer = setTimeout(() => setShow(true), 180000);
     }
     return () => timer && clearTimeout(timer);
   }, [show]);
@@ -76,7 +60,6 @@ const LeadForm: React.FC = () => {
 
   if (!show) return null;
 
-  // Responsive positioning
   const containerStyle: React.CSSProperties = {
     position: "fixed",
     zIndex: 99999,
@@ -84,7 +67,6 @@ const LeadForm: React.FC = () => {
     transition: "all 0.3s ease",
     ...(isMobile
       ? {
-          // Mobile: center horizontally and vertically
           top: "50%",
           left: "50%",
           transform: "translate(-50%, -50%)",
@@ -92,7 +74,6 @@ const LeadForm: React.FC = () => {
           maxWidth: "340px",
         }
       : {
-          // Desktop: bottom right corner
           bottom: 32,
           right: 32,
           width: "380px",
@@ -102,7 +83,6 @@ const LeadForm: React.FC = () => {
 
   return (
     <>
-      {/* Mobile backdrop overlay */}
       {isMobile && (
         <div
           style={{
@@ -111,7 +91,7 @@ const LeadForm: React.FC = () => {
             left: 0,
             right: 0,
             bottom: 0,
-            background: "rgba(0, 0, 0, 0.4)",
+            background: "rgba(0, 0, 0, 0.5)",
             zIndex: 99998,
             backdropFilter: "blur(4px)",
           }}
@@ -122,18 +102,46 @@ const LeadForm: React.FC = () => {
       <div style={containerStyle}>
         <div
           style={{
-            // ✅ CHỈ ĐỔI DÒNG NÀY: SoftPinkTheme gradient background
-            background: `linear-gradient(135deg, #ec4899 0%, #f97316 50%, #eab308 100%)`,
+            // ✅ NỀN PASTEL
+            background: `linear-gradient(135deg, #fce7f3 0%, #fed7aa 50%, #fef3c7 100%)`,
             borderRadius: isMobile ? 16 : 20,
             boxShadow: isMobile
-              ? "0 20px 40px rgba(236, 72, 153, 0.3)" // ✅ Pink shadow
-              : "0 16px 48px rgba(249, 115, 22, 0.25), 0 4px 16px rgba(234, 179, 8, 0.15)", // ✅ Orange/Yellow shadows
+              ? "0 20px 40px rgba(236, 72, 153, 0.25)"
+              : "0 16px 48px rgba(249, 115, 22, 0.2), 0 4px 16px rgba(234, 179, 8, 0.15)",
             padding: isMobile ? "24px 20px 20px" : "32px 28px 24px",
             position: "relative",
-            border: "1px solid rgba(255, 255, 255, 0.1)",
+            border: "2px solid rgba(249, 115, 22, 0.15)",
             backdropFilter: "blur(8px)",
           }}
         >
+          {/* Decorative elements */}
+          <div
+            style={{
+              position: "absolute",
+              top: 16,
+              right: 16,
+              width: 60,
+              height: 60,
+              background: "rgba(236, 72, 153, 0.1)",
+              borderRadius: "50%",
+              filter: "blur(20px)",
+              pointerEvents: "none",
+            }}
+          />
+          <div
+            style={{
+              position: "absolute",
+              bottom: 16,
+              left: 16,
+              width: 50,
+              height: 50,
+              background: "rgba(249, 115, 22, 0.1)",
+              borderRadius: "50%",
+              filter: "blur(15px)",
+              pointerEvents: "none",
+            }}
+          />
+
           {/* Header */}
           <div
             style={{
@@ -154,21 +162,18 @@ const LeadForm: React.FC = () => {
             >
               <div
                 style={{
-                  // ✅ THÊM: Icon background với SoftPinkTheme
                   background:
-                    "linear-gradient(135deg, rgba(255, 255, 255, 0.25) 0%, rgba(254, 215, 170, 0.2) 100%)",
+                    "linear-gradient(135deg, #fbcfe8 0%, #fed7aa 100%)",
                   borderRadius: 12,
                   padding: isMobile ? 10 : 12,
-                  backdropFilter: "blur(6px)",
                   flexShrink: 0,
-                  border: "1px solid rgba(255, 255, 255, 0.2)",
-                  boxShadow: "0 4px 12px rgba(249, 115, 22, 0.15)",
+                  boxShadow: "0 4px 12px rgba(249, 168, 212, 0.25)",
                 }}
               >
                 <Gift
                   size={isMobile ? 22 : 26}
-                  color="#fff"
-                  strokeWidth={2.2}
+                  color="#ec4899"
+                  strokeWidth={2.5}
                 />
               </div>
               <div>
@@ -176,10 +181,13 @@ const LeadForm: React.FC = () => {
                   style={{
                     fontWeight: 700,
                     fontSize: isMobile ? 16 : 18,
-                    color: "#fff",
+                    background:
+                      "linear-gradient(120deg, #ec4899 0%, #f97316 50%, #eab308 100%)",
+                    WebkitBackgroundClip: "text",
+                    WebkitTextFillColor: "transparent",
+                    backgroundClip: "text",
                     margin: 0,
                     lineHeight: 1.3,
-                    textShadow: "0 2px 4px rgba(0,0,0,0.2)",
                   }}
                 >
                   Nhận ưu đãi & tài liệu mới
@@ -188,9 +196,9 @@ const LeadForm: React.FC = () => {
                   <p
                     style={{
                       fontSize: 13,
-                      color: "rgba(255,255,255,0.8)",
+                      color: "#64748b",
                       margin: "2px 0 0 0",
-                      fontWeight: 400,
+                      fontWeight: 500,
                     }}
                   >
                     Miễn phí 100% • Hủy bất cứ lúc nào
@@ -203,10 +211,10 @@ const LeadForm: React.FC = () => {
               aria-label="Đóng"
               onClick={handleClose}
               style={{
-                background: "rgba(255, 255, 255, 0.15)",
+                background: "rgba(236, 72, 153, 0.1)",
                 border: "none",
                 borderRadius: 8,
-                color: "#fff",
+                color: "#ec4899",
                 padding: isMobile ? 8 : 10,
                 cursor: "pointer",
                 display: "flex",
@@ -216,13 +224,13 @@ const LeadForm: React.FC = () => {
                 flexShrink: 0,
               }}
               onMouseEnter={(e) => {
-                e.currentTarget.style.background = "rgba(255, 255, 255, 0.2)";
+                e.currentTarget.style.background = "rgba(236, 72, 153, 0.2)";
               }}
               onMouseLeave={(e) => {
-                e.currentTarget.style.background = "rgba(255, 255, 255, 0.15)";
+                e.currentTarget.style.background = "rgba(236, 72, 153, 0.1)";
               }}
             >
-              <XCircle size={isMobile ? 18 : 20} strokeWidth={2} />
+              <XCircle size={isMobile ? 18 : 20} strokeWidth={2.5} />
             </button>
           </div>
 
@@ -230,28 +238,34 @@ const LeadForm: React.FC = () => {
           <div
             style={{
               fontSize: isMobile ? 14 : 15,
-              color: "#fed7d7", // ✅ UPDATED: Light pink text
-              opacity: 0.9,
+              color: "#475569",
               marginBottom: success ? 12 : isMobile ? 18 : 20,
-              fontWeight: 400,
+              fontWeight: 500,
               lineHeight: 1.5,
             }}
           >
             Đăng ký để nhận{" "}
-            <span style={{ color: "#fff", fontWeight: 600 }}>
+            <span
+              style={{
+                background: "linear-gradient(120deg, #ec4899 0%, #f97316 100%)",
+                WebkitBackgroundClip: "text",
+                WebkitTextFillColor: "transparent",
+                backgroundClip: "text",
+                fontWeight: 700,
+              }}
+            >
               templates độc quyền, ưu đãi hot
             </span>{" "}
             và tips thiết kế mỗi tuần!
           </div>
 
-          {/* Success State */}
           {success ? (
             <div
               style={{
                 background: "rgba(16, 185, 129, 0.15)",
                 borderRadius: 12,
                 padding: isMobile ? "16px 14px" : "18px 16px",
-                border: "1px solid rgba(16, 185, 129, 0.3)",
+                border: "2px solid rgba(16, 185, 129, 0.3)",
                 marginBottom: 12,
               }}
             >
@@ -260,17 +274,16 @@ const LeadForm: React.FC = () => {
                   display: "flex",
                   alignItems: "center",
                   gap: 12,
-                  color: "#10b981",
                 }}
               >
-                <CheckCircle size={24} strokeWidth={2.5} />
+                <CheckCircle size={24} color="#10b981" strokeWidth={3} />
                 <div>
                   <p
                     style={{
                       fontSize: isMobile ? 15 : 16,
-                      fontWeight: 600,
+                      fontWeight: 700,
                       margin: 0,
-                      color: "#fff",
+                      color: "#10b981",
                     }}
                   >
                     🎉 Đăng ký thành công!
@@ -279,8 +292,8 @@ const LeadForm: React.FC = () => {
                     style={{
                       fontSize: isMobile ? 13 : 14,
                       margin: "4px 0 0 0",
-                      color: "rgba(255,255,255,0.9)",
-                      fontWeight: 400,
+                      color: "#475569",
+                      fontWeight: 500,
                     }}
                   >
                     Kiểm tra email để nhận quà nhé!
@@ -289,7 +302,6 @@ const LeadForm: React.FC = () => {
               </div>
             </div>
           ) : (
-            /* Form */
             <form onSubmit={handleSubmit} style={{ marginBottom: 8 }}>
               {/* Name Field */}
               <div style={{ marginBottom: isMobile ? 14 : 16 }}>
@@ -297,38 +309,35 @@ const LeadForm: React.FC = () => {
                   htmlFor="name"
                   style={{
                     fontSize: isMobile ? 13 : 14,
-                    color: "#fff",
-                    fontWeight: 500,
+                    color: "#334155",
+                    fontWeight: 600,
                     marginBottom: 6,
                     display: "block",
-                    letterSpacing: "0.01em",
                   }}
                 >
                   Họ tên *
                 </label>
                 <div style={{ position: "relative" }}>
-                  {/* ✅ THÊM: Icon với background */}
+                  {/* ✅ ICON NỀN TRONG INPUT */}
                   <div
                     style={{
                       position: "absolute",
-                      left: 12,
+                      left: 14,
                       top: "50%",
                       transform: "translateY(-50%)",
                       background:
-                        "linear-gradient(135deg, #f9a8d4 0%, #fed7aa 100%)", // ✅ Pink-orange gradient
-                      borderRadius: 6,
-                      padding: 4,
+                        "linear-gradient(135deg, #fbcfe8 0%, #fed7aa 100%)",
+                      borderRadius: 8,
+                      padding: 8,
                       display: "flex",
                       alignItems: "center",
                       justifyContent: "center",
-                      boxShadow: "0 2px 4px rgba(249, 168, 212, 0.3)",
+                      boxShadow: "0 2px 6px rgba(249, 168, 212, 0.2)",
+                      pointerEvents: "none",
+                      zIndex: 1,
                     }}
                   >
-                    <User
-                      size={14}
-                      color="#ec4899" // ✅ Pink icon color
-                      strokeWidth={2.5}
-                    />
+                    <User size={16} color="#ec4899" strokeWidth={2.5} />
                   </div>
                   <input
                     id="name"
@@ -339,32 +348,31 @@ const LeadForm: React.FC = () => {
                     style={{
                       width: "100%",
                       padding: isMobile
-                        ? "14px 16px 14px 48px" // ✅ Increased left padding for icon background
-                        : "13px 16px 13px 46px", // ✅ Increased left padding for icon background
+                        ? "14px 16px 14px 54px" // ✅ Tăng left padding
+                        : "13px 16px 13px 52px",
                       borderRadius: 10,
-                      border: "1px solid rgba(255, 255, 255, 0.2)",
+                      border: "2px solid rgba(249, 115, 22, 0.2)",
                       fontSize: isMobile ? 15 : 16,
-                      background: "rgba(255, 255, 255, 0.95)",
+                      background: "#fff",
                       color: "#2d3748",
                       outline: "none",
-                      boxShadow: "0 2px 8px rgba(249, 115, 22, 0.08)", // ✅ Orange shadow
+                      boxShadow: "0 2px 8px rgba(249, 115, 22, 0.08)",
                       fontFamily: "inherit",
                       transition: "all 0.2s ease",
                       boxSizing: "border-box",
+                      fontWeight: 500,
                     }}
                     onFocus={(e) => {
-                      e.target.style.background = "#fff";
-                      e.target.style.borderColor = "rgba(254, 215, 170, 0.5)"; // ✅ Orange border
+                      e.target.style.borderColor = "#f97316";
                       e.target.style.boxShadow =
-                        "0 0 0 3px rgba(254, 215, 170, 0.1)"; // ✅ Orange focus shadow
+                        "0 0 0 4px rgba(249, 115, 22, 0.1)";
                     }}
                     onBlur={(e) => {
-                      e.target.style.background = "rgba(255, 255, 255, 0.95)";
-                      e.target.style.borderColor = "rgba(255, 255, 255, 0.2)";
+                      e.target.style.borderColor = "rgba(249, 115, 22, 0.2)";
                       e.target.style.boxShadow =
-                        "0 2px 8px rgba(249, 115, 22, 0.08)"; // ✅ Orange shadow
+                        "0 2px 8px rgba(249, 115, 22, 0.08)";
                     }}
-                    autoFocus={!isMobile} // Không auto focus trên mobile
+                    autoFocus={!isMobile}
                   />
                 </div>
               </div>
@@ -375,38 +383,35 @@ const LeadForm: React.FC = () => {
                   htmlFor="email"
                   style={{
                     fontSize: isMobile ? 13 : 14,
-                    color: "#fff",
-                    fontWeight: 500,
+                    color: "#334155",
+                    fontWeight: 600,
                     marginBottom: 6,
                     display: "block",
-                    letterSpacing: "0.01em",
                   }}
                 >
                   Email *
                 </label>
                 <div style={{ position: "relative" }}>
-                  {/* ✅ THÊM: Icon với background */}
+                  {/* ✅ ICON NỀN TRONG INPUT */}
                   <div
                     style={{
                       position: "absolute",
-                      left: 12,
+                      left: 14,
                       top: "50%",
                       transform: "translateY(-50%)",
                       background:
-                        "linear-gradient(135deg, #fbbf24 0%, #fed7aa 100%)", // ✅ Yellow-orange gradient
-                      borderRadius: 6,
-                      padding: 4,
+                        "linear-gradient(135deg, #fef3c7 0%, #fed7aa 100%)",
+                      borderRadius: 8,
+                      padding: 8,
                       display: "flex",
                       alignItems: "center",
                       justifyContent: "center",
-                      boxShadow: "0 2px 4px rgba(251, 191, 36, 0.3)",
+                      boxShadow: "0 2px 6px rgba(251, 191, 36, 0.2)",
+                      pointerEvents: "none",
+                      zIndex: 1,
                     }}
                   >
-                    <Mail
-                      size={14}
-                      color="#f97316" // ✅ Orange icon color
-                      strokeWidth={2.5}
-                    />
+                    <Mail size={16} color="#f97316" strokeWidth={2.5} />
                   </div>
                   <input
                     id="email"
@@ -418,79 +423,83 @@ const LeadForm: React.FC = () => {
                     style={{
                       width: "100%",
                       padding: isMobile
-                        ? "14px 16px 14px 48px" // ✅ Increased left padding for icon background
-                        : "13px 16px 13px 46px", // ✅ Increased left padding for icon background
+                        ? "14px 16px 14px 54px"
+                        : "13px 16px 13px 52px",
                       borderRadius: 10,
-                      border: "1px solid rgba(255, 255, 255, 0.2)",
+                      border: "2px solid rgba(249, 115, 22, 0.2)",
                       fontSize: isMobile ? 15 : 16,
-                      background: "rgba(255, 255, 255, 0.95)",
+                      background: "#fff",
                       color: "#2d3748",
                       outline: "none",
-                      boxShadow: "0 2px 8px rgba(249, 115, 22, 0.08)", // ✅ Orange shadow
+                      boxShadow: "0 2px 8px rgba(249, 115, 22, 0.08)",
                       fontFamily: "inherit",
                       transition: "all 0.2s ease",
                       boxSizing: "border-box",
+                      fontWeight: 500,
                     }}
                     onFocus={(e) => {
-                      e.target.style.background = "#fff";
-                      e.target.style.borderColor = "rgba(254, 215, 170, 0.5)"; // ✅ Orange border
+                      e.target.style.borderColor = "#f97316";
                       e.target.style.boxShadow =
-                        "0 0 0 3px rgba(254, 215, 170, 0.1)"; // ✅ Orange focus shadow
+                        "0 0 0 4px rgba(249, 115, 22, 0.1)";
                     }}
                     onBlur={(e) => {
-                      e.target.style.background = "rgba(255, 255, 255, 0.95)";
-                      e.target.style.borderColor = "rgba(255, 255, 255, 0.2)";
+                      e.target.style.borderColor = "rgba(249, 115, 22, 0.2)";
                       e.target.style.boxShadow =
-                        "0 2px 8px rgba(249, 115, 22, 0.08)"; // ✅ Orange shadow
+                        "0 2px 8px rgba(249, 115, 22, 0.08)";
                     }}
                   />
                 </div>
               </div>
 
-              {/* Error Message */}
               {error && (
                 <div
                   style={{
-                    color: "#fca5a5",
+                    color: "#ef4444",
                     background: "rgba(239, 68, 68, 0.1)",
                     fontSize: isMobile ? 13 : 14,
                     marginBottom: 14,
-                    fontWeight: 500,
+                    fontWeight: 600,
                     padding: "8px 12px",
                     borderRadius: 8,
-                    border: "1px solid rgba(239, 68, 68, 0.2)",
+                    border: "2px solid rgba(239, 68, 68, 0.2)",
                   }}
                 >
                   ⚠️ {error}
                 </div>
               )}
 
-              {/* Submit Button */}
+              {/* ✅ BUTTON MÀU HỢP LÝ VỚI NỀN PASTEL */}
               <button
                 type="submit"
                 style={{
                   width: "100%",
                   padding: isMobile ? "15px 20px" : "14px 20px",
                   borderRadius: 10,
-                  background: "linear-gradient(120deg, #fff 0%, #fef3c7 100%)", // ✅ UPDATED: Yellow-tinted white
-                  color: "#f97316", // ✅ UPDATED: Orange text
+                  // ✅ Pink-Orange gradient hợp với pastel background
+                  background:
+                    "linear-gradient(120deg, #ec4899 0%, #f97316 100%)",
+                  color: "#fff",
                   fontWeight: 700,
                   fontSize: isMobile ? 16 : 17,
                   border: "none",
                   cursor: "pointer",
-                  boxShadow: "0 4px 16px rgba(255, 255, 255, 0.3)",
+                  boxShadow: "0 4px 16px rgba(236, 72, 153, 0.3)",
                   transition: "all 0.2s ease",
                   fontFamily: "inherit",
                 }}
                 onMouseEnter={(e) => {
-                  e.currentTarget.style.transform = "translateY(-1px)";
+                  e.currentTarget.style.transform = "translateY(-2px)";
                   e.currentTarget.style.boxShadow =
-                    "0 6px 20px rgba(255, 255, 255, 0.4)";
+                    "0 6px 20px rgba(236, 72, 153, 0.4)";
+                  e.currentTarget.style.background =
+                    "linear-gradient(120deg, #db2777 0%, #ea580c 100%)";
                 }}
                 onMouseLeave={(e) => {
                   e.currentTarget.style.transform = "translateY(0)";
                   e.currentTarget.style.boxShadow =
-                    "0 4px 16px rgba(255, 255, 255, 0.3)";
+                    "0 4px 16px rgba(236, 72, 153, 0.3)";
+                  e.currentTarget.style.background =
+                    "linear-gradient(120deg, #ec4899 0%, #f97316 100%)";
                 }}
               >
                 🎁 Đăng ký nhận quà ngay
@@ -498,15 +507,15 @@ const LeadForm: React.FC = () => {
             </form>
           )}
 
-          {/* Footer Security Note */}
+          {/* Footer */}
           <div
             style={{
               marginTop: isMobile ? 12 : 16,
               fontSize: isMobile ? 11 : 12,
-              color: "#fed7d7", // ✅ UPDATED: Light pink text
-              opacity: 0.75,
+              color: "#64748b",
               textAlign: "center",
               lineHeight: 1.4,
+              fontWeight: 500,
             }}
           >
             🔒 Bảo mật 100% • Không spam • Hủy đăng ký dễ dàng
@@ -514,7 +523,6 @@ const LeadForm: React.FC = () => {
         </div>
       </div>
 
-      {/* Responsive Styles */}
       <style>
         {`
           input::placeholder {
@@ -525,7 +533,7 @@ const LeadForm: React.FC = () => {
           
           @media (max-width: 767px) {
             input {
-              font-size: 16px !important; /* Prevent zoom on iOS */
+              font-size: 16px !important;
             }
           }
         `}

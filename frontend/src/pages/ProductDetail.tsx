@@ -1253,7 +1253,7 @@ const ProductDetail: React.FC = () => {
       </div>
 
       {/* Main container */}
-      <div className="container relative z-10 px-4 py-8 mx-auto max-w-7xl">
+      <div className="container relative z-10 px-4 py-16 lg:py-8 mx-auto max-w-7xl">
         {/* Breadcrumb */}
         <motion.nav
           initial={{ opacity: 0, y: -16 }}
