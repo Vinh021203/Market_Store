@@ -78,21 +78,27 @@ const ResetPassword: React.FC = () => {
 
   useEffect(() => {
     const handlePasswordReset = async () => {
-      // Lấy code từ URL parameters
-      const code = searchParams.get("code");
+      // ✅ Lấy token_hash thay vì code
+      const tokenHash = searchParams.get("token_hash");
+      const type = searchParams.get("type");
 
-      if (!code) {
-        setError("Link đặt lại mật khẩu không hợp lệ.");
+      if (!tokenHash || type !== "recovery") {
+        setError("Link đặt lại mật khẩu không hợp lệ hoặc đã hết hạn.");
         setIsValidating(false);
         return;
       }
 
       try {
-        // ✅ CÁCH 1: Exchange code for session (PKCE flow - Recommended)
-        const { data, error } =
-          await supabase.auth.exchangeCodeForSession(code);
+        // ✅ Sử dụng verifyOtp thay vì exchangeCodeForSession
+        const { data, error } = await supabase.auth.verifyOtp({
+          token_hash: tokenHash,
+          type: "recovery",
+        });
 
-        if (error) throw error;
+        if (error) {
+          console.error("Verify OTP error:", error);
+          throw error;
+        }
 
         if (data.session) {
           setIsValidToken(true);
@@ -102,7 +108,20 @@ const ResetPassword: React.FC = () => {
         }
       } catch (error: any) {
         console.error("Token validation error:", error);
-        setError("Link đặt lại mật khẩu đã hết hạn hoặc không hợp lệ.");
+
+        // Xử lý error cụ thể
+        if (
+          error.message?.includes("expired") ||
+          error.message?.includes("Token has expired")
+        ) {
+          setError(
+            "Link đã hết hạn (hiệu lực 1 giờ). Vui lòng yêu cầu link mới.",
+          );
+        } else if (error.message?.includes("invalid")) {
+          setError("Link không hợp lệ. Vui lòng yêu cầu link reset mới.");
+        } else {
+          setError("Link đặt lại mật khẩu đã hết hạn hoặc không hợp lệ.");
+        }
       } finally {
         setIsValidating(false);
       }
