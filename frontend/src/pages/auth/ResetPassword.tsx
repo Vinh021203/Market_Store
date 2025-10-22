@@ -77,29 +77,28 @@ const ResetPassword: React.FC = () => {
   });
 
   useEffect(() => {
-    const validateToken = async () => {
+    const handlePasswordReset = async () => {
+      // Lấy code từ URL parameters
       const code = searchParams.get("code");
-      const email = searchParams.get("email");
 
-      if (!code || !email) {
+      if (!code) {
         setError("Link đặt lại mật khẩu không hợp lệ.");
         setIsValidating(false);
         return;
       }
 
       try {
-        const { data, error } = await supabase.auth.verifyOtp({
-          type: "recovery",
-          token: code,
-          email: email,
-        });
+        // ✅ CÁCH 1: Exchange code for session (PKCE flow - Recommended)
+        const { data, error } =
+          await supabase.auth.exchangeCodeForSession(code);
 
         if (error) throw error;
 
         if (data.session) {
           setIsValidToken(true);
+          console.log("Password reset session established");
         } else {
-          setError("Phiên đăng nhập không hợp lệ.");
+          setError("Không thể tạo phiên đăng nhập.");
         }
       } catch (error: any) {
         console.error("Token validation error:", error);
@@ -109,7 +108,7 @@ const ResetPassword: React.FC = () => {
       }
     };
 
-    validateToken();
+    handlePasswordReset();
   }, [searchParams]);
 
   const onSubmit = async (data: ResetPasswordData) => {
