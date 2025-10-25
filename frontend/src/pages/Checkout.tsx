@@ -386,7 +386,7 @@ const Checkout: React.FC = () => {
 
   // ✅ Reading Progress Component
   const ReadingProgress: React.FC = () => (
-    <div className="fixed top-0 left-0 w-full h-1 bg-gray-200 dark:bg-gray-700 z-50">
+    <div className="fixed top-0 left-0 z-50 w-full h-1 bg-gray-200 dark:bg-gray-700">
       <motion.div
         className="h-full bg-gradient-to-r from-purple-500 to-magenta-500"
         style={{ width: `${scrollProgress}%` }}
@@ -405,9 +405,9 @@ const Checkout: React.FC = () => {
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           exit={{ opacity: 0, y: 20 }}
-          className="fixed bottom-6 right-6 z-40"
+          className="fixed z-40 bottom-6 right-6"
         >
-          <Card className="bg-white/95 dark:bg-gray-800/95 backdrop-blur-lg border-0 shadow-2xl">
+          <Card className="border-0 shadow-2xl bg-white/95 dark:bg-gray-800/95 backdrop-blur-lg">
             <CardContent className="p-4">
               <div className="flex items-center space-x-3">
                 <Button
@@ -416,11 +416,11 @@ const Checkout: React.FC = () => {
                   onClick={() =>
                     window.scrollTo({ top: 0, behavior: "smooth" })
                   }
-                  className="bg-gradient-to-r from-purple-500 to-magenta-500 text-white border-0 hover:from-purple-600 hover:to-magenta-600"
+                  className="text-white border-0 bg-gradient-to-r from-purple-500 to-magenta-500 hover:from-purple-600 hover:to-magenta-600"
                 >
                   <ArrowUp className="w-4 h-4" />
                 </Button>
-                <div className="text-sm text-gray-700 dark:text-gray-300 font-medium">
+                <div className="text-sm font-medium text-gray-700 dark:text-gray-300">
                   {Math.round(scrollProgress)}% hoàn thành
                 </div>
                 <Progress value={scrollProgress} className="w-20" />
@@ -490,20 +490,20 @@ const Checkout: React.FC = () => {
                     animate={{ scale: 1 }}
                     transition={{ delay: 0.2, type: "spring", stiffness: 200 }}
                   >
-                    <div className="w-20 h-20 mx-auto mb-6 bg-gradient-to-r from-purple-500 to-magenta-500 rounded-3xl flex items-center justify-center shadow-xl">
+                    <div className="flex items-center justify-center w-20 h-20 mx-auto mb-6 shadow-xl bg-gradient-to-r from-purple-500 to-magenta-500 rounded-3xl">
                       <ShoppingCart className="w-10 h-10 text-white" />
                     </div>
                   </motion.div>
                   <h2 className="mb-4 text-2xl font-bold text-transparent bg-gradient-to-r from-purple-600 to-magenta-600 bg-clip-text">
                     Giỏ hàng trống
                   </h2>
-                  <p className="mb-8 text-gray-600 dark:text-gray-400 leading-relaxed">
+                  <p className="mb-8 leading-relaxed text-gray-600 dark:text-gray-400">
                     Không có sản phẩm nào để thanh toán
                   </p>
                   <div className="space-y-4">
                     <Button
                       asChild
-                      className="w-full bg-gradient-to-r from-purple-500 via-magenta-500 to-rose-500 hover:from-purple-600 hover:via-magenta-600 hover:to-rose-600 rounded-2xl text-white border-0 h-12 shadow-lg hover:shadow-xl transition-all duration-300"
+                      className="w-full h-12 text-white transition-all duration-300 border-0 shadow-lg bg-gradient-to-r from-purple-500 via-magenta-500 to-rose-500 hover:from-purple-600 hover:via-magenta-600 hover:to-rose-600 rounded-2xl hover:shadow-xl"
                     >
                       <a href="/templates">
                         <Code className="w-5 h-5 mr-2" />
@@ -513,7 +513,7 @@ const Checkout: React.FC = () => {
                     <Button
                       variant="outline"
                       asChild
-                      className="w-full bg-white/80 hover:bg-purple-50 border-purple-200 rounded-2xl h-12"
+                      className="w-full h-12 border-purple-200 bg-white/80 hover:bg-purple-50 rounded-2xl"
                     >
                       <a href="/ebooks">
                         <Coffee className="w-5 h-5 mr-2" />
@@ -833,7 +833,7 @@ const Checkout: React.FC = () => {
               {/* Progress Steps */}
               <div className="flex items-center justify-center mb-8 space-x-4">
                 <div className="flex items-center space-x-2">
-                  <div className="flex items-center justify-center w-8 h-8 bg-emerald-500 rounded-full">
+                  <div className="flex items-center justify-center w-8 h-8 rounded-full bg-emerald-500">
                     <Check className="w-4 h-4 text-white" />
                   </div>
                   <span className="text-sm font-medium text-emerald-600">
@@ -863,9 +863,9 @@ const Checkout: React.FC = () => {
                   variant="ghost"
                   size="sm"
                   onClick={() => setShowPayment(false)}
-                  className="group bg-white/70 hover:bg-white/90 rounded-2xl shadow-md border border-purple-200/50"
+                  className="border shadow-md group bg-white/70 hover:bg-white/90 rounded-2xl border-purple-200/50"
                 >
-                  <ArrowLeft className="w-4 h-4 mr-1 transition-transform group-hover:-translate-x-1 text-purple-600" />
+                  <ArrowLeft className="w-4 h-4 mr-1 text-purple-600 transition-transform group-hover:-translate-x-1" />
                   <span className="font-semibold text-purple-800">
                     Quay lại thông tin đơn hàng
                   </span>
@@ -878,27 +878,27 @@ const Checkout: React.FC = () => {
                   <CardTitle className="flex items-center space-x-3">
                     <motion.div
                       whileHover={{ scale: 1.1, rotate: 5 }}
-                      className="flex items-center justify-center w-12 h-12 rounded-2xl bg-gradient-to-r from-purple-500 to-magenta-600 shadow-lg"
+                      className="flex items-center justify-center w-12 h-12 shadow-lg rounded-2xl bg-gradient-to-r from-purple-500 to-magenta-600"
                     >
                       <ShoppingCart className="w-6 h-6 text-white" />
                     </motion.div>
                     <div>
-                      <span className="text-xl text-transparent bg-gradient-to-r from-purple-600 to-magenta-600 bg-clip-text font-bold">
+                      <span className="text-xl font-bold text-transparent bg-gradient-to-r from-purple-600 to-magenta-600 bg-clip-text">
                         Thông tin đơn hàng
                       </span>
-                      <p className="text-sm text-purple-700/80 dark:text-purple-300/80 mt-1">
+                      <p className="mt-1 text-sm text-purple-700/80 dark:text-purple-300/80">
                         Đơn hàng #{currentOrder.id.slice(0, 8)}
                       </p>
                     </div>
                   </CardTitle>
                 </CardHeader>
                 <CardContent className="space-y-4">
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm">
+                  <div className="grid grid-cols-1 gap-4 text-sm md:grid-cols-2">
                     <div>
                       <span className="text-purple-700 dark:text-purple-300">
                         Tổng sản phẩm:
                       </span>
-                      <span className="font-medium ml-2 dark:text-gray-200">
+                      <span className="ml-2 font-medium dark:text-gray-200">
                         {items.length}
                       </span>
                     </div>
@@ -906,7 +906,7 @@ const Checkout: React.FC = () => {
                       <span className="text-purple-700 dark:text-purple-300">
                         Phương thức:
                       </span>
-                      <span className="font-medium ml-2 dark:text-gray-200">
+                      <span className="ml-2 font-medium dark:text-gray-200">
                         {
                           paymentMethods.find((m) => m.id === paymentMethod)
                             ?.name
@@ -928,10 +928,10 @@ const Checkout: React.FC = () => {
                     </div>
 
                     {appliedDiscount && (
-                      <div className="flex justify-between text-sm items-center">
+                      <div className="flex items-center justify-between text-sm">
                         <div className="flex items-center space-x-2">
                           <Gift className="w-4 h-4 text-emerald-600 dark:text-emerald-400" />
-                          <span className="text-emerald-700 dark:text-emerald-400 font-medium">
+                          <span className="font-medium text-emerald-700 dark:text-emerald-400">
                             Giảm giá ({appliedDiscount.code})
                           </span>
                         </div>
@@ -941,7 +941,7 @@ const Checkout: React.FC = () => {
                       </div>
                     )}
 
-                    <div className="flex justify-between text-lg font-bold pt-2 border-t border-purple-200 dark:border-purple-700">
+                    <div className="flex justify-between pt-2 text-lg font-bold border-t border-purple-200 dark:border-purple-700">
                       <span className="text-purple-900 dark:text-purple-100">
                         Tổng thanh toán:
                       </span>
@@ -951,7 +951,7 @@ const Checkout: React.FC = () => {
                     </div>
 
                     {appliedDiscount && (
-                      <div className="text-center text-sm text-emerald-600 dark:text-emerald-400 font-medium">
+                      <div className="text-sm font-medium text-center text-emerald-600 dark:text-emerald-400">
                         🎉 Bạn đã tiết kiệm {formatPrice(discountAmount)}!
                       </div>
                     )}
@@ -989,11 +989,11 @@ const Checkout: React.FC = () => {
                       <CardTitle className="flex items-center justify-center space-x-3">
                         <motion.div
                           whileHover={{ scale: 1.1, rotate: 5 }}
-                          className="flex items-center justify-center w-12 h-12 rounded-2xl bg-gradient-to-r from-rose-500 to-pink-600 shadow-lg"
+                          className="flex items-center justify-center w-12 h-12 shadow-lg rounded-2xl bg-gradient-to-r from-rose-500 to-pink-600"
                         >
                           <CreditCard className="w-6 h-6 text-white" />
                         </motion.div>
-                        <span className="text-xl text-transparent bg-gradient-to-r from-rose-600 to-pink-600 bg-clip-text font-bold">
+                        <span className="text-xl font-bold text-transparent bg-gradient-to-r from-rose-600 to-pink-600 bg-clip-text">
                           Thanh toán với{" "}
                           {
                             paymentMethods.find((m) => m.id === paymentMethod)
@@ -1008,7 +1008,7 @@ const Checkout: React.FC = () => {
                           {formatPrice(finalPrice)}
                         </div>
                         {appliedDiscount && (
-                          <div className="text-sm text-emerald-600 dark:text-emerald-400 mb-2">
+                          <div className="mb-2 text-sm text-emerald-600 dark:text-emerald-400">
                             Tiết kiệm: {formatPrice(discountAmount)} với mã{" "}
                             {appliedDiscount.code}
                           </div>
@@ -1019,7 +1019,7 @@ const Checkout: React.FC = () => {
                       </div>
 
                       <div className="p-4 rounded-2xl bg-gradient-to-r from-rose-50 to-pink-50 dark:from-rose-900/20 dark:to-pink-900/20">
-                        <p className="text-sm text-rose-700 dark:text-rose-300 flex items-center">
+                        <p className="flex items-center text-sm text-rose-700 dark:text-rose-300">
                           <AlertCircle className="w-4 h-4 mr-2" />
                           Bạn sẽ được chuyển đến trang thanh toán an toàn của{" "}
                           {
@@ -1030,7 +1030,7 @@ const Checkout: React.FC = () => {
                       </div>
 
                       <Button
-                        className="w-full h-14 bg-gradient-to-r from-rose-500 via-pink-500 to-fuchsia-600 hover:from-rose-600 hover:via-pink-600 hover:to-fuchsia-700 rounded-2xl text-lg font-semibold shadow-xl text-white border-0"
+                        className="w-full text-lg font-semibold text-white border-0 shadow-xl h-14 bg-gradient-to-r from-rose-500 via-pink-500 to-fuchsia-600 hover:from-rose-600 hover:via-pink-600 hover:to-fuchsia-700 rounded-2xl"
                         onClick={() => {
                           setTimeout(() => {
                             handlePaymentSuccess();
@@ -1102,15 +1102,15 @@ const Checkout: React.FC = () => {
             initial={{ opacity: 0, y: -20 }}
             animate={{ opacity: 1, y: 0 }}
             style={{ y: headerY, opacity: headerOpacity }}
-            className="flex flex-col lg:flex-row items-start lg:items-center justify-between mb-8 p-6 bg-gradient-to-r from-white/90 via-purple-50/90 to-magenta-50/90 backdrop-blur-xl border border-purple-200/50 rounded-3xl shadow-xl gap-4"
+            className="flex flex-col items-start justify-between gap-4 p-6 mb-8 border shadow-xl lg:flex-row lg:items-center bg-gradient-to-r from-white/90 via-purple-50/90 to-magenta-50/90 backdrop-blur-xl border-purple-200/50 rounded-3xl"
           >
             <Button
               variant="ghost"
               size="sm"
               onClick={() => navigate("/cart")}
-              className="group bg-white/70 hover:bg-white/90 rounded-2xl shadow-md border border-purple-200/50"
+              className="border shadow-md group bg-white/70 hover:bg-white/90 rounded-2xl border-purple-200/50"
             >
-              <ArrowLeft className="w-4 h-4 mr-1 transition-transform group-hover:-translate-x-1 text-purple-600" />
+              <ArrowLeft className="w-4 h-4 mr-1 text-purple-600 transition-transform group-hover:-translate-x-1" />
               <span className="font-semibold text-purple-800">
                 Quay lại giỏ hàng
               </span>
@@ -1119,15 +1119,15 @@ const Checkout: React.FC = () => {
             <div className="flex items-center space-x-4">
               <motion.div
                 whileHover={{ scale: 1.1, rotate: 5 }}
-                className="flex items-center justify-center w-14 h-14 rounded-2xl bg-gradient-to-r from-purple-500 via-magenta-500 to-rose-500 shadow-xl"
+                className="flex items-center justify-center shadow-xl w-14 h-14 rounded-2xl bg-gradient-to-r from-purple-500 via-magenta-500 to-rose-500"
               >
-                <CreditCard className="w-7 h-7 text-white" />
+                <CreditCard className="text-white w-7 h-7" />
               </motion.div>
               <div>
-                <h1 className="text-3xl lg:text-4xl font-bold text-transparent bg-gradient-to-r from-purple-600 via-magenta-600 to-rose-600 bg-clip-text">
+                <h1 className="text-3xl font-bold text-transparent lg:text-4xl bg-gradient-to-r from-purple-600 via-magenta-600 to-rose-600 bg-clip-text">
                   Thanh toán
                 </h1>
-                <p className="text-purple-700/80 dark:text-purple-300/80 flex items-center space-x-2 text-lg">
+                <p className="flex items-center space-x-2 text-lg text-purple-700/80 dark:text-purple-300/80">
                   <Sparkles className="w-5 h-5" />
                   <span>Bước cuối để hoàn tất đơn hàng</span>
                 </p>
@@ -1144,7 +1144,7 @@ const Checkout: React.FC = () => {
           >
             {/* Step 1 - Active */}
             <div className="flex items-center space-x-2">
-              <div className="flex items-center justify-center w-8 h-8 rounded-full bg-gradient-to-r from-pink-400 via-orange-400 to-yellow-400 shadow-lg">
+              <div className="flex items-center justify-center w-8 h-8 rounded-full shadow-lg bg-gradient-to-r from-pink-400 via-orange-400 to-yellow-400">
                 <span className="text-sm font-bold text-white">1</span>
               </div>
               <span className="text-sm font-medium text-pink-600">
@@ -1157,10 +1157,10 @@ const Checkout: React.FC = () => {
 
             {/* Step 2 - Inactive */}
             <div className="flex items-center space-x-2">
-              <div className="flex items-center justify-center w-8 h-8 bg-gray-200 rounded-full border-2 border-gray-300">
+              <div className="flex items-center justify-center w-8 h-8 bg-gray-200 border-2 border-gray-300 rounded-full">
                 <span className="text-sm font-bold text-gray-500">2</span>
               </div>
-              <span className="text-sm text-gray-500 font-medium">
+              <span className="text-sm font-medium text-gray-500">
                 Thanh toán
               </span>
             </div>
@@ -1170,10 +1170,10 @@ const Checkout: React.FC = () => {
 
             {/* Step 3 - Inactive */}
             <div className="flex items-center space-x-2">
-              <div className="flex items-center justify-center w-8 h-8 bg-gray-200 rounded-full border-2 border-gray-300">
+              <div className="flex items-center justify-center w-8 h-8 bg-gray-200 border-2 border-gray-300 rounded-full">
                 <span className="text-sm font-bold text-gray-500">3</span>
               </div>
-              <span className="text-sm text-gray-500 font-medium">
+              <span className="text-sm font-medium text-gray-500">
                 Hoàn tất
               </span>
             </div>
@@ -1199,15 +1199,15 @@ const Checkout: React.FC = () => {
                       <CardTitle className="flex items-center space-x-3">
                         <motion.div
                           whileHover={{ scale: 1.1, rotate: 5 }}
-                          className="flex items-center justify-center w-10 h-10 rounded-2xl bg-gradient-to-r from-purple-500 to-violet-600 shadow-lg"
+                          className="flex items-center justify-center w-10 h-10 shadow-lg rounded-2xl bg-gradient-to-r from-purple-500 to-violet-600"
                         >
                           <User className="w-5 h-5 text-white" />
                         </motion.div>
                         <div>
-                          <span className="text-xl text-transparent bg-gradient-to-r from-purple-600 to-violet-600 bg-clip-text font-bold">
+                          <span className="text-xl font-bold text-transparent bg-gradient-to-r from-purple-600 to-violet-600 bg-clip-text">
                             Thông tin khách hàng
                           </span>
-                          <p className="text-sm text-purple-700/80 dark:text-purple-300/80 mt-1">
+                          <p className="mt-1 text-sm text-purple-700/80 dark:text-purple-300/80">
                             Nhập thông tin để giao hàng
                           </p>
                         </div>
@@ -1414,20 +1414,20 @@ const Checkout: React.FC = () => {
                   animate={{ opacity: 1, y: 0 }}
                   transition={{ delay: 0.4 }}
                 >
-                  <Card className="border-0 shadow-xl bg-gradient-to-br from-white/95 via-pink-50/80 to-blue-50/80 backdrop-blur-xl rounded-3xl overflow-hidden">
+                  <Card className="overflow-hidden border-0 shadow-xl bg-gradient-to-br from-white/95 via-pink-50/80 to-blue-50/80 backdrop-blur-xl rounded-3xl">
                     <CardHeader className="pb-4">
                       <CardTitle className="flex items-center space-x-3">
                         <motion.div
                           whileHover={{ scale: 1.1, rotate: 10 }}
-                          className="flex items-center justify-center w-12 h-12 rounded-2xl bg-gradient-to-r from-pink-400 via-orange-400 to-yellow-400 shadow-lg"
+                          className="flex items-center justify-center w-12 h-12 shadow-lg rounded-2xl bg-gradient-to-r from-pink-400 via-orange-400 to-yellow-400"
                         >
                           <Gift className="w-6 h-6 text-white" />
                         </motion.div>
                         <div>
-                          <span className="text-xl lg:text-2xl text-transparent bg-gradient-to-r from-pink-600 via-orange-500 to-yellow-600 bg-clip-text font-bold">
+                          <span className="text-xl font-bold text-transparent lg:text-2xl bg-gradient-to-r from-pink-600 via-orange-500 to-yellow-600 bg-clip-text">
                             Mã giảm giá
                           </span>
-                          <p className="text-sm text-slate-600 mt-1">
+                          <p className="mt-1 text-sm text-slate-600">
                             Áp dụng mã để tiết kiệm thêm
                           </p>
                         </div>
@@ -1440,7 +1440,7 @@ const Checkout: React.FC = () => {
                         <motion.div
                           initial={{ scale: 0.95, opacity: 0 }}
                           animate={{ scale: 1, opacity: 1 }}
-                          className="relative p-6 border-2 border-emerald-300 rounded-2xl bg-gradient-to-r from-emerald-50 via-teal-50 to-cyan-50 overflow-hidden"
+                          className="relative p-6 overflow-hidden border-2 border-emerald-300 rounded-2xl bg-gradient-to-r from-emerald-50 via-teal-50 to-cyan-50"
                         >
                           <div className="absolute inset-0 opacity-10">
                             <div className="w-full h-full bg-gradient-to-br from-emerald-400 to-teal-400"></div>
@@ -1456,20 +1456,20 @@ const Checkout: React.FC = () => {
                                   type: "spring",
                                   stiffness: 200,
                                 }}
-                                className="flex items-center justify-center w-12 h-12 rounded-2xl bg-gradient-to-r from-emerald-500 to-teal-500 shadow-lg"
+                                className="flex items-center justify-center w-12 h-12 shadow-lg rounded-2xl bg-gradient-to-r from-emerald-500 to-teal-500"
                               >
                                 <CheckCircle className="w-6 h-6 text-white" />
                               </motion.div>
                               <div>
-                                <div className="flex items-center space-x-3 mb-2">
-                                  <span className="font-bold text-lg text-emerald-800 font-mono">
+                                <div className="flex items-center mb-2 space-x-3">
+                                  <span className="font-mono text-lg font-bold text-emerald-800">
                                     {appliedDiscount.code}
                                   </span>
-                                  <Badge className="text-emerald-800 bg-emerald-200 border-emerald-300 font-semibold">
+                                  <Badge className="font-semibold text-emerald-800 bg-emerald-200 border-emerald-300">
                                     {formatDiscountValue(appliedDiscount)}
                                   </Badge>
                                 </div>
-                                <p className="text-sm text-emerald-700 mb-1 font-medium">
+                                <p className="mb-1 text-sm font-medium text-emerald-700">
                                   {appliedDiscount.name}
                                 </p>
                                 <div className="flex items-center space-x-2">
@@ -1488,7 +1488,7 @@ const Checkout: React.FC = () => {
                                 variant="ghost"
                                 size="sm"
                                 onClick={handleRemoveCoupon}
-                                className="text-red-500 hover:text-red-600 hover:bg-red-100 rounded-2xl p-2 transition-all duration-200"
+                                className="p-2 text-red-500 transition-all duration-200 hover:text-red-600 hover:bg-red-100 rounded-2xl"
                               >
                                 <X className="w-5 h-5" />
                               </Button>
@@ -1520,7 +1520,7 @@ const Checkout: React.FC = () => {
                                       : "border-pink-200/50 focus:border-pink-400"
                                   }`}
                                 />
-                                <Tag className="absolute left-4 top-1/2 transform -translate-y-1/2 w-4 h-4 text-pink-600" />
+                                <Tag className="absolute w-4 h-4 text-pink-600 transform -translate-y-1/2 left-4 top-1/2" />
                               </div>
                               <motion.div
                                 whileHover={{ scale: 1.05 }}
@@ -1532,7 +1532,7 @@ const Checkout: React.FC = () => {
                                   disabled={
                                     !couponCode.trim() || isApplyingDiscount
                                   }
-                                  className="h-12 px-6 bg-gradient-to-r from-pink-400 via-orange-400 to-yellow-400 hover:from-pink-500 hover:via-orange-500 hover:to-yellow-500 disabled:from-gray-400 disabled:to-gray-500 rounded-2xl shadow-lg font-semibold text-white border-0 transition-all duration-200"
+                                  className="h-12 px-6 font-semibold text-white transition-all duration-200 border-0 shadow-lg bg-gradient-to-r from-pink-400 via-orange-400 to-yellow-400 hover:from-pink-500 hover:via-orange-500 hover:to-yellow-500 disabled:from-gray-400 disabled:to-gray-500 rounded-2xl"
                                 >
                                   {isApplyingDiscount ? (
                                     <motion.div
@@ -1561,10 +1561,10 @@ const Checkout: React.FC = () => {
                                   initial={{ opacity: 0, y: -10, height: 0 }}
                                   animate={{ opacity: 1, y: 0, height: "auto" }}
                                   exit={{ opacity: 0, y: -10, height: 0 }}
-                                  className="mt-3 p-3 bg-red-50 border border-red-200 rounded-xl"
+                                  className="p-3 mt-3 border border-red-200 bg-red-50 rounded-xl"
                                 >
                                   <p className="flex items-center space-x-2 text-sm text-red-600">
-                                    <AlertTriangle className="w-4 h-4 flex-shrink-0" />
+                                    <AlertTriangle className="flex-shrink-0 w-4 h-4" />
                                     <span>{discountError}</span>
                                   </p>
                                 </motion.div>
@@ -1589,7 +1589,7 @@ const Checkout: React.FC = () => {
                             </span>
                           </div>
 
-                          <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
+                          <div className="grid grid-cols-1 gap-4 lg:grid-cols-2">
                             {availableDiscounts.map((discount, index) => {
                               const validation = validateDiscount(
                                 discount,
@@ -1623,7 +1623,7 @@ const Checkout: React.FC = () => {
                                     }`}
                                   >
                                     <div className="flex items-center justify-between w-full">
-                                      <div className="text-left space-y-2">
+                                      <div className="space-y-2 text-left">
                                         <div className="flex items-center space-x-2">
                                           <Badge
                                             variant="secondary"
@@ -1644,11 +1644,11 @@ const Checkout: React.FC = () => {
                                             {discount.code}
                                           </span>
                                         </div>
-                                        <p className="text-xs text-gray-600 leading-relaxed">
+                                        <p className="text-xs leading-relaxed text-gray-600">
                                           {discount.name}
                                         </p>
                                         {!validation.isValid && (
-                                          <p className="text-xs text-red-500 leading-relaxed">
+                                          <p className="text-xs leading-relaxed text-red-500">
                                             {validation.reason}
                                           </p>
                                         )}
@@ -1672,9 +1672,9 @@ const Checkout: React.FC = () => {
                         initial={{ opacity: 0 }}
                         animate={{ opacity: 1 }}
                         transition={{ delay: 0.4 }}
-                        className="p-4 rounded-2xl bg-gradient-to-r from-pink-100/60 via-orange-50/60 to-yellow-100/60 border border-pink-200/50"
+                        className="p-4 border rounded-2xl bg-gradient-to-r from-pink-100/60 via-orange-50/60 to-yellow-100/60 border-pink-200/50"
                       >
-                        <div className="flex items-center space-x-2 mb-3">
+                        <div className="flex items-center mb-3 space-x-2">
                           <Info className="w-4 h-4 text-pink-600" />
                           <span className="text-sm font-semibold text-slate-800">
                             Thông tin mã giảm giá:
@@ -1682,15 +1682,15 @@ const Checkout: React.FC = () => {
                         </div>
                         <div className="text-xs text-slate-700 space-y-1.5 leading-relaxed">
                           <div className="flex items-start space-x-2">
-                            <div className="w-1 h-1 bg-pink-500 rounded-full mt-2 flex-shrink-0"></div>
+                            <div className="flex-shrink-0 w-1 h-1 mt-2 bg-pink-500 rounded-full"></div>
                             <p>Mỗi đơn hàng chỉ áp dụng được 1 mã giảm giá</p>
                           </div>
                           <div className="flex items-start space-x-2">
-                            <div className="w-1 h-1 bg-pink-500 rounded-full mt-2 flex-shrink-0"></div>
+                            <div className="flex-shrink-0 w-1 h-1 mt-2 bg-pink-500 rounded-full"></div>
                             <p>Mã giảm giá không áp dụng cho phí vận chuyển</p>
                           </div>
                           <div className="flex items-start space-x-2">
-                            <div className="w-1 h-1 bg-pink-500 rounded-full mt-2 flex-shrink-0"></div>
+                            <div className="flex-shrink-0 w-1 h-1 mt-2 bg-pink-500 rounded-full"></div>
                             <p>Một số mã có điều kiện đơn hàng tối thiểu</p>
                           </div>
                         </div>
@@ -1710,15 +1710,15 @@ const Checkout: React.FC = () => {
                       <CardTitle className="flex items-center space-x-3">
                         <motion.div
                           whileHover={{ scale: 1.1, rotate: 5 }}
-                          className="flex items-center justify-center w-10 h-10 rounded-2xl bg-gradient-to-r from-rose-500 to-pink-600 shadow-lg"
+                          className="flex items-center justify-center w-10 h-10 shadow-lg rounded-2xl bg-gradient-to-r from-rose-500 to-pink-600"
                         >
                           <Lock className="w-5 h-5 text-white" />
                         </motion.div>
                         <div>
-                          <span className="text-xl text-transparent bg-gradient-to-r from-rose-600 to-pink-600 bg-clip-text font-bold">
+                          <span className="text-xl font-bold text-transparent bg-gradient-to-r from-rose-600 to-pink-600 bg-clip-text">
                             Phương thức thanh toán
                           </span>
-                          <p className="text-sm text-rose-700/80 dark:text-rose-300/80 mt-1">
+                          <p className="mt-1 text-sm text-rose-700/80 dark:text-rose-300/80">
                             Chọn cách thanh toán phù hợp
                           </p>
                         </div>
@@ -1866,7 +1866,7 @@ const Checkout: React.FC = () => {
                 >
                   <Button
                     type="submit"
-                    className="w-full h-14 transition-all duration-300 shadow-xl bg-gradient-to-r from-purple-500 via-magenta-500 to-rose-600 hover:from-purple-600 hover:via-magenta-600 hover:to-rose-700 hover:shadow-2xl rounded-2xl text-lg font-semibold text-white border-0"
+                    className="w-full text-lg font-semibold text-white transition-all duration-300 border-0 shadow-xl h-14 bg-gradient-to-r from-purple-500 via-magenta-500 to-rose-600 hover:from-purple-600 hover:via-magenta-600 hover:to-rose-700 hover:shadow-2xl rounded-2xl"
                     disabled={isProcessing}
                   >
                     {isProcessing ? (
@@ -1889,7 +1889,7 @@ const Checkout: React.FC = () => {
                           ? "Tạo mã QR thanh toán"
                           : `Thanh toán ${formatPrice(finalPrice)}`}
                         {appliedDiscount && (
-                          <Badge className="ml-3 bg-emerald-500 text-white border-0">
+                          <Badge className="ml-3 text-white border-0 bg-emerald-500">
                             Tiết kiệm {formatPrice(discountAmount)}
                           </Badge>
                         )}
@@ -1913,15 +1913,15 @@ const Checkout: React.FC = () => {
                     <CardTitle className="flex items-center space-x-3">
                       <motion.div
                         whileHover={{ scale: 1.1, rotate: 5 }}
-                        className="flex items-center justify-center w-10 h-10 rounded-2xl bg-gradient-to-r from-indigo-500 to-violet-600 shadow-lg"
+                        className="flex items-center justify-center w-10 h-10 shadow-lg rounded-2xl bg-gradient-to-r from-indigo-500 to-violet-600"
                       >
                         <ShoppingCart className="w-5 h-5 text-white" />
                       </motion.div>
                       <div>
-                        <span className="text-xl text-transparent bg-gradient-to-r from-indigo-600 to-violet-600 bg-clip-text font-bold">
+                        <span className="text-xl font-bold text-transparent bg-gradient-to-r from-indigo-600 to-violet-600 bg-clip-text">
                           Đơn hàng của bạn
                         </span>
-                        <p className="text-sm text-indigo-700/80 dark:text-indigo-300/80 mt-1">
+                        <p className="mt-1 text-sm text-indigo-700/80 dark:text-indigo-300/80">
                           Chi tiết sản phẩm
                         </p>
                       </div>
@@ -1993,10 +1993,10 @@ const Checkout: React.FC = () => {
                           animate={{ opacity: 1, height: "auto" }}
                           className="space-y-2"
                         >
-                          <div className="flex justify-between text-sm items-center">
+                          <div className="flex items-center justify-between text-sm">
                             <div className="flex items-center space-x-2">
                               <Gift className="w-4 h-4 text-emerald-600 dark:text-emerald-400" />
-                              <span className="text-emerald-700 dark:text-emerald-400 font-medium">
+                              <span className="font-medium text-emerald-700 dark:text-emerald-400">
                                 Giảm giá ({appliedDiscount.code})
                               </span>
                             </div>
@@ -2004,7 +2004,7 @@ const Checkout: React.FC = () => {
                               -{formatPrice(discountAmount)}
                             </span>
                           </div>
-                          <div className="flex items-center justify-between text-xs p-2 bg-emerald-50 dark:bg-emerald-900/20 rounded-xl">
+                          <div className="flex items-center justify-between p-2 text-xs bg-emerald-50 dark:bg-emerald-900/20 rounded-xl">
                             <span className="text-emerald-700 dark:text-emerald-400">
                               {appliedDiscount.name}
                             </span>
@@ -2022,7 +2022,7 @@ const Checkout: React.FC = () => {
                         <span className="text-indigo-800 dark:text-indigo-300">
                           Phí xử lý
                         </span>
-                        <span className="text-emerald-600 dark:text-emerald-400 font-medium">
+                        <span className="font-medium text-emerald-600 dark:text-emerald-400">
                           Miễn phí
                         </span>
                       </div>
@@ -2035,7 +2035,7 @@ const Checkout: React.FC = () => {
                         </span>
                       </div>
                       {paymentMethod === "vietqr" && (
-                        <div className="flex justify-between text-emerald-600 dark:text-emerald-400 text-sm">
+                        <div className="flex justify-between text-sm text-emerald-600 dark:text-emerald-400">
                           <span>Phí thanh toán</span>
                           <span className="font-medium">Miễn phí</span>
                         </div>
@@ -2055,7 +2055,7 @@ const Checkout: React.FC = () => {
                             {formatPrice(finalPrice)}
                           </span>
                           {appliedDiscount && (
-                            <div className="text-sm text-emerald-600 dark:text-emerald-400 font-normal">
+                            <div className="text-sm font-normal text-emerald-600 dark:text-emerald-400">
                               Tiết kiệm: {formatPrice(discountAmount)}
                             </div>
                           )}
@@ -2067,7 +2067,7 @@ const Checkout: React.FC = () => {
                         <motion.div
                           initial={{ scale: 0.9 }}
                           animate={{ scale: 1 }}
-                          className="p-3 bg-gradient-to-r from-emerald-100 to-teal-100 dark:from-emerald-900/20 dark:to-teal-900/20 rounded-2xl border border-emerald-200 dark:border-emerald-800"
+                          className="p-3 border bg-gradient-to-r from-emerald-100 to-teal-100 dark:from-emerald-900/20 dark:to-teal-900/20 rounded-2xl border-emerald-200 dark:border-emerald-800"
                         >
                           <div className="flex items-center space-x-2">
                             <TrendingUp className="w-4 h-4 text-emerald-600 dark:text-emerald-400" />

@@ -42,10 +42,12 @@ import {
   CheckCircle,
   XCircle,
   Info,
+  Eye,
+  TrendingDown,
 } from "lucide-react";
 import { Link } from "react-router-dom";
 
-// **🎨 Enhanced Toast Component**
+// 🎨 FLOATING TOAST COMPONENT
 const FloatingToast = ({
   type = "success",
   title,
@@ -100,7 +102,7 @@ const FloatingToast = ({
         <div className="flex-1 min-w-0">
           <div className={`font-semibold text-sm ${colorScheme}`}>{title}</div>
           {description && (
-            <div className="text-xs mt-1 text-orange-700/70 leading-relaxed">
+            <div className="mt-1 text-xs leading-relaxed text-orange-700/70">
               {description}
             </div>
           )}
@@ -108,7 +110,7 @@ const FloatingToast = ({
         {onClose && (
           <button
             onClick={onClose}
-            className="flex-shrink-0 p-1 rounded-full hover:bg-white/60 transition-colors"
+            className="flex-shrink-0 p-1 transition-colors rounded-full hover:bg-white/60"
           >
             <XCircle className="w-4 h-4 text-gray-400" />
           </button>
@@ -118,7 +120,7 @@ const FloatingToast = ({
   );
 };
 
-// **🎨 Enhanced Overview Card Component**
+// 🎯 OVERVIEW CARD COMPONENT - ENHANCED
 const OverviewCard = ({
   title,
   value,
@@ -128,6 +130,7 @@ const OverviewCard = ({
   bgGradient,
   iconBg,
   index,
+  growth,
 }: any) => {
   return (
     <motion.div
@@ -138,60 +141,85 @@ const OverviewCard = ({
       className="transition-all duration-500"
     >
       <Card
-        className={`relative overflow-hidden border-0 bg-gradient-to-br ${bgGradient} backdrop-blur-sm shadow-xl hover:shadow-2xl transition-all duration-300 group`}
-        style={{ minHeight: 160 }}
+        className={`relative overflow-hidden border-0 bg-gradient-to-br ${bgGradient} backdrop-blur-sm shadow-xl hover:shadow-2xl transition-all duration-300 group rounded-3xl`}
+        style={{ minHeight: 180 }}
       >
-        {/* Decorative gradient overlay */}
-        <div className="absolute inset-0 bg-gradient-to-br from-white/20 via-transparent to-transparent opacity-50" />
+        {/* Animated background gradient */}
+        <motion.div
+          className="absolute inset-0 opacity-30"
+          animate={{
+            background: [
+              "radial-gradient(circle at 0% 0%, rgba(255,255,255,0.3) 0%, transparent 50%)",
+              "radial-gradient(circle at 100% 100%, rgba(255,255,255,0.3) 0%, transparent 50%)",
+              "radial-gradient(circle at 0% 0%, rgba(255,255,255,0.3) 0%, transparent 50%)",
+            ],
+          }}
+          transition={{ duration: 4, repeat: Infinity }}
+        />
 
         <CardHeader className="relative flex flex-row items-start justify-between pb-2 space-y-0">
           <div className="flex-1">
-            <CardTitle className="text-sm font-semibold text-orange-900/90 mb-3">
+            <CardTitle className="mb-3 text-sm font-semibold text-orange-900/90">
               {title}
             </CardTitle>
             <motion.div
               initial={{ scale: 0.8 }}
               animate={{ scale: 1 }}
               transition={{ delay: 0.4 + index * 0.1 }}
-              className="text-3xl font-bold text-orange-900 mb-2"
+              className="mb-2 text-3xl font-bold text-orange-900"
             >
               {value}
             </motion.div>
           </div>
           <motion.div
             whileHover={{ scale: 1.15, rotate: 10 }}
-            className={`w-12 h-12 rounded-2xl bg-gradient-to-r ${iconBg} flex items-center justify-center shadow-lg group-hover:shadow-xl transition-all duration-300 flex-shrink-0`}
+            className={`w-14 h-14 rounded-2xl bg-gradient-to-r ${iconBg} flex items-center justify-center shadow-lg group-hover:shadow-xl transition-all duration-300 flex-shrink-0`}
           >
-            <Icon className="w-6 h-6 text-white" />
+            <Icon className="text-white w-7 h-7" />
           </motion.div>
         </CardHeader>
 
         <CardContent className="relative pt-0">
-          <div className="flex items-center text-xs text-orange-700/80">
-            {trend === "up" ? (
-              <motion.div
-                initial={{ scale: 0 }}
-                animate={{ scale: 1 }}
-                transition={{ delay: 0.5 + index * 0.1 }}
-                className="flex items-center"
+          <div className="flex items-center justify-between">
+            <div className="flex items-center text-xs text-orange-700/80">
+              {trend === "up" ? (
+                <motion.div
+                  initial={{ scale: 0 }}
+                  animate={{ scale: 1 }}
+                  transition={{ delay: 0.5 + index * 0.1 }}
+                  className="flex items-center"
+                >
+                  <div className="p-1.5 rounded-full bg-emerald-100 mr-2">
+                    <TrendingUp className="w-3.5 h-3.5 text-emerald-600" />
+                  </div>
+                  <span className="leading-relaxed">{description}</span>
+                </motion.div>
+              ) : (
+                <motion.div
+                  initial={{ scale: 0 }}
+                  animate={{ scale: 1 }}
+                  transition={{ delay: 0.5 + index * 0.1 }}
+                  className="flex items-center"
+                >
+                  <div className="p-1.5 rounded-full bg-red-100 mr-2">
+                    <TrendingDown className="w-3.5 h-3.5 text-red-600" />
+                  </div>
+                  <span className="leading-relaxed">{description}</span>
+                </motion.div>
+              )}
+            </div>
+            {growth && (
+              <Badge
+                className={`text-xs font-bold ${
+                  trend === "up"
+                    ? "bg-emerald-100 text-emerald-700 border-emerald-300"
+                    : "bg-red-100 text-red-700 border-red-300"
+                }`}
               >
-                <div className="p-1 rounded-full bg-emerald-100 mr-2">
-                  <ArrowUpRight className="w-3 h-3 text-emerald-600" />
-                </div>
-              </motion.div>
-            ) : (
-              <motion.div
-                initial={{ scale: 0 }}
-                animate={{ scale: 1 }}
-                transition={{ delay: 0.5 + index * 0.1 }}
-                className="flex items-center"
-              >
-                <div className="p-1 rounded-full bg-red-100 mr-2">
-                  <ArrowDownRight className="w-3 h-3 text-red-600" />
-                </div>
-              </motion.div>
+                {trend === "up" ? "+" : ""}
+                {growth}%
+              </Badge>
             )}
-            <span className="leading-relaxed">{description}</span>
           </div>
         </CardContent>
       </Card>
@@ -217,7 +245,7 @@ const AdminDashboard: React.FC = () => {
     return <Navigate to="/" replace />;
   }
 
-  // **🎯 Enhanced Toast System**
+  // TOAST SYSTEM
   const showToast = (
     type: "success" | "error" | "info",
     title: string,
@@ -227,7 +255,6 @@ const AdminDashboard: React.FC = () => {
     const newToast = { id, type, title, description };
     setToasts((prev) => [...prev, newToast]);
 
-    // Auto remove after 4 seconds
     setTimeout(() => {
       setToasts((prev) => prev.filter((toast) => toast.id !== id));
     }, 4000);
@@ -237,7 +264,7 @@ const AdminDashboard: React.FC = () => {
     setToasts((prev) => prev.filter((toast) => toast.id !== id));
   };
 
-  // ✅ Fetch dashboard data
+  // FETCH DASHBOARD DATA
   useEffect(() => {
     const fetchDashboardData = async () => {
       try {
@@ -260,7 +287,7 @@ const AdminDashboard: React.FC = () => {
 
     fetchDashboardData();
 
-    // Intersection Observer for scroll animations
+    // Intersection Observer
     const observer = new IntersectionObserver(
       (entries) => {
         entries.forEach((entry) => {
@@ -289,7 +316,7 @@ const AdminDashboard: React.FC = () => {
       showToast(
         "success",
         "🔄 Đã cập nhật",
-        "Dữ liệu dashboard đã được cập nhật",
+        "Dữ liệu dashboard đã được làm mới",
       );
     } catch (error) {
       showToast("error", "❌ Lỗi cập nhật", "Không thể cập nhật dữ liệu");
@@ -298,10 +325,10 @@ const AdminDashboard: React.FC = () => {
     }
   };
 
-  // ✅ Error state
+  // ERROR STATE
   if (!stats) {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-orange-50 via-amber-50  to-pink-50">
+      <div className="min-h-screen bg-gradient-to-br from-orange-50 via-amber-50 to-pink-50">
         {/* Floating Elements */}
         <div className="fixed inset-0 overflow-hidden pointer-events-none">
           <motion.div
@@ -322,30 +349,6 @@ const AdminDashboard: React.FC = () => {
             }}
           >
             <Palette className="w-6 h-6 text-pink-400 opacity-20" />
-          </motion.div>
-          <motion.div
-            className="absolute bottom-1/4 left-1/3"
-            animate={{ y: [0, -25, 0], rotate: [0, 15, 0] }}
-            transition={{
-              duration: 7,
-              repeat: Infinity,
-              ease: "easeInOut",
-              delay: 2,
-            }}
-          >
-            <Coffee className="text-amber-400 w-7 h-7 opacity-20" />
-          </motion.div>
-          <motion.div
-            className="absolute top-2/3 right-1/3"
-            animate={{ y: [0, -18, 0], scale: [1, 1.1, 1] }}
-            transition={{
-              duration: 4,
-              repeat: Infinity,
-              ease: "easeInOut",
-              delay: 3,
-            }}
-          >
-            <Heart className="w-5 h-5 text-pink-300 opacity-20" />
           </motion.div>
         </div>
 
@@ -372,7 +375,7 @@ const AdminDashboard: React.FC = () => {
                 </p>
                 <Button
                   onClick={handleRefresh}
-                  className="bg-gradient-to-r from-orange-500 via-amber-500 to-pink-600 hover:from-orange-600 hover:via-amber-600 hover:to-pink-700 shadow-lg hover:shadow-xl rounded-2xl"
+                  className="shadow-lg bg-gradient-to-r from-orange-500 via-amber-500 to-pink-600 hover:from-orange-600 hover:via-amber-600 hover:to-pink-700 hover:shadow-xl rounded-2xl"
                 >
                   <RefreshCw className="w-4 h-4 mr-2" />
                   Thử lại
@@ -385,32 +388,35 @@ const AdminDashboard: React.FC = () => {
     );
   }
 
-  // ✅ Enhanced overview cards
+  // OVERVIEW CARDS DATA
   const overviewCards = [
     {
       title: "Tổng doanh thu",
       value: formatPrice(stats.totalRevenue),
-      description: `${stats.monthlyGrowth.revenue > 0 ? "+" : ""}${stats.monthlyGrowth.revenue.toFixed(1)}% so với tháng trước`,
+      description: "so với tháng trước",
       icon: DollarSign,
       trend: stats.monthlyGrowth.revenue >= 0 ? "up" : "down",
+      growth: stats.monthlyGrowth.revenue.toFixed(1),
       bgGradient: "from-emerald-50/80 via-green-50/80 to-teal-50/80",
       iconBg: "from-emerald-500 to-teal-600",
     },
     {
       title: "Tổng đơn hàng",
       value: stats.totalOrders.toString(),
-      description: `${stats.monthlyGrowth.orders > 0 ? "+" : ""}${stats.monthlyGrowth.orders.toFixed(1)}% so với tháng trước`,
+      description: "so với tháng trước",
       icon: ShoppingCart,
       trend: stats.monthlyGrowth.orders >= 0 ? "up" : "down",
+      growth: stats.monthlyGrowth.orders.toFixed(1),
       bgGradient: "from-blue-50/80 via-sky-50/80 to-cyan-50/80",
       iconBg: "from-blue-500 to-cyan-600",
     },
     {
       title: "Người dùng",
       value: stats.totalUsers.toString(),
-      description: `${stats.monthlyGrowth.users > 0 ? "+" : ""}${stats.monthlyGrowth.users.toFixed(1)}% người dùng mới`,
+      description: "người dùng mới",
       icon: Users,
       trend: stats.monthlyGrowth.users >= 0 ? "up" : "down",
+      growth: stats.monthlyGrowth.users.toFixed(1),
       bgGradient: "from-purple-50/80 via-violet-50/80 to-indigo-50/80",
       iconBg: "from-purple-500 to-indigo-600",
     },
@@ -420,6 +426,7 @@ const AdminDashboard: React.FC = () => {
       description: `${stats.templates} templates, ${stats.ebooks} e-books`,
       icon: Package,
       trend: "up",
+      growth: null,
       bgGradient: "from-orange-50/80 via-amber-50/80 to-yellow-50/80",
       iconBg: "from-orange-500 to-yellow-600",
     },
@@ -427,7 +434,7 @@ const AdminDashboard: React.FC = () => {
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-orange-50 via-amber-50 to-pink-50">
-      {/* **🌟 Enhanced Floating Elements** */}
+      {/* FLOATING ELEMENTS */}
       <div className="fixed inset-0 overflow-hidden pointer-events-none">
         <motion.div
           className="absolute top-1/4 left-1/4"
@@ -486,7 +493,7 @@ const AdminDashboard: React.FC = () => {
         </motion.div>
       </div>
 
-      {/* **🎨 Toast Container** */}
+      {/* TOAST CONTAINER */}
       <div className="fixed top-0 right-0 z-50 p-4 space-y-3">
         <AnimatePresence>
           {toasts.map((toast) => (
@@ -502,11 +509,11 @@ const AdminDashboard: React.FC = () => {
       </div>
 
       <div className="container relative z-10 px-4 py-8 mx-auto">
-        {/* ✅ Enhanced Header */}
+        {/* HEADER */}
         <motion.div
           initial={{ opacity: 0, y: -20 }}
           animate={{ opacity: 1, y: 0 }}
-          className="flex items-center justify-between mb-8 p-6 bg-gradient-to-r from-white/90 via-orange-50/90 to-pink-50/90 backdrop-blur-xl border border-orange-200/50 rounded-3xl shadow-lg"
+          className="flex items-center justify-between p-6 mb-8 border shadow-lg bg-gradient-to-r from-white/90 via-orange-50/90 to-pink-50/90 backdrop-blur-xl border-orange-200/50 rounded-3xl"
           id="header"
           data-animate
         >
@@ -521,7 +528,7 @@ const AdminDashboard: React.FC = () => {
               <h1 className="text-4xl font-bold text-transparent bg-gradient-to-r from-orange-600 via-amber-600 to-pink-600 bg-clip-text">
                 Dashboard Quản trị
               </h1>
-              <p className="flex items-center space-x-2 text-orange-700/80 mt-2">
+              <p className="flex items-center mt-2 space-x-2 text-orange-700/80">
                 <span>
                   Chào mừng trở lại,{" "}
                   <span className="font-semibold">{user.name}</span>
@@ -538,7 +545,7 @@ const AdminDashboard: React.FC = () => {
                 >
                   👋
                 </motion.span>
-                <Badge className="text-orange-800 bg-gradient-to-r from-yellow-200 to-amber-300 border-0 shadow-sm">
+                <Badge className="text-orange-800 border-0 shadow-sm bg-gradient-to-r from-yellow-200 to-amber-300">
                   <Crown className="w-3 h-3 mr-1" />
                   Admin
                 </Badge>
@@ -552,7 +559,7 @@ const AdminDashboard: React.FC = () => {
                 variant="outline"
                 onClick={handleRefresh}
                 disabled={refreshing}
-                className="transition-all duration-300 group bg-white/80 hover:bg-white border-orange-200/50 hover:border-orange-300 rounded-2xl shadow-md hover:shadow-lg"
+                className="transition-all duration-300 shadow-md group bg-white/80 hover:bg-white border-orange-200/50 hover:border-orange-300 rounded-2xl hover:shadow-lg"
               >
                 {refreshing ? (
                   <motion.div
@@ -566,9 +573,9 @@ const AdminDashboard: React.FC = () => {
                     <RefreshCw className="w-4 h-4 mr-2" />
                   </motion.div>
                 ) : (
-                  <RefreshCw className="w-4 h-4 mr-2 group-hover:animate-spin text-orange-600" />
+                  <RefreshCw className="w-4 h-4 mr-2 text-orange-600 group-hover:animate-spin" />
                 )}
-                <span className="text-orange-800 font-semibold">Làm mới</span>
+                <span className="font-semibold text-orange-800">Làm mới</span>
               </Button>
             </motion.div>
 
@@ -577,9 +584,9 @@ const AdminDashboard: React.FC = () => {
                 asChild
                 className="transition-all duration-300 shadow-lg bg-gradient-to-r from-orange-500 via-amber-500 to-pink-600 hover:from-orange-600 hover:via-amber-600 hover:to-pink-700 hover:shadow-xl rounded-2xl"
               >
-                <Link to="/admin/products">
-                  <Package className="w-4 h-4 mr-2" />
-                  <span className="font-semibold">Quản lý sản phẩm</span>
+                <Link to="/admin/analytics">
+                  <BarChart3 className="w-4 h-4 mr-2" />
+                  <span className="font-semibold">Xem Thống kê Chi tiết</span>
                   <Sparkles className="w-4 h-4 ml-1" />
                 </Link>
               </Button>
@@ -587,7 +594,7 @@ const AdminDashboard: React.FC = () => {
           </div>
         </motion.div>
 
-        {/* ✅ Enhanced Overview Cards */}
+        {/* OVERVIEW CARDS */}
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
@@ -601,9 +608,9 @@ const AdminDashboard: React.FC = () => {
           ))}
         </motion.div>
 
-        {/* Rest of the components remain the same but with enhanced styling */}
+        {/* MAIN CONTENT - ORDERS & STATS */}
         <div className="grid gap-8 lg:grid-cols-3">
-          {/* ✅ Enhanced Recent Orders */}
+          {/* RECENT ORDERS */}
           <motion.div
             initial={{ opacity: 0, x: -20 }}
             animate={{ opacity: 1, x: 0 }}
@@ -615,14 +622,14 @@ const AdminDashboard: React.FC = () => {
             <Card className="transition-all duration-300 border-0 shadow-xl bg-gradient-to-br from-white/95 via-blue-50/80 to-cyan-50/80 hover:shadow-2xl backdrop-blur-sm rounded-3xl">
               <CardHeader className="flex flex-row items-center justify-between">
                 <div className="flex items-center space-x-4">
-                  <div className="flex items-center justify-center w-12 h-12 rounded-2xl bg-gradient-to-r from-blue-500 to-cyan-600 shadow-lg">
+                  <div className="flex items-center justify-center w-12 h-12 shadow-lg rounded-2xl bg-gradient-to-r from-blue-500 to-cyan-600">
                     <ShoppingCart className="w-6 h-6 text-white" />
                   </div>
                   <div>
-                    <CardTitle className="text-2xl text-transparent bg-gradient-to-r from-blue-600 to-cyan-600 bg-clip-text font-bold">
+                    <CardTitle className="text-2xl font-bold text-transparent bg-gradient-to-r from-blue-600 to-cyan-600 bg-clip-text">
                       Đơn hàng gần đây
                     </CardTitle>
-                    <p className="text-sm text-blue-700/80 mt-1">
+                    <p className="mt-1 text-sm text-blue-700/80">
                       {stats.recentOrders.length} đơn hàng mới nhất
                     </p>
                   </div>
@@ -632,13 +639,13 @@ const AdminDashboard: React.FC = () => {
                     variant="outline"
                     size="sm"
                     asChild
-                    className="group bg-white/80 hover:bg-white border-blue-200/50 hover:border-blue-300 rounded-2xl shadow-md"
+                    className="shadow-md group bg-white/80 hover:bg-white border-blue-200/50 hover:border-blue-300 rounded-2xl"
                   >
                     <Link to="/admin/orders">
-                      <span className="text-blue-800 font-semibold">
+                      <span className="font-semibold text-blue-800">
                         Xem tất cả
                       </span>
-                      <ArrowUpRight className="w-3 h-3 ml-1 transition-transform group-hover:translate-x-1 group-hover:-translate-y-1 text-blue-600" />
+                      <ArrowUpRight className="w-3 h-3 ml-1 text-blue-600 transition-transform group-hover:translate-x-1 group-hover:-translate-y-1" />
                     </Link>
                   </Button>
                 </motion.div>
@@ -647,7 +654,7 @@ const AdminDashboard: React.FC = () => {
                 <div className="space-y-4">
                   <AnimatePresence>
                     {stats.recentOrders.length > 0 ? (
-                      stats.recentOrders.map((order, index) => (
+                      stats.recentOrders.slice(0, 5).map((order, index) => (
                         <motion.div
                           key={order.id}
                           initial={{ opacity: 0, x: -20 }}
@@ -661,7 +668,7 @@ const AdminDashboard: React.FC = () => {
                               <span>#{order.id.slice(0, 8)}</span>
                               <Badge
                                 variant="outline"
-                                className="text-xs bg-green-100 text-green-800 border-green-300"
+                                className="text-xs text-green-800 bg-green-100 border-green-300"
                               >
                                 <Clock className="w-3 h-3 mr-1" />
                                 Mới
@@ -725,7 +732,7 @@ const AdminDashboard: React.FC = () => {
             </Card>
           </motion.div>
 
-          {/* ✅ Enhanced Quick Stats & Top Products */}
+          {/* QUICK STATS & TOP PRODUCTS */}
           <motion.div
             initial={{ opacity: 0, x: 20 }}
             animate={{ opacity: 1, x: 0 }}
@@ -738,14 +745,14 @@ const AdminDashboard: React.FC = () => {
             <Card className="transition-all duration-300 border-0 shadow-xl bg-gradient-to-br from-white/95 via-emerald-50/80 to-green-50/80 hover:shadow-2xl backdrop-blur-sm rounded-3xl">
               <CardHeader>
                 <div className="flex items-center space-x-4">
-                  <div className="flex items-center justify-center w-12 h-12 rounded-2xl bg-gradient-to-r from-emerald-500 to-green-600 shadow-lg">
+                  <div className="flex items-center justify-center w-12 h-12 shadow-lg rounded-2xl bg-gradient-to-r from-emerald-500 to-green-600">
                     <Activity className="w-6 h-6 text-white" />
                   </div>
                   <div>
-                    <CardTitle className="text-2xl text-transparent bg-gradient-to-r from-emerald-600 to-green-600 bg-clip-text font-bold">
+                    <CardTitle className="text-2xl font-bold text-transparent bg-gradient-to-r from-emerald-600 to-green-600 bg-clip-text">
                       Thống kê nhanh
                     </CardTitle>
-                    <p className="text-sm text-emerald-700/80 mt-1">
+                    <p className="mt-1 text-sm text-emerald-700/80">
                       Dữ liệu tổng quan
                     </p>
                   </div>
@@ -788,7 +795,7 @@ const AdminDashboard: React.FC = () => {
                     animate={{ opacity: 1, x: 0 }}
                     transition={{ delay: 0.7 + index * 0.1 }}
                     whileHover={{ scale: 1.02, x: 4 }}
-                    className="flex items-center justify-between p-4 transition-all duration-300 rounded-2xl hover:bg-emerald-50/50 group bg-white/50 backdrop-blur-sm border border-emerald-200/30"
+                    className="flex items-center justify-between p-4 transition-all duration-300 border rounded-2xl hover:bg-emerald-50/50 group bg-white/50 backdrop-blur-sm border-emerald-200/30"
                   >
                     <div className="flex items-center space-x-3">
                       <div
@@ -802,7 +809,7 @@ const AdminDashboard: React.FC = () => {
                         {stat.label}
                       </span>
                     </div>
-                    <span className="font-bold text-emerald-800 text-lg">
+                    <span className="text-lg font-bold text-emerald-800">
                       {stat.value}
                     </span>
                   </motion.div>
@@ -814,14 +821,14 @@ const AdminDashboard: React.FC = () => {
             <Card className="transition-all duration-300 border-0 shadow-xl bg-gradient-to-br from-white/95 via-purple-50/80 to-pink-50/80 hover:shadow-2xl backdrop-blur-sm rounded-3xl">
               <CardHeader className="flex flex-row items-center justify-between">
                 <div className="flex items-center space-x-4">
-                  <div className="flex items-center justify-center w-12 h-12 rounded-2xl bg-gradient-to-r from-purple-500 to-pink-600 shadow-lg">
+                  <div className="flex items-center justify-center w-12 h-12 shadow-lg rounded-2xl bg-gradient-to-r from-purple-500 to-pink-600">
                     <Target className="w-6 h-6 text-white" />
                   </div>
                   <div>
-                    <CardTitle className="text-2xl text-transparent bg-gradient-to-r from-purple-600 to-pink-600 bg-clip-text font-bold">
+                    <CardTitle className="text-2xl font-bold text-transparent bg-gradient-to-r from-purple-600 to-pink-600 bg-clip-text">
                       Sản phẩm hàng đầu
                     </CardTitle>
-                    <p className="text-sm text-purple-700/80 mt-1">
+                    <p className="mt-1 text-sm text-purple-700/80">
                       Top {stats.topProducts.length} sản phẩm
                     </p>
                   </div>
@@ -831,13 +838,13 @@ const AdminDashboard: React.FC = () => {
                     variant="outline"
                     size="sm"
                     asChild
-                    className="group bg-white/80 hover:bg-white border-purple-200/50 hover:border-purple-300 rounded-2xl shadow-md"
+                    className="shadow-md group bg-white/80 hover:bg-white border-purple-200/50 hover:border-purple-300 rounded-2xl"
                   >
                     <Link to="/admin/products">
-                      <span className="text-purple-800 font-semibold">
+                      <span className="font-semibold text-purple-800">
                         Quản lý
                       </span>
-                      <ArrowUpRight className="w-3 h-3 ml-1 transition-transform group-hover:translate-x-1 group-hover:-translate-y-1 text-purple-600" />
+                      <ArrowUpRight className="w-3 h-3 ml-1 text-purple-600 transition-transform group-hover:translate-x-1 group-hover:-translate-y-1" />
                     </Link>
                   </Button>
                 </motion.div>
@@ -846,14 +853,14 @@ const AdminDashboard: React.FC = () => {
                 <div className="space-y-3">
                   <AnimatePresence>
                     {stats.topProducts.length > 0 ? (
-                      stats.topProducts.map((product, index) => (
+                      stats.topProducts.slice(0, 5).map((product, index) => (
                         <motion.div
                           key={product.id}
                           initial={{ opacity: 0, x: 20 }}
                           animate={{ opacity: 1, x: 0 }}
                           transition={{ delay: 0.8 + index * 0.1 }}
                           whileHover={{ scale: 1.02, x: 4 }}
-                          className="flex items-center p-4 space-x-3 transition-all duration-300 rounded-2xl hover:bg-purple-50/50 group bg-white/50 backdrop-blur-sm border border-purple-200/30"
+                          className="flex items-center p-4 space-x-3 transition-all duration-300 border rounded-2xl hover:bg-purple-50/50 group bg-white/50 backdrop-blur-sm border-purple-200/30"
                         >
                           <motion.div
                             whileHover={{ scale: 1.1 }}
@@ -870,11 +877,11 @@ const AdminDashboard: React.FC = () => {
                             {index + 1}
                           </motion.div>
                           <div className="flex-1 min-w-0">
-                            <div className="text-sm font-semibold truncate transition-colors group-hover:text-purple-800 text-purple-900">
+                            <div className="text-sm font-semibold text-purple-900 truncate transition-colors group-hover:text-purple-800">
                               {product.title}
                             </div>
                             <div className="flex items-center space-x-2 text-xs text-purple-700/80">
-                              <Star className="w-3 h-3 text-amber-500" />
+                              <Star className="w-3 h-3 text-amber-500 fill-amber-500" />
                               <span>{product.review_count || 0} đánh giá</span>
                             </div>
                           </div>
@@ -909,7 +916,7 @@ const AdminDashboard: React.FC = () => {
           </motion.div>
         </div>
 
-        {/* ✅ Enhanced Quick Actions */}
+        {/* QUICK ACTIONS */}
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
@@ -918,15 +925,15 @@ const AdminDashboard: React.FC = () => {
           id="actions"
           data-animate
         >
-          <div className="flex items-center mb-6 space-x-4 p-6 bg-gradient-to-r from-white/90 via-orange-50/90 to-pink-50/90 backdrop-blur-xl border border-orange-200/50 rounded-3xl shadow-lg">
-            <div className="flex items-center justify-center w-12 h-12 rounded-2xl bg-gradient-to-r from-orange-500 to-pink-600 shadow-lg">
+          <div className="flex items-center p-6 mb-6 space-x-4 border shadow-lg bg-gradient-to-r from-white/90 via-orange-50/90 to-pink-50/90 backdrop-blur-xl border-orange-200/50 rounded-3xl">
+            <div className="flex items-center justify-center w-12 h-12 shadow-lg rounded-2xl bg-gradient-to-r from-orange-500 to-pink-600">
               <Zap className="w-6 h-6 text-white" />
             </div>
             <div>
               <h2 className="text-3xl font-bold text-transparent bg-gradient-to-r from-orange-600 to-pink-600 bg-clip-text">
                 Thao tác nhanh
               </h2>
-              <p className="text-sm text-orange-700/80 mt-1">
+              <p className="mt-1 text-sm text-orange-700/80">
                 Các tác vụ quản trị thường dùng
               </p>
             </div>
@@ -990,10 +997,10 @@ const AdminDashboard: React.FC = () => {
                           whileHover={{ scale: 1.15, rotate: 10 }}
                           className={`w-14 h-14 rounded-2xl bg-gradient-to-r ${action.gradient} flex items-center justify-center shadow-lg group-hover:shadow-xl transition-all duration-300`}
                         >
-                          <action.icon className="w-7 h-7 text-white" />
+                          <action.icon className="text-white w-7 h-7" />
                         </motion.div>
                         <div className="flex-1">
-                          <h3 className="mb-2 text-lg font-bold transition-colors group-hover:text-orange-800 text-orange-900">
+                          <h3 className="mb-2 text-lg font-bold text-orange-900 transition-colors group-hover:text-orange-800">
                             {action.title}
                           </h3>
                           <p className="text-sm text-orange-700/80">

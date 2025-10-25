@@ -42,18 +42,12 @@ import {
   RefreshCw,
   Activity,
   ArrowLeft,
-  Code,
-  Palette,
-  Coffee,
   Sparkles,
-  Heart,
   ChevronLeft,
   ChevronRight,
-  Database,
   Search,
   Eye,
   Settings,
-  HelpCircle,
   Filter,
   SortAsc,
   SortDesc,
@@ -65,15 +59,11 @@ import {
   TrendingUp,
   PieChart,
   Users,
-  Globe,
-  Zap,
-  Target,
-  Award,
-  Star,
-  Gift,
   Mail,
-  Bell,
   Shield,
+  Globe,
+  Coffee,
+  XCircle,
 } from "lucide-react";
 import {
   PieChart as RechartsPieChart,
@@ -89,7 +79,7 @@ import {
   ResponsiveContainer,
 } from "recharts";
 
-// Enhanced Toast Component
+// 🎨 Toast Component
 const FloatingToast = ({
   type = "success",
   title,
@@ -108,7 +98,7 @@ const FloatingToast = ({
 
   switch (type) {
     case "error":
-      icon = <AlertTriangle className={`${iconProps} text-pink-600`} />;
+      icon = <XCircle className={`${iconProps} text-pink-600`} />;
       colorScheme = "text-pink-800";
       bgGradient = "from-pink-50/95 via-orange-50/95 to-white/95";
       break;
@@ -144,7 +134,7 @@ const FloatingToast = ({
         <div className="flex-1 min-w-0">
           <div className={`font-semibold text-sm ${colorScheme}`}>{title}</div>
           {description && (
-            <div className="text-xs mt-1 text-orange-700/70 leading-relaxed">
+            <div className="mt-1 text-xs leading-relaxed text-orange-700/70">
               {description}
             </div>
           )}
@@ -152,9 +142,9 @@ const FloatingToast = ({
         {onClose && (
           <button
             onClick={onClose}
-            className="flex-shrink-0 p-1 rounded-full hover:bg-white/60 transition-colors"
+            className="flex-shrink-0 p-1 transition-colors rounded-full hover:bg-white/60"
           >
-            <Trash2 className="w-4 h-4 text-gray-400" />
+            <XCircle className="w-4 h-4 text-gray-400" />
           </button>
         )}
       </div>
@@ -236,13 +226,13 @@ const ReportCard = ({
             <div className="flex items-center gap-2 mb-2">
               <motion.div
                 whileHover={{ scale: 1.1, rotate: 5 }}
-                className="flex items-center justify-center w-10 h-10 rounded-xl bg-gradient-to-r from-orange-500 to-pink-600 shadow-lg"
+                className="flex items-center justify-center w-10 h-10 shadow-lg rounded-xl bg-gradient-to-r from-orange-500 to-pink-600"
               >
                 <FileText className="w-5 h-5 text-white" />
               </motion.div>
               <div>
                 <h4
-                  className="text-lg font-semibold text-orange-900 cursor-pointer hover:text-orange-700 transition-colors"
+                  className="text-lg font-semibold text-orange-900 transition-colors cursor-pointer hover:text-orange-700"
                   onClick={onDetail}
                 >
                   {report.title}
@@ -259,7 +249,7 @@ const ReportCard = ({
                 </div>
               </div>
             </div>
-            <p className="text-sm text-orange-700/80 mb-3">
+            <p className="mb-3 text-sm text-orange-700/80">
               {report.description}
             </p>
             <div className="flex flex-wrap gap-3 text-xs text-orange-600">
@@ -352,28 +342,28 @@ const QuickTemplatesGrid = ({
         whileHover={{ y: -8, scale: 1.03 }}
         className="transition-all duration-500"
       >
-        <Card className="transition-all duration-300 hover:shadow-2xl border-0 bg-gradient-to-br from-white/95 via-orange-50/80 to-pink-50/80 backdrop-blur-sm group cursor-pointer rounded-3xl overflow-hidden">
-          <div className="absolute inset-0 bg-gradient-to-br from-white/20 via-transparent to-transparent opacity-50" />
+        <Card className="overflow-hidden transition-all duration-300 border-0 cursor-pointer hover:shadow-2xl bg-gradient-to-br from-white/95 via-orange-50/80 to-pink-50/80 backdrop-blur-sm group rounded-3xl">
+          <div className="absolute inset-0 opacity-50 bg-gradient-to-br from-white/20 via-transparent to-transparent" />
           <CardContent className="relative pt-6 pb-6">
             <div className="space-y-4 text-center">
               <motion.div
                 whileHover={{ scale: 1.15, rotate: 10 }}
                 className={`mx-auto w-14 h-14 rounded-2xl bg-gradient-to-r ${template.gradient} flex items-center justify-center shadow-xl group-hover:shadow-2xl transition-all duration-300`}
               >
-                <template.icon className="w-7 h-7 text-white" />
+                <template.icon className="text-white w-7 h-7" />
               </motion.div>
               <div>
-                <h3 className="mb-2 text-lg font-bold text-orange-900 group-hover:text-orange-700 transition-colors">
+                <h3 className="mb-2 text-lg font-bold text-orange-900 transition-colors group-hover:text-orange-700">
                   {template.name}
                 </h3>
-                <p className="text-sm text-orange-700/80 leading-relaxed">
+                <p className="text-sm leading-relaxed text-orange-700/80">
                   {template.description}
                 </p>
               </div>
               <div className="space-y-3">
                 <motion.div whileFocus={{ scale: 1.02 }}>
                   <Select value={timeRange} onValueChange={setTimeRange}>
-                    <SelectTrigger className="w-full h-11 bg-white/80 border-orange-200/50 rounded-2xl shadow-md hover:shadow-lg transition-all">
+                    <SelectTrigger className="w-full transition-all shadow-md h-11 bg-white/80 border-orange-200/50 rounded-2xl hover:shadow-lg">
                       <SelectValue />
                     </SelectTrigger>
                     <SelectContent>
@@ -395,12 +385,6 @@ const QuickTemplatesGrid = ({
                           <span>3 tháng qua</span>
                         </div>
                       </SelectItem>
-                      <SelectItem value="1y">
-                        <div className="flex items-center space-x-2">
-                          <Calendar className="w-4 h-4" />
-                          <span>1 năm qua</span>
-                        </div>
-                      </SelectItem>
                     </SelectContent>
                   </Select>
                 </motion.div>
@@ -410,7 +394,7 @@ const QuickTemplatesGrid = ({
                 >
                   <Button
                     size="sm"
-                    className="w-full h-11 transition-all duration-300 bg-gradient-to-r from-orange-500 via-amber-500 to-pink-600 hover:from-orange-600 hover:via-amber-600 hover:to-pink-700 rounded-2xl shadow-lg hover:shadow-xl"
+                    className="w-full transition-all duration-300 shadow-lg h-11 bg-gradient-to-r from-orange-500 via-amber-500 to-pink-600 hover:from-orange-600 hover:via-amber-600 hover:to-pink-700 rounded-2xl hover:shadow-xl"
                     onClick={() => onGenerate(template.name)}
                     disabled={isGenerating}
                   >
@@ -439,7 +423,7 @@ const QuickTemplatesGrid = ({
   </div>
 );
 
-// Report Analytics Component
+// Report Analytics Overview Component
 const ReportAnalyticsOverview = ({ reports }: { reports: ReportData[] }) => {
   const formatStats = reports.reduce(
     (acc, report) => {
@@ -489,13 +473,13 @@ const ReportAnalyticsOverview = ({ reports }: { reports: ReportData[] }) => {
   return (
     <div className="space-y-6">
       {/* Stats Cards */}
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+      <div className="grid grid-cols-1 gap-6 md:grid-cols-3">
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ delay: 0.1 }}
         >
-          <Card className="border-0 shadow-xl bg-gradient-to-br from-emerald-50 to-green-100 rounded-3xl overflow-hidden">
+          <Card className="overflow-hidden border-0 shadow-xl bg-gradient-to-br from-emerald-50 to-green-100 rounded-3xl">
             <CardContent className="p-6">
               <div className="flex items-center justify-between">
                 <div>
@@ -506,7 +490,7 @@ const ReportAnalyticsOverview = ({ reports }: { reports: ReportData[] }) => {
                     {totalReports}
                   </p>
                 </div>
-                <div className="w-12 h-12 bg-gradient-to-r from-emerald-500 to-green-600 rounded-2xl flex items-center justify-center">
+                <div className="flex items-center justify-center w-12 h-12 bg-gradient-to-r from-emerald-500 to-green-600 rounded-2xl">
                   <FileText className="w-6 h-6 text-white" />
                 </div>
               </div>
@@ -519,7 +503,7 @@ const ReportAnalyticsOverview = ({ reports }: { reports: ReportData[] }) => {
           animate={{ opacity: 1, y: 0 }}
           transition={{ delay: 0.2 }}
         >
-          <Card className="border-0 shadow-xl bg-gradient-to-br from-blue-50 to-indigo-100 rounded-3xl overflow-hidden">
+          <Card className="overflow-hidden border-0 shadow-xl bg-gradient-to-br from-blue-50 to-indigo-100 rounded-3xl">
             <CardContent className="p-6">
               <div className="flex items-center justify-between">
                 <div>
@@ -530,7 +514,7 @@ const ReportAnalyticsOverview = ({ reports }: { reports: ReportData[] }) => {
                     {completedReports}
                   </p>
                 </div>
-                <div className="w-12 h-12 bg-gradient-to-r from-blue-500 to-indigo-600 rounded-2xl flex items-center justify-center">
+                <div className="flex items-center justify-center w-12 h-12 bg-gradient-to-r from-blue-500 to-indigo-600 rounded-2xl">
                   <CheckCircle className="w-6 h-6 text-white" />
                 </div>
               </div>
@@ -543,7 +527,7 @@ const ReportAnalyticsOverview = ({ reports }: { reports: ReportData[] }) => {
           animate={{ opacity: 1, y: 0 }}
           transition={{ delay: 0.3 }}
         >
-          <Card className="border-0 shadow-xl bg-gradient-to-br from-purple-50 to-pink-100 rounded-3xl overflow-hidden">
+          <Card className="overflow-hidden border-0 shadow-xl bg-gradient-to-br from-purple-50 to-pink-100 rounded-3xl">
             <CardContent className="p-6">
               <div className="flex items-center justify-between">
                 <div>
@@ -554,7 +538,7 @@ const ReportAnalyticsOverview = ({ reports }: { reports: ReportData[] }) => {
                     {successRate.toFixed(1)}%
                   </p>
                 </div>
-                <div className="w-12 h-12 bg-gradient-to-r from-purple-500 to-pink-600 rounded-2xl flex items-center justify-center">
+                <div className="flex items-center justify-center w-12 h-12 bg-gradient-to-r from-purple-500 to-pink-600 rounded-2xl">
                   <TrendingUp className="w-6 h-6 text-white" />
                 </div>
               </div>
@@ -564,7 +548,7 @@ const ReportAnalyticsOverview = ({ reports }: { reports: ReportData[] }) => {
       </div>
 
       {/* Charts */}
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+      <div className="grid grid-cols-1 gap-6 lg:grid-cols-2">
         <motion.div
           initial={{ opacity: 0, x: -20 }}
           animate={{ opacity: 1, x: 0 }}
@@ -573,10 +557,10 @@ const ReportAnalyticsOverview = ({ reports }: { reports: ReportData[] }) => {
           <Card className="border-0 shadow-xl bg-gradient-to-br from-white/95 to-orange-50/80 rounded-3xl">
             <CardHeader>
               <CardTitle className="flex items-center gap-3">
-                <div className="w-10 h-10 bg-gradient-to-r from-orange-500 to-red-500 rounded-xl flex items-center justify-center">
+                <div className="flex items-center justify-center w-10 h-10 bg-gradient-to-r from-orange-500 to-red-500 rounded-xl">
                   <PieChart className="w-5 h-5 text-white" />
                 </div>
-                <span className="text-xl text-transparent bg-gradient-to-r from-orange-600 to-red-600 bg-clip-text font-bold">
+                <span className="text-xl font-bold text-transparent bg-gradient-to-r from-orange-600 to-red-600 bg-clip-text">
                   Phân bố định dạng
                 </span>
               </CardTitle>
@@ -613,10 +597,10 @@ const ReportAnalyticsOverview = ({ reports }: { reports: ReportData[] }) => {
           <Card className="border-0 shadow-xl bg-gradient-to-br from-white/95 to-blue-50/80 rounded-3xl">
             <CardHeader>
               <CardTitle className="flex items-center gap-3">
-                <div className="w-10 h-10 bg-gradient-to-r from-blue-500 to-purple-500 rounded-xl flex items-center justify-center">
+                <div className="flex items-center justify-center w-10 h-10 bg-gradient-to-r from-blue-500 to-purple-500 rounded-xl">
                   <BarChart3 className="w-5 h-5 text-white" />
                 </div>
-                <span className="text-xl text-transparent bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text font-bold">
+                <span className="text-xl font-bold text-transparent bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text">
                   Trạng thái báo cáo
                 </span>
               </CardTitle>
@@ -658,10 +642,10 @@ const SettingsSection = () => {
         <Card className="border-0 shadow-xl bg-gradient-to-br from-white/95 to-orange-50/80 rounded-3xl">
           <CardHeader>
             <CardTitle className="flex items-center gap-3">
-              <div className="w-10 h-10 bg-gradient-to-r from-orange-500 to-pink-500 rounded-xl flex items-center justify-center">
+              <div className="flex items-center justify-center w-10 h-10 bg-gradient-to-r from-orange-500 to-pink-500 rounded-xl">
                 <Settings className="w-5 h-5 text-white" />
               </div>
-              <span className="text-xl text-transparent bg-gradient-to-r from-orange-600 to-pink-600 bg-clip-text font-bold">
+              <span className="text-xl font-bold text-transparent bg-gradient-to-r from-orange-600 to-pink-600 bg-clip-text">
                 Cài đặt báo cáo
               </span>
             </CardTitle>
@@ -669,7 +653,7 @@ const SettingsSection = () => {
           <CardContent className="space-y-6">
             <div className="flex items-center justify-between">
               <div className="space-y-0.5">
-                <Label className="text-orange-900 font-medium">
+                <Label className="font-medium text-orange-900">
                   Thông báo tự động
                 </Label>
                 <p className="text-sm text-orange-700/70">
@@ -681,7 +665,7 @@ const SettingsSection = () => {
             <Separator className="bg-orange-200/50" />
             <div className="flex items-center justify-between">
               <div className="space-y-0.5">
-                <Label className="text-orange-900 font-medium">
+                <Label className="font-medium text-orange-900">
                   Gửi qua email
                 </Label>
                 <p className="text-sm text-orange-700/70">
@@ -695,7 +679,7 @@ const SettingsSection = () => {
             </div>
             <Separator className="bg-orange-200/50" />
             <div className="space-y-2">
-              <Label className="text-orange-900 font-medium">
+              <Label className="font-medium text-orange-900">
                 Thời gian lưu trữ
               </Label>
               <Select value={retentionDays} onValueChange={setRetentionDays}>
@@ -722,29 +706,29 @@ const SettingsSection = () => {
         <Card className="border-0 shadow-xl bg-gradient-to-br from-white/95 to-blue-50/80 rounded-3xl">
           <CardHeader>
             <CardTitle className="flex items-center gap-3">
-              <div className="w-10 h-10 bg-gradient-to-r from-blue-500 to-purple-500 rounded-xl flex items-center justify-center">
-                <HelpCircle className="w-5 h-5 text-white" />
+              <div className="flex items-center justify-center w-10 h-10 bg-gradient-to-r from-blue-500 to-purple-500 rounded-xl">
+                <Shield className="w-5 h-5 text-white" />
               </div>
-              <span className="text-xl text-transparent bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text font-bold">
+              <span className="text-xl font-bold text-transparent bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text">
                 Hướng dẫn & Hỗ trợ
               </span>
             </CardTitle>
           </CardHeader>
           <CardContent className="space-y-4">
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              <Button variant="outline" className="h-12 justify-start">
+            <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
+              <Button variant="outline" className="justify-start h-12">
                 <FileText className="w-4 h-4 mr-2" />
                 Tài liệu hướng dẫn
               </Button>
-              <Button variant="outline" className="h-12 justify-start">
+              <Button variant="outline" className="justify-start h-12">
                 <Mail className="w-4 h-4 mr-2" />
                 Liên hệ hỗ trợ
               </Button>
-              <Button variant="outline" className="h-12 justify-start">
+              <Button variant="outline" className="justify-start h-12">
                 <Globe className="w-4 h-4 mr-2" />
                 Cộng đồng
               </Button>
-              <Button variant="outline" className="h-12 justify-start">
+              <Button variant="outline" className="justify-start h-12">
                 <Shield className="w-4 h-4 mr-2" />
                 Bảo mật dữ liệu
               </Button>
@@ -770,10 +754,10 @@ const ReportDetailModal = ({
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="max-w-2xl max-h-[80vh] overflow-y-auto">
+      <DialogContent className="max-w-2xl max-h-[80vh] overflow-y-auto rounded-3xl">
         <DialogHeader>
           <DialogTitle className="flex items-center gap-3">
-            <div className="w-10 h-10 bg-gradient-to-r from-orange-500 to-pink-500 rounded-xl flex items-center justify-center">
+            <div className="flex items-center justify-center w-10 h-10 bg-gradient-to-r from-orange-500 to-pink-500 rounded-xl">
               <FileText className="w-5 h-5 text-white" />
             </div>
             <span>{report.title}</span>
@@ -781,103 +765,72 @@ const ReportDetailModal = ({
           <DialogDescription>{report.description}</DialogDescription>
         </DialogHeader>
 
-        <Tabs defaultValue="info" className="w-full">
-          <TabsList className="grid w-full grid-cols-3">
-            <TabsTrigger value="info">Thông tin</TabsTrigger>
-            <TabsTrigger value="details">Chi tiết</TabsTrigger>
-            <TabsTrigger value="actions">Thao tác</TabsTrigger>
-          </TabsList>
-
-          <TabsContent value="info" className="space-y-4">
-            <div className="grid grid-cols-2 gap-4">
-              <div>
-                <Label className="text-sm font-medium text-gray-500">
-                  Định dạng
-                </Label>
-                <p className="text-sm font-semibold">{report.format}</p>
-              </div>
-              <div>
-                <Label className="text-sm font-medium text-gray-500">
-                  Kích thước
-                </Label>
-                <p className="text-sm font-semibold">{report.file_size}</p>
-              </div>
-              <div>
-                <Label className="text-sm font-medium text-gray-500">
-                  Ngày tạo
-                </Label>
-                <p className="text-sm font-semibold">
-                  {new Date(report.generated_at).toLocaleString("vi-VN")}
-                </p>
-              </div>
-              <div>
-                <Label className="text-sm font-medium text-gray-500">
-                  Trạng thái
-                </Label>
-                <Badge
-                  className={
-                    report.status === "completed"
-                      ? "bg-green-100 text-green-800"
-                      : report.status === "processing"
-                        ? "bg-yellow-100 text-yellow-800"
-                        : "bg-red-100 text-red-800"
-                  }
-                >
-                  {report.status === "completed"
-                    ? "Hoàn thành"
+        <div className="mt-4 space-y-4">
+          <div className="grid grid-cols-2 gap-4">
+            <div>
+              <Label className="text-sm font-medium text-gray-500">
+                Định dạng
+              </Label>
+              <p className="text-sm font-semibold">{report.format}</p>
+            </div>
+            <div>
+              <Label className="text-sm font-medium text-gray-500">
+                Kích thước
+              </Label>
+              <p className="text-sm font-semibold">{report.file_size}</p>
+            </div>
+            <div>
+              <Label className="text-sm font-medium text-gray-500">
+                Ngày tạo
+              </Label>
+              <p className="text-sm font-semibold">
+                {new Date(report.generated_at).toLocaleString("vi-VN")}
+              </p>
+            </div>
+            <div>
+              <Label className="text-sm font-medium text-gray-500">
+                Trạng thái
+              </Label>
+              <Badge
+                className={
+                  report.status === "completed"
+                    ? "bg-green-100 text-green-800"
                     : report.status === "processing"
-                      ? "Đang xử lý"
-                      : "Thất bại"}
-                </Badge>
-              </div>
-            </div>
-          </TabsContent>
-
-          <TabsContent value="details" className="space-y-4">
-            <div className="space-y-3">
-              <div>
-                <Label className="text-sm font-medium text-gray-500">
-                  Khoảng thời gian dữ liệu
-                </Label>
-                <p className="text-sm">{report.data_range}</p>
-              </div>
-              <div>
-                <Label className="text-sm font-medium text-gray-500">
-                  Loại báo cáo
-                </Label>
-                <p className="text-sm">{report.type}</p>
-              </div>
-              <div>
-                <Label className="text-sm font-medium text-gray-500">
-                  Mô tả chi tiết
-                </Label>
-                <p className="text-sm text-gray-700">{report.description}</p>
-              </div>
-            </div>
-          </TabsContent>
-
-          <TabsContent value="actions" className="space-y-4">
-            <div className="flex flex-col gap-3">
-              {report.status === "completed" && (
-                <Button className="w-full">
-                  <Download className="w-4 h-4 mr-2" />
-                  Tải xuống báo cáo
-                </Button>
-              )}
-              <Button variant="outline" className="w-full">
-                <Mail className="w-4 h-4 mr-2" />
-                Gửi qua email
-              </Button>
-              <Button
-                variant="outline"
-                className="w-full text-red-600 hover:text-red-700"
+                      ? "bg-yellow-100 text-yellow-800"
+                      : "bg-red-100 text-red-800"
+                }
               >
-                <Trash2 className="w-4 h-4 mr-2" />
-                Xóa báo cáo
-              </Button>
+                {report.status === "completed"
+                  ? "Hoàn thành"
+                  : report.status === "processing"
+                    ? "Đang xử lý"
+                    : "Thất bại"}
+              </Badge>
             </div>
-          </TabsContent>
-        </Tabs>
+          </div>
+
+          <Separator />
+
+          <div className="flex flex-col gap-3">
+            {report.status === "completed" && (
+              <Button className="w-full bg-gradient-to-r from-orange-500 to-pink-600">
+                <Download className="w-4 h-4 mr-2" />
+                Tải xuống báo cáo
+              </Button>
+            )}
+            <Button variant="outline" className="w-full">
+              <Mail className="w-4 h-4 mr-2" />
+              Gửi qua email
+            </Button>
+            <Button
+              variant="outline"
+              className="w-full text-red-600 hover:text-red-700"
+            >
+              <Trash2 className="w-4 h-4 mr-2" />
+              Xóa báo cáo
+            </Button>
+          </div>
+        </div>
       </DialogContent>
     </Dialog>
   );
@@ -885,9 +838,8 @@ const ReportDetailModal = ({
 
 // Main Reports Component
 const Reports: React.FC = () => {
+  // ✅ ALL HOOKS AT TOP LEVEL
   const { user } = useAuth();
-
-  // All hooks at top-level
   const [timeRange, setTimeRange] = useState("30d");
   const [reportType, setReportType] = useState("all");
   const [selectedFormat, setSelectedFormat] = useState("Excel");
@@ -897,7 +849,6 @@ const Reports: React.FC = () => {
   const [isGenerating, setIsGenerating] = useState(false);
   const [searchQuery, setSearchQuery] = useState("");
   const [toasts, setToasts] = useState<any[]>([]);
-  const [isVisible, setIsVisible] = useState<Record<string, boolean>>({});
   const [page, setPage] = useState(1);
   const [activeTab, setActiveTab] = useState("history");
   const [selectedReports, setSelectedReports] = useState<string[]>([]);
@@ -908,23 +859,29 @@ const Reports: React.FC = () => {
 
   const PER_PAGE = 8;
 
-  // Guard
-  if (!user || !isAdmin(user)) return <Navigate to="/" replace />;
+  // ✅ GUARD CLAUSE
+  if (!user || !isAdmin(user)) {
+    return <Navigate to="/" replace />;
+  }
 
-  // Toast functions
-  const showToast = (type: string, title: string, description?: string) => {
+  // ✅ TOAST SYSTEM
+  const showToast = (
+    type: "success" | "error" | "info",
+    title: string,
+    description?: string,
+  ) => {
     const id = Date.now().toString();
     setToasts((prev) => [...prev, { id, type, title, description }]);
-    setTimeout(
-      () => setToasts((prev) => prev.filter((t) => t.id !== id)),
-      4000,
-    );
+    setTimeout(() => {
+      setToasts((prev) => prev.filter((toast) => toast.id !== id));
+    }, 4000);
   };
 
-  const removeToast = (id: string) =>
-    setToasts((prev) => prev.filter((t) => t.id !== id));
+  const removeToast = (id: string) => {
+    setToasts((prev) => prev.filter((toast) => toast.id !== id));
+  };
 
-  // Data fetching
+  // ✅ EFFECTS
   useEffect(() => {
     const fetchReports = async () => {
       setLoading(true);
@@ -948,64 +905,13 @@ const Reports: React.FC = () => {
     };
 
     fetchReports();
-
-    const observer = new IntersectionObserver(
-      (entries) => {
-        entries.forEach((entry) => {
-          if (entry.isIntersecting) {
-            setIsVisible((prev) => ({ ...prev, [entry.target.id]: true }));
-          }
-        });
-      },
-      { threshold: 0.1 },
-    );
-
-    const sections = document.querySelectorAll("[data-animate]");
-    sections.forEach((section) => observer.observe(section));
-    return () => observer.disconnect();
   }, [timeRange, reportType]);
-
-  // Search and filter
-  const filteredReports = reports
-    .filter(
-      (report) =>
-        report.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
-        report.description.toLowerCase().includes(searchQuery.toLowerCase()),
-    )
-    .sort((a, b) => {
-      let aValue, bValue;
-      switch (sortBy) {
-        case "name":
-          aValue = a.title;
-          bValue = b.title;
-          break;
-        case "status":
-          aValue = a.status;
-          bValue = b.status;
-          break;
-        default:
-          aValue = new Date(a.generated_at);
-          bValue = new Date(b.generated_at);
-      }
-
-      if (sortOrder === "asc") {
-        return aValue > bValue ? 1 : -1;
-      } else {
-        return aValue < bValue ? 1 : -1;
-      }
-    });
-
-  const totalPages = Math.max(1, Math.ceil(filteredReports.length / PER_PAGE));
-  const pagedReports = filteredReports.slice(
-    (page - 1) * PER_PAGE,
-    page * PER_PAGE,
-  );
 
   useEffect(() => {
     setPage(1);
   }, [searchQuery, reportType, timeRange, sortBy, sortOrder]);
 
-  // Action handlers
+  // ✅ EVENT HANDLERS
   const handleRefresh = async () => {
     setRefreshing(true);
     try {
@@ -1076,10 +982,17 @@ const Reports: React.FC = () => {
   };
 
   const handleSelectAll = () => {
-    if (selectedReports.length === pagedReports.length) {
+    if (
+      selectedReports.length ===
+      filteredReports.slice((page - 1) * PER_PAGE, page * PER_PAGE).length
+    ) {
       setSelectedReports([]);
     } else {
-      setSelectedReports(pagedReports.map((r) => r.id));
+      setSelectedReports(
+        filteredReports
+          .slice((page - 1) * PER_PAGE, page * PER_PAGE)
+          .map((r) => r.id),
+      );
     }
   };
 
@@ -1087,6 +1000,42 @@ const Reports: React.FC = () => {
     setModalReport(report);
     setShowDetailModal(true);
   };
+
+  // ✅ DATA CALCULATIONS
+  const filteredReports = reports
+    .filter(
+      (report) =>
+        report.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
+        report.description.toLowerCase().includes(searchQuery.toLowerCase()),
+    )
+    .sort((a, b) => {
+      let aValue: any, bValue: any;
+      switch (sortBy) {
+        case "name":
+          aValue = a.title;
+          bValue = b.title;
+          break;
+        case "status":
+          aValue = a.status;
+          bValue = b.status;
+          break;
+        default:
+          aValue = new Date(a.generated_at);
+          bValue = new Date(b.generated_at);
+      }
+
+      if (sortOrder === "asc") {
+        return aValue > bValue ? 1 : -1;
+      } else {
+        return aValue < bValue ? 1 : -1;
+      }
+    });
+
+  const totalPages = Math.max(1, Math.ceil(filteredReports.length / PER_PAGE));
+  const pagedReports = filteredReports.slice(
+    (page - 1) * PER_PAGE,
+    page * PER_PAGE,
+  );
 
   const quickTemplates = [
     {
@@ -1115,13 +1064,6 @@ const Reports: React.FC = () => {
     },
   ];
 
-  const REPORT_TABS = [
-    { id: "history", icon: FileText, label: "Lịch sử báo cáo" },
-    { id: "generate", icon: Download, label: "Tạo báo cáo" },
-    { id: "analytics", icon: BarChart3, label: "Phân tích" },
-    { id: "settings", icon: Settings, label: "Cài đặt" },
-  ];
-
   // Loading state
   if (loading) {
     return (
@@ -1146,19 +1088,8 @@ const Reports: React.FC = () => {
           >
             <FileText className="w-6 h-6 text-pink-400 opacity-20" />
           </motion.div>
-          <motion.div
-            className="absolute bottom-1/4 left-1/3"
-            animate={{ y: [0, -25, 0], rotate: [0, 15, 0] }}
-            transition={{
-              duration: 7,
-              repeat: Infinity,
-              ease: "easeInOut",
-              delay: 2,
-            }}
-          >
-            <Coffee className="text-amber-400 w-7 h-7 opacity-20" />
-          </motion.div>
         </div>
+
         <div className="container relative z-10 px-4 py-8 mx-auto">
           <motion.div
             initial={{ opacity: 0, scale: 0.8 }}
@@ -1170,7 +1101,7 @@ const Reports: React.FC = () => {
                 <motion.div
                   animate={{ rotate: 360 }}
                   transition={{ duration: 1, repeat: Infinity, ease: "linear" }}
-                  className="w-12 h-12 mx-auto mb-4 border-4 rounded-full border-orange-500 border-t-transparent"
+                  className="w-12 h-12 mx-auto mb-4 border-4 border-orange-500 rounded-full border-t-transparent"
                 />
                 <h2 className="mb-2 text-xl font-semibold text-orange-800">
                   Đang tải báo cáo...
@@ -1188,14 +1119,14 @@ const Reports: React.FC = () => {
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-orange-50 via-amber-50 to-pink-50">
-      {/* Enhanced Floating Elements */}
+      {/* 🌟 Floating Elements */}
       <div className="fixed inset-0 overflow-hidden pointer-events-none">
         <motion.div
           className="absolute top-1/4 left-1/4"
           animate={{ y: [0, -20, 0], rotate: [0, 10, 0] }}
           transition={{ duration: 6, repeat: Infinity, ease: "easeInOut" }}
         >
-          <Code className="w-8 h-8 text-orange-400 opacity-20" />
+          <BarChart3 className="w-8 h-8 text-orange-400 opacity-20" />
         </motion.div>
         <motion.div
           className="absolute top-1/3 right-1/4"
@@ -1207,7 +1138,7 @@ const Reports: React.FC = () => {
             delay: 1,
           }}
         >
-          <Palette className="w-6 h-6 text-pink-400 opacity-20" />
+          <FileText className="w-6 h-6 text-pink-400 opacity-20" />
         </motion.div>
         <motion.div
           className="absolute bottom-1/4 left-1/3"
@@ -1220,42 +1151,6 @@ const Reports: React.FC = () => {
           }}
         >
           <Coffee className="text-amber-400 w-7 h-7 opacity-20" />
-        </motion.div>
-        <motion.div
-          className="absolute top-2/3 right-1/3"
-          animate={{ y: [0, -18, 0], scale: [1, 1.1, 1] }}
-          transition={{
-            duration: 4,
-            repeat: Infinity,
-            ease: "easeInOut",
-            delay: 3,
-          }}
-        >
-          <Heart className="w-5 h-5 text-pink-300 opacity-20" />
-        </motion.div>
-        <motion.div
-          className="absolute top-1/6 right-1/6"
-          animate={{ y: [0, -12, 0], rotate: [0, -5, 0] }}
-          transition={{
-            duration: 8,
-            repeat: Infinity,
-            ease: "easeInOut",
-            delay: 1.5,
-          }}
-        >
-          <Sparkles className="w-4 h-4 text-yellow-400 opacity-20" />
-        </motion.div>
-        <motion.div
-          className="absolute bottom-1/6 right-1/5"
-          animate={{ y: [0, -16, 0], scale: [1, 1.2, 1] }}
-          transition={{
-            duration: 5,
-            repeat: Infinity,
-            ease: "easeInOut",
-            delay: 2.5,
-          }}
-        >
-          <Gift className="w-6 h-6 text-purple-300 opacity-20" />
         </motion.div>
       </div>
 
@@ -1275,13 +1170,11 @@ const Reports: React.FC = () => {
       </div>
 
       <div className="container relative z-10 px-4 py-8 mx-auto">
-        {/* Enhanced Header */}
+        {/* Header */}
         <motion.div
           initial={{ opacity: 0, y: -20 }}
           animate={{ opacity: 1, y: 0 }}
-          className="flex items-center justify-between mb-8 p-6 bg-gradient-to-r from-white/90 via-orange-50/90 to-pink-50/90 backdrop-blur-xl border border-orange-200/50 rounded-3xl shadow-lg"
-          id="header"
-          data-animate
+          className="flex items-center justify-between p-6 mb-8 border shadow-lg bg-gradient-to-r from-white/90 via-orange-50/90 to-pink-50/90 backdrop-blur-xl border-orange-200/50 rounded-3xl"
         >
           <div className="flex items-center space-x-4">
             <motion.div whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }}>
@@ -1289,10 +1182,10 @@ const Reports: React.FC = () => {
                 variant="ghost"
                 size="sm"
                 asChild
-                className="group bg-white/60 hover:bg-white/80 rounded-2xl shadow-md"
+                className="shadow-md group bg-white/60 hover:bg-white/80 rounded-2xl"
               >
                 <Link to="/admin">
-                  <ArrowLeft className="w-4 h-4 mr-1 transition-transform group-hover:-translate-x-1 text-orange-600" />
+                  <ArrowLeft className="w-4 h-4 mr-1 text-orange-600 transition-transform group-hover:-translate-x-1" />
                   <span className="font-semibold text-orange-800">
                     Về Dashboard
                   </span>
@@ -1310,7 +1203,7 @@ const Reports: React.FC = () => {
                 <h1 className="text-4xl font-bold text-transparent bg-gradient-to-r from-orange-600 via-amber-600 to-pink-600 bg-clip-text">
                   Báo cáo & Xuất dữ liệu
                 </h1>
-                <p className="text-orange-700/80 mt-1 flex items-center space-x-2">
+                <p className="flex items-center mt-1 space-x-2 text-orange-700/80">
                   <Sparkles className="w-4 h-4" />
                   <span>
                     Tổng hợp, tạo và quản lý các báo cáo kinh doanh chuyên
@@ -1320,13 +1213,14 @@ const Reports: React.FC = () => {
               </div>
             </div>
           </div>
+
           <div className="flex space-x-3">
             <motion.div whileFocus={{ scale: 1.01 }}>
               <Select
                 value={selectedFormat}
                 onValueChange={(val) => setSelectedFormat(val)}
               >
-                <SelectTrigger className="w-32 h-12 bg-white/80 border-orange-200/50 rounded-2xl shadow-md">
+                <SelectTrigger className="w-32 h-12 shadow-md bg-white/80 border-orange-200/50 rounded-2xl">
                   <SelectValue />
                 </SelectTrigger>
                 <SelectContent>
@@ -1345,12 +1239,13 @@ const Reports: React.FC = () => {
                 </SelectContent>
               </Select>
             </motion.div>
+
             <motion.div whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }}>
               <Button
                 variant="outline"
                 onClick={handleRefresh}
                 disabled={refreshing}
-                className="transition-all duration-300 group bg-white/80 hover:bg-white border-orange-200/50 hover:border-orange-300 rounded-2xl shadow-md hover:shadow-lg"
+                className="transition-all duration-300 shadow-md group bg-white/80 hover:bg-white border-orange-200/50 hover:border-orange-300 rounded-2xl hover:shadow-lg"
               >
                 {refreshing ? (
                   <motion.div
@@ -1364,62 +1259,152 @@ const Reports: React.FC = () => {
                     <RefreshCw className="w-4 h-4 mr-2" />
                   </motion.div>
                 ) : (
-                  <RefreshCw className="w-4 h-4 mr-2 group-hover:animate-spin text-orange-600" />
+                  <RefreshCw className="w-4 h-4 mr-2 text-orange-600 group-hover:animate-spin" />
                 )}
-                <span className="text-orange-800 font-semibold">Làm mới</span>
+                <span className="font-semibold text-orange-800">Làm mới</span>
               </Button>
             </motion.div>
           </div>
         </motion.div>
 
-        {/* Enhanced Tabs Navigation */}
+        {/* ✨ Enhanced Tabs Navigation - THIẾT KẾ MỚI */}
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ delay: 0.2 }}
           className="mb-8"
-          id="tabs"
-          data-animate
         >
           <Tabs
             value={activeTab}
             onValueChange={setActiveTab}
             className="w-full"
           >
-            <TabsList className="grid w-full h-[12vh] grid-cols-5 mb-8 p-2 bg-gradient-to-r from-white/80 via-blue-50/80 to-purple-50/80 backdrop-blur-xl border border-blue-200/50 rounded-3xl shadow-xl">
-              {[
-                { id: "general", icon: Globe, label: "Chung" },
-                { id: "security", icon: Shield, label: "Bảo mật" },
-                { id: "notifications", icon: Bell, label: "Thông báo" },
-                { id: "appearance", icon: Palette, label: "Giao diện" },
-                { id: "integrations", icon: Database, label: "Tích hợp" },
-              ].map((tab) => (
-                <TabsTrigger
-                  key={tab.id}
-                  value={tab.id}
-                  className="group relative flex items-center justify-center w-full h-full py-4 px-0 font-semibold text-sm bg-transparent rounded-2xl transition-all duration-300 text-blue-700 hover:bg-white/60 hover:text-blue-900 hover:shadow-md data-[state=active]:text-white data-[state=active]:shadow-xl outline-none"
-                >
-                  <span className="flex items-center gap-2 z-10">
-                    <tab.icon className="w-5 h-5 flex-shrink-0" />
-                    <span className="hidden sm:inline font-bold tracking-wide">
-                      {tab.label}
-                    </span>
+            <TabsList className="grid w-full grid-cols-4 mb-8 p-1.5 bg-gradient-to-r from-orange-100/60 via-amber-100/60 to-pink-100/60 backdrop-blur-xl border border-orange-200/40 rounded-[32px] shadow-lg">
+              <TabsTrigger
+                value="history"
+                className="relative flex items-center justify-center py-3.5 px-6 font-semibold text-sm bg-transparent rounded-[26px] transition-all duration-300 text-orange-700/80 hover:text-orange-900 data-[state=active]:text-white outline-none data-[state=active]:shadow-xl overflow-hidden"
+              >
+                {activeTab === "history" && (
+                  <motion.div
+                    layoutId="report-tab-bg"
+                    className="absolute inset-0 rounded-[26px] bg-gradient-to-r from-orange-500 via-amber-500 to-pink-600 shadow-lg"
+                    initial={false}
+                    transition={{
+                      type: "spring",
+                      stiffness: 500,
+                      damping: 40,
+                      mass: 0.8,
+                    }}
+                  />
+                )}
+                <span className="relative z-10 flex items-center gap-2.5">
+                  <motion.div
+                    animate={{
+                      scale: activeTab === "history" ? 1.1 : 1,
+                      rotate: activeTab === "history" ? [0, -5, 5, 0] : 0,
+                    }}
+                    transition={{ duration: 0.3 }}
+                  >
+                    <FileText className="w-5 h-5" />
+                  </motion.div>
+                  <span className="font-bold tracking-wide">
+                    Lịch sử báo cáo
                   </span>
-                  {activeTab === tab.id && (
-                    <motion.div
-                      layoutId="tab-active-bg"
-                      className="absolute inset-0 rounded-2xl bg-gradient-to-r from-blue-500 via-purple-500 to-pink-600"
-                      initial={false}
-                      transition={{
-                        type: "spring",
-                        stiffness: 400,
-                        damping: 35,
-                      }}
-                      style={{ zIndex: 1 }}
-                    />
-                  )}
-                </TabsTrigger>
-              ))}
+                </span>
+              </TabsTrigger>
+
+              <TabsTrigger
+                value="generate"
+                className="relative flex items-center justify-center py-3.5 px-6 font-semibold text-sm bg-transparent rounded-[26px] transition-all duration-300 text-orange-700/80 hover:text-orange-900 data-[state=active]:text-white outline-none data-[state=active]:shadow-xl overflow-hidden"
+              >
+                {activeTab === "generate" && (
+                  <motion.div
+                    layoutId="report-tab-bg"
+                    className="absolute inset-0 rounded-[26px] bg-gradient-to-r from-orange-500 via-amber-500 to-pink-600 shadow-lg"
+                    initial={false}
+                    transition={{
+                      type: "spring",
+                      stiffness: 500,
+                      damping: 40,
+                      mass: 0.8,
+                    }}
+                  />
+                )}
+                <span className="relative z-10 flex items-center gap-2.5">
+                  <motion.div
+                    animate={{
+                      scale: activeTab === "generate" ? 1.1 : 1,
+                      rotate: activeTab === "generate" ? [0, -5, 5, 0] : 0,
+                    }}
+                    transition={{ duration: 0.3 }}
+                  >
+                    <Download className="w-5 h-5" />
+                  </motion.div>
+                  <span className="font-bold tracking-wide">Tạo báo cáo</span>
+                </span>
+              </TabsTrigger>
+
+              <TabsTrigger
+                value="analytics"
+                className="relative flex items-center justify-center py-3.5 px-6 font-semibold text-sm bg-transparent rounded-[26px] transition-all duration-300 text-orange-700/80 hover:text-orange-900 data-[state=active]:text-white outline-none data-[state=active]:shadow-xl overflow-hidden"
+              >
+                {activeTab === "analytics" && (
+                  <motion.div
+                    layoutId="report-tab-bg"
+                    className="absolute inset-0 rounded-[26px] bg-gradient-to-r from-orange-500 via-amber-500 to-pink-600 shadow-lg"
+                    initial={false}
+                    transition={{
+                      type: "spring",
+                      stiffness: 500,
+                      damping: 40,
+                      mass: 0.8,
+                    }}
+                  />
+                )}
+                <span className="relative z-10 flex items-center gap-2.5">
+                  <motion.div
+                    animate={{
+                      scale: activeTab === "analytics" ? 1.1 : 1,
+                      rotate: activeTab === "analytics" ? [0, -5, 5, 0] : 0,
+                    }}
+                    transition={{ duration: 0.3 }}
+                  >
+                    <BarChart3 className="w-5 h-5" />
+                  </motion.div>
+                  <span className="font-bold tracking-wide">Phân tích</span>
+                </span>
+              </TabsTrigger>
+
+              <TabsTrigger
+                value="settings"
+                className="relative flex items-center justify-center py-3.5 px-6 font-semibold text-sm bg-transparent rounded-[26px] transition-all duration-300 text-orange-700/80 hover:text-orange-900 data-[state=active]:text-white outline-none data-[state=active]:shadow-xl overflow-hidden"
+              >
+                {activeTab === "settings" && (
+                  <motion.div
+                    layoutId="report-tab-bg"
+                    className="absolute inset-0 rounded-[26px] bg-gradient-to-r from-orange-500 via-amber-500 to-pink-600 shadow-lg"
+                    initial={false}
+                    transition={{
+                      type: "spring",
+                      stiffness: 500,
+                      damping: 40,
+                      mass: 0.8,
+                    }}
+                  />
+                )}
+                <span className="relative z-10 flex items-center gap-2.5">
+                  <motion.div
+                    animate={{
+                      scale: activeTab === "settings" ? 1.1 : 1,
+                      rotate: activeTab === "settings" ? [0, -5, 5, 0] : 0,
+                    }}
+                    transition={{ duration: 0.3 }}
+                  >
+                    <Settings className="w-5 h-5" />
+                  </motion.div>
+                  <span className="font-bold tracking-wide">Cài đặt</span>
+                </span>
+              </TabsTrigger>
             </TabsList>
 
             <AnimatePresence mode="wait">
@@ -1450,24 +1435,24 @@ const Reports: React.FC = () => {
                       </div>
                     </CardHeader>
                     <CardContent>
-                      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+                      <div className="grid grid-cols-1 gap-4 md:grid-cols-2 lg:grid-cols-4">
                         <motion.div
                           className="relative"
                           whileFocus={{ scale: 1.01 }}
                         >
-                          <Search className="absolute w-4 h-4 transform -translate-y-1/2 left-3 top-1/2 text-orange-600" />
+                          <Search className="absolute w-4 h-4 text-orange-600 transform -translate-y-1/2 left-3 top-1/2" />
                           <Input
                             placeholder="Tìm kiếm báo cáo..."
                             value={searchQuery}
                             onChange={(e) => setSearchQuery(e.target.value)}
-                            className="h-12 pl-10 bg-white/80 border-orange-200/50 rounded-2xl shadow-md focus:ring-2 focus:ring-orange-200"
+                            className="h-12 pl-10 shadow-md bg-white/80 border-orange-200/50 rounded-2xl focus:ring-2 focus:ring-orange-200"
                           />
                         </motion.div>
                         <Select
                           value={reportType}
                           onValueChange={setReportType}
                         >
-                          <SelectTrigger className="h-12 bg-white/80 border-orange-200/50 rounded-2xl shadow-md">
+                          <SelectTrigger className="h-12 shadow-md bg-white/80 border-orange-200/50 rounded-2xl">
                             <SelectValue placeholder="Loại báo cáo" />
                           </SelectTrigger>
                           <SelectContent>
@@ -1483,7 +1468,7 @@ const Reports: React.FC = () => {
                             setSortBy(v as "name" | "date" | "status")
                           }
                         >
-                          <SelectTrigger className="h-12 bg-white/80 border-orange-200/50 rounded-2xl shadow-md">
+                          <SelectTrigger className="h-12 shadow-md bg-white/80 border-orange-200/50 rounded-2xl">
                             <SelectValue placeholder="Sắp xếp theo" />
                           </SelectTrigger>
                           <SelectContent>
@@ -1497,7 +1482,7 @@ const Reports: React.FC = () => {
                           onClick={() =>
                             setSortOrder(sortOrder === "asc" ? "desc" : "asc")
                           }
-                          className="h-12 bg-white/80 border-orange-200/50 rounded-2xl shadow-md hover:bg-white"
+                          className="h-12 shadow-md bg-white/80 border-orange-200/50 rounded-2xl hover:bg-white"
                         >
                           {sortOrder === "asc" ? (
                             <SortAsc className="w-4 h-4 mr-2" />
@@ -1552,7 +1537,7 @@ const Reports: React.FC = () => {
                   </Card>
 
                   {/* Reports Grid */}
-                  <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                  <div className="grid grid-cols-1 gap-6 lg:grid-cols-2">
                     <AnimatePresence>
                       {pagedReports.length > 0 ? (
                         pagedReports.map((report, index) => (
@@ -1576,7 +1561,7 @@ const Reports: React.FC = () => {
                         <motion.div
                           initial={{ opacity: 0, scale: 0.8 }}
                           animate={{ opacity: 1, scale: 1 }}
-                          className="col-span-full py-16 text-center"
+                          className="py-16 text-center col-span-full"
                         >
                           <motion.div
                             initial={{ scale: 0 }}
@@ -1599,14 +1584,6 @@ const Reports: React.FC = () => {
                               ? "Thử thay đổi từ khóa tìm kiếm hoặc tạo báo cáo mới."
                               : "Tạo báo cáo đầu tiên bằng cách chuyển sang tab 'Tạo báo cáo'"}
                           </p>
-                          <div className="flex justify-center gap-2">
-                            <Badge variant="outline">
-                              💡 Gợi ý: Sử dụng tab "Tạo báo cáo"
-                            </Badge>
-                            <Badge variant="outline">
-                              📊 Hoặc xem "Phân tích"
-                            </Badge>
-                          </div>
                         </motion.div>
                       )}
                     </AnimatePresence>
@@ -1614,15 +1591,15 @@ const Reports: React.FC = () => {
 
                   {/* Pagination */}
                   {totalPages > 1 && (
-                    <div className="flex justify-center items-center mt-8 gap-2">
+                    <div className="flex items-center justify-center gap-2 mt-8">
                       <Button
                         onClick={() => setPage((p) => Math.max(1, p - 1))}
                         disabled={page === 1}
                         variant="outline"
-                        className="bg-white/80 hover:bg-white border-orange-200/50 hover:border-orange-300 rounded-2xl shadow-md"
+                        className="shadow-md bg-white/80 hover:bg-white border-orange-200/50 hover:border-orange-300 rounded-2xl"
                       >
                         <ChevronLeft className="w-4 h-4 mr-1" />
-                        <span className="text-orange-800 font-semibold">
+                        <span className="font-semibold text-orange-800">
                           Trước
                         </span>
                       </Button>
@@ -1661,9 +1638,9 @@ const Reports: React.FC = () => {
                         }
                         disabled={page === totalPages}
                         variant="outline"
-                        className="bg-white/80 hover:bg-white border-orange-200/50 hover:border-orange-300 rounded-2xl shadow-md"
+                        className="shadow-md bg-white/80 hover:bg-white border-orange-200/50 hover:border-orange-300 rounded-2xl"
                       >
-                        <span className="text-orange-800 font-semibold">
+                        <span className="font-semibold text-orange-800">
                           Sau
                         </span>
                         <ChevronRight className="w-4 h-4 ml-1" />
@@ -1682,17 +1659,17 @@ const Reports: React.FC = () => {
                   exit={{ opacity: 0, y: -20 }}
                   transition={{ duration: 0.3 }}
                 >
-                  <Card className="border-0 shadow-xl bg-gradient-to-br from-white/95 to-orange-50/80 rounded-3xl mb-8">
+                  <Card className="mb-8 border-0 shadow-xl bg-gradient-to-br from-white/95 to-orange-50/80 rounded-3xl">
                     <CardHeader>
                       <div className="flex items-center space-x-3">
-                        <div className="flex items-center justify-center w-12 h-12 rounded-2xl bg-gradient-to-r from-orange-500 to-pink-500 shadow-lg">
+                        <div className="flex items-center justify-center w-12 h-12 shadow-lg rounded-2xl bg-gradient-to-r from-orange-500 to-pink-500">
                           <Download className="w-6 h-6 text-white" />
                         </div>
                         <div>
-                          <CardTitle className="text-2xl text-transparent bg-gradient-to-r from-orange-600 to-pink-600 bg-clip-text font-bold">
+                          <CardTitle className="text-2xl font-bold text-transparent bg-gradient-to-r from-orange-600 to-pink-600 bg-clip-text">
                             Tạo báo cáo nhanh
                           </CardTitle>
-                          <p className="text-sm text-orange-700/80 mt-1">
+                          <p className="mt-1 text-sm text-orange-700/80">
                             Chọn template và tạo báo cáo chuyên nghiệp trong vài
                             giây
                           </p>
