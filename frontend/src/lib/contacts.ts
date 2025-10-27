@@ -16,6 +16,7 @@ export interface Contact {
     | "partnership"
     | "feedback"
     | "media"
+    | "technical"
     | "other";
   message: string;
   status: "new" | "read" | "replied" | "closed";

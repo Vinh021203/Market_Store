@@ -55,10 +55,8 @@ import {
   Package,
   Settings,
 } from "lucide-react";
+import { createContact } from "@/lib/contacts";
 
-// ============================================
-// COLOR SCHEME - ĐỒNG BỘ VỚI PRICING PAGE
-// ============================================
 const softPinkTheme = {
   // Background Gradients
   pageBackground: "from-pink-50/70 via-rose-50/60 to-red-50/50",
@@ -90,9 +88,6 @@ const softPinkTheme = {
   iconText: "text-pink-400",
 };
 
-// ============================================
-// BACKGROUND DECORATIVE ICONS - GIỐNG PRICING
-// ============================================
 const decorativeIcons = [
   {
     Icon: MessageCircle,
@@ -192,9 +187,6 @@ const decorativeIcons = [
   },
 ];
 
-// ============================================
-// VALIDATION SCHEMA
-// ============================================
 const contactSchema = z.object({
   name: z
     .string()
@@ -235,9 +227,6 @@ const contactSchema = z.object({
 
 type ContactData = z.infer<typeof contactSchema>;
 
-// ============================================
-// SOCIAL MEDIA PLATFORMS
-// ============================================
 const socialPlatforms = [
   {
     icon: Facebook,
@@ -277,9 +266,6 @@ const socialPlatforms = [
   },
 ];
 
-// ============================================
-// CONTACT CHANNELS
-// ============================================
 const contactChannels = [
   {
     id: "office",
@@ -341,9 +327,6 @@ const contactChannels = [
   },
 ];
 
-// ============================================
-// COMPANY STATS
-// ============================================
 const companyStats = [
   {
     icon: Users,
@@ -389,9 +372,6 @@ const companyStats = [
   },
 ];
 
-// ============================================
-// SUPPORT CATEGORIES
-// ============================================
 const supportCategories = [
   {
     value: "support",
@@ -437,9 +417,6 @@ const supportCategories = [
   },
 ];
 
-// ============================================
-// FAQ DATA
-// ============================================
 const faqCategories = [
   {
     title: "Thanh toán & Pricing",
@@ -471,9 +448,6 @@ const faqCategories = [
   },
 ];
 
-// ============================================
-// SCROLL TO TOP COMPONENT
-// ============================================
 const ScrollToTopButton: React.FC<{ show: boolean }> = ({ show }) => (
   <AnimatePresence>
     {show && (
@@ -492,9 +466,6 @@ const ScrollToTopButton: React.FC<{ show: boolean }> = ({ show }) => (
   </AnimatePresence>
 );
 
-// ============================================
-// MAIN CONTACT COMPONENT
-// ============================================
 const Contact: React.FC = () => {
   // States
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -539,23 +510,30 @@ const Contact: React.FC = () => {
     return () => window.removeEventListener("scroll", handleScroll);
   }, []);
 
-  // Form submission
   const onSubmit = useCallback(
     async (data: ContactData) => {
       setIsSubmitting(true);
 
       try {
-        // Simulate API call
-        await new Promise((resolve) => setTimeout(resolve, 2000));
+        // ✅ GỌI API THẬT
+        await createContact({
+          name: data.name,
+          email: data.email,
+          phone: data.phone || undefined,
+          company: data.company || undefined,
+          subject: data.subject,
+          category: data.category,
+          message: data.message,
+        });
 
-        console.log("Contact Form Data:", data);
+        console.log("✅ Contact submitted successfully!");
 
         setIsSubmitted(true);
         reset();
 
         setTimeout(() => setIsSubmitted(false), 8000);
       } catch (error) {
-        console.error("Error submitting form:", error);
+        console.error("❌ Error submitting contact:", error);
         alert("Lỗi gửi tin nhắn. Vui lòng thử lại sau!");
       } finally {
         setIsSubmitting(false);

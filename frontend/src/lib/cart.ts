@@ -5,27 +5,28 @@ export async function addToCartDB(
   userId: string,
   productId: string,
   quantity = 1,
-  price: number
+  price: number,
 ) {
-  const { data, error } = await supabase
-    .from("carts")
-    .upsert(
-      {
-        user_id: userId,
-        product_id: productId,
-        quantity,
-        price_at_added: price,
-      },
-      { onConflict: 'user_id,product_id' }
-    );
+  const { data, error } = await supabase.from("carts").upsert(
+    {
+      user_id: userId,
+      product_id: productId,
+      quantity,
+      price_at_added: price,
+    },
+    { onConflict: "user_id,product_id" },
+  );
 
   if (error) {
-    console.error("⛔ Lỗi khi thêm vào giỏ hàng:", error.message, error.details);
+    console.error(
+      "⛔ Lỗi khi thêm vào giỏ hàng:",
+      error.message,
+      error.details,
+    );
     throw error;
   }
   return data;
 }
-
 
 export async function getCartItems(userId: string): Promise<CartItem[]> {
   const { data, error } = await supabase
@@ -34,7 +35,7 @@ export async function getCartItems(userId: string): Promise<CartItem[]> {
     .eq("user_id", userId);
 
   if (error) throw error;
-  return data.map(item => ({
+  return data.map((item) => ({
     id: item.id,
     quantity: item.quantity,
     addedAt: item.created_at,
@@ -42,7 +43,11 @@ export async function getCartItems(userId: string): Promise<CartItem[]> {
   }));
 }
 
-export async function updateCartItem(userId: string, productId: string, quantity: number) {
+export async function updateCartItem(
+  userId: string,
+  productId: string,
+  quantity: number,
+) {
   return await supabase
     .from("carts")
     .update({ quantity })
@@ -59,8 +64,5 @@ export async function removeCartItem(userId: string, productId: string) {
 }
 
 export async function clearCart(userId: string) {
-  return await supabase
-    .from("carts")
-    .delete()
-    .eq("user_id", userId);
+  return await supabase.from("carts").delete().eq("user_id", userId);
 }

@@ -5,35 +5,34 @@ import {
   useContext,
   ReactNode,
   useCallback,
+  useRef,
 } from "react";
 import { Product } from "@/types";
 import { toast } from "@/hooks/use-toast";
 
 const WISHLIST_STORAGE_KEY = "myWishlist";
 
-// Helper: Đọc wishlist từ localStorage
+// 📦 Helper: Đọc wishlist từ localStorage
 function getStoredWishlist(): Product[] {
   try {
     const stored = localStorage.getItem(WISHLIST_STORAGE_KEY);
     return stored ? JSON.parse(stored) : [];
   } catch (error) {
-    console.error("❌ Lỗi khi đọc wishlist từ localStorage:", error);
     return [];
   }
 }
 
-// Helper: Ghi wishlist vào localStorage
+// 💾 Helper: Ghi wishlist vào localStorage
 function setStoredWishlist(wishlist: Product[]) {
   try {
     localStorage.setItem(WISHLIST_STORAGE_KEY, JSON.stringify(wishlist));
-    // ✅ Dispatch custom event để notify các components khác
     window.dispatchEvent(
       new CustomEvent("wishlistUpdated", {
         detail: { wishlist, count: wishlist.length },
       }),
     );
   } catch (error) {
-    console.error("❌ Lỗi khi lưu wishlist vào localStorage:", error);
+    // Silent fail
   }
 }
 
@@ -70,92 +69,116 @@ interface WishlistProviderProps {
 // Provider component
 export const WishlistProvider = ({ children }: WishlistProviderProps) => {
   const [wishlist, setWishlist] = useState<Product[]>([]);
-  const [forceUpdate, setForceUpdate] = useState(0);
+  const [isInitialized, setIsInitialized] = useState(false);
+  const isFirstRender = useRef(true);
 
-  // ✅ Load initial data
+  // Load initial data
   useEffect(() => {
     const stored = getStoredWishlist();
     setWishlist(stored);
+    setIsInitialized(true);
   }, []);
 
-  // ✅ Listen to custom wishlist events
+  // Save to localStorage
   useEffect(() => {
-    const handleWishlistUpdate = () => {
-      setForceUpdate((prev) => prev + 1);
-    };
+    if (isFirstRender.current) {
+      isFirstRender.current = false;
+      return;
+    }
 
-    window.addEventListener("wishlistUpdated", handleWishlistUpdate);
-    return () => {
-      window.removeEventListener("wishlistUpdated", handleWishlistUpdate);
-    };
-  }, []);
-
-  // ✅ Save to localStorage whenever wishlist changes
-  useEffect(() => {
-    if (wishlist.length >= 0) {
+    if (isInitialized) {
       setStoredWishlist(wishlist);
     }
-  }, [wishlist]);
+  }, [wishlist, isInitialized]);
 
-  const refreshWishlist = useCallback(() => {
-    const stored = getStoredWishlist();
-    setWishlist(stored);
-    setForceUpdate((prev) => prev + 1);
+  // Listen to storage changes
+  useEffect(() => {
+    const handleStorageChange = (e: StorageEvent) => {
+      if (e.key === WISHLIST_STORAGE_KEY && e.newValue) {
+        try {
+          const newWishlist = JSON.parse(e.newValue);
+          setWishlist(newWishlist);
+        } catch (error) {
+          // Silent fail
+        }
+      }
+    };
+
+    window.addEventListener("storage", handleStorageChange);
+    return () => window.removeEventListener("storage", handleStorageChange);
   }, []);
 
+  // Add to wishlist
   const addToWishlist = useCallback((product: Product) => {
     setWishlist((prev) => {
       if (prev.some((item) => item.id === product.id)) {
         toast({
-          title: "💡 Sản phẩm đã có trong danh sách yêu thích.",
+          title: "💡 Sản phẩm đã có trong danh sách",
           description: product.title,
           variant: "default",
+          duration: 3000,
         });
         return prev;
       }
 
       const newWishlist = [...prev, product];
+
       toast({
         title: "❤️ Đã thêm vào yêu thích",
         description: product.title,
+        duration: 3000,
       });
 
-      setForceUpdate((prev) => prev + 1);
       return newWishlist;
     });
   }, []);
 
+  // Remove from wishlist
   const removeFromWishlist = useCallback((productId: string) => {
     setWishlist((prev) => {
-      const newWishlist = prev.filter((item) => item.id !== productId);
       const removed = prev.find((item) => item.id === productId);
+      const newWishlist = prev.filter((item) => item.id !== productId);
 
-      toast({
-        title: "💔 Đã xóa khỏi yêu thích",
-        description: removed?.title || "Sản phẩm",
-      });
+      if (removed) {
+        toast({
+          title: "💔 Đã xóa khỏi yêu thích",
+          description: removed.title,
+          duration: 3000,
+        });
+      }
 
-      setForceUpdate((prev) => prev + 1);
       return newWishlist;
     });
   }, []);
 
+  // Check if in wishlist
   const isInWishlist = useCallback(
     (productId: string) => {
       return wishlist.some((item) => item.id === productId);
     },
-    [wishlist, forceUpdate],
+    [wishlist],
   );
 
+  // Clear all
   const clearWishlist = useCallback(() => {
     setWishlist([]);
-    toast({ title: "🗑️ Đã xóa toàn bộ danh sách yêu thích." });
-    setForceUpdate((prev) => prev + 1);
+    toast({
+      title: "🗑️ Đã xóa toàn bộ wishlist",
+      description: "Danh sách yêu thích đã được làm trống.",
+      duration: 3000,
+    });
   }, []);
 
+  // Get total items
   const getTotalWishlistItems = useCallback(() => {
     return wishlist.length;
-  }, [wishlist.length, forceUpdate]);
+  }, [wishlist.length]);
+
+  // Refresh wishlist
+  const refreshWishlist = useCallback(() => {
+    const stored = getStoredWishlist();
+    setWishlist(stored);
+  }, []);
 
   const value: WishlistContextType = {
     wishlist,

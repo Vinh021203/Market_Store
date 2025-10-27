@@ -118,18 +118,15 @@ export async function getFeaturedProducts(
     .select("*")
     .eq("is_featured", true)
     .eq("is_active", true)
-    .order("created_at", { ascending: false }); // Vẫn sắp xếp để có trật tự ban đầu nếu muốn
+    .order("created_at", { ascending: false });
 
   if (error || !data) {
     console.error("Lỗi khi lấy sản phẩm nổi bật từ Supabase:", error);
     return [];
   }
 
-  // Chuyển đổi sang camelCase
   let featuredProducts = data.map(mapProduct);
 
-  // ✅ LOGIC LẤY NGẪU NHIÊN 4 SẢN PHẨM
-  // Shuffle the array using Fisher-Yates algorithm
   for (let i = featuredProducts.length - 1; i > 0; i--) {
     const j = Math.floor(Math.random() * (i + 1));
     [featuredProducts[i], featuredProducts[j]] = [
@@ -138,7 +135,6 @@ export async function getFeaturedProducts(
     ];
   }
 
-  // Return the first 'limit' number of shuffled products
   return featuredProducts.slice(0, limit);
 }
 

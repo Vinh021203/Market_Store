@@ -43,7 +43,7 @@ export interface CartItem {
 
 export interface Order {
   id: string;
-  user_id: string | null; // match với Supabase
+  user_id: string | null;
   status: "pending" | "processing" | "completed" | "cancelled" | null;
   payment_method: string | null;
   payment_status:
@@ -57,15 +57,13 @@ export interface Order {
   total_price: number | null;
   created_at: string | null;
   updated_at?: string | null;
-
-  full_name: string | null; // Bắt buộc có giá trị mặc định trong mapOrder
+  full_name: string | null;
   email: string | null;
   phone: string | null;
   address: string | null;
   city: string | null;
   country: string | null;
-
-  items: OrderItemUI[]; // Sử dụng items thay vì order_items sau khi map
+  items: OrderItemUI[];
 }
 
 export interface OrderItem {
@@ -74,11 +72,11 @@ export interface OrderItem {
   product_id: string;
   quantity: number;
   price: number;
-  products?: Product; // từ Supabase
+  products?: Product;
 }
 
 export interface OrderItemUI extends OrderItem {
-  product: Product | null; // để dùng tiện trong frontend UI
+  product: Product | null;
 }
 
 export interface Download {
@@ -94,7 +92,6 @@ export interface Download {
 }
 
 export interface DownloadUI extends Download {
-  // Computed properties for easier frontend access
   downloadDate: string; // camelCase alias
   fileSize?: string; // camelCase alias
   downloadUrl: string; // camelCase alias
@@ -229,31 +226,17 @@ export interface Discount {
   code: string;
   name: string;
   description?: string;
-
-  // Loại và giá trị
   type: "percent" | "fixed";
   value: number;
-
-  // Điều kiện áp dụng
   min_order_amount: number;
   max_discount_amount?: number;
-
-  // Số lần sử dụng
   max_uses?: number;
   used_count: number;
   max_uses_per_user: number;
-
-  // Thời gian
   start_date: string;
   end_date: string;
-
-  // Phạm vi áp dụng
   applicable_to: "all" | "products" | "users";
-
-  // Trạng thái
   is_active: boolean;
-
-  // Audit
   created_by?: string;
   created_at: string;
   updated_at: string;

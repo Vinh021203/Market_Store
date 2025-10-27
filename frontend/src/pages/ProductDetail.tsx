@@ -1,5 +1,6 @@
 import React, { useState, useEffect, useRef, useCallback } from "react";
 import { useParams, useNavigate } from "react-router-dom";
+import { Helmet } from "react-helmet-async";
 import FormattedDescription from "@/components/FormattedDescription";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -41,12 +42,14 @@ import { Alert, AlertDescription } from "@/components/ui/alert";
 import ProductCard from "@/components/ProductCard";
 import { Product } from "@/types";
 import { useCart } from "@/contexts/CartContext";
+import { ReviewSection } from "@/components/ReviewSection";
 import {
   getProductById,
   getRelatedProducts,
   formatPrice,
   getDiscountPercentage,
 } from "@/lib/products";
+import { useWishlist } from "@/hooks/useWishlist";
 import {
   motion,
   AnimatePresence,
@@ -535,6 +538,7 @@ const ImageModal = ({
 const ReviewModal = ({ isOpen, onClose, product }) => {
   const [userRating, setUserRating] = useState(0);
   const [userReview, setUserReview] = useState("");
+  const [reviewCount, setReviewCount] = useState(0);
 
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
@@ -779,11 +783,11 @@ const ProductDetail: React.FC = () => {
 
   // State Management
   const [selectedImage, setSelectedImage] = useState(0);
-  const [isWishlisted, setIsWishlisted] = useState(false);
+  const { wishlist, addToWishlist, removeFromWishlist, isInWishlist } =
+    useWishlist();
   const [product, setProduct] = useState<Product | null>(null);
   const [relatedProducts, setRelatedProducts] = useState<Product[]>([]);
   const [quantity, setQuantity] = useState(1);
-  const [reviews, setReviews] = useState<Review[]>([]);
   const [features, setFeatures] = useState<Feature[]>([]);
   const [specifications, setSpecifications] = useState<Specification[]>([]);
   const [faqs, setFAQs] = useState<FAQ[]>([]);
@@ -887,258 +891,26 @@ const ProductDetail: React.FC = () => {
   };
 
   const toggleWishlist = () => {
-    const newState = !isWishlisted;
-    setIsWishlisted(newState);
-
-    // Save to localStorage
-    const wishlist = JSON.parse(localStorage.getItem("wishlist") || "[]");
-    if (newState) {
-      if (!wishlist.includes(product?.id)) {
-        wishlist.push(product?.id);
-      }
+    if (!product) return;
+    const isCurrentlyInWishlist = isInWishlist(product.id);
+    if (isCurrentlyInWishlist) {
+      removeFromWishlist(product.id);
     } else {
-      const index = wishlist.indexOf(product?.id);
-      if (index > -1) {
-        wishlist.splice(index, 1);
-      }
+      addToWishlist(product);
     }
-    localStorage.setItem("wishlist", JSON.stringify(wishlist));
-
-    toast({
-      title: newState ? "❤️ Đã thêm vào yêu thích" : "💔 Đã xóa khỏi yêu thích",
-      description: newState
-        ? "Sản phẩm đã được thêm vào danh sách yêu thích."
-        : "Sản phẩm đã được xóa khỏi danh sách yêu thích.",
-    });
   };
 
   // Data fetching
   useEffect(() => {
     if (!id) return;
-
     (async () => {
       setIsLoading(true);
-
       try {
         await new Promise((resolve) => setTimeout(resolve, 1500));
-
         const data = await getProductById(id);
         if (!data) return;
-
-        // Process images
-        if (typeof data.images === "string") {
-          data.images = (data.images as string)
-            .split(",")
-            .map((t: string) => t.trim())
-            .filter(Boolean);
-        }
-        if (!Array.isArray(data.images)) {
-          data.images = [];
-        }
-
         setProduct(data);
-
-        // Check if in wishlist
-        const wishlist = JSON.parse(localStorage.getItem("wishlist") || "[]");
-        setIsWishlisted(wishlist.includes(data.id));
-
-        // Mock reviews
-        const mockReviews: Review[] = [
-          {
-            id: "1",
-            userId: "user1",
-            userName: "Nguyễn Văn An",
-            userAvatar:
-              "https://ui-avatars.com/api/?name=Nguyen+Van+An&background=ec4899&color=fff",
-            rating: 5,
-            comment:
-              "Sản phẩm thực sự tuyệt vời! Code rất sạch sẽ và có cấu trúc tốt. Documentation chi tiết giúp tôi triển khai nhanh chóng. Responsive design hoàn hảo trên mọi thiết bị. Team support phản hồi nhanh chóng và chuyên nghiệp. Đáng từng đồng bỏ ra!",
-            createdAt: "2025-07-15T10:30:00Z",
-            helpful: 34,
-            verified: true,
-            pros: [
-              "Code sạch sẽ",
-              "Documentation chi tiết",
-              "Responsive tốt",
-              "Hỗ trợ nhanh",
-            ],
-            cons: ["Setup ban đầu hơi phức tạp"],
-            purchaseDate: "2025-07-01",
-            version: "v2.1.0",
-          },
-          {
-            id: "2",
-            userId: "user2",
-            userName: "Trần Thị Mai",
-            userAvatar:
-              "https://ui-avatars.com/api/?name=Tran+Thi+Mai&background=f59e0b&color=fff",
-            rating: 5,
-            comment:
-              "Design hiện đại và trendy, phù hợp với xu hướng 2025. Tôi đã sử dụng cho 3 dự án client và đều nhận được feedback tích cực. Color scheme và typography rất hài hòa.",
-            createdAt: "2025-07-10T14:15:00Z",
-            helpful: 28,
-            verified: true,
-            pros: ["Design đẹp", "UI/UX xuất sắc", "Components đa dạng"],
-            cons: ["Cần thời gian làm quen"],
-            purchaseDate: "2025-06-28",
-            version: "v2.0.5",
-          },
-          {
-            id: "3",
-            userId: "user3",
-            userName: "Lê Hoàng Nam",
-            userAvatar:
-              "https://ui-avatars.com/api/?name=Le+Hoang+Nam&background=8b5cf6&color=fff",
-            rating: 4,
-            comment:
-              "Chất lượng cao, performance tốt. Đã deploy lên production với traffic 10k+ users/day và chạy rất mượt. Loading time nhanh, SEO friendly.",
-            createdAt: "2025-07-05T09:45:00Z",
-            helpful: 42,
-            verified: true,
-            pros: ["Performance cao", "SEO friendly", "Scalable"],
-            cons: ["Docs có thể chi tiết hơn"],
-            purchaseDate: "2025-06-20",
-            version: "v2.0.0",
-          },
-        ];
-        setReviews(mockReviews);
-
-        // Mock features
-        const productFeatures: Feature[] = [
-          {
-            label: "Clean Code Architecture",
-            included: true,
-            icon: Code,
-            description:
-              "Mã nguồn được viết theo React best practices với SOLID principles",
-            category: "Code Quality",
-            premium: false,
-          },
-          {
-            label: "Responsive Design",
-            included: true,
-            icon: Smartphone,
-            description:
-              "Mobile-first approach, tương thích hoàn hảo trên mọi thiết bị",
-            category: "Design",
-            premium: false,
-          },
-          {
-            label: "Modern UI Components",
-            included: true,
-            icon: Palette,
-            description:
-              "50+ components được thiết kế theo Material Design & Human Interface",
-            category: "Components",
-            premium: false,
-          },
-          {
-            label: "TypeScript Support",
-            included: true,
-            icon: Shield,
-            description:
-              "Full TypeScript với strict mode, type definitions đầy đủ",
-            category: "Development",
-            premium: false,
-          },
-          {
-            label: "Dark Mode Built-in",
-            included: true,
-            icon: Eye,
-            description: "System-aware dark mode với smooth transitions",
-            category: "Features",
-            premium: false,
-          },
-          {
-            label: "SEO Optimized",
-            included: true,
-            icon: TrendingUp,
-            description:
-              "Meta tags, structured data, sitemap và performance optimization",
-            category: "SEO",
-            premium: false,
-          },
-        ];
-        setFeatures(productFeatures);
-
-        // Mock specifications
-        const mockSpecs: Specification[] = [
-          {
-            category: "Kỹ thuật",
-            specs: [
-              { label: "Framework", value: "React 18.2.0 / Next.js 14" },
-              { label: "TypeScript", value: "5.0+ Full Support" },
-              { label: "Styling", value: "Tailwind CSS 3.4" },
-              { label: "Components", value: "50+", unit: "components" },
-              { label: "Pages", value: "25+", unit: "pages" },
-              { label: "Bundle Size", value: "< 500", unit: "KB (gzipped)" },
-            ],
-          },
-          {
-            category: "Tương thích",
-            specs: [
-              { label: "Chrome", value: "90+" },
-              { label: "Firefox", value: "88+" },
-              { label: "Safari", value: "14+" },
-              { label: "Edge", value: "90+" },
-              { label: "Mobile iOS", value: "14+" },
-              { label: "Mobile Android", value: "10+" },
-            ],
-          },
-        ];
-        setSpecifications(mockSpecs);
-
-        // Mock FAQs
-        const mockFAQs: FAQ[] = [
-          {
-            question:
-              "Tôi có thể sử dụng sản phẩm này cho dự án thương mại không?",
-            answer:
-              "Có, hoàn toàn được! Tất cả sản phẩm của chúng tôi đều đi kèm với giấy phép thương mại (Commercial License) đầy đủ. Bạn có thể sử dụng cho các dự án cá nhân, thương mại, client projects, hoặc bán lại dưới dạng sản phẩm riêng mà không cần trả thêm phí.",
-            category: "Giấy phép",
-            helpful: 89,
-          },
-          {
-            question: "Tôi có nhận được cập nhật miễn phí không?",
-            answer:
-              "Có! Khi mua sản phẩm, bạn sẽ nhận được tất cả các bản cập nhật miễn phí trọn đời (lifetime updates). Chúng tôi thường xuyên cập nhật để tương thích với các phiên bản framework mới nhất.",
-            category: "Cập nhật",
-            helpful: 76,
-          },
-          {
-            question: "Có hỗ trợ kỹ thuật không?",
-            answer:
-              "Chúng tôi cung cấp hỗ trợ kỹ thuật chuyên nghiệp 24/7 qua email và chat. Đội ngũ developers có kinh nghiệm 5+ năm sẽ giúp bạn giải quyết mọi vấn đề.",
-            category: "Hỗ trợ",
-            helpful: 92,
-          },
-        ];
-        setFAQs(mockFAQs);
-
-        // Update product rating
-        const avgRating =
-          mockReviews.reduce((sum, review) => sum + review.rating, 0) /
-          mockReviews.length;
-        setProduct((prev) =>
-          prev
-            ? {
-                ...prev,
-                rating: parseFloat(avgRating.toFixed(1)),
-                reviewCount: mockReviews.length,
-              }
-            : null,
-        );
-
-        // Get related products
-        const related = await getRelatedProducts(data);
-        setRelatedProducts(related);
       } catch (error) {
-        console.error("Error fetching product:", error);
-        toast({
-          title: "❌ Lỗi tải dữ liệu",
-          description: "Không thể tải thông tin sản phẩm. Vui lòng thử lại.",
-          variant: "destructive",
-        });
       } finally {
         setIsLoading(false);
       }
@@ -1197,959 +969,808 @@ const ProductDetail: React.FC = () => {
     : 0;
 
   return (
-    <motion.div
-      initial={{ opacity: 0 }}
-      animate={{ opacity: 1 }}
-      exit={{ opacity: 0 }}
-      className={`min-h-screen bg-gradient-to-br ${softPinkTheme.pageBackground} relative`}
-    >
-      {/* Progress Bar */}
+    <>
+      {/* ✅ DYNAMIC SEO - THÊM ĐOẠN NÀY */}
+      <Helmet>
+        <title>{product?.title || "Đang tải..."} | Template Market</title>
+        <meta
+          name="description"
+          content={
+            product?.description?.substring(0, 160) ||
+            "Mô tả sản phẩm đang được tải..."
+          }
+        />
+        <meta
+          property="og:title"
+          content={product?.title || "Template Market"}
+        />
+        <meta
+          property="og:description"
+          content={
+            product?.description?.substring(0, 160) ||
+            "Khám phá template chuyên nghiệp"
+          }
+        />
+        <meta property="og:image" content={product?.image || ""} />
+        <meta property="og:type" content="product" />
+        <meta
+          property="og:price:amount"
+          content={String(product?.price || 0)}
+        />
+        <meta property="og:price:currency" content="VND" />
+
+        {/* Twitter Card */}
+        <meta name="twitter:card" content="summary_large_image" />
+        <meta
+          name="twitter:title"
+          content={product?.title || "Template Market"}
+        />
+        <meta
+          name="twitter:description"
+          content={product?.description?.substring(0, 160) || ""}
+        />
+        <meta name="twitter:image" content={product?.image || ""} />
+
+        {/* Additional SEO */}
+        <meta name="author" content={product?.author || "Template Market"} />
+        <meta name="keywords" content={product?.tags?.join(", ") || ""} />
+        <link rel="canonical" href={window.location.href} />
+      </Helmet>
       <motion.div
-        className={`fixed top-0 left-0 right-0 z-50 h-1 bg-gradient-to-r ${softPinkTheme.primaryGradient} origin-left`}
-        style={{ scaleX }}
-      />
+        initial={{ opacity: 0 }}
+        animate={{ opacity: 1 }}
+        exit={{ opacity: 0 }}
+        className={`min-h-screen bg-gradient-to-br ${softPinkTheme.pageBackground} relative`}
+      >
+        {/* Progress Bar */}
+        <motion.div
+          className={`fixed top-0 left-0 right-0 z-50 h-1 bg-gradient-to-r ${softPinkTheme.primaryGradient} origin-left`}
+          style={{ scaleX }}
+        />
 
-      {/* Floating background icons */}
-      <div className="fixed inset-0 pointer-events-none z-0">
-        {[
-          Heart,
-          Star,
-          Crown,
-          Gift,
-          Sparkles,
-          Award,
-          Diamond,
-          BookMarked,
-          ShoppingCart,
-          Smartphone,
-          Users,
-          Code,
-          Palette,
-          Shield,
-        ].map((Icon, idx) => (
-          <motion.div
-            key={idx}
-            className="absolute"
-            style={{
-              top: `${10 + Math.sin(idx) * 30}%`,
-              left: `${8 + Math.cos(idx) * 35}%`,
-              zIndex: 1,
-            }}
-            animate={{
-              y: [0, -12, 0],
-              opacity: [0.09, 0.17, 0.09],
-              scale: [1, 1.12, 1],
-            }}
-            transition={{
-              duration: 8 + idx,
-              repeat: Infinity,
-              delay: idx * 0.25,
-              ease: "easeInOut",
-            }}
-          >
-            <Icon className="w-8 h-8 text-pink-300/15" />
-          </motion.div>
-        ))}
-      </div>
-
-      {/* Main container */}
-      <div className="container relative z-10 px-4 py-16 lg:py-8 mx-auto max-w-7xl">
-        {/* Breadcrumb */}
-        <motion.nav
-          initial={{ opacity: 0, y: -16 }}
-          animate={{ opacity: 1, y: 0 }}
-          className="flex items-center text-xs text-gray-700 mb-7 gap-2"
-        >
-          <Button
-            variant="ghost"
-            size="sm"
-            className="group"
-            onClick={() => navigate(-1)}
-          >
-            <ArrowLeft className="w-3 h-3 mr-1 transition-transform group-hover:-translate-x-1" />
-            Quay lại
-          </Button>
-          <span>/</span>
-          <span
-            className="capitalize cursor-pointer hover:text-pink-500"
-            onClick={() => navigate("/templates")}
-          >
-            {product.category === "template" ? "Templates" : "E-books"}
-          </span>
-          <span>/</span>
-          <span className="capitalize truncate max-w-xs font-semibold text-pink-800">
-            {product.title}
-          </span>
-        </motion.nav>
-
-        {/* Content layout: image - info */}
-        <div className="grid gap-8 mb-12 lg:grid-cols-2">
-          {/* Image gallery section */}
-          <motion.div
-            initial={{ opacity: 0, x: -50 }}
-            animate={{ opacity: 1, x: 0 }}
-            transition={{ duration: 0.6 }}
-            className="space-y-6"
-          >
-            {/* Main Image */}
-            <div
-              className={`relative group rounded-2xl overflow-hidden border border-pink-200/50 ${softPinkTheme.softGlow} bg-gradient-to-tr ${softPinkTheme.neoCard} aspect-[4/3]`}
+        {/* Floating background icons */}
+        <div className="fixed inset-0 pointer-events-none z-0">
+          {[
+            Heart,
+            Star,
+            Crown,
+            Gift,
+            Sparkles,
+            Award,
+            Diamond,
+            BookMarked,
+            ShoppingCart,
+            Smartphone,
+            Users,
+            Code,
+            Palette,
+            Shield,
+          ].map((Icon, idx) => (
+            <motion.div
+              key={idx}
+              className="absolute"
+              style={{
+                top: `${10 + Math.sin(idx) * 30}%`,
+                left: `${8 + Math.cos(idx) * 35}%`,
+                zIndex: 1,
+              }}
+              animate={{
+                y: [0, -12, 0],
+                opacity: [0.09, 0.17, 0.09],
+                scale: [1, 1.12, 1],
+              }}
+              transition={{
+                duration: 8 + idx,
+                repeat: Infinity,
+                delay: idx * 0.25,
+                ease: "easeInOut",
+              }}
             >
-              <motion.img
-                key={selectedImage}
-                initial={{ opacity: 0, scale: 1.1 }}
-                animate={{ opacity: 1, scale: 1 }}
-                transition={{ duration: 0.5 }}
-                src={
-                  product.images[selectedImage] ||
-                  "https://via.placeholder.com/800x600?text=No+Image"
-                }
-                alt={product.title}
-                className="object-cover w-full h-full transition duration-300 group-hover:scale-105 cursor-zoom-in"
-                onClick={() => {
-                  setModalImageIndex(selectedImage);
-                  setIsImageModalOpen(true);
-                }}
-                onError={(e) => {
-                  (e.target as HTMLImageElement).src =
-                    "https://via.placeholder.com/800x600?text=Image+Not+Available";
-                }}
-              />
-
-              {/* Badges */}
-              <div className="absolute top-4 left-4 flex flex-col gap-2 z-10">
-                {discountPercentage > 0 && (
-                  <Badge
-                    className={`bg-gradient-to-r ${softPinkTheme.primaryGradient} text-white shadow px-2 py-1 gap-1 text-xs`}
-                  >
-                    <Zap className="w-3 h-3" /> -{discountPercentage}%
-                  </Badge>
-                )}
-                {product.isFeatured && (
-                  <Badge className="bg-yellow-400 text-white shadow px-2 py-1 gap-1 text-xs">
-                    <Crown className="w-3 h-3" /> Nổi bật
-                  </Badge>
-                )}
-                {stockCount < 10 && (
-                  <Badge className="bg-gradient-to-r from-orange-500 to-red-500 text-white px-2 py-1 text-xs shadow gap-1">
-                    <Flame className="w-3 h-3" /> Sắp hết hàng
-                  </Badge>
-                )}
-              </div>
-
-              {/* Quick action buttons */}
-              <div className="absolute top-4 right-4 flex gap-2 opacity-0 group-hover:opacity-100 transition-all duration-300">
-                <TooltipProvider>
-                  <Tooltip>
-                    <TooltipTrigger asChild>
-                      <Button
-                        size="sm"
-                        variant="secondary"
-                        className={`w-10 h-10 p-0 rounded-full bg-white/90 backdrop-blur-sm hover:bg-white shadow-lg`}
-                        onClick={() => {
-                          setModalImageIndex(selectedImage);
-                          setIsImageModalOpen(true);
-                        }}
-                      >
-                        <Eye className="w-4 h-4" />
-                      </Button>
-                    </TooltipTrigger>
-                    <TooltipContent>
-                      <p>Xem full size</p>
-                    </TooltipContent>
-                  </Tooltip>
-                </TooltipProvider>
-
-                <TooltipProvider>
-                  <Tooltip>
-                    <TooltipTrigger asChild>
-                      <Button
-                        size="sm"
-                        variant="secondary"
-                        className={`w-10 h-10 p-0 rounded-full bg-white/90 backdrop-blur-sm hover:bg-white shadow-lg ${isWishlisted ? "text-red-500" : ""}`}
-                        onClick={toggleWishlist}
-                      >
-                        <Heart
-                          className={`w-4 h-4 ${isWishlisted ? "fill-current" : ""}`}
-                        />
-                      </Button>
-                    </TooltipTrigger>
-                    <TooltipContent>
-                      <p>
-                        {isWishlisted
-                          ? "Xóa khỏi yêu thích"
-                          : "Thêm vào yêu thích"}
-                      </p>
-                    </TooltipContent>
-                  </Tooltip>
-                </TooltipProvider>
-              </div>
-            </div>
-
-            {/* Thumbnails */}
-            {product.images && product.images.length > 1 && (
-              <div className="grid grid-cols-4 gap-3">
-                {product.images.map((img, idx) => (
-                  <button
-                    key={idx}
-                    onClick={() => setSelectedImage(idx)}
-                    className={`rounded-lg border-2 aspect-square transition hover:border-pink-400 hover:shadow-md overflow-hidden ${
-                      selectedImage === idx
-                        ? "border-pink-500 ring-2 ring-pink-200 shadow-lg"
-                        : "border-pink-200/50"
-                    }`}
-                  >
-                    <img
-                      src={img}
-                      alt={`Thumb ${idx + 1}`}
-                      className="object-cover w-full h-full"
-                      onError={(e) => {
-                        (e.target as HTMLImageElement).src =
-                          "https://via.placeholder.com/100x100?text=No+Image";
-                      }}
-                    />
-                  </button>
-                ))}
-              </div>
-            )}
-
-            {/* Features card */}
-            <Card
-              className={`bg-gradient-to-br ${softPinkTheme.neoCard} border-0 ${softPinkTheme.softGlow}`}
-            >
-              <CardHeader className="pb-3">
-                <CardTitle className="flex items-center text-lg font-bold">
-                  <Sparkles className="w-5 h-5 mr-2 text-pink-600" />
-                  Tính năng nổi bật
-                </CardTitle>
-              </CardHeader>
-              <CardContent>
-                <div className="grid grid-cols-1 gap-3">
-                  {features.slice(0, 6).map((f, idx) => (
-                    <div
-                      key={idx}
-                      className={`flex items-center p-3 rounded-lg text-sm gap-3 transition-all duration-300 border ${
-                        f.included
-                          ? "bg-green-50 text-green-800 border-green-200"
-                          : "bg-gray-50 text-gray-600 border-gray-200"
-                      }`}
-                    >
-                      <span
-                        className={`w-6 h-6 rounded-full flex items-center justify-center flex-shrink-0 ${
-                          f.included ? "bg-green-500" : "bg-gray-400"
-                        }`}
-                      >
-                        {f.included ? (
-                          <Check className="w-3 h-3 text-white" />
-                        ) : (
-                          <X className="w-3 h-3 text-white" />
-                        )}
-                      </span>
-                      <f.icon
-                        className={`w-5 h-5 flex-shrink-0 ${
-                          f.included ? "text-green-600" : "text-gray-400"
-                        }`}
-                      />
-                      <div className="flex-1">
-                        <div className="font-medium">{f.label}</div>
-                        {f.description && (
-                          <div className="text-xs opacity-70 mt-1">
-                            {f.description}
-                          </div>
-                        )}
-                      </div>
-                      {f.premium && (
-                        <Badge variant="secondary" className="text-xs">
-                          Pro
-                        </Badge>
-                      )}
-                    </div>
-                  ))}
-                </div>
-              </CardContent>
-            </Card>
-          </motion.div>
-
-          {/* Info Section */}
-          <motion.div
-            initial={{ opacity: 0, x: 50 }}
-            animate={{ opacity: 1, x: 0 }}
-            transition={{ duration: 0.6, delay: 0.2 }}
-            className="space-y-6"
-          >
-            {/* Header */}
-            <div>
-              <div className="flex items-start justify-between mb-4">
-                <div className="flex-1">
-                  <h1 className="text-3xl font-bold text-gray-900 mb-2">
-                    {product.title}
-                  </h1>
-                  <div className="flex items-center gap-4">
-                    <span className="text-base text-gray-600">
-                      Bởi{" "}
-                      <span className="font-semibold text-pink-600">
-                        {product.author}
-                      </span>
-                    </span>
-                    <Badge variant="outline" className="text-xs">
-                      <CheckCircle2 className="w-3 h-3 mr-1" /> Đã xác minh
-                    </Badge>
-                  </div>
-                </div>
-
-                <div className="flex space-x-2">
-                  <Button
-                    variant="ghost"
-                    size="sm"
-                    onClick={toggleWishlist}
-                    className={`rounded-full w-10 h-10 p-0 ${
-                      isWishlisted
-                        ? "text-red-500 bg-red-50 hover:bg-red-100"
-                        : "hover:text-red-500"
-                    }`}
-                  >
-                    <Heart
-                      className={`h-5 w-5 ${isWishlisted ? "fill-current" : ""}`}
-                    />
-                  </Button>
-                  <Button
-                    variant="ghost"
-                    size="sm"
-                    onClick={() => handleShare()}
-                    className="rounded-full w-10 h-10 p-0"
-                  >
-                    <Share2 className="w-5 h-5" />
-                  </Button>
-                </div>
-              </div>
-
-              {/* Ratings */}
-              <div className="flex items-center mb-6 gap-4 flex-wrap">
-                <div className="flex items-center">
-                  {[...Array(5)].map((_, i) => (
-                    <Star
-                      key={i}
-                      className={`w-5 h-5 ${
-                        i < Math.floor(product.rating)
-                          ? "text-yellow-400 fill-yellow-400"
-                          : "text-gray-300"
-                      }`}
-                    />
-                  ))}
-                  <span className="font-bold text-lg ml-2">
-                    {product.rating}
-                  </span>
-                  <span className="text-gray-600 text-sm ml-1">
-                    ({reviews.length} đánh giá)
-                  </span>
-                </div>
-
-                <Badge
-                  className={`flex items-center gap-1 px-3 py-1 text-sm bg-gradient-to-r ${softPinkTheme.secondaryGradient} text-white`}
-                >
-                  {product.category === "template" ? (
-                    <>
-                      <Code className="w-4 h-4" />
-                      <span>Template</span>
-                    </>
-                  ) : (
-                    <>
-                      <BookOpen className="w-4 h-4" />
-                      <span>E-book</span>
-                    </>
-                  )}
-                </Badge>
-
-                <Badge variant="outline" className="text-xs">
-                  <TrendingUp className="w-3 h-3 mr-1" /> Bán chạy #1
-                </Badge>
-              </div>
-
-              {/* Stock Alert */}
-              <StockAlert stockCount={stockCount} />
-
-              {/* Description */}
-              <ExpandableDescription
-                text={product.description}
-                maxLength={400}
-              />
-            </div>
-
-            {/* Price card */}
-            <Card
-              className={`border-0 ${softPinkTheme.softGlow} bg-gradient-to-r ${softPinkTheme.glassCard} backdrop-blur-xl`}
-            >
-              <CardContent className="p-6">
-                <div className="flex items-center justify-between mb-4">
-                  <span
-                    className={`text-4xl lg:text-5xl font-bold bg-gradient-to-r ${softPinkTheme.heroText} bg-clip-text text-transparent`}
-                  >
-                    {formatPrice(product.price)}
-                  </span>
-                  {product.originalPrice && (
-                    <div className="text-center">
-                      <span className="text-xl line-through text-gray-500 block">
-                        {formatPrice(product.originalPrice)}
-                      </span>
-                      <Badge
-                        className={`bg-gradient-to-r ${softPinkTheme.primaryGradient} text-white text-xs font-bold mt-1 gap-1`}
-                      >
-                        <Flame className="w-3 h-3" /> Giảm {discountPercentage}%
-                      </Badge>
-                    </div>
-                  )}
-                </div>
-                {product.originalPrice && (
-                  <div className="flex items-center text-green-600 mb-4 gap-1">
-                    <Gift className="w-4 h-4" />
-                    <span className="font-medium text-sm">
-                      Bạn tiết kiệm{" "}
-                      {formatPrice(product.originalPrice - product.price)}!
-                    </span>
-                  </div>
-                )}
-                {/* Payment options */}
-                <div className="flex items-center gap-3 text-xs text-gray-600">
-                  <span className="flex items-center">
-                    <CreditCard className="w-3 h-3 mr-1" />
-                    Thẻ tín dụng
-                  </span>
-                  <span className="flex items-center">
-                    <Wallet className="w-3 h-3 mr-1" />
-                    Ví điện tử
-                  </span>
-                  <span className="flex items-center">
-                    <Truck className="w-3 h-3 mr-1" />
-                    COD
-                  </span>
-                </div>
-              </CardContent>
-            </Card>
-
-            {/* Product details */}
-            <Card
-              className={`border-0 ${softPinkTheme.softGlow} bg-gradient-to-r ${softPinkTheme.neoCard}`}
-            >
-              <CardHeader className="pb-3">
-                <CardTitle className="text-lg font-bold">
-                  Thông tin chi tiết
-                </CardTitle>
-              </CardHeader>
-              <CardContent>
-                <div className="grid grid-cols-2 gap-4">
-                  <div className="flex items-center gap-3">
-                    <User className="w-5 h-5 text-pink-600" />
-                    <span className="text-sm">
-                      Tác giả: <b>{product.author}</b>
-                    </span>
-                  </div>
-                  <div className="flex items-center gap-3">
-                    <Calendar className="w-5 h-5 text-green-600" />
-                    <span className="text-sm">
-                      Ngày tạo:{" "}
-                      <b>
-                        {new Date(product.createdAt).toLocaleDateString(
-                          "vi-VN",
-                        )}
-                      </b>
-                    </span>
-                  </div>
-                  <div className="flex items-center gap-3">
-                    <Star className="w-5 h-5 text-yellow-600" />
-                    <span className="text-sm">
-                      Đánh giá: <b>{reviews.length}</b> đánh giá
-                    </span>
-                  </div>
-                  <div className="flex items-center gap-3">
-                    <Download className="w-5 h-5 text-purple-600" />
-                    <span className="text-sm">
-                      Lượt tải: <b>2,847</b>
-                    </span>
-                  </div>
-                  <div className="flex items-center gap-3">
-                    <Package className="w-5 h-5 text-blue-600" />
-                    <span className="text-sm">
-                      Kho hàng:{" "}
-                      <b>{stockCount > 0 ? stockCount : "Hết hàng"}</b>
-                    </span>
-                  </div>
-                  <div className="flex items-center gap-3">
-                    <Eye className="w-5 h-5 text-indigo-600" />
-                    <span className="text-sm">
-                      Lượt xem: <b>12,483</b>
-                    </span>
-                  </div>
-                </div>
-              </CardContent>
-            </Card>
-
-            {/* Actions: Quantity + Buy */}
-            <div className="space-y-4">
-              <div className="flex items-center gap-4">
-                <span className="text-sm font-medium">Số lượng:</span>
-                <div className="flex items-center border border-pink-200 rounded-lg bg-white">
-                  <Button
-                    variant="ghost"
-                    size="sm"
-                    onClick={() => setQuantity(Math.max(1, quantity - 1))}
-                    disabled={quantity <= 1}
-                    className="rounded-r-none"
-                  >
-                    <Minus className="w-4 h-4" />
-                  </Button>
-                  <span className="px-4 py-2 min-w-[3rem] text-center border-x border-pink-200">
-                    {quantity}
-                  </span>
-                  <Button
-                    variant="ghost"
-                    size="sm"
-                    onClick={() => setQuantity(quantity + 1)}
-                    className="rounded-l-none"
-                  >
-                    <Plus className="w-4 h-4" />
-                  </Button>
-                </div>
-              </div>
-
-              <div className="flex gap-3">
-                <Button
-                  onClick={handleAddToCart}
-                  className={`flex-1 text-base px-6 py-3 bg-gradient-to-r ${softPinkTheme.primaryGradient} hover:scale-105 ${softPinkTheme.glow} shadow-lg transition-all rounded-xl`}
-                  size="lg"
-                  disabled={isAddingToCart || stockCount <= 0}
-                >
-                  <ShoppingCart className="w-5 h-5 mr-2" />
-                  {isAddingToCart
-                    ? "Đang thêm..."
-                    : stockCount <= 0
-                      ? "Hết hàng"
-                      : "Thêm vào giỏ hàng"}
-                </Button>
-
-                <Button
-                  variant="outline"
-                  size="lg"
-                  className="px-6 py-3 border-2 border-pink-200 hover:bg-pink-50 rounded-xl"
-                  onClick={() => setIsReviewModalOpen(true)}
-                >
-                  <MessageCircle className="w-5 h-5 mr-2" />
-                  Đánh giá
-                </Button>
-              </div>
-            </div>
-          </motion.div>
+              <Icon className="w-8 h-8 text-pink-300/15" />
+            </motion.div>
+          ))}
         </div>
 
-        {/* Tabs Section */}
-        <motion.div
-          initial={{ opacity: 0, y: 50 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.6, delay: 0.4 }}
-          className="mb-12"
-        >
-          <Card
-            className={`border-0 ${softPinkTheme.softGlow} bg-gradient-to-br ${softPinkTheme.neoCard} backdrop-blur-xl`}
+        {/* Main container */}
+        <div className="container relative z-10 px-4 py-16 lg:py-8 mx-auto max-w-7xl">
+          {/* Breadcrumb */}
+          <motion.nav
+            initial={{ opacity: 0, y: -16 }}
+            animate={{ opacity: 1, y: 0 }}
+            className="flex items-center text-xs text-gray-700 mb-7 gap-2"
           >
-            <Tabs
-              value={activeTab}
-              onValueChange={setActiveTab}
-              className="w-full"
+            <Button
+              variant="ghost"
+              size="sm"
+              className="group"
+              onClick={() => navigate(-1)}
             >
-              <div className="sticky top-0 z-10 bg-white/95 backdrop-blur-sm">
-                <TabsList className="grid w-full grid-cols-4 gap-2 p-2 bg-transparent">
-                  <TabsTrigger
-                    value="overview"
-                    className={`rounded-xl ${activeTab === "overview" ? `bg-gradient-to-r ${softPinkTheme.primaryGradient} text-white` : "hover:bg-pink-50"}`}
-                  >
-                    <Eye className="w-4 h-4 mr-2" />
-                    Tổng quan
-                  </TabsTrigger>
-                  <TabsTrigger
-                    value="reviews"
-                    className={`rounded-xl ${activeTab === "reviews" ? `bg-gradient-to-r ${softPinkTheme.primaryGradient} text-white` : "hover:bg-pink-50"}`}
-                  >
-                    <Star className="w-4 h-4 mr-2" />
-                    Đánh giá ({reviews.length})
-                  </TabsTrigger>
-                  <TabsTrigger
-                    value="specs"
-                    className={`rounded-xl ${activeTab === "specs" ? `bg-gradient-to-r ${softPinkTheme.primaryGradient} text-white` : "hover:bg-pink-50"}`}
-                  >
-                    <FileText className="w-4 h-4 mr-2" />
-                    Thông số
-                  </TabsTrigger>
-                  <TabsTrigger
-                    value="faq"
-                    className={`rounded-xl ${activeTab === "faq" ? `bg-gradient-to-r ${softPinkTheme.primaryGradient} text-white` : "hover:bg-pink-50"}`}
-                  >
-                    <MessageCircle className="w-4 h-4 mr-2" />
-                    FAQ
-                  </TabsTrigger>
-                </TabsList>
+              <ArrowLeft className="w-3 h-3 mr-1 transition-transform group-hover:-translate-x-1" />
+              Quay lại
+            </Button>
+            <span>/</span>
+            <span
+              className="capitalize cursor-pointer hover:text-pink-500"
+              onClick={() => navigate("/templates")}
+            >
+              {product.category === "template" ? "Templates" : "E-books"}
+            </span>
+            <span>/</span>
+            <span className="capitalize truncate max-w-xs font-semibold text-pink-800">
+              {product.title}
+            </span>
+          </motion.nav>
+
+          {/* Content layout: image - info */}
+          <div className="grid gap-8 mb-12 lg:grid-cols-2">
+            {/* Image gallery section */}
+            <motion.div
+              initial={{ opacity: 0, x: -50 }}
+              animate={{ opacity: 1, x: 0 }}
+              transition={{ duration: 0.6 }}
+              className="space-y-6"
+            >
+              {/* Main Image */}
+              <div
+                className={`relative group rounded-2xl overflow-hidden border border-pink-200/50 ${softPinkTheme.softGlow} bg-gradient-to-tr ${softPinkTheme.neoCard} aspect-[4/3]`}
+              >
+                <motion.img
+                  key={selectedImage}
+                  initial={{ opacity: 0, scale: 1.1 }}
+                  animate={{ opacity: 1, scale: 1 }}
+                  transition={{ duration: 0.5 }}
+                  src={
+                    product.images[selectedImage] ||
+                    "https://via.placeholder.com/800x600?text=No+Image"
+                  }
+                  alt={product.title}
+                  className="object-cover w-full h-full transition duration-300 group-hover:scale-105 cursor-zoom-in"
+                  onClick={() => {
+                    setModalImageIndex(selectedImage);
+                    setIsImageModalOpen(true);
+                  }}
+                  onError={(e) => {
+                    (e.target as HTMLImageElement).src =
+                      "https://via.placeholder.com/800x600?text=Image+Not+Available";
+                  }}
+                />
+
+                {/* Badges */}
+                <div className="absolute top-4 left-4 flex flex-col gap-2 z-10">
+                  {discountPercentage > 0 && (
+                    <Badge
+                      className={`bg-gradient-to-r ${softPinkTheme.primaryGradient} text-white shadow px-2 py-1 gap-1 text-xs`}
+                    >
+                      <Zap className="w-3 h-3" /> -{discountPercentage}%
+                    </Badge>
+                  )}
+                  {product.isFeatured && (
+                    <Badge className="bg-yellow-400 text-white shadow px-2 py-1 gap-1 text-xs">
+                      <Crown className="w-3 h-3" /> Nổi bật
+                    </Badge>
+                  )}
+                  {stockCount < 10 && (
+                    <Badge className="bg-gradient-to-r from-orange-500 to-red-500 text-white px-2 py-1 text-xs shadow gap-1">
+                      <Flame className="w-3 h-3" /> Sắp hết hàng
+                    </Badge>
+                  )}
+                </div>
+
+                {/* Quick action buttons */}
+                <div className="absolute top-4 right-4 flex gap-2 opacity-0 group-hover:opacity-100 transition-all duration-300">
+                  <TooltipProvider>
+                    <Tooltip>
+                      <TooltipTrigger asChild>
+                        <Button
+                          size="sm"
+                          variant="secondary"
+                          className={`w-10 h-10 p-0 rounded-full bg-white/90 backdrop-blur-sm hover:bg-white shadow-lg`}
+                          onClick={() => {
+                            setModalImageIndex(selectedImage);
+                            setIsImageModalOpen(true);
+                          }}
+                        >
+                          <Eye className="w-4 h-4" />
+                        </Button>
+                      </TooltipTrigger>
+                      <TooltipContent>
+                        <p>Xem full size</p>
+                      </TooltipContent>
+                    </Tooltip>
+                  </TooltipProvider>
+
+                  <TooltipProvider>
+                    <Tooltip>
+                      <TooltipTrigger asChild>
+                        <Button
+                          size="sm"
+                          variant="secondary"
+                          className={`w-10 h-10 p-0 rounded-full bg-white/90 backdrop-blur-sm hover:bg-white shadow-lg ${isInWishlist(product?.id || "") ? "text-red-500" : ""}`}
+                          onClick={toggleWishlist}
+                        >
+                          <Heart
+                            className={`w-4 h-4 ${isInWishlist(product?.id || "") ? "fill-current" : ""}`}
+                          />
+                        </Button>
+                      </TooltipTrigger>
+                      <TooltipContent>
+                        <p>
+                          {isInWishlist
+                            ? "Xóa khỏi yêu thích"
+                            : "Thêm vào yêu thích"}
+                        </p>
+                      </TooltipContent>
+                    </Tooltip>
+                  </TooltipProvider>
+                </div>
               </div>
 
-              <TabsContent value="overview" className="p-6 space-y-6">
-                <div>
-                  <h3 className="text-xl font-bold mb-4">Mô tả chi tiết</h3>
-                  <div className="prose max-w-none">
-                    <FormattedDescription
-                      text={product.description}
-                      className="text-gray-700 leading-relaxed"
-                    />
-                  </div>
-                </div>
-
-                {/* Tags */}
-                <div>
-                  <h3 className="text-xl font-bold mb-4">Tags</h3>
-                  <div className="flex flex-wrap gap-2">
-                    {product.tags.map((tag, index) => (
-                      <Badge
-                        key={index}
-                        variant="outline"
-                        className="cursor-pointer hover:bg-pink-50 border-pink-200"
-                      >
-                        <Bookmark className="w-3 h-3 mr-1" />
-                        {tag}
-                      </Badge>
-                    ))}
-                  </div>
-                </div>
-              </TabsContent>
-
-              <TabsContent value="reviews" className="p-6">
-                <div className="space-y-6">
-                  <div className="flex items-center justify-between">
-                    <h3 className="text-xl font-bold">
-                      Đánh giá từ khách hàng ({reviews.length})
-                    </h3>
-                    <Button
-                      onClick={() => setIsReviewModalOpen(true)}
-                      className={`bg-gradient-to-r ${softPinkTheme.secondaryGradient} hover:scale-105 transition-all rounded-xl`}
+              {/* Thumbnails */}
+              {product.images && product.images.length > 1 && (
+                <div className="grid grid-cols-4 gap-3">
+                  {product.images.map((img, idx) => (
+                    <button
+                      key={idx}
+                      onClick={() => setSelectedImage(idx)}
+                      className={`rounded-lg border-2 aspect-square transition hover:border-pink-400 hover:shadow-md overflow-hidden ${
+                        selectedImage === idx
+                          ? "border-pink-500 ring-2 ring-pink-200 shadow-lg"
+                          : "border-pink-200/50"
+                      }`}
                     >
-                      <MessageCircle className="w-4 h-4 mr-2" />
-                      Viết đánh giá
-                    </Button>
-                  </div>
-
-                  {/* Rating summary */}
-                  <Card className="p-6 bg-gradient-to-r from-pink-50 to-rose-50">
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                      <div className="text-center">
-                        <div
-                          className={`text-5xl font-bold bg-gradient-to-r ${softPinkTheme.heroText} bg-clip-text text-transparent mb-2`}
-                        >
-                          {product.rating}
-                        </div>
-                        <div className="flex justify-center mb-2">
-                          {[...Array(5)].map((_, i) => (
-                            <Star
-                              key={i}
-                              className={`w-5 h-5 ${
-                                i < Math.floor(product.rating)
-                                  ? "text-yellow-400 fill-yellow-400"
-                                  : "text-gray-300"
-                              }`}
-                            />
-                          ))}
-                        </div>
-                        <p className="text-gray-600">
-                          {reviews.length} đánh giá
-                        </p>
-                      </div>
-
-                      <div className="space-y-2">
-                        {[5, 4, 3, 2, 1].map((rating) => {
-                          const count = reviews.filter(
-                            (r) => r.rating === rating,
-                          ).length;
-                          const percentage =
-                            reviews.length > 0
-                              ? (count / reviews.length) * 100
-                              : 0;
-
-                          return (
-                            <div
-                              key={rating}
-                              className="flex items-center gap-2"
-                            >
-                              <span className="text-sm w-8">{rating} ⭐</span>
-                              <div className="flex-1 bg-gray-200 rounded-full h-2">
-                                <div
-                                  className={`h-2 bg-gradient-to-r ${softPinkTheme.primaryGradient} rounded-full transition-all duration-1000`}
-                                  style={{ width: `${percentage}%` }}
-                                />
-                              </div>
-                              <span className="text-sm text-gray-600 w-8">
-                                {count}
-                              </span>
-                            </div>
-                          );
-                        })}
-                      </div>
-                    </div>
-                  </Card>
-
-                  {/* Reviews list */}
-                  <div className="space-y-6">
-                    {reviews.map((review) => (
-                      <Card key={review.id} className="p-6">
-                        <div className="flex items-start gap-4">
-                          <Avatar>
-                            <AvatarImage src={review.userAvatar} />
-                            <AvatarFallback>
-                              {review.userName.charAt(0)}
-                            </AvatarFallback>
-                          </Avatar>
-
-                          <div className="flex-1">
-                            <div className="flex items-center justify-between mb-2">
-                              <div>
-                                <div className="flex items-center gap-2">
-                                  <h4 className="font-semibold">
-                                    {review.userName}
-                                  </h4>
-                                  {review.verified && (
-                                    <Badge
-                                      variant="secondary"
-                                      className="text-xs"
-                                    >
-                                      <CheckCircle2 className="w-3 h-3 mr-1" />
-                                      Đã xác minh
-                                    </Badge>
-                                  )}
-                                </div>
-                                <div className="flex items-center gap-2 mt-1">
-                                  <div className="flex">
-                                    {[...Array(5)].map((_, i) => (
-                                      <Star
-                                        key={i}
-                                        className={`w-4 h-4 ${
-                                          i < review.rating
-                                            ? "text-yellow-400 fill-yellow-400"
-                                            : "text-gray-300"
-                                        }`}
-                                      />
-                                    ))}
-                                  </div>
-                                  <span className="text-sm text-gray-500">
-                                    {new Date(
-                                      review.createdAt,
-                                    ).toLocaleDateString("vi-VN")}
-                                  </span>
-                                </div>
-                              </div>
-                            </div>
-
-                            <p className="text-gray-700 leading-relaxed mb-4">
-                              {review.comment}
-                            </p>
-
-                            {/* Pros/Cons */}
-                            {(review.pros || review.cons) && (
-                              <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
-                                {review.pros && review.pros.length > 0 && (
-                                  <div>
-                                    <h5 className="font-medium text-green-600 mb-2 flex items-center">
-                                      <ThumbsUp className="w-4 h-4 mr-1" />
-                                      Ưu điểm
-                                    </h5>
-                                    <ul className="space-y-1">
-                                      {review.pros.map((pro, index) => (
-                                        <li
-                                          key={index}
-                                          className="text-sm text-gray-600 flex items-center"
-                                        >
-                                          <Check className="w-3 h-3 text-green-500 mr-2 flex-shrink-0" />
-                                          {pro}
-                                        </li>
-                                      ))}
-                                    </ul>
-                                  </div>
-                                )}
-
-                                {review.cons && review.cons.length > 0 && (
-                                  <div>
-                                    <h5 className="font-medium text-red-600 mb-2 flex items-center">
-                                      <X className="w-4 h-4 mr-1" />
-                                      Nhược điểm
-                                    </h5>
-                                    <ul className="space-y-1">
-                                      {review.cons.map((con, index) => (
-                                        <li
-                                          key={index}
-                                          className="text-sm text-gray-600 flex items-center"
-                                        >
-                                          <Minus className="w-3 h-3 text-red-500 mr-2 flex-shrink-0" />
-                                          {con}
-                                        </li>
-                                      ))}
-                                    </ul>
-                                  </div>
-                                )}
-                              </div>
-                            )}
-
-                            <div className="flex items-center gap-4 text-sm text-gray-500">
-                              <Button
-                                variant="ghost"
-                                size="sm"
-                                className="h-auto p-0 hover:text-pink-600"
-                              >
-                                <ThumbsUp className="w-4 h-4 mr-1" />
-                                Hữu ích ({review.helpful})
-                              </Button>
-                              {review.purchaseDate && (
-                                <span className="flex items-center">
-                                  <Calendar className="w-4 h-4 mr-1" />
-                                  Mua ngày{" "}
-                                  {new Date(
-                                    review.purchaseDate,
-                                  ).toLocaleDateString("vi-VN")}
-                                </span>
-                              )}
-                              {review.version && (
-                                <span className="flex items-center">
-                                  <Code className="w-4 h-4 mr-1" />
-                                  {review.version}
-                                </span>
-                              )}
-                            </div>
-                          </div>
-                        </div>
-                      </Card>
-                    ))}
-                  </div>
-                </div>
-              </TabsContent>
-
-              <TabsContent value="specs" className="p-6">
-                <div className="space-y-6">
-                  <h3 className="text-xl font-bold">Thông số kỹ thuật</h3>
-
-                  {specifications.map((spec, index) => (
-                    <Card key={index} className="p-6">
-                      <h4 className="font-semibold mb-4 text-lg">
-                        {spec.category}
-                      </h4>
-                      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                        {spec.specs.map((item, idx) => (
-                          <div
-                            key={idx}
-                            className="flex justify-between items-center py-2 border-b border-gray-100 last:border-b-0"
-                          >
-                            <span className="font-medium text-gray-700">
-                              {item.label}
-                            </span>
-                            <span className="font-semibold text-gray-900">
-                              {item.value}{" "}
-                              {item.unit && (
-                                <span className="text-gray-500">
-                                  {item.unit}
-                                </span>
-                              )}
-                            </span>
-                          </div>
-                        ))}
-                      </div>
-                    </Card>
+                      <img
+                        src={img}
+                        alt={`Thumb ${idx + 1}`}
+                        className="object-cover w-full h-full"
+                        onError={(e) => {
+                          (e.target as HTMLImageElement).src =
+                            "https://via.placeholder.com/100x100?text=No+Image";
+                        }}
+                      />
+                    </button>
                   ))}
                 </div>
-              </TabsContent>
+              )}
 
-              <TabsContent value="faq" className="p-6">
-                <div className="space-y-6">
-                  <h3 className="text-xl font-bold">Câu hỏi thường gặp</h3>
-
-                  <Accordion type="single" collapsible className="space-y-4">
-                    {faqs.map((faq, index) => (
-                      <AccordionItem
-                        key={index}
-                        value={`item-${index}`}
-                        className="border border-pink-200 rounded-xl px-4 data-[state=open]:bg-pink-50/50"
+              {/* Features card */}
+              <Card
+                className={`bg-gradient-to-br ${softPinkTheme.neoCard} border-0 ${softPinkTheme.softGlow}`}
+              >
+                <CardHeader className="pb-3">
+                  <CardTitle className="flex items-center text-lg font-bold">
+                    <Sparkles className="w-5 h-5 mr-2 text-pink-600" />
+                    Tính năng nổi bật
+                  </CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <div className="grid grid-cols-1 gap-3">
+                    {features.slice(0, 6).map((f, idx) => (
+                      <div
+                        key={idx}
+                        className={`flex items-center p-3 rounded-lg text-sm gap-3 transition-all duration-300 border ${
+                          f.included
+                            ? "bg-green-50 text-green-800 border-green-200"
+                            : "bg-gray-50 text-gray-600 border-gray-200"
+                        }`}
                       >
-                        <AccordionTrigger className="hover:no-underline py-4">
-                          <div className="flex items-center gap-3 text-left">
-                            <Badge variant="outline" className="text-xs">
-                              {faq.category}
-                            </Badge>
-                            <span className="font-medium">{faq.question}</span>
-                          </div>
-                        </AccordionTrigger>
-                        <AccordionContent className="pb-4">
-                          <div className="space-y-3">
-                            <p className="text-gray-700 leading-relaxed">
-                              {faq.answer}
-                            </p>
-                            {faq.helpful && (
-                              <div className="flex items-center gap-2 text-sm text-gray-500">
-                                <ThumbsUp className="w-4 h-4" />
-                                <span>{faq.helpful} người thấy hữu ích</span>
-                              </div>
-                            )}
-                          </div>
-                        </AccordionContent>
-                      </AccordionItem>
+                        <span
+                          className={`w-6 h-6 rounded-full flex items-center justify-center flex-shrink-0 ${
+                            f.included ? "bg-green-500" : "bg-gray-400"
+                          }`}
+                        >
+                          {f.included ? (
+                            <Check className="w-3 h-3 text-white" />
+                          ) : (
+                            <X className="w-3 h-3 text-white" />
+                          )}
+                        </span>
+                        <f.icon
+                          className={`w-5 h-5 flex-shrink-0 ${
+                            f.included ? "text-green-600" : "text-gray-400"
+                          }`}
+                        />
+                        <div className="flex-1">
+                          <div className="font-medium">{f.label}</div>
+                          {f.description && (
+                            <div className="text-xs opacity-70 mt-1">
+                              {f.description}
+                            </div>
+                          )}
+                        </div>
+                        {f.premium && (
+                          <Badge variant="secondary" className="text-xs">
+                            Pro
+                          </Badge>
+                        )}
+                      </div>
                     ))}
-                  </Accordion>
-                </div>
-              </TabsContent>
-            </Tabs>
-          </Card>
-        </motion.div>
+                  </div>
+                </CardContent>
+              </Card>
+            </motion.div>
 
-        {/* Related products */}
-        {relatedProducts.length > 0 && (
+            {/* Info Section */}
+            <motion.div
+              initial={{ opacity: 0, x: 50 }}
+              animate={{ opacity: 1, x: 0 }}
+              transition={{ duration: 0.6, delay: 0.2 }}
+              className="space-y-6"
+            >
+              {/* Header */}
+              <div>
+                <div className="flex items-start justify-between mb-4">
+                  <div className="flex-1">
+                    <h1 className="text-3xl font-bold text-gray-900 mb-2">
+                      {product.title}
+                    </h1>
+                    <div className="flex items-center gap-4">
+                      <span className="text-base text-gray-600">
+                        Bởi{" "}
+                        <span className="font-semibold text-pink-600">
+                          {product.author}
+                        </span>
+                      </span>
+                      <Badge variant="outline" className="text-xs">
+                        <CheckCircle2 className="w-3 h-3 mr-1" /> Đã xác minh
+                      </Badge>
+                    </div>
+                  </div>
+
+                  <div className="flex space-x-2">
+                    <Button
+                      variant="ghost"
+                      size="sm"
+                      onClick={toggleWishlist}
+                      className={`rounded-full w-10 h-10 p-0 ${
+                        isInWishlist
+                          ? "text-red-500 bg-red-50 hover:bg-red-100"
+                          : "hover:text-red-500"
+                      }`}
+                    >
+                      <Heart
+                        className={`h-5 w-5 ${isInWishlist ? "fill-current" : ""}`}
+                      />
+                    </Button>
+                    <Button
+                      variant="ghost"
+                      size="sm"
+                      onClick={() => handleShare()}
+                      className="rounded-full w-10 h-10 p-0"
+                    >
+                      <Share2 className="w-5 h-5" />
+                    </Button>
+                  </div>
+                </div>
+
+                {/* Ratings */}
+                <div className="flex items-center mb-6 gap-4 flex-wrap">
+                  <div className="flex items-center">
+                    {[...Array(5)].map((_, i) => (
+                      <Star
+                        key={i}
+                        className={`w-5 h-5 ${
+                          i < Math.floor(product.rating)
+                            ? "text-yellow-400 fill-yellow-400"
+                            : "text-gray-300"
+                        }`}
+                      />
+                    ))}
+                    <span className="font-bold text-lg ml-2">
+                      {product.rating}
+                    </span>
+                    <span className="text-gray-600 text-sm ml-1">
+                      ({product.reviewCount || 0} đánh giá)
+                    </span>
+                  </div>
+
+                  <Badge
+                    className={`flex items-center gap-1 px-3 py-1 text-sm bg-gradient-to-r ${softPinkTheme.secondaryGradient} text-white`}
+                  >
+                    {product.category === "template" ? (
+                      <>
+                        <Code className="w-4 h-4" />
+                        <span>Template</span>
+                      </>
+                    ) : (
+                      <>
+                        <BookOpen className="w-4 h-4" />
+                        <span>E-book</span>
+                      </>
+                    )}
+                  </Badge>
+
+                  <Badge variant="outline" className="text-xs">
+                    <TrendingUp className="w-3 h-3 mr-1" /> Bán chạy #1
+                  </Badge>
+                </div>
+
+                {/* Stock Alert */}
+                <StockAlert stockCount={stockCount} />
+
+                {/* Description */}
+                <ExpandableDescription
+                  text={product.description}
+                  maxLength={400}
+                />
+              </div>
+
+              {/* Price card */}
+              <Card
+                className={`border-0 ${softPinkTheme.softGlow} bg-gradient-to-r ${softPinkTheme.glassCard} backdrop-blur-xl`}
+              >
+                <CardContent className="p-6">
+                  <div className="flex items-center justify-between mb-4">
+                    <span
+                      className={`text-4xl lg:text-5xl font-bold bg-gradient-to-r ${softPinkTheme.heroText} bg-clip-text text-transparent`}
+                    >
+                      {formatPrice(product.price)}
+                    </span>
+                    {product.originalPrice && (
+                      <div className="text-center">
+                        <span className="text-xl line-through text-gray-500 block">
+                          {formatPrice(product.originalPrice)}
+                        </span>
+                        <Badge
+                          className={`bg-gradient-to-r ${softPinkTheme.primaryGradient} text-white text-xs font-bold mt-1 gap-1`}
+                        >
+                          <Flame className="w-3 h-3" /> Giảm{" "}
+                          {discountPercentage}%
+                        </Badge>
+                      </div>
+                    )}
+                  </div>
+                  {product.originalPrice && (
+                    <div className="flex items-center text-green-600 mb-4 gap-1">
+                      <Gift className="w-4 h-4" />
+                      <span className="font-medium text-sm">
+                        Bạn tiết kiệm{" "}
+                        {formatPrice(product.originalPrice - product.price)}!
+                      </span>
+                    </div>
+                  )}
+                  {/* Payment options */}
+                  <div className="flex items-center gap-3 text-xs text-gray-600">
+                    <span className="flex items-center">
+                      <CreditCard className="w-3 h-3 mr-1" />
+                      Thẻ tín dụng
+                    </span>
+                    <span className="flex items-center">
+                      <Wallet className="w-3 h-3 mr-1" />
+                      Ví điện tử
+                    </span>
+                    <span className="flex items-center">
+                      <Truck className="w-3 h-3 mr-1" />
+                      COD
+                    </span>
+                  </div>
+                </CardContent>
+              </Card>
+
+              {/* Product details */}
+              <Card
+                className={`border-0 ${softPinkTheme.softGlow} bg-gradient-to-r ${softPinkTheme.neoCard}`}
+              >
+                <CardHeader className="pb-3">
+                  <CardTitle className="text-lg font-bold">
+                    Thông tin chi tiết
+                  </CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <div className="grid grid-cols-2 gap-4">
+                    <div className="flex items-center gap-3">
+                      <User className="w-5 h-5 text-pink-600" />
+                      <span className="text-sm">
+                        Tác giả: <b>{product.author}</b>
+                      </span>
+                    </div>
+                    <div className="flex items-center gap-3">
+                      <Calendar className="w-5 h-5 text-green-600" />
+                      <span className="text-sm">
+                        Ngày tạo:{" "}
+                        <b>
+                          {new Date(product.createdAt).toLocaleDateString(
+                            "vi-VN",
+                          )}
+                        </b>
+                      </span>
+                    </div>
+                    <div className="flex items-center gap-3">
+                      <Star className="w-5 h-5 text-yellow-600" />
+                      <span className="text-sm">
+                        Đánh giá: <b>{product.reviewCount || 0}</b> đánh giá
+                      </span>
+                    </div>
+                    <div className="flex items-center gap-3">
+                      <Download className="w-5 h-5 text-purple-600" />
+                      <span className="text-sm">
+                        Lượt tải: <b>2,847</b>
+                      </span>
+                    </div>
+                    <div className="flex items-center gap-3">
+                      <Package className="w-5 h-5 text-blue-600" />
+                      <span className="text-sm">
+                        Kho hàng:{" "}
+                        <b>{stockCount > 0 ? stockCount : "Hết hàng"}</b>
+                      </span>
+                    </div>
+                    <div className="flex items-center gap-3">
+                      <Eye className="w-5 h-5 text-indigo-600" />
+                      <span className="text-sm">
+                        Lượt xem: <b>12,483</b>
+                      </span>
+                    </div>
+                  </div>
+                </CardContent>
+              </Card>
+
+              {/* Actions: Quantity + Buy */}
+              <div className="space-y-4">
+                <div className="flex items-center gap-4">
+                  <span className="text-sm font-medium">Số lượng:</span>
+                  <div className="flex items-center border border-pink-200 rounded-lg bg-white">
+                    <Button
+                      variant="ghost"
+                      size="sm"
+                      onClick={() => setQuantity(Math.max(1, quantity - 1))}
+                      disabled={quantity <= 1}
+                      className="rounded-r-none"
+                    >
+                      <Minus className="w-4 h-4" />
+                    </Button>
+                    <span className="px-4 py-2 min-w-[3rem] text-center border-x border-pink-200">
+                      {quantity}
+                    </span>
+                    <Button
+                      variant="ghost"
+                      size="sm"
+                      onClick={() => setQuantity(quantity + 1)}
+                      className="rounded-l-none"
+                    >
+                      <Plus className="w-4 h-4" />
+                    </Button>
+                  </div>
+                </div>
+
+                <div className="flex gap-3">
+                  <Button
+                    onClick={handleAddToCart}
+                    className={`flex-1 text-base px-6 py-3 bg-gradient-to-r ${softPinkTheme.primaryGradient} hover:scale-105 ${softPinkTheme.glow} shadow-lg transition-all rounded-xl`}
+                    size="lg"
+                    disabled={isAddingToCart || stockCount <= 0}
+                  >
+                    <ShoppingCart className="w-5 h-5 mr-2" />
+                    {isAddingToCart
+                      ? "Đang thêm..."
+                      : stockCount <= 0
+                        ? "Hết hàng"
+                        : "Thêm vào giỏ hàng"}
+                  </Button>
+
+                  <Button
+                    variant="outline"
+                    size="lg"
+                    className="px-6 py-3 border-2 border-pink-200 hover:bg-pink-50 rounded-xl"
+                    onClick={() => setIsReviewModalOpen(true)}
+                  >
+                    <MessageCircle className="w-5 h-5 mr-2" />
+                    Đánh giá
+                  </Button>
+                </div>
+              </div>
+            </motion.div>
+          </div>
+
+          {/* Tabs Section */}
           <motion.div
             initial={{ opacity: 0, y: 50 }}
             animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.6, delay: 0.6 }}
+            transition={{ duration: 0.6, delay: 0.4 }}
+            className="mb-12"
           >
             <Card
               className={`border-0 ${softPinkTheme.softGlow} bg-gradient-to-br ${softPinkTheme.neoCard} backdrop-blur-xl`}
             >
-              <CardHeader>
-                <CardTitle className="flex items-center gap-2 text-2xl">
-                  <Sparkles className="w-6 h-6 text-pink-500" />
-                  Sản phẩm liên quan
-                </CardTitle>
-              </CardHeader>
-              <CardContent>
-                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-                  {relatedProducts.slice(0, 4).map((p, index) => (
-                    <motion.div
-                      key={p.id}
-                      initial={{ opacity: 0, y: 20 }}
-                      animate={{ opacity: 1, y: 0 }}
-                      transition={{ delay: index * 0.1 }}
+              <Tabs
+                value={activeTab}
+                onValueChange={setActiveTab}
+                className="w-full"
+              >
+                <div className="sticky top-0 z-10 bg-white/95 backdrop-blur-sm">
+                  <TabsList className="grid w-full grid-cols-4 gap-2 p-2 bg-transparent">
+                    <TabsTrigger
+                      value="overview"
+                      className={`rounded-xl ${activeTab === "overview" ? `bg-gradient-to-r ${softPinkTheme.primaryGradient} text-white` : "hover:bg-pink-50"}`}
                     >
-                      <ProductCard product={p} />
-                    </motion.div>
-                  ))}
+                      <Eye className="w-4 h-4 mr-2" />
+                      Tổng quan
+                    </TabsTrigger>
+                    <TabsTrigger
+                      value="reviews"
+                      className={`rounded-xl ${activeTab === "reviews" ? `bg-gradient-to-r ${softPinkTheme.primaryGradient} text-white` : "hover:bg-pink-50"}`}
+                    >
+                      <Star className="w-4 h-4 mr-2" />
+                      Đánh giá ({product.reviewCount || 0})
+                    </TabsTrigger>
+                    <TabsTrigger
+                      value="specs"
+                      className={`rounded-xl ${activeTab === "specs" ? `bg-gradient-to-r ${softPinkTheme.primaryGradient} text-white` : "hover:bg-pink-50"}`}
+                    >
+                      <FileText className="w-4 h-4 mr-2" />
+                      Thông số
+                    </TabsTrigger>
+                    <TabsTrigger
+                      value="faq"
+                      className={`rounded-xl ${activeTab === "faq" ? `bg-gradient-to-r ${softPinkTheme.primaryGradient} text-white` : "hover:bg-pink-50"}`}
+                    >
+                      <MessageCircle className="w-4 h-4 mr-2" />
+                      FAQ
+                    </TabsTrigger>
+                  </TabsList>
                 </div>
-              </CardContent>
+
+                <TabsContent value="overview" className="p-6 space-y-6">
+                  <div>
+                    <h3 className="text-xl font-bold mb-4">Mô tả chi tiết</h3>
+                    <div className="prose max-w-none">
+                      <FormattedDescription
+                        text={product.description}
+                        className="text-gray-700 leading-relaxed"
+                      />
+                    </div>
+                  </div>
+
+                  {/* Tags */}
+                  <div>
+                    <h3 className="text-xl font-bold mb-4">Tags</h3>
+                    <div className="flex flex-wrap gap-2">
+                      {product.tags.map((tag, index) => (
+                        <Badge
+                          key={index}
+                          variant="outline"
+                          className="cursor-pointer hover:bg-pink-50 border-pink-200"
+                        >
+                          <Bookmark className="w-3 h-3 mr-1" />
+                          {tag}
+                        </Badge>
+                      ))}
+                    </div>
+                  </div>
+                </TabsContent>
+
+                <TabsContent value="reviews" className="p-6">
+                  <ReviewSection productId={product.id} />
+                </TabsContent>
+
+                <TabsContent value="specs" className="p-6">
+                  <div className="space-y-6">
+                    <h3 className="text-xl font-bold">Thông số kỹ thuật</h3>
+
+                    {specifications.map((spec, index) => (
+                      <Card key={index} className="p-6">
+                        <h4 className="font-semibold mb-4 text-lg">
+                          {spec.category}
+                        </h4>
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                          {spec.specs.map((item, idx) => (
+                            <div
+                              key={idx}
+                              className="flex justify-between items-center py-2 border-b border-gray-100 last:border-b-0"
+                            >
+                              <span className="font-medium text-gray-700">
+                                {item.label}
+                              </span>
+                              <span className="font-semibold text-gray-900">
+                                {item.value}{" "}
+                                {item.unit && (
+                                  <span className="text-gray-500">
+                                    {item.unit}
+                                  </span>
+                                )}
+                              </span>
+                            </div>
+                          ))}
+                        </div>
+                      </Card>
+                    ))}
+                  </div>
+                </TabsContent>
+
+                <TabsContent value="faq" className="p-6">
+                  <div className="space-y-6">
+                    <h3 className="text-xl font-bold">Câu hỏi thường gặp</h3>
+
+                    <Accordion type="single" collapsible className="space-y-4">
+                      {faqs.map((faq, index) => (
+                        <AccordionItem
+                          key={index}
+                          value={`item-${index}`}
+                          className="border border-pink-200 rounded-xl px-4 data-[state=open]:bg-pink-50/50"
+                        >
+                          <AccordionTrigger className="hover:no-underline py-4">
+                            <div className="flex items-center gap-3 text-left">
+                              <Badge variant="outline" className="text-xs">
+                                {faq.category}
+                              </Badge>
+                              <span className="font-medium">
+                                {faq.question}
+                              </span>
+                            </div>
+                          </AccordionTrigger>
+                          <AccordionContent className="pb-4">
+                            <div className="space-y-3">
+                              <p className="text-gray-700 leading-relaxed">
+                                {faq.answer}
+                              </p>
+                              {faq.helpful && (
+                                <div className="flex items-center gap-2 text-sm text-gray-500">
+                                  <ThumbsUp className="w-4 h-4" />
+                                  <span>{faq.helpful} người thấy hữu ích</span>
+                                </div>
+                              )}
+                            </div>
+                          </AccordionContent>
+                        </AccordionItem>
+                      ))}
+                    </Accordion>
+                  </div>
+                </TabsContent>
+              </Tabs>
             </Card>
           </motion.div>
-        )}
-      </div>
 
-      {/* Floating components */}
-      <ScrollToTopButton show={showScrollToTop} />
+          {/* Related products */}
+          {relatedProducts.length > 0 && (
+            <motion.div
+              initial={{ opacity: 0, y: 50 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.6, delay: 0.6 }}
+            >
+              <Card
+                className={`border-0 ${softPinkTheme.softGlow} bg-gradient-to-br ${softPinkTheme.neoCard} backdrop-blur-xl`}
+              >
+                <CardHeader>
+                  <CardTitle className="flex items-center gap-2 text-2xl">
+                    <Sparkles className="w-6 h-6 text-pink-500" />
+                    Sản phẩm liên quan
+                  </CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+                    {relatedProducts.slice(0, 4).map((p, index) => (
+                      <motion.div
+                        key={p.id}
+                        initial={{ opacity: 0, y: 20 }}
+                        animate={{ opacity: 1, y: 0 }}
+                        transition={{ delay: index * 0.1 }}
+                      >
+                        <ProductCard product={p} />
+                      </motion.div>
+                    ))}
+                  </div>
+                </CardContent>
+              </Card>
+            </motion.div>
+          )}
+        </div>
 
-      <ImageModal
-        isOpen={isImageModalOpen}
-        onClose={() => setIsImageModalOpen(false)}
-        product={product}
-        imageIndex={modalImageIndex}
-        setImageIndex={setModalImageIndex}
-      />
+        {/* Floating components */}
+        <ScrollToTopButton show={showScrollToTop} />
 
-      <ReviewModal
-        isOpen={isReviewModalOpen}
-        onClose={() => setIsReviewModalOpen(false)}
-        product={product}
-      />
-    </motion.div>
+        <ImageModal
+          isOpen={isImageModalOpen}
+          onClose={() => setIsImageModalOpen(false)}
+          product={product}
+          imageIndex={modalImageIndex}
+          setImageIndex={setModalImageIndex}
+        />
+
+        <ReviewModal
+          isOpen={isReviewModalOpen}
+          onClose={() => setIsReviewModalOpen(false)}
+          product={product}
+        />
+      </motion.div>
+    </>
   );
 };
 

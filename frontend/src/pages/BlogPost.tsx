@@ -43,6 +43,7 @@ import {
   Coffee,
 } from "lucide-react";
 import { toast } from "@/hooks/use-toast";
+import { BlogCommentSection } from "@/components/BlogCommentSection";
 
 // Interfaces
 interface Comment {
@@ -1251,173 +1252,14 @@ const BlogPost: React.FC = () => {
 
                 <Separator className="my-16" />
 
-                {/* Comments Section - READ ONLY */}
+                {/* ✅ COMMENTS SECTION - NEW COMPONENT */}
                 <motion.section
                   initial={{ opacity: 0, y: 40 }}
                   animate={{ opacity: 1, y: 0 }}
                   transition={{ delay: 0.5, duration: 0.8 }}
                   className="mt-20"
                 >
-                  <div className="flex items-center justify-between mb-12">
-                    <div className="flex items-center space-x-4">
-                      <div
-                        className={`flex items-center justify-center w-12 h-12 rounded-xl bg-gradient-to-r ${unifiedColorScheme.button} shadow-lg`}
-                      >
-                        <MessageSquare className="w-6 h-6 text-white" />
-                      </div>
-                      <div>
-                        <h2
-                          className={`text-3xl font-bold text-transparent bg-gradient-to-r ${unifiedColorScheme.textMain} bg-clip-text`}
-                        >
-                          Bình luận
-                        </h2>
-                        <p className="text-muted-foreground mt-1">
-                          {comments.length} bình luận từ độc giả
-                        </p>
-                      </div>
-                    </div>
-                  </div>
-
-                  {/* Comments List */}
-                  <div className="space-y-8">
-                    <AnimatePresence>
-                      {comments.length > 0 ? (
-                        comments.map((comment, index) => (
-                          <motion.div
-                            key={comment.id}
-                            initial={{ opacity: 0, y: 30 }}
-                            animate={{ opacity: 1, y: 0 }}
-                            transition={{ delay: index * 0.1, duration: 0.5 }}
-                            whileHover={{ scale: 1.01, y: -2 }}
-                            className="group"
-                          >
-                            <Card
-                              className={`transition-all duration-500 border-0 shadow-xl bg-gradient-to-r ${unifiedColorScheme.cardBg} hover:shadow-2xl`}
-                            >
-                              <div className="p-8">
-                                <div className="flex items-start space-x-6">
-                                  <motion.img
-                                    src={
-                                      comment.author_avatar ||
-                                      `https://i.pravatar.cc/100?u=${comment.author_name}`
-                                    }
-                                    alt={comment.author_name}
-                                    className="object-cover w-16 h-16 rounded-full ring-4 ring-pink-200 shadow-lg"
-                                    whileHover={{ scale: 1.1, rotate: 5 }}
-                                  />
-                                  <div className="flex-1">
-                                    <div className="flex items-center justify-between mb-4">
-                                      <div>
-                                        <div className="text-xl font-bold">
-                                          {comment.author_name}
-                                        </div>
-                                        <div className="flex items-center space-x-3 text-sm text-muted-foreground">
-                                          <Calendar className="w-4 h-4" />
-                                          <span>
-                                            {new Date(
-                                              comment.created_at,
-                                            ).toLocaleString("vi-VN")}
-                                          </span>
-                                        </div>
-                                      </div>
-                                      <Button
-                                        variant="ghost"
-                                        size="sm"
-                                        className="transition-opacity opacity-0 group-hover:opacity-100"
-                                      >
-                                        <MoreHorizontal className="w-5 h-5" />
-                                      </Button>
-                                    </div>
-
-                                    <p className="mb-6 leading-relaxed text-foreground text-lg">
-                                      {comment.content}
-                                    </p>
-
-                                    <div className="flex items-center space-x-6">
-                                      <Button
-                                        variant="ghost"
-                                        size="sm"
-                                        onClick={() =>
-                                          handleCommentLike(comment.id)
-                                        }
-                                        className={`group/like transition-all duration-300 ${
-                                          likedComments.has(comment.id)
-                                            ? "text-red-500 bg-red-50"
-                                            : "hover:text-red-500 hover:bg-red-50"
-                                        }`}
-                                      >
-                                        <motion.div
-                                          whileHover={{ scale: 1.2 }}
-                                          whileTap={{ scale: 0.8 }}
-                                        >
-                                          <ThumbsUp
-                                            className={`w-5 h-5 mr-2 ${
-                                              likedComments.has(comment.id)
-                                                ? "fill-current"
-                                                : ""
-                                            }`}
-                                          />
-                                        </motion.div>
-                                        <span className="font-medium">
-                                          {(comment.likes || 0) +
-                                            (likedComments.has(comment.id)
-                                              ? 1
-                                              : 0)}
-                                        </span>
-                                      </Button>
-
-                                      <Button
-                                        variant="ghost"
-                                        size="sm"
-                                        className="transition-colors hover:text-pink-500 hover:bg-pink-50"
-                                      >
-                                        <Share2 className="w-5 h-5 mr-2" />
-                                        Chia sẻ
-                                      </Button>
-                                    </div>
-                                  </div>
-                                </div>
-                              </div>
-                            </Card>
-                          </motion.div>
-                        ))
-                      ) : (
-                        <motion.div
-                          initial={{ opacity: 0, scale: 0.8 }}
-                          animate={{ opacity: 1, scale: 1 }}
-                        >
-                          <Card
-                            className={`py-20 text-center border-0 shadow-2xl bg-gradient-to-br ${unifiedColorScheme.cardBg}`}
-                          >
-                            <CardContent>
-                              <motion.div
-                                initial={{ scale: 0 }}
-                                animate={{ scale: 1 }}
-                                transition={{
-                                  delay: 0.2,
-                                  type: "spring",
-                                  stiffness: 200,
-                                }}
-                                className="mb-8"
-                              >
-                                <div
-                                  className={`w-24 h-24 mx-auto bg-gradient-to-r ${unifiedColorScheme.iconBg} rounded-full flex items-center justify-center`}
-                                >
-                                  <MessageSquare className="w-12 h-12 text-pink-500" />
-                                </div>
-                              </motion.div>
-                              <h3 className="mb-4 text-2xl font-bold">
-                                Chưa có bình luận nào
-                              </h3>
-                              <p className="text-lg text-muted-foreground">
-                                Bài viết này chưa có bình luận từ độc giả.
-                              </p>
-                            </CardContent>
-                          </Card>
-                        </motion.div>
-                      )}
-                    </AnimatePresence>
-                  </div>
+                  {post && <BlogCommentSection postId={post.id} />}
                 </motion.section>
 
                 {/* ✅ MOBILE-OPTIMIZED Author Info */}

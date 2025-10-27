@@ -56,7 +56,6 @@ export const registerUser = async (data: RegisterData): Promise<boolean> => {
 
       if (profileError) {
         console.error("Profile creation error:", profileError);
-        // Không throw error vì user đã được tạo thành công
       }
 
       return true;
