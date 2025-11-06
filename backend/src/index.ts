@@ -7,7 +7,6 @@ import uploadRoute from "./routes/uploadRoute";
 import sepayRoute from "./routes/sepayRoute";
 import productRoute from "./routes/productRoute";
 
-// ✅ Extend Express Request interface
 declare global {
   namespace Express {
     interface Request {
@@ -21,7 +20,6 @@ dotenv.config();
 const app = express();
 const PORT = process.env.PORT || 5000;
 
-// 🛡️ Security Middleware
 app.use(
   helmet({
     contentSecurityPolicy: {

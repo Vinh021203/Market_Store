@@ -572,57 +572,163 @@ const ProductCreate: React.FC = () => {
                         </motion.div>
 
                         {/* ---- PHẦN NHẬP MÔ TẢ CHI TIẾT ĐÃ NÂNG CẤP TINYMCE ---- */}
-                        <motion.div className="space-y-2 mb-4">
-                          <Label
-                            htmlFor="description"
-                            className="flex items-center space-x-2 mb-1 font-semibold text-orange-800"
-                          >
-                            <FileText className="w-4 h-4 text-orange-600" />
-                            <span>Mô tả chi tiết *</span>
-                          </Label>
-                          <div
-                            className="overflow-y-auto rounded-xl shadow border border-orange-100 scroll-smooth scrollbar-thin scrollbar-thumb-orange-200 scrollbar-track-orange-50 bg-white/90"
-                            style={{ maxHeight: 320, minHeight: 170 }}
-                          >
-                            <TinyMCEEditor
-                              value={watchedValues.description}
-                              onChange={(value) =>
-                                setValue("description", value)
-                              }
-                              placeholder="Nhập mô tả chi tiết về sản phẩm..."
-                              height={220}
-                              theme="light"
-                            />
+                        <motion.div
+                          className="space-y-3 mb-6"
+                          initial={{ opacity: 0, y: 10 }}
+                          animate={{ opacity: 1, y: 0 }}
+                          transition={{ delay: 0.3 }}
+                        >
+                          {/* Header Label */}
+                          <div className="flex items-center justify-between">
+                            <Label
+                              htmlFor="description"
+                              className="flex items-center space-x-2 mb-0 font-semibold text-orange-800"
+                            >
+                              <FileText className="w-5 h-5 text-orange-600" />
+                              <span className="text-base">
+                                Mô tả chi tiết *
+                              </span>
+                            </Label>
+                            {watchedValues.description && (
+                              <motion.div
+                                initial={{ opacity: 0 }}
+                                animate={{ opacity: 1 }}
+                                className="flex items-center space-x-1"
+                              >
+                                <Badge
+                                  variant="outline"
+                                  className="text-xs border-emerald-300 text-emerald-700 bg-emerald-50"
+                                >
+                                  <CheckCircle className="w-3 h-3 mr-1" />
+                                  {
+                                    watchedValues.description.replace(
+                                      /<[^>]*>/g,
+                                      "",
+                                    ).length
+                                  }{" "}
+                                  ký tự
+                                </Badge>
+                              </motion.div>
+                            )}
                           </div>
-                          {errors.description && (
-                            <motion.p
-                              initial={{ opacity: 0, y: -10 }}
-                              animate={{ opacity: 1, y: 0 }}
-                              className="flex items-center space-x-1 text-sm text-red-500 mt-2"
-                            >
-                              <AlertTriangle className="w-3 h-3" />
-                              <span>{errors.description.message}</span>
-                            </motion.p>
-                          )}
-                          {watchedValues.description && (
-                            <motion.div
-                              initial={{ opacity: 0, y: 10 }}
-                              animate={{ opacity: 1, y: 0 }}
-                              className="mt-4 px-4 py-3 border border-orange-100 rounded-2xl bg-orange-50/80 overflow-auto prose max-w-none scrollbar-thin scrollbar-thumb-orange-200"
-                              style={{ maxHeight: 200 }}
-                            >
-                              <Label className="flex items-center mb-2 space-x-2 font-medium text-orange-700">
-                                <Eye className="w-4 h-4" />
-                                <span>Xem trước mô tả</span>
-                              </Label>
-                              <div
-                                className="text-[15px] leading-relaxed"
-                                dangerouslySetInnerHTML={{
-                                  __html: watchedValues.description,
-                                }}
+
+                          {/* Main Editor Container */}
+                          <motion.div
+                            className="relative border-2 border-orange-200/50 rounded-2xl overflow-hidden bg-white/90 shadow-lg hover:shadow-xl transition-all duration-300"
+                            whileHover={{
+                              borderColor: "rgba(249, 158, 11, 0.3)",
+                            }}
+                          >
+                            {/* Editor Wrapper - Full Width */}
+                            <div className="w-full">
+                              <TinyMCEEditor
+                                value={watchedValues.description}
+                                onChange={(value) =>
+                                  setValue("description", value)
+                                }
+                                placeholder="Nhập mô tả chi tiết về sản phẩm..."
+                                height={400}
+                                theme="light"
+                                showWordCount={true}
+                                showPreview={true}
                               />
-                            </motion.div>
-                          )}
+                            </div>
+                          </motion.div>
+
+                          {/* Error State */}
+                          <AnimatePresence>
+                            {errors.description && (
+                              <motion.div
+                                initial={{ opacity: 0, y: -10, scale: 0.95 }}
+                                animate={{ opacity: 1, y: 0, scale: 1 }}
+                                exit={{ opacity: 0, y: -10, scale: 0.95 }}
+                                className="flex items-start space-x-2 px-4 py-3 rounded-2xl bg-red-50 border border-red-200/50"
+                              >
+                                <AlertTriangle className="w-4 h-4 text-red-500 mt-0.5 flex-shrink-0" />
+                                <div className="flex-1">
+                                  <p className="text-sm font-medium text-red-700">
+                                    {errors.description.message}
+                                  </p>
+                                  <p className="text-xs text-red-600/70 mt-1">
+                                    Vui lòng nhập mô tả có ít nhất 20 ký tự
+                                  </p>
+                                </div>
+                              </motion.div>
+                            )}
+                          </AnimatePresence>
+
+                          {/* Preview Section - Integrated */}
+                          <AnimatePresence>
+                            {watchedValues.description && (
+                              <motion.div
+                                initial={{ opacity: 0, y: 10, maxHeight: 0 }}
+                                animate={{ opacity: 1, y: 0, maxHeight: 400 }}
+                                exit={{ opacity: 0, y: -10, maxHeight: 0 }}
+                                transition={{ duration: 0.3 }}
+                                className="overflow-hidden"
+                              >
+                                <div
+                                  className="relative mt-3 p-6 border-2 border-orange-100/50 rounded-2xl bg-gradient-to-br from-orange-50/80 via-amber-50/50 to-white/80 backdrop-blur-sm overflow-y-auto scrollbar-thin scrollbar-thumb-orange-200 scrollbar-track-orange-50"
+                                  style={{ maxHeight: 280 }}
+                                >
+                                  {/* Preview Header */}
+                                  <div className="flex items-center space-x-2 mb-4 pb-4 border-b border-orange-200/50">
+                                    <Eye className="w-4 h-4 text-orange-600" />
+                                    <span className="font-semibold text-orange-800 text-sm">
+                                      Xem trước mô tả
+                                    </span>
+                                    <Badge
+                                      variant="outline"
+                                      className="ml-auto text-xs border-orange-300 text-orange-700"
+                                    >
+                                      Live preview
+                                    </Badge>
+                                  </div>
+
+                                  {/* Preview Content */}
+                                  <motion.div
+                                    className="prose prose-orange prose-sm max-w-none text-orange-900/90"
+                                    initial={{ opacity: 0 }}
+                                    animate={{ opacity: 1 }}
+                                    transition={{ delay: 0.1 }}
+                                  >
+                                    <div
+                                      className="text-[15px] leading-relaxed text-gray-700 [&_h1]:text-2xl [&_h1]:font-bold [&_h1]:text-orange-800 [&_h1]:mb-4 [&_h2]:text-xl [&_h2]:font-bold [&_h2]:text-orange-700 [&_h2]:mb-3 [&_h3]:text-lg [&_h3]:font-semibold [&_h3]:text-orange-600 [&_h3]:mb-2 [&_p]:mb-3 [&_ul]:list-disc [&_ul]:ml-5 [&_ol]:list-decimal [&_ol]:ml-5 [&_li]:mb-2 [&_blockquote]:border-l-4 [&_blockquote]:border-orange-400 [&_blockquote]:pl-4 [&_blockquote]:italic [&_blockquote]:text-orange-700/80 [&_blockquote]:my-3 [&_code]:bg-orange-100 [&_code]:text-orange-800 [&_code]:px-2 [&_code]:py-1 [&_code]:rounded [&_pre]:bg-slate-800 [&_pre]:text-white [&_pre]:p-4 [&_pre]:rounded-lg [&_pre]:overflow-x-auto [&_table]:w-full [&_table]:border-collapse [&_table_th]:bg-orange-500 [&_table_th]:text-white [&_table_th]:p-2 [&_table_td]:border [&_table_td]:border-orange-200 [&_table_td]:p-2 [&_a]:text-orange-600 [&_a]:underline [&_a:hover]:text-orange-800"
+                                      dangerouslySetInnerHTML={{
+                                        __html: watchedValues.description,
+                                      }}
+                                    />
+                                  </motion.div>
+
+                                  {/* Preview Footer */}
+                                  <motion.div
+                                    initial={{ opacity: 0, y: 10 }}
+                                    animate={{ opacity: 1, y: 0 }}
+                                    transition={{ delay: 0.2 }}
+                                    className="mt-4 pt-4 border-t border-orange-200/50 flex items-center justify-between text-xs text-orange-600/70"
+                                  >
+                                    <span>
+                                      {watchedValues.description.replace(
+                                        /<[^>]*>/g,
+                                        "",
+                                      ).length > 20
+                                        ? "✓ Đủ ký tự tối thiểu"
+                                        : "⚠ Chưa đủ 20 ký tự"}
+                                    </span>
+                                    <span className="font-medium">
+                                      ~
+                                      {Math.ceil(
+                                        watchedValues.description
+                                          .replace(/<[^>]*>/g, "")
+                                          .split(/\s+/).length / 200,
+                                      )}{" "}
+                                      phút đọc
+                                    </span>
+                                  </motion.div>
+                                </div>
+                              </motion.div>
+                            )}
+                          </AnimatePresence>
                         </motion.div>
                         {/* ---- END MÔ TẢ CHI TIẾT TINYMCE ---- */}
 
