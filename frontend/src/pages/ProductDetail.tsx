@@ -239,9 +239,9 @@ const LoadingScreen = () => (
           opacity: [0.3, 0.6, 0.3],
         }}
         transition={{ duration: 8, repeat: Infinity, ease: "easeInOut" }}
-        className="absolute top-20 left-20 w-32 h-32"
+        className="absolute w-32 h-32 top-20 left-20"
       >
-        <div className="w-full h-full bg-gradient-to-r from-pink-400/30 to-rose-400/30 transform rotate-45 rounded-lg filter blur-xl" />
+        <div className="w-full h-full transform rotate-45 rounded-lg bg-gradient-to-r from-pink-400/30 to-rose-400/30 filter blur-xl" />
       </motion.div>
 
       {/* Floating product icons */}
@@ -278,7 +278,7 @@ const LoadingScreen = () => (
       ))}
     </div>
 
-    <div className="relative z-10 text-center space-y-8">
+    <div className="relative z-10 space-y-8 text-center">
       <motion.div
         initial={{ scale: 0, rotateY: 0 }}
         animate={{ scale: 1, rotateY: 360 }}
@@ -288,7 +288,7 @@ const LoadingScreen = () => (
         <div
           className={`w-24 h-24 mx-auto bg-gradient-to-br ${softPinkTheme.primaryGradient} rounded-2xl shadow-2xl relative`}
         >
-          <div className="absolute inset-2 bg-white/20 rounded-xl backdrop-blur-sm flex items-center justify-center">
+          <div className="absolute flex items-center justify-center inset-2 bg-white/20 rounded-xl backdrop-blur-sm">
             <ShoppingCart className="w-10 h-10 text-white" />
           </div>
         </div>
@@ -327,7 +327,7 @@ const LoadingScreen = () => (
         >
           Đang tải sản phẩm
         </h2>
-        <p className="text-gray-600 mt-2">
+        <p className="mt-2 text-gray-600">
           Chuẩn bị những điều tuyệt vời cho bạn...
         </p>
       </motion.div>
@@ -359,7 +359,7 @@ const LoadingScreen = () => (
       </div>
 
       {/* Animated progress bar */}
-      <div className="w-80 bg-gray-200 rounded-full h-2 overflow-hidden">
+      <div className="h-2 overflow-hidden bg-gray-200 rounded-full w-80">
         <motion.div
           className={`h-2 bg-gradient-to-r ${softPinkTheme.primaryGradient} rounded-full`}
           initial={{ width: 0 }}
@@ -384,15 +384,15 @@ const ImageModal = ({
   setImageIndex,
 }) => (
   <Dialog open={isOpen} onOpenChange={onClose}>
-    <DialogContent className="max-w-7xl p-0 bg-transparent border-none">
-      <div className="relative bg-black/95 rounded-3xl overflow-hidden backdrop-blur-3xl border border-white/10">
+    <DialogContent className="p-0 bg-transparent border-none max-w-7xl">
+      <div className="relative overflow-hidden border bg-black/95 rounded-3xl backdrop-blur-3xl border-white/10">
         <DialogHeader className="absolute top-0 left-0 right-0 z-20 p-6 bg-gradient-to-b from-black/80 to-transparent">
           <div className="flex items-center justify-between text-white">
             <div>
               <DialogTitle className="text-2xl font-bold">
                 {product?.title}
               </DialogTitle>
-              <p className="text-white/70 text-sm">
+              <p className="text-sm text-white/70">
                 Hình ảnh {imageIndex + 1} / {product?.images?.length || 1}
               </p>
             </div>
@@ -470,7 +470,7 @@ const ImageModal = ({
             <Button
               variant="secondary"
               size="lg"
-              className="absolute left-6 top-1/2 -translate-y-1/2 bg-white/20 backdrop-blur-md hover:bg-white/30 text-white border-white/20 rounded-full w-14 h-14 p-0"
+              className="absolute p-0 text-white -translate-y-1/2 rounded-full left-6 top-1/2 bg-white/20 backdrop-blur-md hover:bg-white/30 border-white/20 w-14 h-14"
               onClick={() => {
                 const newIndex =
                   imageIndex > 0 ? imageIndex - 1 : product.images!.length - 1;
@@ -482,7 +482,7 @@ const ImageModal = ({
             <Button
               variant="secondary"
               size="lg"
-              className="absolute right-6 top-1/2 -translate-y-1/2 bg-white/20 backdrop-blur-md hover:bg-white/30 text-white border-white/20 rounded-full w-14 h-14 p-0"
+              className="absolute p-0 text-white -translate-y-1/2 rounded-full right-6 top-1/2 bg-white/20 backdrop-blur-md hover:bg-white/30 border-white/20 w-14 h-14"
               onClick={() => {
                 const newIndex =
                   imageIndex < product.images!.length - 1 ? imageIndex + 1 : 0;
@@ -496,7 +496,7 @@ const ImageModal = ({
 
         {/* Thumbnail navigation */}
         {product?.images && product.images.length > 1 && (
-          <div className="absolute bottom-6 left-1/2 -translate-x-1/2 flex space-x-3 max-w-2xl overflow-x-auto bg-black/50 backdrop-blur-md rounded-full p-3">
+          <div className="absolute flex max-w-2xl p-3 space-x-3 overflow-x-auto -translate-x-1/2 rounded-full bottom-6 left-1/2 bg-black/50 backdrop-blur-md">
             {product.images.map((image, index) => (
               <button
                 key={index}
@@ -510,7 +510,7 @@ const ImageModal = ({
                 <img
                   src={image}
                   alt={`Thumbnail ${index + 1}`}
-                  className="w-full h-full object-cover"
+                  className="object-cover w-full h-full"
                   onError={(e) => {
                     e.currentTarget.src =
                       "https://via.placeholder.com/100x80?text=Img";
@@ -524,7 +524,7 @@ const ImageModal = ({
         {/* Close Button */}
         <Button
           variant="secondary"
-          className="absolute top-6 right-6 bg-white/20 backdrop-blur-md hover:bg-white/30 text-white border-white/20 rounded-full w-12 h-12 p-0"
+          className="absolute w-12 h-12 p-0 text-white rounded-full top-6 right-6 bg-white/20 backdrop-blur-md hover:bg-white/30 border-white/20"
           onClick={onClose}
         >
           <X className="w-6 h-6" />
@@ -544,7 +544,7 @@ const ReviewModal = ({ isOpen, onClose, product }) => {
     <Dialog open={isOpen} onOpenChange={onClose}>
       <DialogContent className="max-w-2xl">
         <DialogHeader>
-          <DialogTitle className="text-2xl font-bold flex items-center">
+          <DialogTitle className="flex items-center text-2xl font-bold">
             <Star className="w-6 h-6 mr-2 text-pink-500" />
             Viết đánh giá sản phẩm
           </DialogTitle>
@@ -554,13 +554,13 @@ const ReviewModal = ({ isOpen, onClose, product }) => {
           </p>
         </DialogHeader>
 
-        <div className="space-y-6 py-6">
+        <div className="py-6 space-y-6">
           {/* Rating Section */}
           <div>
-            <label className="block text-sm font-medium mb-3">
+            <label className="block mb-3 text-sm font-medium">
               Đánh giá tổng thể
             </label>
-            <div className="flex items-center space-x-2 mb-2">
+            <div className="flex items-center mb-2 space-x-2">
               {[1, 2, 3, 4, 5].map((rating) => (
                 <motion.button
                   key={rating}
@@ -601,7 +601,7 @@ const ReviewModal = ({ isOpen, onClose, product }) => {
 
           {/* Review Text */}
           <div>
-            <label className="block text-sm font-medium mb-3">
+            <label className="block mb-3 text-sm font-medium">
               Nội dung đánh giá ({userReview.length}/500)
             </label>
             <Textarea
@@ -610,7 +610,7 @@ const ReviewModal = ({ isOpen, onClose, product }) => {
               onChange={(e) => setUserReview(e.target.value.slice(0, 500))}
               className="min-h-[120px] resize-none"
             />
-            <div className="flex justify-between items-center mt-2">
+            <div className="flex items-center justify-between mt-2">
               <span className="text-xs text-gray-500">
                 Tối thiểu 20 ký tự để gửi đánh giá
               </span>
@@ -623,7 +623,7 @@ const ReviewModal = ({ isOpen, onClose, product }) => {
           </div>
 
           {/* Submit Section */}
-          <div className="flex justify-end space-x-3 pt-4 border-t">
+          <div className="flex justify-end pt-4 space-x-3 border-t">
             <Button variant="outline" onClick={onClose}>
               Hủy
             </Button>
@@ -650,10 +650,10 @@ const ExpandableDescription = ({ text, maxLength = 400 }) => {
 
   return (
     <div className="space-y-4">
-      <div className="prose prose-sm max-w-none">
+      <div className="prose-sm prose max-w-none">
         <FormattedDescription
           text={displayText}
-          className="text-gray-700 leading-relaxed text-sm"
+          className="text-sm leading-relaxed text-gray-700"
         />
       </div>
 
@@ -662,7 +662,7 @@ const ExpandableDescription = ({ text, maxLength = 400 }) => {
           variant="ghost"
           size="sm"
           onClick={() => setIsExpanded(!isExpanded)}
-          className="h-auto p-0 font-medium text-pink-600 hover:text-pink-700 group text-sm"
+          className="h-auto p-0 text-sm font-medium text-pink-600 hover:text-pink-700 group"
         >
           <span className="flex items-center">
             {isExpanded ? (
@@ -746,7 +746,7 @@ const ScrollToTopButton = ({ show }) => (
         initial={{ opacity: 0, scale: 0, y: 20 }}
         animate={{ opacity: 1, scale: 1, y: 0 }}
         exit={{ opacity: 0, scale: 0, y: 20 }}
-        className="fixed bottom-8 right-8 z-40"
+        className="fixed z-40 bottom-8 right-8"
       >
         <TooltipProvider>
           <Tooltip>
@@ -1029,7 +1029,7 @@ const ProductDetail: React.FC = () => {
         />
 
         {/* Floating background icons */}
-        <div className="fixed inset-0 pointer-events-none z-0">
+        <div className="fixed inset-0 z-0 pointer-events-none">
           {[
             Heart,
             Star,
@@ -1072,12 +1072,12 @@ const ProductDetail: React.FC = () => {
         </div>
 
         {/* Main container */}
-        <div className="container relative z-10 px-4 py-16 lg:py-8 mx-auto max-w-7xl">
+        <div className="container relative z-10 px-4 py-16 mx-auto lg:py-8 max-w-7xl">
           {/* Breadcrumb */}
           <motion.nav
             initial={{ opacity: 0, y: -16 }}
             animate={{ opacity: 1, y: 0 }}
-            className="flex items-center text-xs text-gray-700 mb-7 gap-2"
+            className="flex items-center gap-2 text-xs text-gray-700 mb-7"
           >
             <Button
               variant="ghost"
@@ -1096,7 +1096,7 @@ const ProductDetail: React.FC = () => {
               {product.category === "template" ? "Templates" : "E-books"}
             </span>
             <span>/</span>
-            <span className="capitalize truncate max-w-xs font-semibold text-pink-800">
+            <span className="max-w-xs font-semibold text-pink-800 capitalize truncate">
               {product.title}
             </span>
           </motion.nav>
@@ -1136,7 +1136,7 @@ const ProductDetail: React.FC = () => {
                 />
 
                 {/* Badges */}
-                <div className="absolute top-4 left-4 flex flex-col gap-2 z-10">
+                <div className="absolute z-10 flex flex-col gap-2 top-4 left-4">
                   {discountPercentage > 0 && (
                     <Badge
                       className={`bg-gradient-to-r ${softPinkTheme.primaryGradient} text-white shadow px-2 py-1 gap-1 text-xs`}
@@ -1145,19 +1145,19 @@ const ProductDetail: React.FC = () => {
                     </Badge>
                   )}
                   {product.isFeatured && (
-                    <Badge className="bg-yellow-400 text-white shadow px-2 py-1 gap-1 text-xs">
+                    <Badge className="gap-1 px-2 py-1 text-xs text-white bg-yellow-400 shadow">
                       <Crown className="w-3 h-3" /> Nổi bật
                     </Badge>
                   )}
                   {stockCount < 10 && (
-                    <Badge className="bg-gradient-to-r from-orange-500 to-red-500 text-white px-2 py-1 text-xs shadow gap-1">
+                    <Badge className="gap-1 px-2 py-1 text-xs text-white shadow bg-gradient-to-r from-orange-500 to-red-500">
                       <Flame className="w-3 h-3" /> Sắp hết hàng
                     </Badge>
                   )}
                 </div>
 
                 {/* Quick action buttons */}
-                <div className="absolute top-4 right-4 flex gap-2 opacity-0 group-hover:opacity-100 transition-all duration-300">
+                <div className="absolute flex gap-2 transition-all duration-300 opacity-0 top-4 right-4 group-hover:opacity-100">
                   <TooltipProvider>
                     <Tooltip>
                       <TooltipTrigger asChild>
@@ -1272,7 +1272,7 @@ const ProductDetail: React.FC = () => {
                         <div className="flex-1">
                           <div className="font-medium">{f.label}</div>
                           {f.description && (
-                            <div className="text-xs opacity-70 mt-1">
+                            <div className="mt-1 text-xs opacity-70">
                               {f.description}
                             </div>
                           )}
@@ -1300,7 +1300,7 @@ const ProductDetail: React.FC = () => {
               <div>
                 <div className="flex items-start justify-between mb-4">
                   <div className="flex-1">
-                    <h1 className="text-3xl font-bold text-gray-900 mb-2">
+                    <h1 className="mb-2 text-3xl font-bold text-gray-900">
                       {product.title}
                     </h1>
                     <div className="flex items-center gap-4">
@@ -1335,7 +1335,7 @@ const ProductDetail: React.FC = () => {
                       variant="ghost"
                       size="sm"
                       onClick={() => handleShare()}
-                      className="rounded-full w-10 h-10 p-0"
+                      className="w-10 h-10 p-0 rounded-full"
                     >
                       <Share2 className="w-5 h-5" />
                     </Button>
@@ -1343,7 +1343,7 @@ const ProductDetail: React.FC = () => {
                 </div>
 
                 {/* Ratings */}
-                <div className="flex items-center mb-6 gap-4 flex-wrap">
+                <div className="flex flex-wrap items-center gap-4 mb-6">
                   <div className="flex items-center">
                     {[...Array(5)].map((_, i) => (
                       <Star
@@ -1355,10 +1355,10 @@ const ProductDetail: React.FC = () => {
                         }`}
                       />
                     ))}
-                    <span className="font-bold text-lg ml-2">
+                    <span className="ml-2 text-lg font-bold">
                       {product.rating}
                     </span>
-                    <span className="text-gray-600 text-sm ml-1">
+                    <span className="ml-1 text-sm text-gray-600">
                       ({product.reviewCount || 0} đánh giá)
                     </span>
                   </div>
@@ -1407,7 +1407,7 @@ const ProductDetail: React.FC = () => {
                     </span>
                     {product.originalPrice && (
                       <div className="text-center">
-                        <span className="text-xl line-through text-gray-500 block">
+                        <span className="block text-xl text-gray-500 line-through">
                           {formatPrice(product.originalPrice)}
                         </span>
                         <Badge
@@ -1420,9 +1420,9 @@ const ProductDetail: React.FC = () => {
                     )}
                   </div>
                   {product.originalPrice && (
-                    <div className="flex items-center text-green-600 mb-4 gap-1">
+                    <div className="flex items-center gap-1 mb-4 text-green-600">
                       <Gift className="w-4 h-4" />
-                      <span className="font-medium text-sm">
+                      <span className="text-sm font-medium">
                         Bạn tiết kiệm{" "}
                         {formatPrice(product.originalPrice - product.price)}!
                       </span>
@@ -1507,7 +1507,7 @@ const ProductDetail: React.FC = () => {
               <div className="space-y-4">
                 <div className="flex items-center gap-4">
                   <span className="text-sm font-medium">Số lượng:</span>
-                  <div className="flex items-center border border-pink-200 rounded-lg bg-white">
+                  <div className="flex items-center bg-white border border-pink-200 rounded-lg">
                     <Button
                       variant="ghost"
                       size="sm"
@@ -1531,7 +1531,20 @@ const ProductDetail: React.FC = () => {
                   </div>
                 </div>
 
-                <div className="flex gap-3">
+                <div className="flex flex-col gap-3 sm:flex-row">
+                  {/* Preview Button - NÚT MỚI */}
+                  {product.preview_url && (
+                    <Button
+                      variant="outline"
+                      size="lg"
+                      className="px-6 py-3 text-blue-600 border-2 border-blue-200 hover:bg-blue-50 rounded-xl hover:text-blue-700"
+                      onClick={() => window.open(product.preview_url, "_blank")}
+                    >
+                      <Eye className="w-5 h-5 mr-2" />
+                      Xem trước
+                    </Button>
+                  )}
+
                   <Button
                     onClick={handleAddToCart}
                     className={`flex-1 text-base px-6 py-3 bg-gradient-to-r ${softPinkTheme.primaryGradient} hover:scale-105 ${softPinkTheme.glow} shadow-lg transition-all rounded-xl`}
@@ -1610,24 +1623,24 @@ const ProductDetail: React.FC = () => {
 
                 <TabsContent value="overview" className="p-6 space-y-6">
                   <div>
-                    <h3 className="text-xl font-bold mb-4">Mô tả chi tiết</h3>
+                    <h3 className="mb-4 text-xl font-bold">Mô tả chi tiết</h3>
                     <div className="prose max-w-none">
                       <FormattedDescription
                         text={product.description}
-                        className="text-gray-700 leading-relaxed"
+                        className="leading-relaxed text-gray-700"
                       />
                     </div>
                   </div>
 
                   {/* Tags */}
                   <div>
-                    <h3 className="text-xl font-bold mb-4">Tags</h3>
+                    <h3 className="mb-4 text-xl font-bold">Tags</h3>
                     <div className="flex flex-wrap gap-2">
                       {product.tags.map((tag, index) => (
                         <Badge
                           key={index}
                           variant="outline"
-                          className="cursor-pointer hover:bg-pink-50 border-pink-200"
+                          className="border-pink-200 cursor-pointer hover:bg-pink-50"
                         >
                           <Bookmark className="w-3 h-3 mr-1" />
                           {tag}
@@ -1647,14 +1660,14 @@ const ProductDetail: React.FC = () => {
 
                     {specifications.map((spec, index) => (
                       <Card key={index} className="p-6">
-                        <h4 className="font-semibold mb-4 text-lg">
+                        <h4 className="mb-4 text-lg font-semibold">
                           {spec.category}
                         </h4>
-                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
                           {spec.specs.map((item, idx) => (
                             <div
                               key={idx}
-                              className="flex justify-between items-center py-2 border-b border-gray-100 last:border-b-0"
+                              className="flex items-center justify-between py-2 border-b border-gray-100 last:border-b-0"
                             >
                               <span className="font-medium text-gray-700">
                                 {item.label}
@@ -1686,7 +1699,7 @@ const ProductDetail: React.FC = () => {
                           value={`item-${index}`}
                           className="border border-pink-200 rounded-xl px-4 data-[state=open]:bg-pink-50/50"
                         >
-                          <AccordionTrigger className="hover:no-underline py-4">
+                          <AccordionTrigger className="py-4 hover:no-underline">
                             <div className="flex items-center gap-3 text-left">
                               <Badge variant="outline" className="text-xs">
                                 {faq.category}
@@ -1698,7 +1711,7 @@ const ProductDetail: React.FC = () => {
                           </AccordionTrigger>
                           <AccordionContent className="pb-4">
                             <div className="space-y-3">
-                              <p className="text-gray-700 leading-relaxed">
+                              <p className="leading-relaxed text-gray-700">
                                 {faq.answer}
                               </p>
                               {faq.helpful && (
@@ -1735,7 +1748,7 @@ const ProductDetail: React.FC = () => {
                   </CardTitle>
                 </CardHeader>
                 <CardContent>
-                  <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+                  <div className="grid grid-cols-1 gap-6 md:grid-cols-2 lg:grid-cols-4">
                     {relatedProducts.slice(0, 4).map((p, index) => (
                       <motion.div
                         key={p.id}
