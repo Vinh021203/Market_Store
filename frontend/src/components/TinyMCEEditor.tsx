@@ -403,13 +403,13 @@ const TinyMCEEditor: React.FC<TinyMCEEditorProps> = ({
         <motion.div
           initial={{ opacity: 0, y: -10 }}
           animate={{ opacity: 1, y: 0 }}
-          className="flex items-center justify-between p-4 bg-gradient-to-r from-orange-50 via-amber-50 to-pink-50 border border-orange-200/50 rounded-t-2xl"
+          className="flex items-center justify-between p-4 border bg-gradient-to-r from-orange-50 via-amber-50 to-pink-50 border-orange-200/50 rounded-t-2xl"
         >
           <div className="flex items-center space-x-4">
             <div className="flex items-center space-x-2">
               <motion.div
                 whileHover={{ scale: 1.05 }}
-                className="flex items-center justify-center w-10 h-10 rounded-xl bg-gradient-to-r from-orange-500 to-amber-500 shadow-md"
+                className="flex items-center justify-center w-10 h-10 shadow-md rounded-xl bg-gradient-to-r from-orange-500 to-amber-500"
               >
                 <FileText className="w-5 h-5 text-white" />
               </motion.div>
@@ -433,7 +433,7 @@ const TinyMCEEditor: React.FC<TinyMCEEditorProps> = ({
                   value={selectedTemplate}
                   onValueChange={setSelectedTemplate}
                 >
-                  <SelectTrigger className="w-48 h-8 text-xs bg-white/80 border-orange-200">
+                  <SelectTrigger className="w-48 h-8 text-xs border-orange-200 bg-white/80">
                     <SelectValue placeholder="Chọn template..." />
                   </SelectTrigger>
                   <SelectContent>
@@ -473,7 +473,7 @@ const TinyMCEEditor: React.FC<TinyMCEEditorProps> = ({
                     variant="outline"
                     size="sm"
                     onClick={() => setIsPreviewMode(!isPreviewMode)}
-                    className="h-8 px-3 bg-white/80 border-orange-200"
+                    className="h-8 px-3 border-orange-200 bg-white/80"
                   >
                     {isPreviewMode ? (
                       <>
@@ -501,7 +501,7 @@ const TinyMCEEditor: React.FC<TinyMCEEditorProps> = ({
                   variant="outline"
                   size="sm"
                   onClick={toggleFullscreen}
-                  className="h-8 px-3 bg-white/80 border-orange-200"
+                  className="h-8 px-3 border-orange-200 bg-white/80"
                 >
                   {isFullscreen ? (
                     <Minimize className="w-3 h-3" />
@@ -524,7 +524,7 @@ const TinyMCEEditor: React.FC<TinyMCEEditorProps> = ({
             animate={{ opacity: 1, y: 0 }}
             className="flex flex-wrap gap-2 p-3 bg-gradient-to-r from-white/90 to-orange-50/90 border-x border-orange-200/50"
           >
-            <span className="text-xs font-medium text-orange-700 flex items-center mr-2">
+            <span className="flex items-center mr-2 text-xs font-medium text-orange-700">
               <Sparkles className="w-3 h-3 mr-1" />
               Quick Templates:
             </span>
@@ -537,7 +537,7 @@ const TinyMCEEditor: React.FC<TinyMCEEditorProps> = ({
                       variant="outline"
                       size="sm"
                       onClick={() => insertTemplate(key)}
-                      className="h-7 px-2 text-xs border-orange-200/50 hover:bg-orange-100 hover:border-orange-300"
+                      className="px-2 text-xs h-7 border-orange-200/50 hover:bg-orange-100 hover:border-orange-300"
                     >
                       <span className="mr-1">{template.icon}</span>
                       {template.name}
@@ -585,7 +585,7 @@ const TinyMCEEditor: React.FC<TinyMCEEditorProps> = ({
                 className="border-x border-orange-200/50"
               >
                 <Editor
-                  apiKey="6wob4h7r1ddb19nbipsoixqg1gjwxjflxntssu6w9ti385p4"
+                  apiKey="o3xpjcpccpwxuf67dwel0pj9fs9oue0a9dnkaegc35gqcg52"
                   onInit={(evt, editor) => {
                     editorRef.current = editor;
                     setIsLoading(false);
@@ -1196,7 +1196,7 @@ const TinyMCEEditor: React.FC<TinyMCEEditorProps> = ({
         <motion.div
           initial={{ opacity: 0, y: 10 }}
           animate={{ opacity: 1, y: 0 }}
-          className="flex items-center justify-between px-6 py-3 bg-gradient-to-r from-orange-50 via-amber-50 to-pink-50 border border-t-0 border-orange-200/50 rounded-b-2xl"
+          className="flex items-center justify-between px-6 py-3 border border-t-0 bg-gradient-to-r from-orange-50 via-amber-50 to-pink-50 border-orange-200/50 rounded-b-2xl"
         >
           <div className="flex items-center space-x-6">
             {showWordCount && (
@@ -1229,7 +1229,7 @@ const TinyMCEEditor: React.FC<TinyMCEEditorProps> = ({
             <div className="flex items-center space-x-2">
               <Badge
                 variant="outline"
-                className="text-xs border-orange-300 text-orange-700"
+                className="text-xs text-orange-700 border-orange-300"
               >
                 <CheckCircle className="w-3 h-3 mr-1" />
                 Professional Editor
@@ -1261,9 +1261,9 @@ const TinyMCEEditor: React.FC<TinyMCEEditorProps> = ({
                 <motion.div
                   animate={{ rotate: 360 }}
                   transition={{ duration: 1, repeat: Infinity, ease: "linear" }}
-                  className="w-6 h-6 border-2 border-orange-600 border-t-transparent rounded-full"
+                  className="w-6 h-6 border-2 border-orange-600 rounded-full border-t-transparent"
                 />
-                <span className="text-orange-700 font-medium">
+                <span className="font-medium text-orange-700">
                   Đang tải editor...
                 </span>
               </div>
