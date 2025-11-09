@@ -585,7 +585,7 @@ const TinyMCEEditor: React.FC<TinyMCEEditorProps> = ({
                 className="border-x border-orange-200/50"
               >
                 <Editor
-                  apiKey="o3xpjcpccpwxuf67dwel0pj9fs9oue0a9dnkaegc35gqcg52"
+                  apiKey="wrnh2gdtuiejkhzwjlvk0gydcbptvm18miqcddbaa29sfpzs"
                   onInit={(evt, editor) => {
                     editorRef.current = editor;
                     setIsLoading(false);
