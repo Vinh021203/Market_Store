@@ -1,4 +1,3 @@
-// components/Layout.tsx
 import React, { useState } from "react";
 import { useNavigationLoading } from "@/hooks/useNavigation";
 import Header from "./Header";
@@ -8,7 +7,6 @@ import ContactWidget from "./ContactWidget";
 import CustomCookieConsent from "./CookieConsent";
 import LeadForm from "./LeadForm";
 import RealtimeNotificationBanner from "./RealtimeNotificationBanner";
-import ProjectInfoModal from "./ProjectInfoModal"; // ✅ THÊM IMPORT
 
 interface LayoutProps {
   children: React.ReactNode;
@@ -41,8 +39,6 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
 
       <LeadForm />
 
-      {/* ✅ THÊM PROJECT INFO MODAL */}
-      <ProjectInfoModal />
     </div>
   );
 };
